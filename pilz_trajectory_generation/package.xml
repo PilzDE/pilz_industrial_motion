@@ -1,0 +1,71 @@
+<?xml version="1.0"?>
+<package>
+  <name>pilz_trajectory_generation</name>
+  <version>0.1.0</version>
+  <description>The pilz_trajectory_generation package</description>
+
+  <maintainer email="ros@pilz.de">Pilz GmbH and Co. KG</maintainer>
+
+  <license>LGPLv3</license>
+
+  <url type="website">https://wiki.ros.org/pilz_industrial_motion</url>
+  <url type="bugtracker">https://github.com/PilzDE/pilz_industrial_motion/issues</url>
+  <url type="repository">https://github.com/PilzDE/pilz_industrial_motion</url>
+
+  <buildtool_depend>catkin</buildtool_depend>
+  <build_depend>orocos_kdl</build_depend>
+  <build_depend>roscpp</build_depend>
+  <build_depend>moveit_msgs</build_depend>
+  <build_depend>moveit_core</build_depend>
+  <build_depend>moveit_ros_planning</build_depend> <!-- RobotModelLoader -->
+  <build_depend>moveit_ros_move_group</build_depend> <!-- move_group capability -->
+  <build_depend>tf_conversions</build_depend>
+  <build_depend>tf2</build_depend>
+  <build_depend>tf2_geometry_msgs</build_depend>
+  <build_depend>tf2_eigen</build_depend>
+  <build_depend>pluginlib</build_depend>
+  <build_depend>pilz_extensions</build_depend>
+  <build_depend>pilz_msgs</build_depend>
+  <build_depend>moveit_ros_planning_interface</build_depend>
+  <build_depend>rospy</build_depend>
+  <build_depend>roslint</build_depend>
+
+  <run_depend>orocos_kdl</run_depend>
+  <run_depend>roscpp</run_depend>
+  <run_depend>moveit_msgs</run_depend>
+  <run_depend>moveit_core</run_depend>
+  <run_depend>moveit_ros_planning</run_depend>
+  <run_depend>moveit_ros_move_group</run_depend>
+  <run_depend>moveit_commander</run_depend>
+  <run_depend>prbt_ikfast_manipulator_plugin</run_depend>
+  <!--<run_depend>python-docopt</run_depend> NEEDED BUT CAUSES ISSUE ON BUILDFARM -->
+  <run_depend>pilz_extensions</run_depend>
+
+  <run_depend>pilz_msgs</run_depend>
+  <run_depend>tf_conversions</run_depend>
+  <run_depend>tf2</run_depend>
+  <run_depend>tf2_geometry_msgs</run_depend>
+  <run_depend>message_runtime</run_depend>
+  <run_depend>moveit_ros_planning_interface</run_depend>
+  <run_depend>rospy</run_depend>
+
+  <!-- Test dependencies -->
+  <test_depend>rostest</test_depend>
+  <test_depend>rosunit</test_depend>
+  <test_depend>cmake_modules</test_depend>
+  <test_depend>pilz_testutils</test_depend>
+  <test_depend>prbt_moveit_config</test_depend>
+  <test_depend>prbt_support</test_depend>
+  <test_depend>prbt_pg70_support</test_depend>
+  <test_depend>panda_moveit_config</test_depend>
+  <test_depend>abb_irb2400_moveit_config</test_depend>
+  <test_depend>code_coverage</test_depend>
+
+
+  <!-- The export tag contains other, unspecified, tags -->
+  <export>
+    <moveit_core plugin="${prefix}/plugins/command_planner_plugin_description.xml"/>
+    <moveit_ros_move_group plugin="${prefix}/plugins/blend_capability_plugin_description.xml"/>
+    <pilz_trajectory_generation plugin="${prefix}/plugins/planning_context_plugin_description.xml"/>
+  </export>
+</package>

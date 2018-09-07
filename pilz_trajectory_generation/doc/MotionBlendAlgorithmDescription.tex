@@ -1,0 +1,158 @@
+﻿%% Based on a TeXnicCenter-Template by Gyorgy SZEIDL.
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+%------------------------------------------------------------
+%
+\documentclass{amsart}
+%
+%----------------------------------------------------------
+% This is a sample document for the AMS LaTeX Article Class
+% Class options
+%        -- Point size:  8pt, 9pt, 10pt (default), 11pt, 12pt
+%        -- Paper size:  letterpaper(default), a4paper
+%        -- Orientation: portrait(default), landscape
+%        -- Print size:  oneside, twoside(default)
+%        -- Quality:     final(default), draft
+%        -- Title page:  notitlepage, titlepage(default)
+%        -- Start chapter on left:
+%                        openright(default), openany
+%        -- Columns:     onecolumn(default), twocolumn
+%        -- Omit extra math features:
+%                        nomath
+%        -- AMSfonts:    noamsfonts
+%        -- PSAMSFonts  (fewer AMSfonts sizes):
+%                        psamsfonts
+%        -- Equation numbering:
+%                        leqno(default), reqno (equation numbers are on the right side)
+%        -- Equation centering:
+%                        centertags(default), tbtags
+%        -- Displayed equations (centered is the default):
+%                        fleqn (equations start at the same distance from the right side)
+%        -- Electronic journal:
+%                        e-only
+%------------------------------------------------------------
+% For instance the command
+%          \documentclass[a4paper,12pt,reqno]{amsart}
+% ensures that the paper size is a4, fonts are typeset at the size 12p
+% and the equation numbers are on the right side
+%
+\usepackage{amsmath}%
+\usepackage{amsfonts}%
+\usepackage{amssymb}%
+\usepackage{graphicx}
+%------------------------------------------------------------
+% Theorem like environments
+%
+\newtheorem{theorem}{Theorem}
+\theoremstyle{plain}
+\newtheorem{acknowledgement}{Acknowledgement}
+\newtheorem{algorithm}{Algorithm}
+\newtheorem{axiom}{Axiom}
+\newtheorem{case}{Case}
+\newtheorem{claim}{Claim}
+\newtheorem{conclusion}{Conclusion}
+\newtheorem{condition}{Condition}
+\newtheorem{conjecture}{Conjecture}
+\newtheorem{corollary}{Corollary}
+\newtheorem{criterion}{Criterion}
+\newtheorem{definition}{Definition}
+\newtheorem{example}{Example}
+\newtheorem{exercise}{Exercise}
+\newtheorem{lemma}{Lemma}
+\newtheorem{notation}{Notation}
+\newtheorem{problem}{Problem}
+\newtheorem{proposition}{Proposition}
+\newtheorem{remark}{Remark}
+\newtheorem{solution}{Solution}
+\newtheorem{summary}{Summary}
+\numberwithin{equation}{section}
+%--------------------------------------------------------
+\begin{document}
+\title[]{Motion Blending}
+\author{
+  Khu,
+  Hsl
+}
+\date{16.11.2017}
+
+\begin{abstract}
+This article describes the techniques used to blend the position and orientation of two robot trajectories.
+\end{abstract}
+\maketitle
+
+\section{Position blending}
+
+\subsection{Introduction}
+
+Suppose we have two trajectories $x_1(t)$, $x_2(t)$ and we want to make a transition from $x_1(t)$ to $x_2(t)$. The transition window technique assumes that the transition happens in a predefined time window. During this transition window, the resulted trajectory (blending trajectory) is given by:
+\begin{equation}
+	x_b(t) = x_1(t) + \alpha(s(t))(x_2(t)-x_1(t)), t \in [t_0, t_0 + T]
+\end{equation}
+in which $x_b(t)$ is the transition trajectory. $t_0$ is the start time of transition window and $T$ represents the transition time. $\alpha(s)$ is the blend function and $s$ is normalized time parameter:
+\begin{equation}
+s = \frac{t - t_0}{T}
+\label{eq:1}
+\end{equation}
+which changes from 0 to 1 during the transition window. Following polynomial is selected as $\alpha(s)$ so that the boundary conditions at the start and end point of the transition window are fulfilled \cite{lloyd1993trajectory}:
+\begin{equation}
+\alpha(s) = 6s^5 - 15s^4 + 10s^3.
+\label{eq:2}
+\end{equation}
+
+\subsection{Application for blending robot trajectory}
+We want to move the robot from $p_1$ to $p_2$, then from $p_2$ to $p_3$. $p_2$ is a blending way-point which means that it does not need to be reached exactly. We want the robot moves alongside $p_2$ without stop. The whole process is described below with an one dimensional example.
+
+\begin{enumerate}
+	\item Generate motion trajectories $x_1(t)$ from $p_1$ to $p_2$ and $x_2(t)$ from $p_2$ to $p_3$. $x_1(t)$ and $x_2(t)$ both start and stop with zero velocity/acceleration. Both trajectories start with time zero. As a simple example we generated two one-dimensional linear trajectories in Figure.\ref{ori_traj}. For robot motion without blending, the two trajectories are executed one after the other, which means $x_2(t)$ needs to be timely shifted by the duration of $x_1(t)$.
+	\begin{figure}%
+	\includegraphics[width=\columnwidth]{figure/original_trajectories.eps}%
+	\caption{One-dimensional linear trajectory}%
+	\label{ori_traj}%
+	\end{figure}
+
+	\item According to the blending radius $r$, the points $p_{b1}$ on $x_1(t)$ and $p_{b2}$ on $x_2(t)$ which intersects with the blending sphere are computed. The transition window should starts earliest from the time of $p_{b1}$ on $x_1(t)$ is reached, and ends latest at the time of $p_{b2}$ on $x_2(t)$ is reached. In the example, we take $r=3$ and $p_{b1} = p_{b2} = 5$ (see Figure.\ref{ori_traj}).
+
+	\item Timely shift the $x_2(t)$ and select the transition window time $T$ according to the above rules. In order to avoid stop on the blending trajectory, the time shift $T_s$ of $x_2(t)$ should smaller than the duration of $x_1(t)$. We now have the second trajectory as $x_2(t-T_s)$ for blending. In the example the duration of $x_1(t)$ is $6s$. Figure.\ref{blend_case_1} shows a blending case that we shift the $x_2(t)$ with $6s$, which is almost the same as motion without blending. Figure.\ref{blend_case_2} shows a blending case that we shift the $x_2(t)$ with $3.5s$ and the blending starts at 3.5s, ends at 5.5s. Figure.\ref{blend_case_3} shows a blending case that we shift the $x_2(t)$ with $4.5s$ and the blending starts at 3.5s, ends at 6.5s.
+
+	\begin{figure}%
+	\includegraphics[width=\columnwidth]{figure/blend_case_1.eps}%
+	\caption{Motion blend case 1: $T_s = 6s$, blending starts at 3.5s, ends at 8s. The resulted blending trajectory comes to a stop in the middle.}%
+	\label{blend_case_1}%
+	\end{figure}
+
+	\begin{figure}%
+	\includegraphics[width=\columnwidth]{figure/blend_case_2.eps}%
+	\caption{Motion blend case 2: $T_s = 3.5s$, blending starts at 3.5s, ends at 5.5s. The resulted blending trajectory smoothly transits from first trajectory to the second trajectory. The velocity profile has no jumps.}%
+	\label{blend_case_2}%
+	\end{figure}
+
+	\begin{figure}%
+	\includegraphics[width=\columnwidth]{figure/blend_case_3.eps}%
+	\caption{Motion blend case 3: $T_s = 4.5s$, blending starts at 3.5s, ends at 6.5s. The resulted blending trajectory smoothly transits from first trajectory to the second trajectory. The velocity profile has no jumps.}%
+	\label{blend_case_3}%
+	\end{figure}
+
+\end{enumerate}
+
+
+\section{Blending the orientation}
+To blend the orientation, the method described in \cite{dantam2014orientation} is used. The equations (18)-(20) in \cite{dantam2014orientation} are used to calculate the orientation along the blend trajectory. In our application, due to the fact that the orientation change along the original (not blended) trajectories has smooth acceleration and deceleration phases, (18) and (19) from paper \cite{dantam2014orientation} do not need to be calculated.\newline
+For the sake of clarity, it is important to note that our functions for $u_{ij}(t)$ and $u_{jk}(t)$ are different. However, we account for this difference by not explicitly calculating (18) and (19) and using the given samples of the original (not blended) trajectories instead. Furthermore,  (\ref{eq:2}) is used for $u_{j}(t)$, in other words, $u_{j}(t) = \alpha(s(t))$.
+
+
+\begin{thebibliography}{9}
+\bibitem {lloyd1993trajectory}Lloyd, John and Hayward, Vincent \textit{Trajectory generation for sensor-driven and time-varying tasks}, The International journal of robotics research, 1993
+\bibitem {dantam2014orientation}Dantam, Neil and Stilman, Mike \textit{Spherical Parabolic Blends for Robot Workspace Trajectories}, International Conference on Intelligent Robots and Systems (IROS), 2014
+
+%\bibitem {Bertoti97} \textsc{Bert\'{o}ti, E.}:\ \textit{On mixed variational formulation
+%of linear elasticity using nonsymmetric stresses and displacements}, International
+%Journal for Numerical Methods in Engineering., \textbf{42}, (1997), 561-578.
+%
+%\bibitem {Szeidl2001} \textsc{Szeidl, G.}:\ \textit{Boundary integral equations for
+%plane problems in terms of stress functions of order one}, Journal of Computational and
+%Applied Mechanics, \textbf{2}(2), (2001), 237-261.
+%
+%\bibitem {Carlson67}  \textsc{Carlson D. E.}:\ \textit{On G\"{u}nther's stress functions
+%for couple stresses}, Quart. Appl. Math., \textbf{25}, (1967), 139-146.
+\end{thebibliography}
+\end{document}

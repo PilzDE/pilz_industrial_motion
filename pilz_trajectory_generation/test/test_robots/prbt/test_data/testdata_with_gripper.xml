@@ -1,0 +1,127 @@
+<!--
+Copyright (c) 2018 Pilz GmbH & Co. KG
+
+This program is free software: you can redistribute it and/or modify
+it under the terms of the GNU Lesser General Public License as published by
+the Free Software Foundation, either version 3 of the License, or
+(at your option) any later version.
+
+This program is distributed in the hope that it will be useful,
+but WITHOUT ANY WARRANTY; without even the implied warranty of
+MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+GNU Lesser General Public License for more details.
+
+You should have received a copy of the GNU Lesser General Public License
+along with this program.  If not, see <http://www.gnu.org/licenses/>.
+-->
+
+<testdata>
+
+  <poses>
+
+    <pos name="ZeroPose">
+        <group name="manipulator">
+            <joints>0.0 0.0 0.0 0.0 0.0 0.0</joints>
+        </group>
+        <group name="gripper">
+            <joints>0</joints>
+        </group>
+    </pos>
+
+    <pos name="PTPJointValid">
+        <group name="manipulator">
+            <joints>0.0 0.785398 0.785398 0.0 1.570796 0.0</joints>
+        </group>
+        <group name="gripper">
+            <joints>0</joints>
+        </group>
+    </pos>
+
+    <pos name="PTPPose">
+        <group name="manipulator">
+            <xyzQuat link_name="prbt_tcp">0.45 -0.1 0.62 0.0 0.0 0.0 1.</xyzQuat>
+        </group>
+        <group name="gripper">
+            <joints>0</joints>
+        </group>
+    </pos>
+
+    <pos name="LINPose1">
+        <group name="manipulator">
+            <joints>0.0 -0.0107868 -1.726650 0.0 1.715863 2.356194</joints>
+        </group>
+        <group name="gripper">
+            <joints>0</joints>
+        </group>
+    </pos>
+
+    <pos name="LINPose2">
+        <group name="manipulator">
+            <joints>1.570796 -0.010786 -1.726650 0.0 1.715863 0.785398</joints>
+        </group>
+        <group name="gripper">
+            <joints>0</joints>
+        </group>
+    </pos>
+
+    <pos name="CIRCStart">
+        <group name="manipulator">
+            <joints>0.0 -0.0107868 -1.726650 0.0 1.715863 2.356194</joints>
+            <xyzQuat link_name="prbt_tcp">0.3 0.0 0.75 0.0 0.0 0.0 1.0</xyzQuat>
+        </group>
+        <group name="gripper">
+            <joints>0</joints>
+        </group>
+    </pos>
+
+    <pos name="CIRCCenter">
+        <group name="manipulator">
+            <xyzQuat link_name="prbt_tcp">0.0 0.0 0.75 0.0 0.0 0.0 1.0</xyzQuat>
+        </group>
+        <group name="gripper">
+            <joints>0</joints>
+        </group>
+    </pos>
+
+    <pos name="CIRCGoal">
+        <group name="manipulator">
+            <joints>1.570796 -0.010786 -1.726650 0.0 1.715863 0.785398</joints>
+            <xyzQuat link_name="prbt_tcp">0.0 0.3 0.75 0.0 0.0 0 1.0</xyzQuat>
+        </group>
+        <group name="gripper">
+            <joints>0</joints>
+        </group>
+    </pos>
+
+  </poses>
+
+  <circs>
+
+    <circ name="ValidCIRCCmd2">
+      <!-- valid circ cmd-->
+      <planningGroup>manipulator</planningGroup>
+      <targetLink>prbt_tcp</targetLink>
+      <startPos>CIRCStart</startPos>
+      <centerPos>CIRCCenter</centerPos>
+      <endPos>CIRCGoal</endPos>
+      <vel>0.1</vel>
+      <acc>0.1</acc>
+    </circ>
+
+  </circs>
+
+
+  <lins>
+
+    <lin name="LINCmd1">
+      <planningGroup>manipulator</planningGroup>
+      <targetLink>prbt_tcp</targetLink>
+      <startPos>LINPose1</startPos>
+      <endPos>LINPose2</endPos>
+      <vel>0.1</vel>
+      <acc>0.1</acc>
+    </lin>
+
+  </lins>
+
+</testdata>

@@ -1,0 +1,906 @@
+<?xml version="1.0" encoding="UTF-8"?><diagram program="umlet" version="13.3">
+  <zoom_level>4</zoom_level>
+  <element>
+    <id>UMLClass</id>
+    <coordinates>
+      <x>352</x>
+      <y>216</y>
+      <w>324</w>
+      <h>76</h>
+    </coordinates>
+    <panel_attributes>PlanningContextLoader
+--
+...
+--
++getAlgorithm(): std::string
++setModel(model: moveit::core::RobotModelConstPtr&amp;): bool
++setLimits(joint_limits: pilz::JointLimitsContainer&amp;): bool
++loadContext(planning_context: planning_interface::PlanningContextPtr&amp;, name: std::string&amp;, group: std::string&amp;): bool
+#loadContext&lt;T&gt;(planning_context: planning_interface::PlanningContextPtr&amp;, name: std::string&amp;, group: std::string&amp;): bool
+--</panel_attributes>
+    <additional_attributes/>
+  </element>
+  <element>
+    <id>UMLGeneric</id>
+    <coordinates>
+      <x>188</x>
+      <y>360</y>
+      <w>148</w>
+      <h>40</h>
+    </coordinates>
+    <panel_attributes>symbol=component
+PlanningContextLoaderPTP
+--
+--
++loadContext(planning_context, name, group)
+--</panel_attributes>
+    <additional_attributes/>
+  </element>
+  <element>
+    <id>UMLGeneric</id>
+    <coordinates>
+      <x>444</x>
+      <y>360</y>
+      <w>148</w>
+      <h>40</h>
+    </coordinates>
+    <panel_attributes>symbol=component
+PlanningContextLoaderLIN
+--
+--
++loadContext(planning_context, name, group)
+--</panel_attributes>
+    <additional_attributes/>
+  </element>
+  <element>
+    <id>Relation</id>
+    <coordinates>
+      <x>256</x>
+      <y>260</y>
+      <w>104</w>
+      <h>108</h>
+    </coordinates>
+    <panel_attributes>lt=&lt;&lt;-</panel_attributes>
+    <additional_attributes>240.0;10.0;10.0;10.0;10.0;250.0</additional_attributes>
+  </element>
+  <element>
+    <id>Relation</id>
+    <coordinates>
+      <x>512</x>
+      <y>288</y>
+      <w>12</w>
+      <h>80</h>
+    </coordinates>
+    <panel_attributes>lt=&lt;&lt;-</panel_attributes>
+    <additional_attributes>10.0;10.0;10.0;180.0</additional_attributes>
+  </element>
+  <element>
+    <id>UMLGeneric</id>
+    <coordinates>
+      <x>208</x>
+      <y>492</y>
+      <w>76</w>
+      <h>20</h>
+    </coordinates>
+    <panel_attributes>PlanningContextPTP
+--
+--</panel_attributes>
+    <additional_attributes/>
+  </element>
+  <element>
+    <id>UMLGeneric</id>
+    <coordinates>
+      <x>480</x>
+      <y>488</y>
+      <w>72</w>
+      <h>20</h>
+    </coordinates>
+    <panel_attributes>PlanningContextLIN
+--
+--</panel_attributes>
+    <additional_attributes/>
+  </element>
+  <element>
+    <id>UMLClass</id>
+    <coordinates>
+      <x>908</x>
+      <y>412</y>
+      <w>68</w>
+      <h>72</h>
+    </coordinates>
+    <panel_attributes>template=T
+PlanningContextBase
+--
+--</panel_attributes>
+    <additional_attributes/>
+  </element>
+  <element>
+    <id>Text</id>
+    <coordinates>
+      <x>200</x>
+      <y>408</y>
+      <w>100</w>
+      <h>8</h>
+    </coordinates>
+    <panel_attributes>&lt;&lt;bind&gt;&gt;&lt;T-&gt;TrajectoryGeneratorPTP&gt;</panel_attributes>
+    <additional_attributes/>
+  </element>
+  <element>
+    <id>Relation</id>
+    <coordinates>
+      <x>264</x>
+      <y>428</y>
+      <w>652</w>
+      <h>72</h>
+    </coordinates>
+    <panel_attributes>lt=&lt;&lt;-</panel_attributes>
+    <additional_attributes>1610.0;10.0;10.0;10.0;10.0;160.0</additional_attributes>
+  </element>
+  <element>
+    <id>Relation</id>
+    <coordinates>
+      <x>532</x>
+      <y>444</y>
+      <w>384</w>
+      <h>52</h>
+    </coordinates>
+    <panel_attributes>lt=&lt;&lt;-</panel_attributes>
+    <additional_attributes>940.0;10.0;10.0;10.0;10.0;110.0</additional_attributes>
+  </element>
+  <element>
+    <id>Text</id>
+    <coordinates>
+      <x>468</x>
+      <y>408</y>
+      <w>100</w>
+      <h>8</h>
+    </coordinates>
+    <panel_attributes>&lt;&lt;bind&gt;&gt;&lt;T-&gt;TrajectoryGeneratorLIN&gt;</panel_attributes>
+    <additional_attributes/>
+  </element>
+  <element>
+    <id>UMLGeneric</id>
+    <coordinates>
+      <x>480</x>
+      <y>632</y>
+      <w>72</w>
+      <h>20</h>
+    </coordinates>
+    <panel_attributes>TrajectoryGeneratorLIN
+--
+--</panel_attributes>
+    <additional_attributes/>
+  </element>
+  <element>
+    <id>Relation</id>
+    <coordinates>
+      <x>244</x>
+      <y>396</y>
+      <w>12</w>
+      <h>104</h>
+    </coordinates>
+    <panel_attributes>lt=&lt;..</panel_attributes>
+    <additional_attributes>10.0;240.0;10.0;10.0</additional_attributes>
+  </element>
+  <element>
+    <id>UMLGeneric</id>
+    <coordinates>
+      <x>208</x>
+      <y>632</y>
+      <w>72</w>
+      <h>20</h>
+    </coordinates>
+    <panel_attributes>TrajectoryGeneratorPTP
+--
+--</panel_attributes>
+    <additional_attributes/>
+  </element>
+  <element>
+    <id>UMLGeneric</id>
+    <coordinates>
+      <x>860</x>
+      <y>552</y>
+      <w>176</w>
+      <h>56</h>
+    </coordinates>
+    <panel_attributes>TrajectoryGenerator
+--
+--
+TrajectoryGenerator(RobotModelConstPtr, LimitsContainer)
+generate(request, response, sampling_time)
+</panel_attributes>
+    <additional_attributes/>
+  </element>
+  <element>
+    <id>Relation</id>
+    <coordinates>
+      <x>512</x>
+      <y>396</y>
+      <w>12</w>
+      <h>100</h>
+    </coordinates>
+    <panel_attributes>lt=&lt;..</panel_attributes>
+    <additional_attributes>10.0;230.0;10.0;10.0</additional_attributes>
+  </element>
+  <element>
+    <id>Relation</id>
+    <coordinates>
+      <x>512</x>
+      <y>504</y>
+      <w>12</w>
+      <h>136</h>
+    </coordinates>
+    <panel_attributes>lt=&lt;&lt;&lt;&lt;-
+m1=1</panel_attributes>
+    <additional_attributes>10.0;10.0;10.0;320.0</additional_attributes>
+  </element>
+  <element>
+    <id>Relation</id>
+    <coordinates>
+      <x>244</x>
+      <y>508</y>
+      <w>12</w>
+      <h>132</h>
+    </coordinates>
+    <panel_attributes>lt=&lt;&lt;&lt;&lt;-
+m1=1</panel_attributes>
+    <additional_attributes>10.0;10.0;10.0;310.0</additional_attributes>
+  </element>
+  <element>
+    <id>Relation</id>
+    <coordinates>
+      <x>532</x>
+      <y>576</y>
+      <w>336</w>
+      <h>64</h>
+    </coordinates>
+    <panel_attributes>lt=&lt;&lt;-</panel_attributes>
+    <additional_attributes>820.0;10.0;10.0;10.0;10.0;140.0</additional_attributes>
+  </element>
+  <element>
+    <id>Relation</id>
+    <coordinates>
+      <x>260</x>
+      <y>560</y>
+      <w>608</w>
+      <h>80</h>
+    </coordinates>
+    <panel_attributes>lt=&lt;&lt;-</panel_attributes>
+    <additional_attributes>1500.0;10.0;10.0;10.0;10.0;180.0</additional_attributes>
+  </element>
+  <element>
+    <id>UMLNote</id>
+    <coordinates>
+      <x>188</x>
+      <y>312</y>
+      <w>56</w>
+      <h>28</h>
+    </coordinates>
+    <panel_attributes>Plugin
+</panel_attributes>
+    <additional_attributes/>
+  </element>
+  <element>
+    <id>Relation</id>
+    <coordinates>
+      <x>212</x>
+      <y>336</y>
+      <w>12</w>
+      <h>32</h>
+    </coordinates>
+    <panel_attributes>lt=..</panel_attributes>
+    <additional_attributes>10.0;10.0;10.0;60.0</additional_attributes>
+  </element>
+  <element>
+    <id>UMLClass</id>
+    <coordinates>
+      <x>1096</x>
+      <y>360</y>
+      <w>84</w>
+      <h>64</h>
+    </coordinates>
+    <panel_attributes>JointLimitsContainer
+--
+--
+--
+</panel_attributes>
+    <additional_attributes/>
+  </element>
+  <element>
+    <id>UMLClass</id>
+    <coordinates>
+      <x>1212</x>
+      <y>360</y>
+      <w>84</w>
+      <h>64</h>
+    </coordinates>
+    <panel_attributes>CartesianLimit
+--
++max_trans_vel_: double
++max_trans_acc_: double
++max_trans_dec_: double
++max_rot_vel_: double
++max_rot_acc_: double
++max_rot_dec_: double
+--
+--
+</panel_attributes>
+    <additional_attributes/>
+  </element>
+  <element>
+    <id>UMLClass</id>
+    <coordinates>
+      <x>1144</x>
+      <y>288</y>
+      <w>112</w>
+      <h>52</h>
+    </coordinates>
+    <panel_attributes>LimitsContainer
+--
+--
++hasCartesianLimit(): bool
++getCartesianLimit(): pilz::CartesianLimit
++hasJointLimits(): bool
++getJointLimits(): pilz::JointLimitsContainer
+--
+</panel_attributes>
+    <additional_attributes/>
+  </element>
+  <element>
+    <id>Relation</id>
+    <coordinates>
+      <x>1196</x>
+      <y>336</y>
+      <w>72</w>
+      <h>32</h>
+    </coordinates>
+    <panel_attributes>lt=&lt;&lt;&lt;&lt;-
+m1=1</panel_attributes>
+    <additional_attributes>10.0;10.0;160.0;60.0</additional_attributes>
+  </element>
+  <element>
+    <id>Relation</id>
+    <coordinates>
+      <x>1136</x>
+      <y>336</y>
+      <w>40</w>
+      <h>32</h>
+    </coordinates>
+    <panel_attributes>lt=&lt;&lt;&lt;&lt;-
+m1=1</panel_attributes>
+    <additional_attributes>80.0;10.0;10.0;60.0</additional_attributes>
+  </element>
+  <element>
+    <id>UMLClass</id>
+    <coordinates>
+      <x>284</x>
+      <y>764</y>
+      <w>72</w>
+      <h>24</h>
+    </coordinates>
+    <panel_attributes>/KDL::VelocityProfile/
+--
+--
+--
+</panel_attributes>
+    <additional_attributes/>
+  </element>
+  <element>
+    <id>UMLClass</id>
+    <coordinates>
+      <x>204</x>
+      <y>804</y>
+      <w>84</w>
+      <h>36</h>
+    </coordinates>
+    <panel_attributes>VelocityProfile_ATrap
+--
++ SetProfile
++ SetProfileDuration
++ SetProfileAllDurations
+--
+--
+
+</panel_attributes>
+    <additional_attributes/>
+  </element>
+  <element>
+    <id>Relation</id>
+    <coordinates>
+      <x>260</x>
+      <y>772</y>
+      <w>32</w>
+      <h>40</h>
+    </coordinates>
+    <panel_attributes>lt=&lt;&lt;-</panel_attributes>
+    <additional_attributes>60.0;10.0;10.0;10.0;10.0;80.0</additional_attributes>
+  </element>
+  <element>
+    <id>Relation</id>
+    <coordinates>
+      <x>240</x>
+      <y>648</y>
+      <w>12</w>
+      <h>164</h>
+    </coordinates>
+    <panel_attributes>lt=&lt;&lt;&lt;&lt;-
+m1=n</panel_attributes>
+    <additional_attributes>10.0;10.0;10.0;390.0</additional_attributes>
+  </element>
+  <element>
+    <id>UMLClass</id>
+    <coordinates>
+      <x>488</x>
+      <y>812</y>
+      <w>52</w>
+      <h>24</h>
+    </coordinates>
+    <panel_attributes>Package::KDL
+Path_Line
+--
+--
+</panel_attributes>
+    <additional_attributes/>
+  </element>
+  <element>
+    <id>UMLClass</id>
+    <coordinates>
+      <x>664</x>
+      <y>812</y>
+      <w>48</w>
+      <h>24</h>
+    </coordinates>
+    <panel_attributes>Package::KDL
+Path_Circle
+--
+--
+</panel_attributes>
+    <additional_attributes/>
+  </element>
+  <element>
+    <id>UMLClass</id>
+    <coordinates>
+      <x>748</x>
+      <y>812</y>
+      <w>60</w>
+      <h>24</h>
+    </coordinates>
+    <panel_attributes>Package::KDL
+Path_Circle_Wrapper
+--
+--
+</panel_attributes>
+    <additional_attributes/>
+  </element>
+  <element>
+    <id>UMLNote</id>
+    <coordinates>
+      <x>984</x>
+      <y>732</y>
+      <w>56</w>
+      <h>28</h>
+    </coordinates>
+    <panel_attributes>Class to manage the Cartesian path
+bg=white</panel_attributes>
+    <additional_attributes/>
+  </element>
+  <element>
+    <id>Relation</id>
+    <coordinates>
+      <x>948</x>
+      <y>740</y>
+      <w>44</w>
+      <h>12</h>
+    </coordinates>
+    <panel_attributes>lt=..</panel_attributes>
+    <additional_attributes>10.0;10.0;90.0;10.0</additional_attributes>
+  </element>
+  <element>
+    <id>Relation</id>
+    <coordinates>
+      <x>508</x>
+      <y>648</y>
+      <w>12</w>
+      <h>172</h>
+    </coordinates>
+    <panel_attributes>lt=&lt;&lt;&lt;&lt;-</panel_attributes>
+    <additional_attributes>10.0;10.0;10.0;410.0</additional_attributes>
+  </element>
+  <element>
+    <id>UMLGeneric</id>
+    <coordinates>
+      <x>692</x>
+      <y>632</y>
+      <w>96</w>
+      <h>20</h>
+    </coordinates>
+    <panel_attributes>TrajectoryGeneratorCIRC
+--
+--</panel_attributes>
+    <additional_attributes/>
+  </element>
+  <element>
+    <id>Relation</id>
+    <coordinates>
+      <x>772</x>
+      <y>648</y>
+      <w>12</w>
+      <h>172</h>
+    </coordinates>
+    <panel_attributes>lt=&lt;&lt;&lt;&lt;-</panel_attributes>
+    <additional_attributes>10.0;10.0;10.0;410.0</additional_attributes>
+  </element>
+  <element>
+    <id>Relation</id>
+    <coordinates>
+      <x>520</x>
+      <y>744</y>
+      <w>396</w>
+      <h>76</h>
+    </coordinates>
+    <panel_attributes>lt=&lt;&lt;-</panel_attributes>
+    <additional_attributes>970.0;10.0;10.0;10.0;10.0;170.0</additional_attributes>
+  </element>
+  <element>
+    <id>Relation</id>
+    <coordinates>
+      <x>696</x>
+      <y>764</y>
+      <w>220</w>
+      <h>56</h>
+    </coordinates>
+    <panel_attributes>lt=&lt;&lt;-</panel_attributes>
+    <additional_attributes>530.0;10.0;10.0;10.0;10.0;120.0</additional_attributes>
+  </element>
+  <element>
+    <id>Relation</id>
+    <coordinates>
+      <x>788</x>
+      <y>784</y>
+      <w>128</w>
+      <h>36</h>
+    </coordinates>
+    <panel_attributes>lt=&lt;&lt;-</panel_attributes>
+    <additional_attributes>300.0;10.0;10.0;10.0;10.0;70.0</additional_attributes>
+  </element>
+  <element>
+    <id>UMLGeneric</id>
+    <coordinates>
+      <x>700</x>
+      <y>484</y>
+      <w>72</w>
+      <h>20</h>
+    </coordinates>
+    <panel_attributes>PlanningContextCIRC
+--
+--</panel_attributes>
+    <additional_attributes/>
+  </element>
+  <element>
+    <id>Relation</id>
+    <coordinates>
+      <x>732</x>
+      <y>500</y>
+      <w>12</w>
+      <h>140</h>
+    </coordinates>
+    <panel_attributes>lt=&lt;&lt;&lt;&lt;-
+m1=1</panel_attributes>
+    <additional_attributes>10.0;10.0;10.0;330.0</additional_attributes>
+  </element>
+  <element>
+    <id>Relation</id>
+    <coordinates>
+      <x>752</x>
+      <y>460</y>
+      <w>164</w>
+      <h>32</h>
+    </coordinates>
+    <panel_attributes>lt=&lt;&lt;-</panel_attributes>
+    <additional_attributes>390.0;10.0;10.0;10.0;10.0;60.0</additional_attributes>
+  </element>
+  <element>
+    <id>UMLGeneric</id>
+    <coordinates>
+      <x>660</x>
+      <y>360</y>
+      <w>148</w>
+      <h>40</h>
+    </coordinates>
+    <panel_attributes>symbol=component
+PlanningContextLoaderCIRC
+--
+--
++loadContext(planning_context, name, group)
+--</panel_attributes>
+    <additional_attributes/>
+  </element>
+  <element>
+    <id>Relation</id>
+    <coordinates>
+      <x>732</x>
+      <y>396</y>
+      <w>12</w>
+      <h>96</h>
+    </coordinates>
+    <panel_attributes>lt=&lt;..</panel_attributes>
+    <additional_attributes>10.0;220.0;10.0;10.0</additional_attributes>
+  </element>
+  <element>
+    <id>Text</id>
+    <coordinates>
+      <x>688</x>
+      <y>408</y>
+      <w>100</w>
+      <h>8</h>
+    </coordinates>
+    <panel_attributes>&lt;&lt;bind&gt;&gt;&lt;T-&gt;TrajectoryGeneratorLIN&gt;</panel_attributes>
+    <additional_attributes/>
+  </element>
+  <element>
+    <id>Relation</id>
+    <coordinates>
+      <x>752</x>
+      <y>592</y>
+      <w>116</w>
+      <h>48</h>
+    </coordinates>
+    <panel_attributes>lt=&lt;&lt;-</panel_attributes>
+    <additional_attributes>270.0;10.0;10.0;10.0;10.0;100.0</additional_attributes>
+  </element>
+  <element>
+    <id>Relation</id>
+    <coordinates>
+      <x>672</x>
+      <y>260</y>
+      <w>68</w>
+      <h>108</h>
+    </coordinates>
+    <panel_attributes>lt=&lt;&lt;-</panel_attributes>
+    <additional_attributes>10.0;10.0;150.0;10.0;150.0;250.0</additional_attributes>
+  </element>
+  <element>
+    <id>Relation</id>
+    <coordinates>
+      <x>240</x>
+      <y>328</y>
+      <w>248</w>
+      <h>40</h>
+    </coordinates>
+    <panel_attributes>lt=..</panel_attributes>
+    <additional_attributes>10.0;10.0;600.0;10.0;600.0;80.0</additional_attributes>
+  </element>
+  <element>
+    <id>Relation</id>
+    <coordinates>
+      <x>240</x>
+      <y>316</y>
+      <w>464</w>
+      <h>52</h>
+    </coordinates>
+    <panel_attributes>lt=..</panel_attributes>
+    <additional_attributes>10.0;10.0;1140.0;10.0;1140.0;110.0</additional_attributes>
+  </element>
+  <element>
+    <id>UMLClass</id>
+    <coordinates>
+      <x>352</x>
+      <y>132</y>
+      <w>324</w>
+      <h>36</h>
+    </coordinates>
+    <panel_attributes>CommandPlanner
+--
+--
++getPlanningContext(const planning_scene::PlanningSceneConstPtr&amp; planning_scene,
+const planning_interface::MotionPlanRequest&amp; req,
+moveit_msgs::MoveItErrorCodes&amp; error_code):planning_interface::PlanningContextPtr
+--
+</panel_attributes>
+    <additional_attributes/>
+  </element>
+  <element>
+    <id>Relation</id>
+    <coordinates>
+      <x>512</x>
+      <y>164</y>
+      <w>12</w>
+      <h>60</h>
+    </coordinates>
+    <panel_attributes>lt=&lt;&lt;&lt;&lt;-
+m1=n</panel_attributes>
+    <additional_attributes>10.0;10.0;10.0;130.0</additional_attributes>
+  </element>
+  <element>
+    <id>UMLClass</id>
+    <coordinates>
+      <x>460</x>
+      <y>60</y>
+      <w>116</w>
+      <h>28</h>
+    </coordinates>
+    <panel_attributes>PlanningInterface::PlannerManager
+--
+--
+
+--</panel_attributes>
+    <additional_attributes/>
+  </element>
+  <element>
+    <id>Relation</id>
+    <coordinates>
+      <x>512</x>
+      <y>84</y>
+      <w>12</w>
+      <h>56</h>
+    </coordinates>
+    <panel_attributes>lt=&lt;&lt;-</panel_attributes>
+    <additional_attributes>10.0;10.0;10.0;120.0</additional_attributes>
+  </element>
+  <element>
+    <id>UMLClass</id>
+    <coordinates>
+      <x>880</x>
+      <y>356</y>
+      <w>116</w>
+      <h>28</h>
+    </coordinates>
+    <panel_attributes>PlanningInterface::PlanningContext
+--
+--
+
+--</panel_attributes>
+    <additional_attributes/>
+  </element>
+  <element>
+    <id>Relation</id>
+    <coordinates>
+      <x>936</x>
+      <y>380</y>
+      <w>12</w>
+      <h>44</h>
+    </coordinates>
+    <panel_attributes>lt=&lt;&lt;-</panel_attributes>
+    <additional_attributes>10.0;10.0;10.0;90.0</additional_attributes>
+  </element>
+  <element>
+    <id>Relation</id>
+    <coordinates>
+      <x>708</x>
+      <y>820</y>
+      <w>48</w>
+      <h>12</h>
+    </coordinates>
+    <panel_attributes>lt=&lt;&lt;&lt;&lt;-</panel_attributes>
+    <additional_attributes>100.0;10.0;10.0;10.0</additional_attributes>
+  </element>
+  <element>
+    <id>UMLClass</id>
+    <coordinates>
+      <x>364</x>
+      <y>804</y>
+      <w>84</w>
+      <h>36</h>
+    </coordinates>
+    <panel_attributes>Package::KDL
+VelocityProfile_Trap
+--
++ SetProfile
++ SetProfileDuration
+--
+--
+
+</panel_attributes>
+    <additional_attributes/>
+  </element>
+  <element>
+    <id>Relation</id>
+    <coordinates>
+      <x>428</x>
+      <y>636</y>
+      <w>272</w>
+      <h>176</h>
+    </coordinates>
+    <panel_attributes>lt=&lt;&lt;&lt;&lt;-</panel_attributes>
+    <additional_attributes>660.0;10.0;410.0;10.0;410.0;140.0;10.0;140.0;10.0;420.0</additional_attributes>
+  </element>
+  <element>
+    <id>UMLClass</id>
+    <coordinates>
+      <x>628</x>
+      <y>712</y>
+      <w>72</w>
+      <h>24</h>
+    </coordinates>
+    <panel_attributes>Package::KDL
+Trajectory_Segment
+--
+--
+</panel_attributes>
+    <additional_attributes/>
+  </element>
+  <element>
+    <id>Relation</id>
+    <coordinates>
+      <x>696</x>
+      <y>648</y>
+      <w>36</w>
+      <h>84</h>
+    </coordinates>
+    <panel_attributes>lt=&lt;&lt;&lt;&lt;-</panel_attributes>
+    <additional_attributes>70.0;10.0;70.0;190.0;10.0;190.0</additional_attributes>
+  </element>
+  <element>
+    <id>Relation</id>
+    <coordinates>
+      <x>352</x>
+      <y>772</y>
+      <w>36</w>
+      <h>40</h>
+    </coordinates>
+    <panel_attributes>lt=&lt;&lt;-</panel_attributes>
+    <additional_attributes>10.0;10.0;70.0;10.0;70.0;80.0</additional_attributes>
+  </element>
+  <element>
+    <id>UMLClass</id>
+    <coordinates>
+      <x>636</x>
+      <y>668</y>
+      <w>56</w>
+      <h>20</h>
+    </coordinates>
+    <panel_attributes>/KDL::Trajectory/
+--
+--
+--
+</panel_attributes>
+    <additional_attributes/>
+  </element>
+  <element>
+    <id>Relation</id>
+    <coordinates>
+      <x>660</x>
+      <y>684</y>
+      <w>12</w>
+      <h>36</h>
+    </coordinates>
+    <panel_attributes>lt=&lt;&lt;-</panel_attributes>
+    <additional_attributes>10.0;10.0;10.0;70.0</additional_attributes>
+  </element>
+  <element>
+    <id>UMLClass</id>
+    <coordinates>
+      <x>908</x>
+      <y>736</y>
+      <w>44</w>
+      <h>64</h>
+    </coordinates>
+    <panel_attributes>/KDL::Path/
+--
+--
+</panel_attributes>
+    <additional_attributes/>
+  </element>
+  <element>
+    <id>Relation</id>
+    <coordinates>
+      <x>524</x>
+      <y>648</y>
+      <w>112</w>
+      <h>84</h>
+    </coordinates>
+    <panel_attributes>lt=&lt;&lt;&lt;&lt;-</panel_attributes>
+    <additional_attributes>10.0;10.0;10.0;190.0;260.0;190.0</additional_attributes>
+  </element>
+  <element>
+    <id>Relation</id>
+    <coordinates>
+      <x>392</x>
+      <y>636</y>
+      <w>96</w>
+      <h>176</h>
+    </coordinates>
+    <panel_attributes>lt=&lt;&lt;&lt;&lt;-</panel_attributes>
+    <additional_attributes>220.0;10.0;10.0;10.0;10.0;420.0</additional_attributes>
+  </element>
+</diagram>

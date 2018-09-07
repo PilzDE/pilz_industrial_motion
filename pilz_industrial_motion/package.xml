@@ -1,0 +1,24 @@
+<package format="2">
+  <name>pilz_industrial_motion</name>
+  <version>0.1.0</version>
+  <description>The pilz_industrial_motion package</description>
+
+  <maintainer email="ros@pilz.de">Pilz GmbH and Co. KG</maintainer>
+
+  <license>Apache 2.0</license>
+
+  <url type="website">https://wiki.ros.org/pilz_industrial_motion</url>
+  <url type="bugtracker">https://github.com/PilzDE/pilz_industrial_motion/issues</url>
+  <url type="repository">https://github.com/PilzDE/pilz_industrial_motion</url>
+
+  <buildtool_depend>catkin</buildtool_depend>
+
+  <exec_depend>pilz_extensions</exec_depend>
+  <exec_depend>pilz_msgs</exec_depend>
+  <exec_depend>pilz_trajectory_generation</exec_depend>
+
+  <export>
+    <metapackage/>
+    <architecture_independent/>
+  </export>
+</package>

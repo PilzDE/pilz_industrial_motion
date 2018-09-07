@@ -1,0 +1,6 @@
+*.autosave
+*.swp
+*.pyc
+.idea/
+*.bag
+doc/

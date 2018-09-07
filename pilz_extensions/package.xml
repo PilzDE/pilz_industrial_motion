@@ -1,0 +1,23 @@
+<?xml version="1.0"?>
+<package>
+  <name>pilz_extensions</name>
+  <version>0.1.0</version>
+  <description>
+  The pilz_extensions package. Here are classes extending the functionality of other packages.
+  On the long run these extensions should become pull requests on the respective packages.
+  </description>
+
+  <maintainer email="ros@pilz.de">Pilz GmbH and Co. KG</maintainer>
+
+  <license>Apache 2.0</license>
+
+  <build_depend>roscpp</build_depend>
+  <build_depend>joint_limits_interface</build_depend>
+
+  <test_depend>rostest</test_depend>
+  <test_depend>rosunit</test_depend>
+  <test_depend>code_coverage</test_depend>
+  <run_depend>prbt_support</run_depend>
+
+  <buildtool_depend>catkin</buildtool_depend>
+</package>
