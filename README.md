@@ -12,6 +12,10 @@ The FTP is implemented by Pilz GmbH & Co. KG.
 | [![Build Status](https://travis-ci.org/PilzDE/pilz_robots.svg?branch=kinetic-devel)](https://travis-ci.org/PilzDE/pilz_industrial_motion) | [![Build Status](https://travis-ci.org/PilzDE/pilz_robots.svg?branch=melodic-devel)](https://travis-ci.org/PilzDE/pilz_industrial_motion) |
 
 
+### Note to Developers:
+`kinetic-devel` is considered to be the active development branch.
+Changes are merged into `melodic-devel` with every release or on demand.
+
 ## Package: pilz_trajectory_generation
 Provides the generators to create LIN, PTP and CIRC trajectories. It uses a plugin structure which allows to the
 definition of custom commands.
