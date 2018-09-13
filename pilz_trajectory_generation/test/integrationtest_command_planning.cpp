@@ -34,8 +34,8 @@
 #include <moveit/planning_interface/planning_request.h>
 #include <moveit/robot_model_loader/robot_model_loader.h>
 
-#include <pilz_testutils/xml_testdata_loader.h>
-#include <pilz_testutils/motion_plan_request_director.h>
+#include <pilz_industrial_motion_testutils/xml_testdata_loader.h>
+#include <pilz_industrial_motion_testutils/motion_plan_request_director.h>
 
 #include "test_utils.h"
 
@@ -61,7 +61,7 @@ protected:
   double pose_norm_tolerance_, rot_axis_norm_tolerance_;
   std::string planning_group_, target_link_, test_data_file_name_;
 
-  std::unique_ptr<pilz_testutils::TestdataLoader> test_data_;
+  std::unique_ptr<pilz_industrial_motion_testutils::TestdataLoader> test_data_;
 
   std::string joint_prefix_ {testutils::JOINT_NAME_PREFIX};
 
@@ -89,7 +89,7 @@ void IntegrationTestCommandPlanning::SetUp()
   testutils::checkRobotModel(robot_model_, planning_group_, target_link_);
 
   // load the test data provider
-  test_data_.reset(new pilz_testutils::XmlTestdataLoader{test_data_file_name_});
+  test_data_.reset(new pilz_industrial_motion_testutils::XmlTestdataLoader{test_data_file_name_});
   ASSERT_NE(nullptr, test_data_) << "Failed to load test data by provider.";
 
   num_joints_ = robot_model_->getJointModelGroup(planning_group_)->getActiveJointModelNames().size();
@@ -199,7 +199,7 @@ TEST_F(IntegrationTestCommandPlanning, PTPPoseGoal)
   // The goal
   geometry_msgs::PoseStamped pose;
   pose.header.frame_id = "";
-  pose.pose = pilz_testutils::TestdataLoader::fromVecToMsg(pose_vec);
+  pose.pose = pilz_industrial_motion_testutils::TestdataLoader::fromVecToMsg(pose_vec);
   std::vector<double> tolerance_pose(3, 0.01);
   std::vector<double> tolerance_angle(3, 0.01);
   moveit_msgs::Constraints pose_goal =
@@ -292,7 +292,7 @@ TEST_F(IntegrationTestCommandPlanning, LinJointGoal)
 {
   ros::NodeHandle node_handle("~");
 
-  pilz_testutils::STestMotionCommand lin_cmd;
+  pilz_industrial_motion_testutils::STestMotionCommand lin_cmd;
   lin_cmd.planning_group=planning_group_;
   ASSERT_TRUE(test_data_->getLin("LINCmd1", lin_cmd));
 
@@ -375,7 +375,7 @@ TEST_F(IntegrationTestCommandPlanning, LinPosGoal)
 {
   ros::NodeHandle node_handle("~");
 
-  pilz_testutils::STestMotionCommand lin_cmd;
+  pilz_industrial_motion_testutils::STestMotionCommand lin_cmd;
   lin_cmd.planning_group=planning_group_;
   ASSERT_TRUE(test_data_->getLin("LINCmd1", lin_cmd));
 
@@ -461,11 +461,11 @@ TEST_F(IntegrationTestCommandPlanning, CIRCJointGoal)
 {
   ros::NodeHandle node_handle("~");
 
-  pilz_testutils::STestMotionCommand circ_cmd;
-  circ_cmd.aux_pos_type = pilz_testutils::ECircAuxPosType::eCENTER;
+  pilz_industrial_motion_testutils::STestMotionCommand circ_cmd;
+  circ_cmd.aux_pos_type = pilz_industrial_motion_testutils::ECircAuxPosType::eCENTER;
   ASSERT_TRUE(test_data_->getCirc("ValidCIRCCmd2", circ_cmd)) << "failed to get circ command from test data";
 
-  pilz_testutils::MotionPlanRequestDirector director;
+  pilz_industrial_motion_testutils::MotionPlanRequestDirector director;
   moveit_msgs::MotionPlanRequest req = director.getCIRCJointReq(robot_model_, circ_cmd);
 
   // Generate the service request
@@ -527,8 +527,8 @@ TEST_F(IntegrationTestCommandPlanning, CIRCJointGoal)
 
     // Check orientation
     Eigen::Affine3d start_pose, goal_pose;
-    tf::poseMsgToEigen(pilz_testutils::TestdataLoader::fromVecToMsg(circ_cmd.start_pose), start_pose);
-    tf::poseMsgToEigen(pilz_testutils::TestdataLoader::fromVecToMsg(circ_cmd.goal_pose), goal_pose);
+    tf::poseMsgToEigen(pilz_industrial_motion_testutils::TestdataLoader::fromVecToMsg(circ_cmd.start_pose), start_pose);
+    tf::poseMsgToEigen(pilz_industrial_motion_testutils::TestdataLoader::fromVecToMsg(circ_cmd.goal_pose), goal_pose);
     EXPECT_TRUE( testutils::checkSLERP(start_pose, goal_pose, waypoint_pose, rot_axis_norm_tolerance_) );
   }
 
@@ -550,11 +550,11 @@ TEST_F(IntegrationTestCommandPlanning, CIRCPoseGoal)
 {
   ros::NodeHandle node_handle("~");
 
-  pilz_testutils::STestMotionCommand circ_cmd;
-  circ_cmd.aux_pos_type = pilz_testutils::ECircAuxPosType::eCENTER;
+  pilz_industrial_motion_testutils::STestMotionCommand circ_cmd;
+  circ_cmd.aux_pos_type = pilz_industrial_motion_testutils::ECircAuxPosType::eCENTER;
   ASSERT_TRUE(test_data_->getCirc("ValidCIRCCmd2", circ_cmd)) << "failed to get circ command from test data";
 
-  pilz_testutils::MotionPlanRequestDirector director;
+  pilz_industrial_motion_testutils::MotionPlanRequestDirector director;
   moveit_msgs::MotionPlanRequest req = director.getCIRCCartReq(robot_model_, circ_cmd);
 
   // Generate the service request
@@ -616,8 +616,8 @@ TEST_F(IntegrationTestCommandPlanning, CIRCPoseGoal)
 
     // Check orientation
     Eigen::Affine3d start_pose, goal_pose;
-    tf::poseMsgToEigen(pilz_testutils::TestdataLoader::fromVecToMsg(circ_cmd.start_pose), start_pose);
-    tf::poseMsgToEigen(pilz_testutils::TestdataLoader::fromVecToMsg(circ_cmd.goal_pose), goal_pose);
+    tf::poseMsgToEigen(pilz_industrial_motion_testutils::TestdataLoader::fromVecToMsg(circ_cmd.start_pose), start_pose);
+    tf::poseMsgToEigen(pilz_industrial_motion_testutils::TestdataLoader::fromVecToMsg(circ_cmd.goal_pose), goal_pose);
     EXPECT_TRUE(testutils::checkSLERP(start_pose,
                                       goal_pose,
                                       waypoint_pose,

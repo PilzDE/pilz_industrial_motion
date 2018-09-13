@@ -20,8 +20,8 @@
 #include "pilz_trajectory_generation/trajectory_generator_circ.h"
 #include "pilz_trajectory_generation/joint_limits_aggregator.h"
 #include "test_utils.h"
-#include "pilz_testutils/xml_testdata_loader.h"
-#include "pilz_testutils/motion_plan_request_director.h"
+#include "pilz_industrial_motion_testutils/xml_testdata_loader.h"
+#include "pilz_industrial_motion_testutils/motion_plan_request_director.h"
 
 #include <moveit/robot_model_loader/robot_model_loader.h>
 #include <moveit/robot_model/robot_model.h>
@@ -64,9 +64,9 @@ protected:
     robot_model_loader::RobotModelLoader(GetParam()).getModel()};
   std::unique_ptr<TrajectoryGeneratorCIRC> circ_;
   // test data provider
-  std::unique_ptr<pilz_testutils::TestdataLoader> tdp_;
+  std::unique_ptr<pilz_industrial_motion_testutils::TestdataLoader> tdp_;
   // motion plan request director
-  pilz_testutils::MotionPlanRequestDirector req_director_;
+  pilz_industrial_motion_testutils::MotionPlanRequestDirector req_director_;
 
   // test parameters from parameter server
   std::string planning_group_, target_link_, test_data_file_name_;
@@ -91,7 +91,7 @@ void TrajectoryGeneratorCIRCTest::SetUp()
   testutils::checkRobotModel(robot_model_, planning_group_, target_link_);
 
   // load the test data provider
-  tdp_.reset(new pilz_testutils::XmlTestdataLoader{test_data_file_name_});
+  tdp_.reset(new pilz_industrial_motion_testutils::XmlTestdataLoader{test_data_file_name_});
   ASSERT_NE(nullptr, tdp_) << "Failed to load test data by provider.";
 
   // create the limits container
@@ -257,8 +257,8 @@ TEST_P(TrajectoryGeneratorCIRCTest, noLimits)
 TEST_P(TrajectoryGeneratorCIRCTest, nonZeroStartVelocity)
 {
   // get the test data from xml
-  pilz_testutils::STestMotionCommand circ_cmd;
-  circ_cmd.aux_pos_type = pilz_testutils::ECircAuxPosType::eCENTER;
+  pilz_industrial_motion_testutils::STestMotionCommand circ_cmd;
+  circ_cmd.aux_pos_type = pilz_industrial_motion_testutils::ECircAuxPosType::eCENTER;
   ASSERT_TRUE(tdp_->getCirc("ValidCIRCCmd1", circ_cmd)) << "failed to get circ command from test data";
   // construct request
   moveit_msgs::MotionPlanRequest req = req_director_.getCIRCJointReq(robot_model_, circ_cmd);
@@ -277,8 +277,8 @@ TEST_P(TrajectoryGeneratorCIRCTest, nonZeroStartVelocity)
 TEST_P(TrajectoryGeneratorCIRCTest, toFast)
 {
   // get the test data from xml
-  pilz_testutils::STestMotionCommand circ_cmd;
-  circ_cmd.aux_pos_type = pilz_testutils::ECircAuxPosType::eINTERMEDIATE;
+  pilz_industrial_motion_testutils::STestMotionCommand circ_cmd;
+  circ_cmd.aux_pos_type = pilz_industrial_motion_testutils::ECircAuxPosType::eINTERMEDIATE;
 
   ROS_ERROR_STREAM("Loading point");
 
@@ -297,8 +297,8 @@ TEST_P(TrajectoryGeneratorCIRCTest, toFast)
 TEST_P(TrajectoryGeneratorCIRCTest, samePoints)
 {
   // get the test data from xml
-  pilz_testutils::STestMotionCommand circ_cmd;
-  circ_cmd.aux_pos_type = pilz_testutils::ECircAuxPosType::eCENTER;
+  pilz_industrial_motion_testutils::STestMotionCommand circ_cmd;
+  circ_cmd.aux_pos_type = pilz_industrial_motion_testutils::ECircAuxPosType::eCENTER;
 
   ROS_ERROR_STREAM("Loading point");
 
@@ -318,8 +318,8 @@ TEST_P(TrajectoryGeneratorCIRCTest, samePoints)
 TEST_P(TrajectoryGeneratorCIRCTest, emptyAux)
 {
   // get the test data from xml
-  pilz_testutils::STestMotionCommand circ_cmd;
-  circ_cmd.aux_pos_type = pilz_testutils::ECircAuxPosType::eCENTER;
+  pilz_industrial_motion_testutils::STestMotionCommand circ_cmd;
+  circ_cmd.aux_pos_type = pilz_industrial_motion_testutils::ECircAuxPosType::eCENTER;
   ASSERT_TRUE(tdp_->getCirc("ValidCIRCCmd1", circ_cmd)) << "failed to get circ command from test data";
   moveit_msgs::MotionPlanRequest req = req_director_.getCIRCJointReq(robot_model_, circ_cmd);
 
@@ -336,8 +336,8 @@ TEST_P(TrajectoryGeneratorCIRCTest, emptyAux)
 TEST_P(TrajectoryGeneratorCIRCTest, invalidAuxName)
 {
   // get the test data from xml
-  pilz_testutils::STestMotionCommand circ_cmd;
-  circ_cmd.aux_pos_type = pilz_testutils::ECircAuxPosType::eCENTER;
+  pilz_industrial_motion_testutils::STestMotionCommand circ_cmd;
+  circ_cmd.aux_pos_type = pilz_industrial_motion_testutils::ECircAuxPosType::eCENTER;
   ASSERT_TRUE(tdp_->getCirc("ValidCIRCCmd1", circ_cmd)) << "failed to get circ command from test data";
   moveit_msgs::MotionPlanRequest req = req_director_.getCIRCJointReq(robot_model_, circ_cmd);
 
@@ -354,8 +354,8 @@ TEST_P(TrajectoryGeneratorCIRCTest, invalidAuxName)
 TEST_P(TrajectoryGeneratorCIRCTest, invalidAuxLinkName)
 {
   // get the test data from xml
-  pilz_testutils::STestMotionCommand circ_cmd;
-  circ_cmd.aux_pos_type = pilz_testutils::ECircAuxPosType::eCENTER;
+  pilz_industrial_motion_testutils::STestMotionCommand circ_cmd;
+  circ_cmd.aux_pos_type = pilz_industrial_motion_testutils::ECircAuxPosType::eCENTER;
   ASSERT_TRUE(tdp_->getCirc("ValidCIRCCmd1", circ_cmd)) << "failed to get circ command from test data";
   moveit_msgs::MotionPlanRequest req = req_director_.getCIRCJointReq(robot_model_, circ_cmd);
 
@@ -372,8 +372,8 @@ TEST_P(TrajectoryGeneratorCIRCTest, invalidAuxLinkName)
 TEST_P(TrajectoryGeneratorCIRCTest, wrongCenter)
 {
   // get the test data from xml
-  pilz_testutils::STestMotionCommand circ_cmd;
-  circ_cmd.aux_pos_type = pilz_testutils::ECircAuxPosType::eCENTER;
+  pilz_industrial_motion_testutils::STestMotionCommand circ_cmd;
+  circ_cmd.aux_pos_type = pilz_industrial_motion_testutils::ECircAuxPosType::eCENTER;
   ASSERT_TRUE(tdp_->getCirc("CIRCCmd3", circ_cmd)) << "failed to get circ command from test data";
   moveit_msgs::MotionPlanRequest req = req_director_.getCIRCJointReq(robot_model_, circ_cmd);
 
@@ -388,8 +388,8 @@ TEST_P(TrajectoryGeneratorCIRCTest, wrongCenter)
  */
 TEST_P(TrajectoryGeneratorCIRCTest, colinearCenter)
 {
-  pilz_testutils::STestMotionCommand circ_cmd;
-  circ_cmd.aux_pos_type = pilz_testutils::ECircAuxPosType::eCENTER;
+  pilz_industrial_motion_testutils::STestMotionCommand circ_cmd;
+  circ_cmd.aux_pos_type = pilz_industrial_motion_testutils::ECircAuxPosType::eCENTER;
   ASSERT_TRUE(tdp_->getCirc("CIRCCmd2", circ_cmd)) << "failed to get circ command from test data";
   moveit_msgs::MotionPlanRequest req = req_director_.getCIRCCartReq(robot_model_, circ_cmd);
 
@@ -404,8 +404,8 @@ TEST_P(TrajectoryGeneratorCIRCTest, colinearCenter)
 TEST_P(TrajectoryGeneratorCIRCTest, colinearInterim)
 {
   // get the test data from xml
-  pilz_testutils::STestMotionCommand circ_cmd;
-  circ_cmd.aux_pos_type = pilz_testutils::ECircAuxPosType::eINTERMEDIATE;
+  pilz_industrial_motion_testutils::STestMotionCommand circ_cmd;
+  circ_cmd.aux_pos_type = pilz_industrial_motion_testutils::ECircAuxPosType::eINTERMEDIATE;
   ASSERT_TRUE(tdp_->getCirc("CIRCCmd5", circ_cmd)) << "failed to get circ command from test data";
   moveit_msgs::MotionPlanRequest req = req_director_.getCIRCJointReq(robot_model_, circ_cmd);
 
@@ -422,8 +422,8 @@ TEST_P(TrajectoryGeneratorCIRCTest, colinearInterim)
 TEST_P(TrajectoryGeneratorCIRCTest, colinearCenterDueToInterim)
 {
   // get the test data from xml
-  pilz_testutils::STestMotionCommand circ_cmd;
-  circ_cmd.aux_pos_type = pilz_testutils::ECircAuxPosType::eINTERMEDIATE;
+  pilz_industrial_motion_testutils::STestMotionCommand circ_cmd;
+  circ_cmd.aux_pos_type = pilz_industrial_motion_testutils::ECircAuxPosType::eINTERMEDIATE;
   ASSERT_TRUE(tdp_->getCirc("CIRCCmd4", circ_cmd)) << "failed to get circ command from test data";
   moveit_msgs::MotionPlanRequest req = req_director_.getCIRCJointReq(robot_model_, circ_cmd);
 
@@ -439,8 +439,8 @@ TEST_P(TrajectoryGeneratorCIRCTest, colinearCenterDueToInterim)
 TEST_P(TrajectoryGeneratorCIRCTest, centerPointJointGoal)
 {
   // get the test data from xml
-  pilz_testutils::STestMotionCommand circ_cmd;
-  circ_cmd.aux_pos_type = pilz_testutils::ECircAuxPosType::eCENTER;
+  pilz_industrial_motion_testutils::STestMotionCommand circ_cmd;
+  circ_cmd.aux_pos_type = pilz_industrial_motion_testutils::ECircAuxPosType::eCENTER;
   ASSERT_TRUE(tdp_->getCirc("ValidCIRCCmd2", circ_cmd)) << "failed to get circ command from test data";
   // construct planning request
   moveit_msgs::MotionPlanRequest req = req_director_.getCIRCJointReq(robot_model_, circ_cmd);
@@ -459,8 +459,8 @@ TEST_P(TrajectoryGeneratorCIRCTest, centerPointJointGoal)
 TEST_P(TrajectoryGeneratorCIRCTest, InvalidAdditionalPrimitivePose)
 {
   // get the test data from xml
-  pilz_testutils::STestMotionCommand circ_cmd;
-  circ_cmd.aux_pos_type = pilz_testutils::ECircAuxPosType::eCENTER;
+  pilz_industrial_motion_testutils::STestMotionCommand circ_cmd;
+  circ_cmd.aux_pos_type = pilz_industrial_motion_testutils::ECircAuxPosType::eCENTER;
   ASSERT_TRUE(tdp_->getCirc("ValidCIRCCmd2", circ_cmd)) << "failed to get circ command from test data";
   // construct planning request
   moveit_msgs::MotionPlanRequest req = req_director_.getCIRCJointReq(robot_model_, circ_cmd);
@@ -489,8 +489,8 @@ TEST_P(TrajectoryGeneratorCIRCTest, InvalidAdditionalPrimitivePose)
 TEST_P(TrajectoryGeneratorCIRCTest, InvalidExtraJointConstraint)
 {
   // get the test data from xml
-  pilz_testutils::STestMotionCommand circ_cmd;
-  circ_cmd.aux_pos_type = pilz_testutils::ECircAuxPosType::eCENTER;
+  pilz_industrial_motion_testutils::STestMotionCommand circ_cmd;
+  circ_cmd.aux_pos_type = pilz_industrial_motion_testutils::ECircAuxPosType::eCENTER;
   ASSERT_TRUE(tdp_->getCirc("ValidCIRCCmd2", circ_cmd)) << "failed to get circ command from test data";
   // construct planning request
   moveit_msgs::MotionPlanRequest req = req_director_.getCIRCJointReq(robot_model_, circ_cmd);
@@ -513,8 +513,8 @@ TEST_P(TrajectoryGeneratorCIRCTest, InvalidExtraJointConstraint)
 TEST_P(TrajectoryGeneratorCIRCTest, CenterPointPoseGoal)
 {
   // get the test data from xml
-  pilz_testutils::STestMotionCommand circ_cmd;
-  circ_cmd.aux_pos_type = pilz_testutils::ECircAuxPosType::eCENTER;
+  pilz_industrial_motion_testutils::STestMotionCommand circ_cmd;
+  circ_cmd.aux_pos_type = pilz_industrial_motion_testutils::ECircAuxPosType::eCENTER;
   ASSERT_TRUE(tdp_->getCirc("ValidCIRCCmd2", circ_cmd)) << "failed to get circ command from test data";
   // construct planning request
   moveit_msgs::MotionPlanRequest req = req_director_.getCIRCCartReq(robot_model_, circ_cmd);
@@ -532,8 +532,8 @@ TEST_P(TrajectoryGeneratorCIRCTest, CenterPointPoseGoal)
 TEST_P(TrajectoryGeneratorCIRCTest, CenterPointPoseGoalFrameIdPositionConstraints)
 {
   // get the test data from xml
-  pilz_testutils::STestMotionCommand circ_cmd;
-  circ_cmd.aux_pos_type = pilz_testutils::ECircAuxPosType::eCENTER;
+  pilz_industrial_motion_testutils::STestMotionCommand circ_cmd;
+  circ_cmd.aux_pos_type = pilz_industrial_motion_testutils::ECircAuxPosType::eCENTER;
   ASSERT_TRUE(tdp_->getCirc("ValidCIRCCmd2", circ_cmd)) << "failed to get circ command from test data";
   // construct planning request
   moveit_msgs::MotionPlanRequest req = req_director_.getCIRCCartReq(robot_model_, circ_cmd);
@@ -552,8 +552,8 @@ TEST_P(TrajectoryGeneratorCIRCTest, CenterPointPoseGoalFrameIdPositionConstraint
 TEST_P(TrajectoryGeneratorCIRCTest, CenterPointPoseGoalFrameIdOrientationConstraints)
 {
   // get the test data from xml
-  pilz_testutils::STestMotionCommand circ_cmd;
-  circ_cmd.aux_pos_type = pilz_testutils::ECircAuxPosType::eCENTER;
+  pilz_industrial_motion_testutils::STestMotionCommand circ_cmd;
+  circ_cmd.aux_pos_type = pilz_industrial_motion_testutils::ECircAuxPosType::eCENTER;
   ASSERT_TRUE(tdp_->getCirc("ValidCIRCCmd2", circ_cmd)) << "failed to get circ command from test data";
   // construct planning request
   moveit_msgs::MotionPlanRequest req = req_director_.getCIRCCartReq(robot_model_, circ_cmd);
@@ -573,8 +573,8 @@ TEST_P(TrajectoryGeneratorCIRCTest, CenterPointPoseGoalFrameIdOrientationConstra
 TEST_P(TrajectoryGeneratorCIRCTest, CenterPointPoseGoalFrameIdBothConstraints)
 {
   // get the test data from xml
-  pilz_testutils::STestMotionCommand circ_cmd;
-  circ_cmd.aux_pos_type = pilz_testutils::ECircAuxPosType::eCENTER;
+  pilz_industrial_motion_testutils::STestMotionCommand circ_cmd;
+  circ_cmd.aux_pos_type = pilz_industrial_motion_testutils::ECircAuxPosType::eCENTER;
   ASSERT_TRUE(tdp_->getCirc("ValidCIRCCmd2", circ_cmd)) << "failed to get circ command from test data";
   // construct planning request
   moveit_msgs::MotionPlanRequest req = req_director_.getCIRCCartReq(robot_model_, circ_cmd);
@@ -596,8 +596,8 @@ TEST_P(TrajectoryGeneratorCIRCTest, CenterPointPoseGoalFrameIdBothConstraints)
 TEST_P(TrajectoryGeneratorCIRCTest, InterimPointJointGoal)
 {
   // get the test data from xml
-  pilz_testutils::STestMotionCommand circ_cmd;
-  circ_cmd.aux_pos_type = pilz_testutils::ECircAuxPosType::eINTERMEDIATE;
+  pilz_industrial_motion_testutils::STestMotionCommand circ_cmd;
+  circ_cmd.aux_pos_type = pilz_industrial_motion_testutils::ECircAuxPosType::eINTERMEDIATE;
   ASSERT_TRUE(tdp_->getCirc("ValidCIRCCmd3", circ_cmd)) << "failed to get circ command from test data";
   // construct planning request
   moveit_msgs::MotionPlanRequest req = req_director_.getCIRCJointReq(robot_model_, circ_cmd);
@@ -615,8 +615,8 @@ TEST_P(TrajectoryGeneratorCIRCTest, InterimPointJointGoal)
 TEST_P(TrajectoryGeneratorCIRCTest, InterimPointPoseGoal)
 {
   // get the test data from xml
-  pilz_testutils::STestMotionCommand circ_cmd;
-  circ_cmd.aux_pos_type = pilz_testutils::ECircAuxPosType::eINTERMEDIATE;
+  pilz_industrial_motion_testutils::STestMotionCommand circ_cmd;
+  circ_cmd.aux_pos_type = pilz_industrial_motion_testutils::ECircAuxPosType::eINTERMEDIATE;
   ASSERT_TRUE(tdp_->getCirc("ValidCIRCCmd3", circ_cmd)) << "failed to get circ command from test data";
   // construct planning request
   moveit_msgs::MotionPlanRequest req = req_director_.getCIRCCartReq(robot_model_, circ_cmd);

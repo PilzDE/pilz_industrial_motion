@@ -14,17 +14,17 @@
  * limitations under the License.
  */
 
-#include "pilz_testutils/xml_testdata_loader.h"
+#include "pilz_industrial_motion_testutils/xml_testdata_loader.h"
 
 #include <iostream>
 
 #include <boost/property_tree/xml_parser.hpp>
 #include <boost/algorithm/string.hpp>
 
-#include "pilz_testutils/default_values.h"
+#include "pilz_industrial_motion_testutils/default_values.h"
 
 namespace pt = boost::property_tree;
-namespace pilz_testutils
+namespace pilz_industrial_motion_testutils
 {
 
 XmlTestdataLoader::XmlTestdataLoader(const std::string &path_filename)

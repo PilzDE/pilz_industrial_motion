@@ -14,13 +14,13 @@
  * limitations under the License.
  */
 
-#include "pilz_testutils/motion_plan_request_director.h"
-#include "pilz_testutils/motion_plan_request_builder.h"
+#include "pilz_industrial_motion_testutils/motion_plan_request_director.h"
+#include "pilz_industrial_motion_testutils/motion_plan_request_builder.h"
 
 #include <eigen_conversions/eigen_msg.h>
 #include <moveit/robot_state/robot_state.h>
 
-namespace pilz_testutils {
+namespace pilz_industrial_motion_testutils {
 
 moveit_msgs::MotionPlanRequest MotionPlanRequestDirector::getLINJointReq(const moveit::core::RobotModelConstPtr &robot_model,
                                                                          const STestMotionCommand &cmd)

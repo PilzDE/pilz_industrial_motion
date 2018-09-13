@@ -20,7 +20,7 @@
 /*
  * @brief This file contains all default values needed for testing.
  */
-namespace pilz_testutils
+namespace pilz_industrial_motion_testutils
 {
 
 static constexpr double DEFAULT_VEL {0.01};
