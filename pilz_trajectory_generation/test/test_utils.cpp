@@ -18,8 +18,6 @@
 #include <gtest/gtest.h>
 
 #include "test_utils.h"
-#include <tf_conversions/tf_eigen.h>
-#include <tf/transform_datatypes.h>
 #include <eigen_conversions/eigen_msg.h>
 #include <moveit/robot_state/conversions.h>
 #include <moveit/planning_interface/planning_interface.h>

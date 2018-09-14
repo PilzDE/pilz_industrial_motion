@@ -19,8 +19,6 @@
 #include "ros/ros.h"
 #include "eigen_conversions/eigen_msg.h"
 #include "moveit/robot_state/conversions.h"
-#include <tf/transform_datatypes.h>
-#include <tf_conversions/tf_eigen.h>
 #include <eigen_conversions/eigen_kdl.h>
 #include <kdl/path_line.hpp>
 #include <kdl/utilities/error.h>
