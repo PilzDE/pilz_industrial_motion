@@ -23,7 +23,7 @@ definition of custom commands.
 ## Package: pilz_extensions
 Minor extensions of existing packages needed for the trajectory_generation.
 
-## Package: pilz_testutils
+## Package: pilz_industrial_motion_testutils
 Contains helper classes and functions that are used by the tests
 
 

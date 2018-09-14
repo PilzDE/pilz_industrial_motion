@@ -20,8 +20,8 @@
 #include "pilz_trajectory_generation/trajectory_generator_lin.h"
 #include "pilz_trajectory_generation/joint_limits_aggregator.h"
 #include "test_utils.h"
-#include "pilz_testutils/xml_testdata_loader.h"
-#include "pilz_testutils/motion_plan_request_director.h"
+#include "pilz_industrial_motion_testutils/xml_testdata_loader.h"
+#include "pilz_industrial_motion_testutils/motion_plan_request_director.h"
 
 #include <moveit/robot_model_loader/robot_model_loader.h>
 #include <moveit/robot_model/robot_model.h>
@@ -73,9 +73,9 @@ protected:
   // lin trajectory generator using model without gripper
   std::unique_ptr<TrajectoryGenerator> lin_;
   // test data provider
-  std::unique_ptr<pilz_testutils::TestdataLoader> tdp_;
+  std::unique_ptr<pilz_industrial_motion_testutils::TestdataLoader> tdp_;
   // motion plan request director
-  pilz_testutils::MotionPlanRequestDirector req_director_;
+  pilz_industrial_motion_testutils::MotionPlanRequestDirector req_director_;
 
   // test parameters from parameter server
   std::string planning_group_, target_link_hcd_, test_data_file_name_;
@@ -105,7 +105,7 @@ void TrajectoryGeneratorLINTest::SetUp()
   testutils::checkRobotModel(robot_model_, planning_group_, target_link_hcd_);
 
   // load the test data provider
-  tdp_.reset(new pilz_testutils::XmlTestdataLoader{test_data_file_name_});
+  tdp_.reset(new pilz_industrial_motion_testutils::XmlTestdataLoader{test_data_file_name_});
   ASSERT_NE(nullptr, tdp_) << "Failed to load test data by provider.";
 
   // create the limits container
@@ -169,7 +169,7 @@ INSTANTIATE_TEST_CASE_P(InstantiationName, TrajectoryGeneratorLINTest, ::testing
 TEST_P(TrajectoryGeneratorLINTest, nonZeroStartVelocity)
 {
   // get the test data from xml
-  pilz_testutils::STestMotionCommand lin_cmd;
+  pilz_industrial_motion_testutils::STestMotionCommand lin_cmd;
   ASSERT_TRUE(tdp_->getLin("LINCmd1", lin_cmd));
 
   // construct motion plan request
@@ -191,7 +191,7 @@ TEST_P(TrajectoryGeneratorLINTest, nonZeroStartVelocity)
 TEST_P(TrajectoryGeneratorLINTest, jointSpaceGoal)
 {
   // get the test data from xml
-  pilz_testutils::STestMotionCommand lin_cmd;
+  pilz_industrial_motion_testutils::STestMotionCommand lin_cmd;
   ASSERT_TRUE(tdp_->getLin("LINCmd1", lin_cmd));
 
   // construct motion plan request
@@ -212,7 +212,7 @@ TEST_P(TrajectoryGeneratorLINTest, jointSpaceGoal)
 TEST_P(TrajectoryGeneratorLINTest, cartesianSpaceGoal)
 {
   // get the test data from xml
-  pilz_testutils::STestMotionCommand lin_cmd;
+  pilz_industrial_motion_testutils::STestMotionCommand lin_cmd;
   ASSERT_TRUE(tdp_->getLin("LINCmd1", lin_cmd));
 
   // construct motion plan request
@@ -233,7 +233,7 @@ TEST_P(TrajectoryGeneratorLINTest, cartesianSpaceGoal)
 TEST_P(TrajectoryGeneratorLINTest, cartesianTrapezoidProfile)
 {
   // get the test data from xml
-  pilz_testutils::STestMotionCommand lin_cmd;
+  pilz_industrial_motion_testutils::STestMotionCommand lin_cmd;
   ASSERT_TRUE(tdp_->getLin("LINCmd2", lin_cmd));
 
   // construct motion plan request
@@ -333,7 +333,7 @@ TEST_P(TrajectoryGeneratorLINTest, cartesianTrapezoidProfile)
 TEST_P(TrajectoryGeneratorLINTest, LinPlannerLimitViolation)
 {
   // get the test data from xml
-  pilz_testutils::STestMotionCommand lin_cmd;
+  pilz_industrial_motion_testutils::STestMotionCommand lin_cmd;
   ASSERT_TRUE(tdp_->getLin("LINCmdLimitViolation", lin_cmd));
 
   // construct motion plan request
@@ -356,7 +356,7 @@ TEST_P(TrajectoryGeneratorLINTest, LinPlannerLimitViolation)
 TEST_P(TrajectoryGeneratorLINTest, LinStartEqualsGoal)
 {
   // get the test data from xml
-  pilz_testutils::STestMotionCommand lin_cmd;
+  pilz_industrial_motion_testutils::STestMotionCommand lin_cmd;
   ASSERT_TRUE(tdp_->getLin("LINStartEqualsGoal", lin_cmd));
 
   // construct motion plan request
@@ -401,7 +401,7 @@ TEST_P(TrajectoryGeneratorLINTest, CtorNoLimits)
 TEST_P(TrajectoryGeneratorLINTest, IncorrectJointNumber)
 {
   // get the test data from xml
-  pilz_testutils::STestMotionCommand lin_cmd;
+  pilz_industrial_motion_testutils::STestMotionCommand lin_cmd;
   ASSERT_TRUE(tdp_->getLin("LINCmd1", lin_cmd));
 
   // construct motion plan request

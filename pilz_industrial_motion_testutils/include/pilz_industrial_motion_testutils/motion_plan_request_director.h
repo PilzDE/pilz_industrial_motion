@@ -19,9 +19,9 @@
 
 #include <moveit/robot_model/robot_model.h>
 #include <moveit_msgs/MotionPlanRequest.h>
-#include "pilz_testutils/testdata_loader.h"
+#include "pilz_industrial_motion_testutils/testdata_loader.h"
 
-namespace pilz_testutils {
+namespace pilz_industrial_motion_testutils {
 
 /**
  * @brief Takes order from user and directs the builder to build the motion plan request
