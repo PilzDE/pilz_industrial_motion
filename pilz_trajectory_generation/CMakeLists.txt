@@ -23,7 +23,7 @@ find_package(catkin REQUIRED COMPONENTS
   moveit_ros_move_group
   moveit_ros_planning_interface
   rospy
-  pilz_testutils
+  pilz_industrial_motion_testutils
   roslint
 )
 

@@ -24,7 +24,7 @@
 
 #include <geometry_msgs/Pose.h>
 
-namespace pilz_testutils
+namespace pilz_industrial_motion_testutils
 {
 
 /**

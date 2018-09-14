@@ -22,7 +22,7 @@
 
 namespace moveit { namespace core{ class RobotState; }}
 
-namespace pilz_testutils {
+namespace pilz_industrial_motion_testutils {
 
 /**
  * @brief The MotionPlanRequestBuilder class builds up a complex motion plan request.

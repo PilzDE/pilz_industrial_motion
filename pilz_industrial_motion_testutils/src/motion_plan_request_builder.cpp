@@ -14,14 +14,14 @@
  * limitations under the License.
  */
 
-#include "pilz_testutils/motion_plan_request_builder.h"
+#include "pilz_industrial_motion_testutils/motion_plan_request_builder.h"
 
 #include <moveit/kinematic_constraints/utils.h>
 #include <moveit/robot_state/conversions.h>
 #include <eigen_conversions/eigen_msg.h>
 #include <moveit_msgs/PositionConstraint.h>
 
-namespace pilz_testutils {
+namespace pilz_industrial_motion_testutils {
 
 moveit_msgs::MotionPlanRequest MotionPlanRequestBuilder::getRequest()
 {

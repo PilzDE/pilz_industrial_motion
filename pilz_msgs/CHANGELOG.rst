@@ -2,7 +2,7 @@
 Changelog for package pilz_msgs
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
-Forthcoming
------------
+0.1.0 (2018-09-14)
+------------------
 * Added msg definition for blend request and response
-* Contributors: Alexander Gutenkunst, Fahri Demirci, Hagen Slusarek, Immanuel Martini, Joachim Schleicher, Kai Hu
+* Contributors: Pilz GmbH and Co. KG

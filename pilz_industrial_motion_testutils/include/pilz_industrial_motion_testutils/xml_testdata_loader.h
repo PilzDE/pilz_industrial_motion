@@ -24,10 +24,10 @@
 
 #include <moveit/robot_model/robot_model.h>
 
-#include "pilz_testutils/testdata_loader.h"
+#include "pilz_industrial_motion_testutils/testdata_loader.h"
 
 namespace pt = boost::property_tree;
-namespace pilz_testutils
+namespace pilz_industrial_motion_testutils
 {
 
 /**
