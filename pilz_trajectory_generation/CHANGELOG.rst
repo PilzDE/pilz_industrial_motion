@@ -2,8 +2,8 @@
 Changelog for package pilz_trajectory_generation
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
-Forthcoming
------------
+0.2.0 (2018-09-14)
+------------------
 * Changes for melodic
 * Contributors: Pilz GmbH and Co. KG
 
