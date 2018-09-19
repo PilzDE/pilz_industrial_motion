@@ -4,6 +4,7 @@ Changelog for package pilz_trajectory_generation
 
 Forthcoming
 -----------
+* port to melodic
 * drop unused dependencies
 * Contributors: Pilz GmbH and Co. KG
 

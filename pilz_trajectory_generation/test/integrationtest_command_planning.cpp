@@ -151,7 +151,7 @@ TEST_F(IntegrationTestCommandPlanning, PTPJointGoal)
   trajectory_msgs::JointTrajectory trajectory = response.trajectory.joint_trajectory;
 
   EXPECT_EQ(trajectory.joint_names.size(), num_joints_) << "Wrong number of jointnames";
-  EXPECT_GT(trajectory.points.size(), 0) << "There are no points in the trajectory";
+  EXPECT_GT(trajectory.points.size(), 0u) << "There are no points in the trajectory";
 
   // Check that every point has position, velocity, acceleration
   for(trajectory_msgs::JointTrajectoryPoint point : trajectory.points)
@@ -239,7 +239,7 @@ TEST_F(IntegrationTestCommandPlanning, PTPPoseGoal)
   trajectory_msgs::JointTrajectory trajectory = response.trajectory.joint_trajectory;
 
   EXPECT_EQ(trajectory.joint_names.size(), num_joints_) << "Wrong number of jointnames";
-  EXPECT_GT(trajectory.points.size(), 0) << "There are no points in the trajectory";
+  EXPECT_GT(trajectory.points.size(), 0u) << "There are no points in the trajectory";
 
   // Check that every point has position, velocity, acceleration
   for(trajectory_msgs::JointTrajectoryPoint point : trajectory.points)
@@ -488,7 +488,7 @@ TEST_F(IntegrationTestCommandPlanning, CIRCJointGoal)
   trajectory_msgs::JointTrajectory trajectory = response.trajectory.joint_trajectory;
 
   EXPECT_EQ(trajectory.joint_names.size(), num_joints_) << "Wrong number of jointnames";
-  EXPECT_GT(trajectory.points.size(), 0) << "There are no points in the trajectory";
+  EXPECT_GT(trajectory.points.size(), 0u) << "There are no points in the trajectory";
 
   // Check that every point has position, velocity, acceleration
   for(trajectory_msgs::JointTrajectoryPoint point : trajectory.points)
@@ -577,7 +577,7 @@ TEST_F(IntegrationTestCommandPlanning, CIRCPoseGoal)
   trajectory_msgs::JointTrajectory trajectory = response.trajectory.joint_trajectory;
 
   EXPECT_EQ(trajectory.joint_names.size(), num_joints_) << "Wrong number of jointnames";
-  EXPECT_GT(trajectory.points.size(), 0) << "There are no points in the trajectory";
+  EXPECT_GT(trajectory.points.size(), 0u) << "There are no points in the trajectory";
 
   // Check that every point has position, velocity, acceleration
   for(trajectory_msgs::JointTrajectoryPoint point : trajectory.points)
