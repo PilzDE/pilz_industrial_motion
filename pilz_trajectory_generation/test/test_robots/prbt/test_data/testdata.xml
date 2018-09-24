@@ -109,7 +109,7 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
         <group name="manipulator">
             <!-- (0.1, 0.4, 0.6 0 0 0) tcp without gripper -->
             <joints>1.32582 0.333691 -1.48422 0.0 1.81791 -1.32582</joints>
-            <xyzQuat link_name="prbt_tcp">0.1 0.4 0.7 0 0 0.92 -0.38</xyzQuat>
+            <xyzQuat link_name="prbt_tcp">0.1 0.4 0.7 0 0 0.923916 -0.382596</xyzQuat>
         </group>
         <group name="gripper">
             <joints>0</joints>
@@ -218,7 +218,7 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
         <group name="manipulator">
             <!-- (0.4, 0.1, 0.5 0 0 0) tcp without gripper -->
             <joints>0.244979 0.333691 -1.48422 0.0 1.81791 -0.244979</joints>
-            <xyzQuat link_name="prbt_tcp">0.4 0.1 0.7 0. 0. 0.92 -0.38</xyzQuat>
+            <xyzQuat link_name="prbt_tcp">0.4 0.1 0.7 0. 0. 0.923916 -0.382596</xyzQuat>
         </group>
         <group name="gripper">
             <joints>0</joints>
@@ -229,7 +229,7 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
         <group name="manipulator">
             <!-- (0.1, 0.4, 0.5 0 0 0) tcp without gripper -->
             <joints>1.32582 0.333691 -1.48422 0.0 1.81791 -1.32582</joints>
-            <xyzQuat link_name="prbt_tcp">0.1 0.4 0.7 0 0 0.92 -0.38</xyzQuat>
+            <xyzQuat link_name="prbt_tcp">0.3 0.2 0.7 0 0 0.923916 -0.382596</xyzQuat>
         </group>
         <group name="gripper">
             <joints>0</joints>
@@ -240,7 +240,7 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
         <group name="manipulator">
             <!-- (-0.2, 0.1, 0.5 0 0 0) tcp without gripper -->
             <joints>-0.463648 -1.64103 -2.06227 0 0.421241 0.463648</joints>
-            <xyzQuat link_name="prbt_tcp">-0.2 0.1 0.7 0 0 0.92 -0.38</xyzQuat>
+            <xyzQuat link_name="prbt_tcp">0.2 0.1 0.7 0 0 0.923916 -0.382596</xyzQuat>
         </group>
         <group name="gripper">
             <joints>0</joints>
