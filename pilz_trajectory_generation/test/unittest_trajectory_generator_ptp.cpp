@@ -433,7 +433,7 @@ TEST_P(TrajectoryGeneratorPTPTest, testJointGoalAlreadyReached)
 
   moveit_msgs::MotionPlanResponse res_msg;
   res.getMessage(res_msg);
-  EXPECT_EQ(1,res_msg.trajectory.joint_trajectory.points.size());
+  EXPECT_EQ(1u,res_msg.trajectory.joint_trajectory.points.size());
 }
 
 /**

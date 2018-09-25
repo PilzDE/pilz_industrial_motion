@@ -135,7 +135,7 @@ TEST_F(IntegrationTestBlendAction, blendEmptyBlendList)
   ac_blend_.sendGoalAndWait(blend_goal);
   pilz_msgs::MoveGroupBlendResultConstPtr res = ac_blend_.getResult();
   EXPECT_EQ(res->error_code.val, moveit_msgs::MoveItErrorCodes::INVALID_MOTION_PLAN);
-  EXPECT_EQ(res->planned_trajectory.joint_trajectory.points.size(), 0)
+  EXPECT_EQ(res->planned_trajectory.joint_trajectory.points.size(), 0u)
       << "Planned trajectory is not empty of empty motion blend list.";
 }
 
@@ -173,7 +173,7 @@ TEST_F(IntegrationTestBlendAction, blendLINLIN)
     ac_blend_.sendGoalAndWait(blend_goal);
     pilz_msgs::MoveGroupBlendResultConstPtr res = ac_blend_.getResult();
     EXPECT_EQ(res->error_code.val, moveit_msgs::MoveItErrorCodes::SUCCESS) << "Blend failed.";
-    EXPECT_NE(res->planned_trajectory.joint_trajectory.points.size(), 0)
+    EXPECT_NE(res->planned_trajectory.joint_trajectory.points.size(), 0u)
         << "Planned trajectory is empty.";
   }
 }
@@ -214,7 +214,7 @@ TEST_F(IntegrationTestBlendAction, blendLINLINInvalidGroupnames)
     ac_blend_.sendGoalAndWait(blend_goal);
     pilz_msgs::MoveGroupBlendResultConstPtr res = ac_blend_.getResult();
     EXPECT_EQ(res->error_code.val, moveit_msgs::MoveItErrorCodes::FAILURE) << "Blend failed.";
-    EXPECT_EQ(res->planned_trajectory.joint_trajectory.points.size(), 0)
+    EXPECT_EQ(res->planned_trajectory.joint_trajectory.points.size(), 0u)
         << "Planned trajectory is empty.";
   }
 }
@@ -254,7 +254,7 @@ TEST_F(IntegrationTestBlendAction, blendLINLIN_invalidBlendRadius)
     ac_blend_.sendGoalAndWait(blend_goal);
     pilz_msgs::MoveGroupBlendResultConstPtr res = ac_blend_.getResult();
     EXPECT_EQ(res->error_code.val, moveit_msgs::MoveItErrorCodes::FAILURE) << "Blend failed.";
-    EXPECT_EQ(res->planned_trajectory.joint_trajectory.points.size(), 0)
+    EXPECT_EQ(res->planned_trajectory.joint_trajectory.points.size(), 0u)
         << "Planned trajectory is empty.";
   }
 }
@@ -292,7 +292,7 @@ TEST_F(IntegrationTestBlendAction, negativeBlendLINLIN)
     ac_blend_.sendGoalAndWait(blend_goal);
     pilz_msgs::MoveGroupBlendResultConstPtr res = ac_blend_.getResult();
     EXPECT_NE(res->error_code.val, moveit_msgs::MoveItErrorCodes::SUCCESS);
-    EXPECT_EQ(res->planned_trajectory.joint_trajectory.points.size(), 0);
+    EXPECT_EQ(res->planned_trajectory.joint_trajectory.points.size(), 0u);
   }
 }
 
@@ -351,7 +351,7 @@ void doneCb(const actionlib::SimpleClientGoalState& state,
   if(result)
   {
     EXPECT_EQ(result->error_code.val, moveit_msgs::MoveItErrorCodes::SUCCESS) << "Plan and execute blend request failed.";
-    EXPECT_NE(result->planned_trajectory.joint_trajectory.points.size(), 0)
+    EXPECT_NE(result->planned_trajectory.joint_trajectory.points.size(), 0u)
         << "Planned trajectory is empty.";
   }
 }
@@ -493,7 +493,7 @@ TEST_F(IntegrationTestBlendAction, blendLINLINOnlyPlanning)
     ac_blend_.sendGoalAndWait(blend_goal);
     pilz_msgs::MoveGroupBlendResultConstPtr res = ac_blend_.getResult();
     EXPECT_EQ(res->error_code.val, moveit_msgs::MoveItErrorCodes::SUCCESS);
-    EXPECT_NE(res->planned_trajectory.joint_trajectory.points.size(), 0)
+    EXPECT_NE(res->planned_trajectory.joint_trajectory.points.size(), 0u)
         << "Planned trajectory is empty.";
 
     // check if robot moved after PTP

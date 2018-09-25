@@ -159,7 +159,11 @@ moveit::core::RobotState MotionPlanRequestDirector::getStartStateFromPose(
 
   // set to Cartesian pose
   Eigen::Affine3d start_pose = rawQuatVectorToEigen(cmd.start_pose);
-  rstate.setFromIK(rstate.getRobotModel()->getJointModelGroup(cmd.planning_group), start_pose, cmd.target_link);
+  if(!rstate.setFromIK(rstate.getRobotModel()->getJointModelGroup(cmd.planning_group), start_pose, cmd.target_link))
+  {
+    ROS_ERROR_STREAM("no solution for ik \n" << start_pose.translation() << "\n" << start_pose.linear());
+    throw std::runtime_error("no solution for inverse kinematics");
+  }
   return rstate;
 }
 
@@ -182,7 +186,11 @@ moveit::core::RobotState MotionPlanRequestDirector::getGoalStateFromPose(
 
   // set to Cartesian pose
   Eigen::Affine3d goal_pose = rawQuatVectorToEigen(cmd.goal_pose);
-  rstate.setFromIK(rstate.getRobotModel()->getJointModelGroup(cmd.planning_group), goal_pose, cmd.target_link);
+  if(!rstate.setFromIK(rstate.getRobotModel()->getJointModelGroup(cmd.planning_group), goal_pose, cmd.target_link))
+  {
+    ROS_ERROR_STREAM("no solution for ik \n" << goal_pose.translation() << "\n" << goal_pose.linear());
+    throw std::runtime_error("no solution for inverse kinematics");
+  }
   return rstate;
 }
 

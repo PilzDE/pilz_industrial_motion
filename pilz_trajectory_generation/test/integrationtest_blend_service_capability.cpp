@@ -171,7 +171,7 @@ TEST_F(IntegrationTestBlendService, blendLINLIN)
 
     // Make sure the planning succeeded
     EXPECT_EQ(moveit_msgs::MoveItErrorCodes::SUCCESS, response.error_code.val) << "Planning of blend trajectory failed!";
-    EXPECT_GT(response.trajectory.joint_trajectory.points.size(), 0) << "Trajectory should contain points.";
+    EXPECT_GT(response.trajectory.joint_trajectory.points.size(), 0u) << "Trajectory should contain points.";
   }
 }
 
@@ -202,7 +202,7 @@ TEST_F(IntegrationTestBlendService, blendRadiusNegative)
   const moveit_msgs::MotionPlanResponse& response = srv.response.plan_response;
 
   EXPECT_EQ(moveit_msgs::MoveItErrorCodes::FAILURE, response.error_code.val) << "Planning should have failed but did not.";
-  EXPECT_EQ(0, response.trajectory.joint_trajectory.points.size()) << "Trajectory should not contain any points.";
+  EXPECT_EQ(0u, response.trajectory.joint_trajectory.points.size()) << "Trajectory should not contain any points.";
 }
 
 /**
@@ -230,7 +230,7 @@ TEST_F(IntegrationTestBlendService, emptyList)
   const moveit_msgs::MotionPlanResponse& response = srv.response.plan_response;
 
   EXPECT_EQ(moveit_msgs::MoveItErrorCodes::INVALID_MOTION_PLAN, response.error_code.val) << "Planning did failed.";
-  EXPECT_EQ(0, response.trajectory.joint_trajectory.points.size()) << "Trajectory should not contain any points.";
+  EXPECT_EQ(0u, response.trajectory.joint_trajectory.points.size()) << "Trajectory should not contain any points.";
 }
 
 /**
@@ -260,7 +260,7 @@ TEST_F(IntegrationTestBlendService, startStateNotFirstGoal)
   const moveit_msgs::MotionPlanResponse& response = srv.response.plan_response;
 
   EXPECT_EQ(moveit_msgs::MoveItErrorCodes::START_STATE_VIOLATES_PATH_CONSTRAINTS, response.error_code.val) << "Incorrect error code.";
-  EXPECT_EQ(0, response.trajectory.joint_trajectory.points.size()) << "Trajectory should not contain any points.";
+  EXPECT_EQ(0u, response.trajectory.joint_trajectory.points.size()) << "Trajectory should not contain any points.";
 }
 
 /**
@@ -290,7 +290,7 @@ TEST_F(IntegrationTestBlendService, firstGoalNotReachable)
   const moveit_msgs::MotionPlanResponse& response = srv.response.plan_response;
 
   EXPECT_EQ(moveit_msgs::MoveItErrorCodes::NO_IK_SOLUTION, response.error_code.val) << "Incorrect error code.";
-  EXPECT_EQ(0, response.trajectory.joint_trajectory.points.size()) << "Trajectory should not contain any points.";
+  EXPECT_EQ(0u, response.trajectory.joint_trajectory.points.size()) << "Trajectory should not contain any points.";
 }
 
 /**
@@ -332,7 +332,7 @@ TEST_F(IntegrationTestBlendService, largeRequest)
 
   // Check result
   EXPECT_EQ(moveit_msgs::MoveItErrorCodes::SUCCESS, response.error_code.val) << "Incorrect error code.";
-  EXPECT_GT(response.trajectory.joint_trajectory.points.size(), 0) << "Trajectory should contain points.";
+  EXPECT_GT(response.trajectory.joint_trajectory.points.size(), 0u) << "Trajectory should contain points.";
 }
 
 int main(int argc, char **argv)

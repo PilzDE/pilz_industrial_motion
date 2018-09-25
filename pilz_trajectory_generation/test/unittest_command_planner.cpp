@@ -112,7 +112,7 @@ TEST_P(CommandPlannerTest, ObtainLoadedPlanningAlgorithms)
   std::vector<std::string> algs;
 
   planner_instance_->getPlanningAlgorithms(algs);
-  ASSERT_EQ(3, algs.size()) << "Found more or less planning algorithms as expected! Found:"
+  ASSERT_EQ(3u, algs.size()) << "Found more or less planning algorithms as expected! Found:"
                             << ::testing::PrintToString(algs);
 
 
@@ -208,7 +208,7 @@ TEST_P(CommandPlannerTest, CheckPlanningContextRequest)
 TEST_P(CommandPlannerTest, CheckPlanningContextDescriptionNotEmptyAndStable)
 {
   std::string desc = planner_instance_->getDescription();
-  EXPECT_GT(desc.length(), 0);
+  EXPECT_GT(desc.length(), 0u);
 }
 
 int main(int argc, char **argv)
