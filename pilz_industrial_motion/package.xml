@@ -1,6 +1,6 @@
 <package format="2">
   <name>pilz_industrial_motion</name>
-  <version>0.2.0</version>
+  <version>0.2.1</version>
   <description>The pilz_industrial_motion package</description>
 
   <maintainer email="ros@pilz.de">Pilz GmbH and Co. KG</maintainer>
