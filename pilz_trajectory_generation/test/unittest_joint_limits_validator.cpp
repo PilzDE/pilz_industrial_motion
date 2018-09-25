@@ -483,7 +483,7 @@ TEST_F(JointLimitsValidatorTest, CheckInEqualityHasDecelerationLimits)
   container.addLimit("joint1", lim1);
   container.addLimit("joint2", lim2);
 
-  ASSERT_EQ(2, container.getCount());
+  ASSERT_EQ(2u, container.getCount());
 
   EXPECT_EQ(true, pilz::JointLimitsValidator::validateAllPositionLimitsEqual(container));
   EXPECT_EQ(true, pilz::JointLimitsValidator::validateAllVelocityLimitsEqual(container));

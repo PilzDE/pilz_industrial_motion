@@ -155,14 +155,14 @@ TEST_P(IntegrationTestCommandListManager, concatThreeSegments)
   planning_interface::MotionPlanResponse res1_2_3;
   ASSERT_TRUE(manager_->solve(scene_, req, res1_2_3));
   EXPECT_EQ(moveit_msgs::MoveItErrorCodes::SUCCESS, res1_2_3.error_code_.val);
-  EXPECT_GT(res1_2_3.trajectory_->getWayPointCount(), 0);
+  EXPECT_GT(res1_2_3.trajectory_->getWayPointCount(), 0u);
 
   ROS_INFO("step 2: only first segment");
   req = blend_list_builder.build({std::make_pair<>(req1_, 0)});
   planning_interface::MotionPlanResponse res1;
   ASSERT_TRUE(manager_->solve(scene_, req, res1));
   EXPECT_EQ(moveit_msgs::MoveItErrorCodes::SUCCESS, res1.error_code_.val);
-  EXPECT_GT(res1.trajectory_->getWayPointCount(), 0);
+  EXPECT_GT(res1.trajectory_->getWayPointCount(), 0u);
   EXPECT_EQ(res1.trajectory_->getFirstWayPoint().getVariableCount(),
             req.requests[0].req.start_state.joint_state.name.size());
 
@@ -177,7 +177,7 @@ TEST_P(IntegrationTestCommandListManager, concatThreeSegments)
   planning_interface::MotionPlanResponse res2;
   ASSERT_TRUE(manager_->solve(scene_, req, res2));
   EXPECT_EQ(moveit_msgs::MoveItErrorCodes::SUCCESS, res2.error_code_.val);
-  EXPECT_GT(res2.trajectory_->getWayPointCount(), 0);
+  EXPECT_GT(res2.trajectory_->getWayPointCount(), 0u);
   EXPECT_EQ(res2.trajectory_->getFirstWayPoint().getVariableCount(),
             req.requests[0].req.start_state.joint_state.name.size());
 
@@ -192,7 +192,7 @@ TEST_P(IntegrationTestCommandListManager, concatThreeSegments)
   planning_interface::MotionPlanResponse res3;
   ASSERT_TRUE(manager_->solve(scene_, req, res3));
   EXPECT_EQ(moveit_msgs::MoveItErrorCodes::SUCCESS, res3.error_code_.val);
-  EXPECT_GT(res3.trajectory_->getWayPointCount(), 0);
+  EXPECT_GT(res3.trajectory_->getWayPointCount(), 0u);
   EXPECT_EQ(res3.trajectory_->getFirstWayPoint().getVariableCount(),
             req.requests[0].req.start_state.joint_state.name.size());
 
@@ -222,7 +222,7 @@ TEST_P(IntegrationTestCommandListManager, blendTwoSegments)
   planning_interface::MotionPlanResponse res;
   ASSERT_TRUE(manager_->solve(scene_, blend_command_list_2_, res));
   EXPECT_EQ(moveit_msgs::MoveItErrorCodes::SUCCESS, res.error_code_.val);
-  EXPECT_GT(res.trajectory_->getWayPointCount(), 0);
+  EXPECT_GT(res.trajectory_->getWayPointCount(), 0u);
   EXPECT_EQ(res.trajectory_->getFirstWayPoint().getVariableCount(),
             blend_command_list_2_.requests[0].req.start_state.joint_state.name.size());
 
@@ -259,7 +259,7 @@ TEST_P(IntegrationTestCommandListManager, emptyList)
   planning_interface::MotionPlanResponse res;
   ASSERT_FALSE(manager_->solve(scene_, empty_list, res));
   EXPECT_EQ(moveit_msgs::MoveItErrorCodes::INVALID_MOTION_PLAN, res.error_code_.val);
-  EXPECT_EQ(0, res.trajectory_->getWayPointCount());
+  EXPECT_EQ(0u, res.trajectory_->getWayPointCount());
 }
 
 /**
@@ -280,7 +280,7 @@ TEST_P(IntegrationTestCommandListManager, firstGoalNotReachable)
   planning_interface::MotionPlanResponse res;
   ASSERT_FALSE(manager_->solve(scene_, req, res));
   EXPECT_EQ(moveit_msgs::MoveItErrorCodes::NO_IK_SOLUTION, res.error_code_.val);
-  EXPECT_EQ(0, res.trajectory_->getWayPointCount());
+  EXPECT_EQ(0u, res.trajectory_->getWayPointCount());
 }
 
 /**
@@ -301,7 +301,7 @@ TEST_P(IntegrationTestCommandListManager, startStateNotFirstGoal)
   planning_interface::MotionPlanResponse res;
   ASSERT_FALSE(manager_->solve(scene_, req, res));
   EXPECT_EQ(moveit_msgs::MoveItErrorCodes::START_STATE_VIOLATES_PATH_CONSTRAINTS, res.error_code_.val);
-  EXPECT_EQ(0, res.trajectory_->getWayPointCount());
+  EXPECT_EQ(0u, res.trajectory_->getWayPointCount());
 }
 
 /**
@@ -322,7 +322,7 @@ TEST_P(IntegrationTestCommandListManager, blendingRadiusNegative)
   planning_interface::MotionPlanResponse res;
   ASSERT_FALSE(manager_->solve(scene_, req, res));
   EXPECT_EQ(moveit_msgs::MoveItErrorCodes::FAILURE, res.error_code_.val);
-  EXPECT_EQ(0, res.trajectory_->getWayPointCount());
+  EXPECT_EQ(0u, res.trajectory_->getWayPointCount());
 }
 
 /**
@@ -343,7 +343,7 @@ TEST_P(IntegrationTestCommandListManager, lastBlendingRadiusNonZero)
   planning_interface::MotionPlanResponse res;
   ASSERT_FALSE(manager_->solve(scene_, req, res));
   EXPECT_EQ(moveit_msgs::MoveItErrorCodes::FAILURE, res.error_code_.val);
-  EXPECT_EQ(0, res.trajectory_->getWayPointCount());
+  EXPECT_EQ(0u, res.trajectory_->getWayPointCount());
 }
 
 /**
@@ -364,7 +364,7 @@ TEST_P(IntegrationTestCommandListManager, blendRadiusGreaterThanSegment)
   planning_interface::MotionPlanResponse res;
   ASSERT_FALSE(manager_->solve(scene_, req, res));
   EXPECT_EQ(moveit_msgs::MoveItErrorCodes::FAILURE, res.error_code_.val);
-  EXPECT_EQ(0, res.trajectory_->getWayPointCount());
+  EXPECT_EQ(0u, res.trajectory_->getWayPointCount());
 }
 
 
@@ -388,7 +388,7 @@ TEST_P(IntegrationTestCommandListManager, blendingRadiusOverlapping)
   planning_interface::MotionPlanResponse res_valid;
   ASSERT_TRUE(manager_->solve(scene_, req, res_valid));
   EXPECT_EQ(moveit_msgs::MoveItErrorCodes::SUCCESS, res_valid.error_code_.val);
-  EXPECT_GT(res_valid.trajectory_->getWayPointCount(), 0);
+  EXPECT_GT(res_valid.trajectory_->getWayPointCount(), 0u);
 
   // calculate distance from first to second goal
   planning_interface::MotionPlanResponse res_overlap;
@@ -399,7 +399,7 @@ TEST_P(IntegrationTestCommandListManager, blendingRadiusOverlapping)
   req.requests[1].blend_radius = distance - req.requests[0].blend_radius + 0.01; // overlapping radii
   ASSERT_FALSE(manager_->solve(scene_, req, res_overlap));
   EXPECT_EQ(moveit_msgs::MoveItErrorCodes::FAILURE, res_overlap.error_code_.val);
-  EXPECT_EQ(0, res_overlap.trajectory_->getWayPointCount());
+  EXPECT_EQ(0u, res_overlap.trajectory_->getWayPointCount());
 }
 
 /**
@@ -425,7 +425,7 @@ TEST_P(IntegrationTestCommandListManager, largeRequest)
   ASSERT_TRUE(manager_->solve(scene_, req, res_single));
   ros::Duration duration1 = ros::Time::now() - begin1;
   EXPECT_EQ(moveit_msgs::MoveItErrorCodes::SUCCESS, res_single.error_code_.val);
-  EXPECT_GT(res_single.trajectory_->getWayPointCount(), 0);
+  EXPECT_GT(res_single.trajectory_->getWayPointCount(), 0u);
 
   // construct request
   req.requests.back().blend_radius = 0.01;
@@ -445,7 +445,7 @@ TEST_P(IntegrationTestCommandListManager, largeRequest)
   ASSERT_TRUE(manager_->solve(scene_, req, res_n));
   ros::Duration durationn = ros::Time::now() - beginn;
   EXPECT_EQ(moveit_msgs::MoveItErrorCodes::SUCCESS, res_n.error_code_.val);
-  EXPECT_GT(res_n.trajectory_->getWayPointCount(), 0);
+  EXPECT_GT(res_n.trajectory_->getWayPointCount(), 0u);
 
   // 0.5*duration1 <= durationn / n <= duration1
   // This assert is influenced by the pc computing power, not stable in build farm slave.

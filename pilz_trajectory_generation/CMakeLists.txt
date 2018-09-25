@@ -19,6 +19,7 @@ find_package(catkin REQUIRED COMPONENTS
   tf2
   tf2_eigen
   tf2_geometry_msgs
+  eigen_conversions
   moveit_ros_move_group
   moveit_ros_planning_interface
   pilz_industrial_motion_testutils

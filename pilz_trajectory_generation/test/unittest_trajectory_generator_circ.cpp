@@ -415,9 +415,13 @@ TEST_P(TrajectoryGeneratorCIRCTest, colinearInterim)
   EXPECT_EQ(res.error_code_.val, moveit_msgs::MoveItErrorCodes::INVALID_MOTION_PLAN);
 }
 
-// TODO find a valid request
 /**
- * @brief test the circ planner with  colinear start/goal/interim position
+ * @brief test the circ planner with half circle with interim point
+ *
+ * The request contains start/interim/goal so that
+ * start, center (not explicitly given) and goal are colinear
+ *
+ * Expected: Planning should successfully return.
  */
 TEST_P(TrajectoryGeneratorCIRCTest, colinearCenterDueToInterim)
 {
@@ -427,7 +431,6 @@ TEST_P(TrajectoryGeneratorCIRCTest, colinearCenterDueToInterim)
   ASSERT_TRUE(tdp_->getCirc("CIRCCmd4", circ_cmd)) << "failed to get circ command from test data";
   moveit_msgs::MotionPlanRequest req = req_director_.getCIRCJointReq(robot_model_, circ_cmd);
 
-  // empty path constraint
   planning_interface::MotionPlanResponse res;
   ASSERT_TRUE(circ_->generate(req,res));
   EXPECT_EQ(res.error_code_.val, moveit_msgs::MoveItErrorCodes::SUCCESS);
@@ -466,7 +469,7 @@ TEST_P(TrajectoryGeneratorCIRCTest, InvalidAdditionalPrimitivePose)
   moveit_msgs::MotionPlanRequest req = req_director_.getCIRCJointReq(robot_model_, circ_cmd);
 
   // Contains one pose (interim / center)
-  ASSERT_EQ(req.path_constraints.position_constraints.back().constraint_region.primitive_poses.size(), 1);
+  ASSERT_EQ(req.path_constraints.position_constraints.back().constraint_region.primitive_poses.size(), 1u);
 
   // Define a additional pose here
   geometry_msgs::Pose center_position;
