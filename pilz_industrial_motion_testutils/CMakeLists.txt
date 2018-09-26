@@ -12,6 +12,7 @@ find_package(catkin REQUIRED COMPONENTS
   moveit_core
   moveit_msgs
   pilz_msgs
+  eigen_conversions
 )
 
 find_package(Boost REQUIRED COMPONENTS)
