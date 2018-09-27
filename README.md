@@ -9,7 +9,7 @@ The FTP is implemented by Pilz GmbH & Co. KG.
 
 | Kinetic | Melodic |
 | --------|-------- |
-| [![Build Status](https://travis-ci.org/PilzDE/pilz_robots.svg?branch=kinetic-devel)](https://travis-ci.org/PilzDE/pilz_industrial_motion) | [![Build Status](https://travis-ci.org/PilzDE/pilz_robots.svg?branch=melodic-devel)](https://travis-ci.org/PilzDE/pilz_industrial_motion) |
+| [![Build Status](https://travis-ci.org/PilzDE/pilz_industrial_motion.svg?branch=kinetic-devel)](https://travis-ci.org/PilzDE/pilz_industrial_motion) | [![Build Status](https://travis-ci.org/PilzDE/pilz_industrial_motion.svg?branch=melodic-devel)](https://travis-ci.org/PilzDE/pilz_industrial_motion) |
 
 
 ### Note to Developers:
