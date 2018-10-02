@@ -11,6 +11,10 @@
 
   <license>Apache 2.0</license>
 
+  <url type="website">https://wiki.ros.org/pilz_extensions</url>
+  <url type="bugtracker">https://github.com/PilzDE/pilz_industrial_motion/issues</url>
+  <url type="repository">https://github.com/PilzDE/pilz_industrial_motion</url>
+
   <build_depend>roscpp</build_depend>
   <build_depend>joint_limits_interface</build_depend>
 
