@@ -15,15 +15,15 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-#ifndef BLEND_ACTION_CAPABILITY_H
-#define BLEND_ACTION_CAPABILITY_H
+#ifndef SEQUENCE_ACTION_CAPABILITY_H
+#define SEQUENCE_ACTION_CAPABILITY_H
 
 #include <memory>
 
 #include <moveit/move_group/move_group_capability.h>
 #include <actionlib/server/simple_action_server.h>
 
-#include <pilz_msgs/MoveGroupBlendAction.h>
+#include <pilz_msgs/MoveGroupSequenceAction.h>
 
 namespace pilz_trajectory_generation
 {
@@ -31,35 +31,35 @@ namespace pilz_trajectory_generation
 class CommandListManager;
 
 /**
- * @brief Provide action to blend multiple trajectories and execute the result
+ * @brief Provide action to handle multiple trajectories and execute the result
  * in the form of a MoveGroup capability (plugin).
  */
-class MoveGroupBlendAction : public move_group::MoveGroupCapability
+class MoveGroupSequenceAction : public move_group::MoveGroupCapability
 {
 public:
-  MoveGroupBlendAction();
+  MoveGroupSequenceAction();
 
   virtual void initialize() override;
 
 private:
-  void executeBlendCallback(const pilz_msgs::MoveGroupBlendGoalConstPtr &goal);
-  void executeBlendCallback_PlanAndExecute(const pilz_msgs::MoveGroupBlendGoalConstPtr& goal,
-                                          pilz_msgs::MoveGroupBlendResult& action_res);
-  void executeMoveCallback_PlanOnly(const pilz_msgs::MoveGroupBlendGoalConstPtr& goal,
-                                    pilz_msgs::MoveGroupBlendResult& action_res);
+  void executeSequenceCallback(const pilz_msgs::MoveGroupSequenceGoalConstPtr &goal);
+  void executeSequenceCallback_PlanAndExecute(const pilz_msgs::MoveGroupSequenceGoalConstPtr& goal,
+                                          pilz_msgs::MoveGroupSequenceResult& action_res);
+  void executeMoveCallback_PlanOnly(const pilz_msgs::MoveGroupSequenceGoalConstPtr& goal,
+                                    pilz_msgs::MoveGroupSequenceResult& action_res);
   void startMoveExecutionCallback();
   void startMoveLookCallback();
   void preemptMoveCallback();
   void setMoveState(move_group::MoveGroupState state);
-  bool planUsingBlendManager(const pilz_msgs::MotionBlendRequestList &req,
+  bool planUsingSequenceManager(const pilz_msgs::MotionSequenceRequest &req,
                                  plan_execution::ExecutableMotionPlan& plan);
 private:
-  std::unique_ptr<actionlib::SimpleActionServer<pilz_msgs::MoveGroupBlendAction> > move_action_server_;
-  pilz_msgs::MoveGroupBlendFeedback move_feedback_;
+  std::unique_ptr<actionlib::SimpleActionServer<pilz_msgs::MoveGroupSequenceAction> > move_action_server_;
+  pilz_msgs::MoveGroupSequenceFeedback move_feedback_;
 
   move_group::MoveGroupState move_state_ {move_group::IDLE};
-  std::unique_ptr<pilz_trajectory_generation::CommandListManager> blend_manager_;
+  std::unique_ptr<pilz_trajectory_generation::CommandListManager> sequence_manager_;
 };
 }
 
-#endif // BLEND_ACTION_CAPABILITY_H
+#endif // SEQUENCE_ACTION_CAPABILITY_H

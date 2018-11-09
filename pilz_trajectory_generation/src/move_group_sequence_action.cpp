@@ -36,7 +36,7 @@
 
 // Modified by Pilz GmbH & Co. KG
 
-#include "pilz_trajectory_generation/move_group_blend_action.h"
+#include "pilz_trajectory_generation/move_group_sequence_action.h"
 
 #include <moveit/planning_pipeline/planning_pipeline.h>
 #include <moveit/plan_execution/plan_execution.h>
@@ -49,33 +49,33 @@
 namespace pilz_trajectory_generation
 {
 
-MoveGroupBlendAction::MoveGroupBlendAction()
-  : MoveGroupCapability("BlendAction")
+MoveGroupSequenceAction::MoveGroupSequenceAction()
+  : MoveGroupCapability("SequenceAction")
 {
 }
 
-void MoveGroupBlendAction::initialize()
+void MoveGroupSequenceAction::initialize()
 {
   // start the move action server
-  move_action_server_.reset( new actionlib::SimpleActionServer<pilz_msgs::MoveGroupBlendAction>(
-                               root_node_handle_, "blend_move_group",
-                               boost::bind(&MoveGroupBlendAction::executeBlendCallback, this, _1), false) );
-  move_action_server_->registerPreemptCallback(boost::bind(&MoveGroupBlendAction::preemptMoveCallback, this));
+  move_action_server_.reset( new actionlib::SimpleActionServer<pilz_msgs::MoveGroupSequenceAction>(
+                               root_node_handle_, "sequence_move_group",
+                               boost::bind(&MoveGroupSequenceAction::executeSequenceCallback, this, _1), false) );
+  move_action_server_->registerPreemptCallback(boost::bind(&MoveGroupSequenceAction::preemptMoveCallback, this));
   move_action_server_->start();
 
-  blend_manager_.reset(new pilz_trajectory_generation::CommandListManager (
+  sequence_manager_.reset(new pilz_trajectory_generation::CommandListManager (
                          ros::NodeHandle("~"), context_->planning_scene_monitor_->getRobotModel()));
 
 }
 
-void MoveGroupBlendAction::executeBlendCallback(const pilz_msgs::MoveGroupBlendGoalConstPtr& goal)
+void MoveGroupSequenceAction::executeSequenceCallback(const pilz_msgs::MoveGroupSequenceGoalConstPtr& goal)
 {
   setMoveState(move_group::PLANNING);
   // before we start planning, ensure that we have the latest robot state received...
   context_->planning_scene_monitor_->waitForCurrentRobotState(ros::Time::now());
   context_->planning_scene_monitor_->updateFrameTransforms();
 
-  pilz_msgs::MoveGroupBlendResult action_res;
+  pilz_msgs::MoveGroupSequenceResult action_res;
   if (goal->planning_options.plan_only || !context_->allow_trajectory_execution_)
   {
     if (!goal->planning_options.plan_only)
@@ -86,7 +86,7 @@ void MoveGroupBlendAction::executeBlendCallback(const pilz_msgs::MoveGroupBlendG
   }
   else
   {
-    executeBlendCallback_PlanAndExecute(goal, action_res);
+    executeSequenceCallback_PlanAndExecute(goal, action_res);
   }
 
   bool planned_trajectory_empty = trajectory_processing::isTrajectoryEmpty(action_res.planned_trajectory);
@@ -109,10 +109,10 @@ void MoveGroupBlendAction::executeBlendCallback(const pilz_msgs::MoveGroupBlendG
   setMoveState(move_group::IDLE);
 }
 
-void MoveGroupBlendAction::executeBlendCallback_PlanAndExecute(const pilz_msgs::MoveGroupBlendGoalConstPtr& goal,
-                                                               pilz_msgs::MoveGroupBlendResult& action_res)
+void MoveGroupSequenceAction::executeSequenceCallback_PlanAndExecute(const pilz_msgs::MoveGroupSequenceGoalConstPtr& goal,
+                                                               pilz_msgs::MoveGroupSequenceResult& action_res)
 {
-  ROS_INFO("Combined planning and execution request received for MoveGroupBlendAction.");
+  ROS_INFO("Combined planning and execution request received for MoveGroupSequenceAction.");
 
   plan_execution::PlanExecution::Options opt;
 
@@ -124,10 +124,10 @@ void MoveGroupBlendAction::executeBlendCallback_PlanAndExecute(const pilz_msgs::
   opt.replan_ = goal->planning_options.replan;
   opt.replan_attempts_ = goal->planning_options.replan_attempts;
   opt.replan_delay_ = goal->planning_options.replan_delay;
-  opt.before_execution_callback_ = boost::bind(&MoveGroupBlendAction::startMoveExecutionCallback, this);
+  opt.before_execution_callback_ = boost::bind(&MoveGroupSequenceAction::startMoveExecutionCallback, this);
 
   opt.plan_callback_ =
-      boost::bind(&MoveGroupBlendAction::planUsingBlendManager, this, boost::cref(goal->request), _1);
+      boost::bind(&MoveGroupSequenceAction::planUsingSequenceManager, this, boost::cref(goal->request), _1);
 
   if (goal->planning_options.look_around && context_->plan_with_sensing_)
   {
@@ -135,7 +135,7 @@ void MoveGroupBlendAction::executeBlendCallback_PlanAndExecute(const pilz_msgs::
 //    opt.plan_callback_ = boost::bind(&plan_execution::PlanWithSensing::computePlan, context_->plan_with_sensing_.get(),
 //                                     _1, opt.plan_callback_, goal->planning_options.look_around_attempts,
 //                                     goal->planning_options.max_safe_execution_cost);
-//    context_->plan_with_sensing_->setBeforeLookCallback(boost::bind(&MoveGroupBlendAction::startMoveLookCallback, this));
+//    context_->plan_with_sensing_->setBeforeLookCallback(boost::bind(&MoveGroupSequenceAction::startMoveLookCallback, this));
 
     ROS_WARN("Plan with sensing not yet implemented/tested. This option is ignored.");
   }
@@ -151,10 +151,10 @@ void MoveGroupBlendAction::executeBlendCallback_PlanAndExecute(const pilz_msgs::
   action_res.error_code = plan.error_code_;
 }
 
-void MoveGroupBlendAction::executeMoveCallback_PlanOnly(const pilz_msgs::MoveGroupBlendGoalConstPtr& goal,
-                                                        pilz_msgs::MoveGroupBlendResult& action_res)
+void MoveGroupSequenceAction::executeMoveCallback_PlanOnly(const pilz_msgs::MoveGroupSequenceGoalConstPtr& goal,
+                                                        pilz_msgs::MoveGroupSequenceResult& action_res)
 {
-  ROS_INFO("Planning request received for MoveGroupBlendAction action.");
+  ROS_INFO("Planning request received for MoveGroupSequenceAction action.");
 
   // lock the scene so that it does not modify the world representation while diff() is called
   planning_scene_monitor::LockedPlanningSceneRO lscene(context_->planning_scene_monitor_);
@@ -167,7 +167,7 @@ void MoveGroupBlendAction::executeMoveCallback_PlanOnly(const pilz_msgs::MoveGro
   planning_interface::MotionPlanResponse res;
   try
   {
-    blend_manager_->solve(the_scene, goal->request, res);
+    sequence_manager_->solve(the_scene, goal->request, res);
   }
   catch (std::exception& ex)
   {
@@ -180,7 +180,7 @@ void MoveGroupBlendAction::executeMoveCallback_PlanOnly(const pilz_msgs::MoveGro
   action_res.planning_time = res.planning_time_;
 }
 
-bool MoveGroupBlendAction::planUsingBlendManager(const pilz_msgs::MotionBlendRequestList& req,
+bool MoveGroupSequenceAction::planUsingSequenceManager(const pilz_msgs::MotionSequenceRequest& req,
                                                      plan_execution::ExecutableMotionPlan& plan)
 {
   setMoveState(move_group::PLANNING);
@@ -190,7 +190,7 @@ bool MoveGroupBlendAction::planUsingBlendManager(const pilz_msgs::MotionBlendReq
   planning_interface::MotionPlanResponse res;
   try
   {
-    solved = blend_manager_->solve(plan.planning_scene_, req, res);
+    solved = sequence_manager_->solve(plan.planning_scene_, req, res);
   }
   catch (std::exception& ex)
   {
@@ -207,22 +207,22 @@ bool MoveGroupBlendAction::planUsingBlendManager(const pilz_msgs::MotionBlendReq
   return solved;
 }
 
-void MoveGroupBlendAction::startMoveExecutionCallback()
+void MoveGroupSequenceAction::startMoveExecutionCallback()
 {
   setMoveState(move_group::MONITOR);
 }
 
-void MoveGroupBlendAction::startMoveLookCallback()
+void MoveGroupSequenceAction::startMoveLookCallback()
 {
   setMoveState(move_group::LOOK);
 }
 
-void MoveGroupBlendAction::preemptMoveCallback()
+void MoveGroupSequenceAction::preemptMoveCallback()
 {
   context_->plan_execution_->stop();
 }
 
-void MoveGroupBlendAction::setMoveState(move_group::MoveGroupState state)
+void MoveGroupSequenceAction::setMoveState(move_group::MoveGroupState state)
 {
   move_state_ = state;
   move_feedback_.state = stateToStr(state);
@@ -233,5 +233,5 @@ void MoveGroupBlendAction::setMoveState(move_group::MoveGroupState state)
 }
 
 #include <pluginlib/class_list_macros.h>
-PLUGINLIB_EXPORT_CLASS(pilz_trajectory_generation::MoveGroupBlendAction, move_group::MoveGroupCapability)
+PLUGINLIB_EXPORT_CLASS(pilz_trajectory_generation::MoveGroupSequenceAction, move_group::MoveGroupCapability)
 

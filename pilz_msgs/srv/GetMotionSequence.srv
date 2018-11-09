@@ -13,5 +13,10 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-# List of motion blend requests
-MotionBlendRequest[] requests
+# A list of motion commands
+MotionSequenceRequest commands
+
+---
+
+# contain the whole trajectory of all commands
+moveit_msgs/MotionPlanResponse plan_response

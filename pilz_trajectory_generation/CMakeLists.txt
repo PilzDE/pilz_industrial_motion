@@ -126,9 +126,9 @@ target_link_libraries(command_list_manager
 add_dependencies(command_list_manager
             ${catkin_EXPORTED_TARGETS})
 
-add_library(blend_capability
-            src/move_group_blend_action.cpp
-            src/move_group_blend_service.cpp
+add_library(sequence_capability
+            src/move_group_sequence_action.cpp
+            src/move_group_sequence_service.cpp
             src/command_list_manager.cpp
             src/trajectory_blender_transition_window.cpp
             src/joint_limits_aggregator.cpp  # do we need joint limits and cartesian_limit here?
@@ -137,16 +137,16 @@ add_library(blend_capability
             src/cartesian_limit.cpp
             src/cartesian_limits_aggregator.cpp
             )
-target_link_libraries(blend_capability
+target_link_libraries(sequence_capability
                       ${catkin_LIBRARIES}) # DO NOT LINK ${PROJECT_NAME} here!
-add_dependencies(blend_capability
+add_dependencies(sequence_capability
            ${catkin_EXPORTED_TARGETS})
 
 #############
 ## Install ##
 #############
 install(FILES
-       plugins/blend_capability_plugin_description.xml
+       plugins/sequence_capability_plugin_description.xml
        plugins/command_planner_plugin_description.xml
        plugins/planning_context_plugin_description.xml
        DESTINATION ${CATKIN_PACKAGE_SHARE_DESTINATION}/plugins
@@ -159,7 +159,7 @@ install(TARGETS
    planning_context_loader_lin
    planning_context_loader_circ
    command_list_manager
-   blend_capability
+   sequence_capability
 #   ARCHIVE DESTINATION ${CATKIN_PACKAGE_LIB_DESTINATION}
   LIBRARY DESTINATION ${CATKIN_PACKAGE_LIB_DESTINATION}
   RUNTIME DESTINATION ${CATKIN_PACKAGE_BIN_DESTINATION}
@@ -194,7 +194,7 @@ if(CATKIN_ENABLE_TESTING)
       src/joint_limits_container.cpp
       src/cartesian_limit.cpp
       test/motion_plan_request_builder.cpp
-      test/motion_blend_request_list_builder.cpp
+      test/motion_sequence_request_builder.cpp
       src/command_list_manager.cpp
       src/trajectory_blender_transition_window.cpp
       src/cartesian_limits_aggregator.cpp
@@ -213,33 +213,33 @@ add_dependencies(${PROJECT_NAME}_test
 #########################
 
 # Planning Integration tests
-add_rostest_gtest(integrationtest_blend_action_capability
-  test/integrationtest_blend_action_capability.test
-  test/integrationtest_blend_action_capability.cpp
+add_rostest_gtest(integrationtest_sequence_action_capability
+  test/integrationtest_sequence_action_capability.test
+  test/integrationtest_sequence_action_capability.cpp
 )
 
-target_link_libraries(integrationtest_blend_action_capability
+target_link_libraries(integrationtest_sequence_action_capability
    ${catkin_LIBRARIES} ${PROJECT_NAME}_test)
 
-add_rostest_gtest(integrationtest_blend_action_capability_with_gripper
-  test/integrationtest_blend_action_capability_with_gripper.test
-  test/integrationtest_blend_action_capability.cpp
+add_rostest_gtest(integrationtest_sequence_action_capability_with_gripper
+  test/integrationtest_sequence_action_capability_with_gripper.test
+  test/integrationtest_sequence_action_capability.cpp
 )
-target_link_libraries(integrationtest_blend_action_capability_with_gripper
+target_link_libraries(integrationtest_sequence_action_capability_with_gripper
    ${catkin_LIBRARIES} ${PROJECT_NAME}_test)
 
-add_rostest_gtest(integrationtest_blend_service_capability
-  test/integrationtest_blend_service_capability.test
-  test/integrationtest_blend_service_capability.cpp
+add_rostest_gtest(integrationtest_sequence_service_capability
+  test/integrationtest_sequence_service_capability.test
+  test/integrationtest_sequence_service_capability.cpp
 )
-target_link_libraries(integrationtest_blend_service_capability
+target_link_libraries(integrationtest_sequence_service_capability
   ${catkin_LIBRARIES} ${PROJECT_NAME}_test)
 
-add_rostest_gtest(integrationtest_blend_service_capability_with_gripper
-  test/integrationtest_blend_service_capability_with_gripper.test
-  test/integrationtest_blend_service_capability.cpp
+add_rostest_gtest(integrationtest_sequence_service_capability_with_gripper
+  test/integrationtest_sequence_service_capability_with_gripper.test
+  test/integrationtest_sequence_service_capability.cpp
 )
-target_link_libraries(integrationtest_blend_service_capability_with_gripper
+target_link_libraries(integrationtest_sequence_service_capability_with_gripper
   ${catkin_LIBRARIES} ${PROJECT_NAME}_test)
 
 # Planning Integration tests

@@ -474,7 +474,7 @@ bool testutils::toTCPPose(const moveit::core::RobotModelConstPtr &robot_model,
 bool testutils::checkOriginalTrajectoryAfterBlending(const pilz::TrajectoryBlendRequest &req,
                                                      const pilz::TrajectoryBlendResponse &res,
                                                      const double time_tolerance)
-{ 
+{
   for(std::size_t i = 0; i < res.first_trajectory->getWayPointCount(); ++i)
   {
     for (const std::string& joint_name : res.first_trajectory->getWayPoint(i).getJointModelGroup(req.group_name)->getActiveJointModelNames())
@@ -680,7 +680,7 @@ bool testutils::checkBlendingCartSpaceContinuity(const pilz::TrajectoryBlendRequ
                                                  const pilz::LimitsContainer& planner_limits)
 {
   // sampling time
-  double duration = res.blend_trajectory->getWayPointDurationFromPrevious(res.blend_trajectory->getWayPointCount()-1);  
+  double duration = res.blend_trajectory->getWayPointDurationFromPrevious(res.blend_trajectory->getWayPointCount()-1);
   if (duration == 0.0)
   {
     std::cout << "Cannot perform check of cartesian space continuity with sampling time 0.0" << std::endl;
@@ -1091,7 +1091,7 @@ void testutils::generateRequestMsgFromBlendTestData(const moveit::core::RobotMod
                                                     const std::string &planner_id,
                                                     const std::string &group_name,
                                                     const std::string &link_name,
-                                                    pilz_msgs::MotionBlendRequestList &req_list)
+                                                    pilz_msgs::MotionSequenceRequest &req_list)
 {
   // motion plan request of first trajectory
   planning_interface::MotionPlanRequest req_1;
@@ -1138,14 +1138,14 @@ void testutils::generateRequestMsgFromBlendTestData(const moveit::core::RobotMod
 
   double blend_radius = 0.5*std::min(dis_1,dis_2);
 
-  pilz_msgs::MotionBlendRequest blend_req_1, blend_req_2;
+  pilz_msgs::MotionSequenceItem blend_req_1, blend_req_2;
   blend_req_1.req = req_1;
   blend_req_1.blend_radius = blend_radius;
   blend_req_2.req = req_2;
   blend_req_2.blend_radius = 0.0;
 
-  req_list.requests.push_back(blend_req_1);
-  req_list.requests.push_back(blend_req_2);
+  req_list.items.push_back(blend_req_1);
+  req_list.items.push_back(blend_req_2);
 }
 
 void testutils::checkRobotModel(const moveit::core::RobotModelConstPtr &robot_model,

@@ -14,7 +14,7 @@
 # limitations under the License.
 
 # A list of motion commands
-MotionBlendRequestList request
+MotionSequenceRequest request
 
 # Planning options
 moveit_msgs/PlanningOptions planning_options

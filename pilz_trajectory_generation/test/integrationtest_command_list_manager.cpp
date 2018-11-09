@@ -30,7 +30,7 @@
 #include "pilz_trajectory_generation/command_list_manager.h"
 
 #include "motion_plan_request_builder.h"
-#include "motion_blend_request_list_builder.h"
+#include "motion_sequence_request_builder.h"
 
 const std::string PARAM_MODEL_NO_GRIPPER_NAME {"robot_description"};
 const std::string PARAM_MODEL_WITH_GRIPPER_NAME {"robot_description_pg70"};
@@ -52,8 +52,8 @@ protected:
   planning_scene::PlanningScenePtr scene_ {0};
 
   std::string planning_group_, target_link_;
-  pilz_msgs::MotionBlendRequestList blend_command_list_2_;
-  pilz_msgs::MotionBlendRequestList blend_command_list_3_;
+  pilz_msgs::MotionSequenceRequest blend_command_list_2_;
+  pilz_msgs::MotionSequenceRequest blend_command_list_3_;
   moveit_msgs::MotionPlanRequest  req1_, req2_, req3_;
   geometry_msgs::PoseStamped p1_, p2_, p3_;
 };
@@ -110,7 +110,7 @@ void IntegrationTestCommandListManager::SetUp()
   builder.setGoal(target_link_, p3_);
   req3_ = builder.createLin();
 
-  MotionBlendRequestListBuilder blend_list_builder;
+  MotionSequenceRequestBuilder blend_list_builder;
   blend_command_list_2_ = blend_list_builder.build({std::make_pair<>(req1_, 0.08),
                                                     std::make_pair<>(req2_, 0)});
 
@@ -131,7 +131,7 @@ INSTANTIATE_TEST_CASE_P(InstantiationName, IntegrationTestCommandListManager, ::
 
 /**
  * @brief Integration test for the concatenation of motion commands
- * Sends a blending request.
+ * Sends a sequence request.
  *
  *  - Test Sequence:
  *    1. Generate request with two trajectories and zero blend radius.
@@ -148,8 +148,8 @@ INSTANTIATE_TEST_CASE_P(InstantiationName, IntegrationTestCommandListManager, ::
  */
 TEST_P(IntegrationTestCommandListManager, concatThreeSegments)
 {
-  MotionBlendRequestListBuilder blend_list_builder;
-  pilz_msgs::MotionBlendRequestList req = blend_list_builder.build({std::make_pair<>(req1_, 0),
+  MotionSequenceRequestBuilder blend_list_builder;
+  pilz_msgs::MotionSequenceRequest req = blend_list_builder.build({std::make_pair<>(req1_, 0),
                                                                                      std::make_pair<>(req2_, 0),
                                                                                      std::make_pair<>(req3_, 0)});
   planning_interface::MotionPlanResponse res1_2_3;
@@ -164,7 +164,7 @@ TEST_P(IntegrationTestCommandListManager, concatThreeSegments)
   EXPECT_EQ(moveit_msgs::MoveItErrorCodes::SUCCESS, res1.error_code_.val);
   EXPECT_GT(res1.trajectory_->getWayPointCount(), 0u);
   EXPECT_EQ(res1.trajectory_->getFirstWayPoint().getVariableCount(),
-            req.requests[0].req.start_state.joint_state.name.size());
+            req.items[0].req.start_state.joint_state.name.size());
 
 
   ROS_INFO("step 3: only second segment");
@@ -179,7 +179,7 @@ TEST_P(IntegrationTestCommandListManager, concatThreeSegments)
   EXPECT_EQ(moveit_msgs::MoveItErrorCodes::SUCCESS, res2.error_code_.val);
   EXPECT_GT(res2.trajectory_->getWayPointCount(), 0u);
   EXPECT_EQ(res2.trajectory_->getFirstWayPoint().getVariableCount(),
-            req.requests[0].req.start_state.joint_state.name.size());
+            req.items[0].req.start_state.joint_state.name.size());
 
 
   ROS_INFO("step 4: only third segment");
@@ -194,7 +194,7 @@ TEST_P(IntegrationTestCommandListManager, concatThreeSegments)
   EXPECT_EQ(moveit_msgs::MoveItErrorCodes::SUCCESS, res3.error_code_.val);
   EXPECT_GT(res3.trajectory_->getWayPointCount(), 0u);
   EXPECT_EQ(res3.trajectory_->getFirstWayPoint().getVariableCount(),
-            req.requests[0].req.start_state.joint_state.name.size());
+            req.items[0].req.start_state.joint_state.name.size());
 
 
   // durations for the different segments
@@ -224,7 +224,7 @@ TEST_P(IntegrationTestCommandListManager, blendTwoSegments)
   EXPECT_EQ(moveit_msgs::MoveItErrorCodes::SUCCESS, res.error_code_.val);
   EXPECT_GT(res.trajectory_->getWayPointCount(), 0u);
   EXPECT_EQ(res.trajectory_->getFirstWayPoint().getVariableCount(),
-            blend_command_list_2_.requests[0].req.start_state.joint_state.name.size());
+            blend_command_list_2_.items[0].req.start_state.joint_state.name.size());
 
 
   ros::NodeHandle nh;
@@ -255,7 +255,7 @@ TEST_P(IntegrationTestCommandListManager, blendTwoSegments)
  */
 TEST_P(IntegrationTestCommandListManager, emptyList)
 {
-  pilz_msgs::MotionBlendRequestList empty_list;
+  pilz_msgs::MotionSequenceRequest empty_list;
   planning_interface::MotionPlanResponse res;
   ASSERT_FALSE(manager_->solve(scene_, empty_list, res));
   EXPECT_EQ(moveit_msgs::MoveItErrorCodes::INVALID_MOTION_PLAN, res.error_code_.val);
@@ -275,8 +275,8 @@ TEST_P(IntegrationTestCommandListManager, emptyList)
  */
 TEST_P(IntegrationTestCommandListManager, firstGoalNotReachable)
 {
-  pilz_msgs::MotionBlendRequestList req = blend_command_list_2_;
-  req.requests[0].req.goal_constraints[0].position_constraints[0].constraint_region.primitive_poses[0].position.y = 27;
+  pilz_msgs::MotionSequenceRequest req = blend_command_list_2_;
+  req.items[0].req.goal_constraints[0].position_constraints[0].constraint_region.primitive_poses[0].position.y = 27;
   planning_interface::MotionPlanResponse res;
   ASSERT_FALSE(manager_->solve(scene_, req, res));
   EXPECT_EQ(moveit_msgs::MoveItErrorCodes::NO_IK_SOLUTION, res.error_code_.val);
@@ -296,8 +296,8 @@ TEST_P(IntegrationTestCommandListManager, firstGoalNotReachable)
  */
 TEST_P(IntegrationTestCommandListManager, startStateNotFirstGoal)
 {
-  pilz_msgs::MotionBlendRequestList req = blend_command_list_2_;
-  req.requests[1].req.start_state.joint_state = testutils::generateJointState({-1., 2., -3., 4., -5., 0.});
+  pilz_msgs::MotionSequenceRequest req = blend_command_list_2_;
+  req.items[1].req.start_state.joint_state = testutils::generateJointState({-1., 2., -3., 4., -5., 0.});
   planning_interface::MotionPlanResponse res;
   ASSERT_FALSE(manager_->solve(scene_, req, res));
   EXPECT_EQ(moveit_msgs::MoveItErrorCodes::START_STATE_VIOLATES_PATH_CONSTRAINTS, res.error_code_.val);
@@ -317,8 +317,8 @@ TEST_P(IntegrationTestCommandListManager, startStateNotFirstGoal)
  */
 TEST_P(IntegrationTestCommandListManager, blendingRadiusNegative)
 {
-  pilz_msgs::MotionBlendRequestList req = blend_command_list_2_;
-  req.requests[0].blend_radius = -0.3;
+  pilz_msgs::MotionSequenceRequest req = blend_command_list_2_;
+  req.items[0].blend_radius = -0.3;
   planning_interface::MotionPlanResponse res;
   ASSERT_FALSE(manager_->solve(scene_, req, res));
   EXPECT_EQ(moveit_msgs::MoveItErrorCodes::FAILURE, res.error_code_.val);
@@ -338,8 +338,8 @@ TEST_P(IntegrationTestCommandListManager, blendingRadiusNegative)
  */
 TEST_P(IntegrationTestCommandListManager, lastBlendingRadiusNonZero)
 {
-  pilz_msgs::MotionBlendRequestList req = blend_command_list_2_;
-  req.requests[1].blend_radius = 0.03;
+  pilz_msgs::MotionSequenceRequest req = blend_command_list_2_;
+  req.items[1].blend_radius = 0.03;
   planning_interface::MotionPlanResponse res;
   ASSERT_FALSE(manager_->solve(scene_, req, res));
   EXPECT_EQ(moveit_msgs::MoveItErrorCodes::FAILURE, res.error_code_.val);
@@ -359,8 +359,8 @@ TEST_P(IntegrationTestCommandListManager, lastBlendingRadiusNonZero)
  */
 TEST_P(IntegrationTestCommandListManager, blendRadiusGreaterThanSegment)
 {
-  pilz_msgs::MotionBlendRequestList req = blend_command_list_2_;
-  req.requests[0].blend_radius = 42.;
+  pilz_msgs::MotionSequenceRequest req = blend_command_list_2_;
+  req.items[0].blend_radius = 42.;
   planning_interface::MotionPlanResponse res;
   ASSERT_FALSE(manager_->solve(scene_, req, res));
   EXPECT_EQ(moveit_msgs::MoveItErrorCodes::FAILURE, res.error_code_.val);
@@ -383,7 +383,7 @@ TEST_P(IntegrationTestCommandListManager, blendRadiusGreaterThanSegment)
  */
 TEST_P(IntegrationTestCommandListManager, blendingRadiusOverlapping)
 {
-  pilz_msgs::MotionBlendRequestList req = blend_command_list_3_;
+  pilz_msgs::MotionSequenceRequest req = blend_command_list_3_;
 
   planning_interface::MotionPlanResponse res_valid;
   ASSERT_TRUE(manager_->solve(scene_, req, res_valid));
@@ -393,10 +393,10 @@ TEST_P(IntegrationTestCommandListManager, blendingRadiusOverlapping)
   // calculate distance from first to second goal
   planning_interface::MotionPlanResponse res_overlap;
   Eigen::Affine3d p1, p2;
-  tf2::fromMsg(req.requests[0].req.goal_constraints[0].position_constraints[0].constraint_region.primitive_poses[0], p1);
-  tf2::fromMsg(req.requests[1].req.goal_constraints[0].position_constraints[0].constraint_region.primitive_poses[0], p2);
+  tf2::fromMsg(req.items[0].req.goal_constraints[0].position_constraints[0].constraint_region.primitive_poses[0], p1);
+  tf2::fromMsg(req.items[1].req.goal_constraints[0].position_constraints[0].constraint_region.primitive_poses[0], p2);
   auto distance = (p2.translation()-p1.translation()).norm();
-  req.requests[1].blend_radius = distance - req.requests[0].blend_radius + 0.01; // overlapping radii
+  req.items[1].blend_radius = distance - req.items[0].blend_radius + 0.01; // overlapping radii
   ASSERT_FALSE(manager_->solve(scene_, req, res_overlap));
   EXPECT_EQ(moveit_msgs::MoveItErrorCodes::FAILURE, res_overlap.error_code_.val);
   EXPECT_EQ(0u, res_overlap.trajectory_->getWayPointCount());
@@ -418,7 +418,7 @@ TEST_P(IntegrationTestCommandListManager, blendingRadiusOverlapping)
 TEST_P(IntegrationTestCommandListManager, largeRequest)
 {
   const int n = 30;
-  pilz_msgs::MotionBlendRequestList req = blend_command_list_3_;
+  pilz_msgs::MotionSequenceRequest req = blend_command_list_3_;
 
   planning_interface::MotionPlanResponse res_single;
   ros::Time begin1 = ros::Time::now();
@@ -428,17 +428,17 @@ TEST_P(IntegrationTestCommandListManager, largeRequest)
   EXPECT_GT(res_single.trajectory_->getWayPointCount(), 0u);
 
   // construct request
-  req.requests.back().blend_radius = 0.01;
+  req.items.back().blend_radius = 0.01;
   for(int i = 0; i < n; ++i)
   {
-    req.requests.push_back(req.requests[0]);
-    req.requests.back().req.start_state.joint_state.position.clear();
-    req.requests.back().req.start_state.joint_state.velocity.clear();
-    req.requests.back().req.start_state.joint_state.name.clear();
-    req.requests.push_back(req.requests[1]);
-    req.requests.push_back(req.requests[2]);
+    req.items.push_back(req.items[0]);
+    req.items.back().req.start_state.joint_state.position.clear();
+    req.items.back().req.start_state.joint_state.velocity.clear();
+    req.items.back().req.start_state.joint_state.name.clear();
+    req.items.push_back(req.items[1]);
+    req.items.push_back(req.items[2]);
   }
-  req.requests.back().blend_radius = 0.0;
+  req.items.back().blend_radius = 0.0;
 
   planning_interface::MotionPlanResponse res_n;
   ros::Time beginn = ros::Time::now();

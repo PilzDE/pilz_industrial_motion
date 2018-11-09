@@ -35,7 +35,7 @@
 #include "pilz_trajectory_generation/trajectory_blend_response.h"
 #include "pilz_trajectory_generation/trajectory_blend_request.h"
 #include "pilz_trajectory_generation/trajectory_generator.h"
-#include "pilz_msgs/MotionBlendRequestList.h"
+#include "pilz_msgs/MotionSequenceRequest.h"
 
 namespace testutils
 {
@@ -473,7 +473,7 @@ void generateRequestMsgFromBlendTestData(const moveit::core::RobotModelConstPtr 
                                          const std::string &planner_id,
                                          const std::string &group_name,
                                          const std::string &link_name,
-                                         pilz_msgs::MotionBlendRequestList& req_list);
+                                         pilz_msgs::MotionSequenceRequest& req_list);
 
 void checkRobotModel(const moveit::core::RobotModelConstPtr &robot_model,
                      const std::string& group_name,

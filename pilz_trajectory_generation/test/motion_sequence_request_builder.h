@@ -15,20 +15,17 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-#include "motion_blend_request_list_builder.h"
+#ifndef MOTION_BLEND_REQUEST_LIST_BUILDER_H
+#define MOTION_BLEND_REQUEST_LIST_BUILDER_H
 
-pilz_msgs::MotionBlendRequestList MotionBlendRequestListBuilder::build(
-  std::initializer_list<std::pair<moveit_msgs::MotionPlanRequest, double> > l)
+#include <pilz_msgs/MotionSequenceRequest.h>
+
+class MotionSequenceRequestBuilder
 {
-  pilz_msgs::MotionBlendRequestList req_list;
+public:
 
-  for(const auto& pair : l)
-  {
-    pilz_msgs::MotionBlendRequest req;
-    req.req = pair.first;
-    req.blend_radius = pair.second;
-    req_list.requests.push_back(req);
-  }
+  pilz_msgs::MotionSequenceRequest
+  build(std::initializer_list<std::pair<moveit_msgs::MotionPlanRequest, double> > l);
+};
 
-  return req_list;
-}
+#endif // MOTION_BLEND_REQUEST_LIST_BUILDER_H

@@ -61,7 +61,7 @@
   <!-- The export tag contains other, unspecified, tags -->
   <export>
     <moveit_core plugin="${prefix}/plugins/command_planner_plugin_description.xml"/>
-    <moveit_ros_move_group plugin="${prefix}/plugins/blend_capability_plugin_description.xml"/>
+    <moveit_ros_move_group plugin="${prefix}/plugins/sequence_capability_plugin_description.xml"/>
     <pilz_trajectory_generation plugin="${prefix}/plugins/planning_context_plugin_description.xml"/>
   </export>
 </package>
