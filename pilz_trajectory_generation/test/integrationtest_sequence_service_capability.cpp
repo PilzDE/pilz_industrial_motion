@@ -29,13 +29,13 @@
 #include <moveit/move_group_interface/move_group_interface.h>
 #include <moveit_msgs/MotionPlanResponse.h>
 
-#include "pilz_msgs/GetMotionBlend.h"
-#include "pilz_msgs/MotionBlendRequestList.h"
+#include "pilz_msgs/GetMotionSequence.h"
+#include "pilz_msgs/MotionSequenceRequest.h"
 #include "pilz_trajectory_generation/capability_names.h"
 #include "test_utils.h"
 
 #include "motion_plan_request_builder.h"
-#include "motion_blend_request_list_builder.h"
+#include "motion_sequence_request_builder.h"
 
 const std::string BLEND_DATA_PREFIX("test_data/");
 
@@ -44,7 +44,7 @@ const std::string PARAM_PLANNING_GROUP_NAME("planning_group");
 const std::string PARAM_TARGET_LINK_NAME("target_link");
 const std::string BLEND_DATASET_NUM("blend_dataset_num");
 
-class IntegrationTestBlendService : public ::testing::Test
+class IntegrationTestSequenceService : public ::testing::Test
 {
 protected:
   virtual void SetUp();
@@ -60,10 +60,10 @@ protected:
   std::vector<testutils::blend_test_data> test_data_;
   std::string planning_group_, target_link_;
 
-  pilz_msgs::MotionBlendRequestList blend_command_list_2_, blend_command_list_3_;
+  pilz_msgs::MotionSequenceRequest blend_command_list_2_, blend_command_list_3_;
 };
 
-void IntegrationTestBlendService::SetUp()
+void IntegrationTestSequenceService::SetUp()
 {
   // get necessary parameters
   ASSERT_TRUE(ph_.getParam(PARAM_PLANNING_GROUP_NAME, planning_group_));
@@ -83,12 +83,12 @@ void IntegrationTestBlendService::SetUp()
 
   generateDataSet();
 
-  ASSERT_TRUE(ros::service::waitForService(pilz_trajectory_generation::BLEND_SERVICE_NAME, ros::Duration(10))) << "Service not available.";
+  ASSERT_TRUE(ros::service::waitForService(pilz_trajectory_generation::SEQUENCE_SERVICE_NAME, ros::Duration(10))) << "Service not available.";
   ros::NodeHandle nh; // connect to service in global namespace, not in ph_
-  client_ = nh.serviceClient<pilz_msgs::GetMotionBlend>(pilz_trajectory_generation::BLEND_SERVICE_NAME);
+  client_ = nh.serviceClient<pilz_msgs::GetMotionSequence>(pilz_trajectory_generation::SEQUENCE_SERVICE_NAME);
 }
 
-void IntegrationTestBlendService::generateDataSet()
+void IntegrationTestSequenceService::generateDataSet()
 {
   geometry_msgs::PoseStamped p1, p2, p3;
 
@@ -131,7 +131,7 @@ void IntegrationTestBlendService::generateDataSet()
   builder.setGoal(target_link_, p3);
   req3 = builder.createLin();
 
-  MotionBlendRequestListBuilder blend_list_builder;
+  MotionSequenceRequestBuilder blend_list_builder;
   blend_command_list_2_ = blend_list_builder.build({std::make_pair(req1, 0.08),
                                                     std::make_pair(req2, 0)});
 
@@ -151,16 +151,16 @@ void IntegrationTestBlendService::generateDataSet()
  *    1. MotionPlanResponse is received.
  *    2. Error code of the blend result is success.
  */
-TEST_F(IntegrationTestBlendService, blendLINLIN)
+TEST_F(IntegrationTestSequenceService, blendLINLIN)
 {
   for(const auto& test_data : test_data_)
   {
-    pilz_msgs::MotionBlendRequestList req_list;
+    pilz_msgs::MotionSequenceRequest req_list;
     testutils::generateRequestMsgFromBlendTestData(robot_model_, test_data,
                                                    "LIN", planning_group_,
                                                    target_link_, req_list);
 
-    pilz_msgs::GetMotionBlend srv;
+    pilz_msgs::GetMotionSequence srv;
     srv.request.commands = req_list;
 
     // Call the service client
@@ -187,12 +187,12 @@ TEST_F(IntegrationTestBlendService, blendLINLIN)
  *    1. MotionPlanResponse is received.
  *    2. blend fails, result trajectory is empty.
  */
-TEST_F(IntegrationTestBlendService, blendRadiusNegative)
+TEST_F(IntegrationTestSequenceService, blendRadiusNegative)
 {
-  pilz_msgs::MotionBlendRequestList req_list = blend_command_list_2_;
-  req_list.requests[0].blend_radius = -0.3;
+  pilz_msgs::MotionSequenceRequest req_list = blend_command_list_2_;
+  req_list.items[0].blend_radius = -0.3;
 
-  pilz_msgs::GetMotionBlend srv;
+  pilz_msgs::GetMotionSequence srv;
   srv.request.commands = req_list;
 
   // Call the service client
@@ -216,11 +216,11 @@ TEST_F(IntegrationTestBlendService, blendRadiusNegative)
  *    1. MotionPlanResponse is received.
  *    2. blend is successful, result trajectory is empty.
  */
-TEST_F(IntegrationTestBlendService, emptyList)
+TEST_F(IntegrationTestSequenceService, emptyList)
 {
-  pilz_msgs::MotionBlendRequestList empty_list;
+  pilz_msgs::MotionSequenceRequest empty_list;
 
-  pilz_msgs::GetMotionBlend srv;
+  pilz_msgs::GetMotionSequence srv;
   srv.request.commands = empty_list;
 
   // Call the service client
@@ -245,12 +245,12 @@ TEST_F(IntegrationTestBlendService, emptyList)
  *    1. MotionPlanResponse is received.
  *    2. blend fails, result trajectory is empty.
  */
-TEST_F(IntegrationTestBlendService, startStateNotFirstGoal)
+TEST_F(IntegrationTestSequenceService, startStateNotFirstGoal)
 {
-  pilz_msgs::MotionBlendRequestList req_list = blend_command_list_2_;
-  req_list.requests[1].req.start_state.joint_state = testutils::generateJointState({-1., 2., -3., 4., -5., 0.});
+  pilz_msgs::MotionSequenceRequest req_list = blend_command_list_2_;
+  req_list.items[1].req.start_state.joint_state = testutils::generateJointState({-1., 2., -3., 4., -5., 0.});
 
-  pilz_msgs::GetMotionBlend srv;
+  pilz_msgs::GetMotionSequence srv;
   srv.request.commands = req_list;
 
   // Call the service client
@@ -275,12 +275,12 @@ TEST_F(IntegrationTestBlendService, startStateNotFirstGoal)
  *    1. MotionPlanResponse is received.
  *    2. blend fails, result trajectory is empty.
  */
-TEST_F(IntegrationTestBlendService, firstGoalNotReachable)
+TEST_F(IntegrationTestSequenceService, firstGoalNotReachable)
 {
-  pilz_msgs::MotionBlendRequestList req_list = blend_command_list_2_;
-  req_list.requests[0].req.goal_constraints[0].position_constraints[0].constraint_region.primitive_poses[0].position.y = 27;
+  pilz_msgs::MotionSequenceRequest req_list = blend_command_list_2_;
+  req_list.items[0].req.goal_constraints[0].position_constraints[0].constraint_region.primitive_poses[0].position.y = 27;
 
-  pilz_msgs::GetMotionBlend srv;
+  pilz_msgs::GetMotionSequence srv;
   srv.request.commands = req_list;
 
   // Call the service client
@@ -304,24 +304,24 @@ TEST_F(IntegrationTestBlendService, firstGoalNotReachable)
  *    1. MotionPlanResponse is received.
  *    2. Blend succeeds, result trajectory is not empty.
  */
-TEST_F(IntegrationTestBlendService, largeRequest)
+TEST_F(IntegrationTestSequenceService, largeRequest)
 {
   // construct request
   constexpr int N = 10;
-  pilz_msgs::MotionBlendRequestList req_list = blend_command_list_3_;
-  req_list.requests.back().blend_radius = 0.01;
+  pilz_msgs::MotionSequenceRequest req_list = blend_command_list_3_;
+  req_list.items.back().blend_radius = 0.01;
   for(int i = 0; i < N; ++i)
   {
-    req_list.requests.push_back(req_list.requests[0]);
-    req_list.requests.back().req.start_state.joint_state.position.clear();
-    req_list.requests.back().req.start_state.joint_state.velocity.clear();
-    req_list.requests.back().req.start_state.joint_state.name.clear();
-    req_list.requests.push_back(req_list.requests[1]);
-    req_list.requests.push_back(req_list.requests[2]);
+    req_list.items.push_back(req_list.items[0]);
+    req_list.items.back().req.start_state.joint_state.position.clear();
+    req_list.items.back().req.start_state.joint_state.velocity.clear();
+    req_list.items.back().req.start_state.joint_state.name.clear();
+    req_list.items.push_back(req_list.items[1]);
+    req_list.items.push_back(req_list.items[2]);
   }
-  req_list.requests.back().blend_radius = 0.0;
+  req_list.items.back().blend_radius = 0.0;
 
-  pilz_msgs::GetMotionBlend srv;
+  pilz_msgs::GetMotionSequence srv;
   srv.request.commands = req_list;
 
   // Call the service client
@@ -337,7 +337,7 @@ TEST_F(IntegrationTestBlendService, largeRequest)
 
 int main(int argc, char **argv)
 {
-  ros::init(argc, argv, "integrationtest_blend_service_capability");
+  ros::init(argc, argv, "integrationtest_sequence_service_capability");
   ros::NodeHandle nh();
   testing::InitGoogleTest(&argc, argv);
   return RUN_ALL_TESTS();

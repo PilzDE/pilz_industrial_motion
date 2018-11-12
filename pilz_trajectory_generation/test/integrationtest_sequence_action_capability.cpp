@@ -32,14 +32,14 @@
 #include <actionlib/client/simple_action_client.h>
 #include <moveit/move_group_interface/move_group_interface.h>
 
-#include "pilz_msgs/MoveGroupBlendAction.h"
+#include "pilz_msgs/MoveGroupSequenceAction.h"
 #include "test_utils.h"
 
 static constexpr int WAIT_FOR_RESULT_TIME_OUT {5}; //seconds
 static constexpr int TIME_BEFORE_CANCEL_GOAL {2}; //seconds
 static constexpr int WAIT_FOR_ACTION_SERVER_TIME_OUT {10}; //seconds
 
-const std::string BLEND_ACTION_NAME("/blend_move_group");
+const std::string SEQUENCE_ACTION_NAME("/sequence_move_group");
 const std::string BLEND_DATA_PREFIX("test_data/");
 const std::string BLEND_NE_DATA_PREFIX("ne_test_data/");
 
@@ -50,7 +50,7 @@ const std::string JOINT_POSITION_TOLERANCE("joint_position_tolerance");
 const std::string BLEND_DATASET_NUM("blend_dataset_num");
 const std::string BLEND_NE_DATASET_NUM("blend_ne_dataset_num");
 
-class IntegrationTestBlendAction : public ::testing::Test
+class IntegrationTestSequenceAction : public ::testing::Test
 {
 protected:
 
@@ -60,7 +60,7 @@ protected:
 
 protected:
   ros::NodeHandle ph_ {"~"};
-  actionlib::SimpleActionClient<pilz_msgs::MoveGroupBlendAction> ac_blend_{ph_, BLEND_ACTION_NAME, true};
+  actionlib::SimpleActionClient<pilz_msgs::MoveGroupSequenceAction> ac_blend_{ph_, SEQUENCE_ACTION_NAME, true};
   std::shared_ptr<moveit::planning_interface::MoveGroupInterface> move_group_;
   ros::AsyncSpinner spinner_ {1};
 
@@ -71,7 +71,7 @@ protected:
   double joint_position_tolerance_;
 };
 
-void IntegrationTestBlendAction::SetUp()
+void IntegrationTestSequenceAction::SetUp()
 {
   spinner_.start();
 
@@ -127,13 +127,13 @@ void IntegrationTestBlendAction::SetUp()
  *    2. Empty blend goal is sent to the action server.
  *    3. Error code of the blend result is INVALIDE_MOTION_PLAN.
  */
-TEST_F(IntegrationTestBlendAction, blendEmptyBlendList)
+TEST_F(IntegrationTestSequenceAction, blendEmptyBlendList)
 {
-  pilz_msgs::MoveGroupBlendGoal blend_goal;
+  pilz_msgs::MoveGroupSequenceGoal seq_goal;
 
   // send goal
-  ac_blend_.sendGoalAndWait(blend_goal);
-  pilz_msgs::MoveGroupBlendResultConstPtr res = ac_blend_.getResult();
+  ac_blend_.sendGoalAndWait(seq_goal);
+  pilz_msgs::MoveGroupSequenceResultConstPtr res = ac_blend_.getResult();
   EXPECT_EQ(res->error_code.val, moveit_msgs::MoveItErrorCodes::INVALID_MOTION_PLAN);
   EXPECT_EQ(res->planned_trajectory.joint_trajectory.points.size(), 0u)
       << "Planned trajectory is not empty of empty motion blend list.";
@@ -153,7 +153,7 @@ TEST_F(IntegrationTestBlendAction, blendEmptyBlendList)
  *    2. Blend goal is sent to the action server.
  *    3. Error code of the blend result is success.
  */
-TEST_F(IntegrationTestBlendAction, blendLINLIN)
+TEST_F(IntegrationTestSequenceAction, blendLINLIN)
 {
   for(const auto& test_data : test_data_)
   {
@@ -162,16 +162,16 @@ TEST_F(IntegrationTestBlendAction, blendLINLIN)
     move_group_->move();
 
     // create request
-    pilz_msgs::MoveGroupBlendGoal blend_goal;
+    pilz_msgs::MoveGroupSequenceGoal seq_goal;
     testutils::generateRequestMsgFromBlendTestData(robot_model_,
                                                    test_data,
                                                    "LIN",
                                                    planning_group_,
                                                    target_link_,
-                                                   blend_goal.request);
+                                                   seq_goal.request);
     // send goal
-    ac_blend_.sendGoalAndWait(blend_goal);
-    pilz_msgs::MoveGroupBlendResultConstPtr res = ac_blend_.getResult();
+    ac_blend_.sendGoalAndWait(seq_goal);
+    pilz_msgs::MoveGroupSequenceResultConstPtr res = ac_blend_.getResult();
     EXPECT_EQ(res->error_code.val, moveit_msgs::MoveItErrorCodes::SUCCESS) << "Blend failed.";
     EXPECT_NE(res->planned_trajectory.joint_trajectory.points.size(), 0u)
         << "Planned trajectory is empty.";
@@ -191,7 +191,7 @@ TEST_F(IntegrationTestBlendAction, blendLINLIN)
  *    2. Blend goal is sent to the action server.
  *    3. Error code of the blend result is failure.
  */
-TEST_F(IntegrationTestBlendAction, blendLINLINInvalidGroupnames)
+TEST_F(IntegrationTestSequenceAction, blendLINLINInvalidGroupnames)
 {
   for(const auto& test_data : test_data_)
   {
@@ -200,19 +200,19 @@ TEST_F(IntegrationTestBlendAction, blendLINLINInvalidGroupnames)
     move_group_->move();
 
     // create request
-    pilz_msgs::MoveGroupBlendGoal blend_goal;
+    pilz_msgs::MoveGroupSequenceGoal seq_goal;
     testutils::generateRequestMsgFromBlendTestData(robot_model_,
                                                    test_data,
                                                    "LIN",
                                                    planning_group_,
                                                    target_link_,
-                                                   blend_goal.request);
+                                                   seq_goal.request);
 
     // Manipulate the group for negative test
-    blend_goal.request.requests.at(0).req.group_name = "WrongGroupName";
+    seq_goal.request.items.at(0).req.group_name = "WrongGroupName";
     // send goal
-    ac_blend_.sendGoalAndWait(blend_goal);
-    pilz_msgs::MoveGroupBlendResultConstPtr res = ac_blend_.getResult();
+    ac_blend_.sendGoalAndWait(seq_goal);
+    pilz_msgs::MoveGroupSequenceResultConstPtr res = ac_blend_.getResult();
     EXPECT_EQ(res->error_code.val, moveit_msgs::MoveItErrorCodes::FAILURE) << "Blend failed.";
     EXPECT_EQ(res->planned_trajectory.joint_trajectory.points.size(), 0u)
         << "Planned trajectory is empty.";
@@ -232,7 +232,7 @@ TEST_F(IntegrationTestBlendAction, blendLINLINInvalidGroupnames)
  *    2. Blend goal is sent to the action server.
  *    3. Error code of the blend result is not success and the planned trajectory is empty.
  */
-TEST_F(IntegrationTestBlendAction, blendLINLIN_invalidBlendRadius)
+TEST_F(IntegrationTestSequenceAction, blendLINLIN_invalidBlendRadius)
 {
   for(const auto& test_data : test_data_)
   {
@@ -241,18 +241,18 @@ TEST_F(IntegrationTestBlendAction, blendLINLIN_invalidBlendRadius)
     move_group_->move();
 
     // create request
-    pilz_msgs::MoveGroupBlendGoal blend_goal;
+    pilz_msgs::MoveGroupSequenceGoal seq_goal;
     testutils::generateRequestMsgFromBlendTestData(robot_model_,
                                                    test_data,
                                                    "LIN",
                                                    planning_group_,
                                                    target_link_,
-                                                   blend_goal.request);
+                                                   seq_goal.request);
     // set invalid blend radius
-    blend_goal.request.requests.at(0).blend_radius = -1;
+    seq_goal.request.items.at(0).blend_radius = -1;
     // send goal
-    ac_blend_.sendGoalAndWait(blend_goal);
-    pilz_msgs::MoveGroupBlendResultConstPtr res = ac_blend_.getResult();
+    ac_blend_.sendGoalAndWait(seq_goal);
+    pilz_msgs::MoveGroupSequenceResultConstPtr res = ac_blend_.getResult();
     EXPECT_EQ(res->error_code.val, moveit_msgs::MoveItErrorCodes::FAILURE) << "Blend failed.";
     EXPECT_EQ(res->planned_trajectory.joint_trajectory.points.size(), 0u)
         << "Planned trajectory is empty.";
@@ -272,7 +272,7 @@ TEST_F(IntegrationTestBlendAction, blendLINLIN_invalidBlendRadius)
  *    2. Blend goal is sent to the action server.
  *    3. Error code of the blend result is not success and the planned trajectory is empty.
  */
-TEST_F(IntegrationTestBlendAction, negativeBlendLINLIN)
+TEST_F(IntegrationTestSequenceAction, negativeBlendLINLIN)
 {
   for(const auto& test_data : ne_test_data_)
   {
@@ -281,16 +281,16 @@ TEST_F(IntegrationTestBlendAction, negativeBlendLINLIN)
     move_group_->move();
 
     // create request
-    pilz_msgs::MoveGroupBlendGoal blend_goal;
+    pilz_msgs::MoveGroupSequenceGoal seq_goal;
     testutils::generateRequestMsgFromBlendTestData(robot_model_,
                                                    test_data,
                                                    "LIN",
                                                    planning_group_,
                                                    target_link_,
-                                                   blend_goal.request);
+                                                   seq_goal.request);
     // send goal
-    ac_blend_.sendGoalAndWait(blend_goal);
-    pilz_msgs::MoveGroupBlendResultConstPtr res = ac_blend_.getResult();
+    ac_blend_.sendGoalAndWait(seq_goal);
+    pilz_msgs::MoveGroupSequenceResultConstPtr res = ac_blend_.getResult();
     EXPECT_NE(res->error_code.val, moveit_msgs::MoveItErrorCodes::SUCCESS);
     EXPECT_EQ(res->planned_trajectory.joint_trajectory.points.size(), 0u);
   }
@@ -318,7 +318,7 @@ void activeCb()
   activeCb_called = true;
 }
 
-void feedbackCb(const pilz_msgs::MoveGroupBlendFeedbackConstPtr& feedback)
+void feedbackCb(const pilz_msgs::MoveGroupSequenceFeedbackConstPtr& feedback)
 {
   std::cout << "feedbackCb" << std::endl;
   std::cout << "Received feedback: " << feedback->state << std::endl;
@@ -344,7 +344,7 @@ void feedbackCb(const pilz_msgs::MoveGroupBlendFeedbackConstPtr& feedback)
 }
 
 void doneCb(const actionlib::SimpleClientGoalState& state,
-                                        const pilz_msgs::MoveGroupBlendResultConstPtr& result)
+                                        const pilz_msgs::MoveGroupSequenceResultConstPtr& result)
 {
   std::cout << "doneCb" << std::endl;
   doneCb_called = true;
@@ -371,7 +371,7 @@ void doneCb(const actionlib::SimpleClientGoalState& state,
  *    3. Error code of the blend result is success.
  *       Callbacks
  */
-TEST_F(IntegrationTestBlendAction, blendLINLINcb)
+TEST_F(IntegrationTestSequenceAction, blendLINLINcb)
 {
   for(const auto& test_data : test_data_)
   {
@@ -388,15 +388,15 @@ TEST_F(IntegrationTestBlendAction, blendLINLINcb)
     move_group_->move();
 
     // create request
-    pilz_msgs::MoveGroupBlendGoal blend_goal;
+    pilz_msgs::MoveGroupSequenceGoal seq_goal;
     testutils::generateRequestMsgFromBlendTestData(robot_model_,
                                                    test_data,
                                                    "LIN",
                                                    planning_group_,
                                                    target_link_,
-                                                   blend_goal.request);
+                                                   seq_goal.request);
     // send goal
-    ac_blend_.sendGoal(blend_goal, &doneCb, &activeCb, &feedbackCb);
+    ac_blend_.sendGoal(seq_goal, &doneCb, &activeCb, &feedbackCb);
     ASSERT_TRUE(ac_blend_.waitForResult());
 
     //check if all callbacks are called
@@ -430,7 +430,7 @@ TEST_F(IntegrationTestBlendAction, blendLINLINcb)
  *    2. Blend goal is sent to the action server.
  *    3. Blend goal canceled. Execution stop.
  */
-TEST_F(IntegrationTestBlendAction, cancelGoal)
+TEST_F(IntegrationTestSequenceAction, cancelGoal)
 {
   for(const auto& test_data : test_data_)
   {
@@ -439,22 +439,22 @@ TEST_F(IntegrationTestBlendAction, cancelGoal)
     move_group_->move();
 
     // create request
-    pilz_msgs::MoveGroupBlendGoal blend_goal;
+    pilz_msgs::MoveGroupSequenceGoal seq_goal;
     testutils::generateRequestMsgFromBlendTestData(robot_model_,
                                                    test_data,
                                                    "LIN",
                                                    planning_group_,
                                                    target_link_,
-                                                   blend_goal.request);
+                                                   seq_goal.request);
     // send goal
-    ac_blend_.sendGoal(blend_goal);
+    ac_blend_.sendGoal(seq_goal);
     // wait for 2 seconds
     ros::Duration(TIME_BEFORE_CANCEL_GOAL).sleep();
     // cancel the goal
     ac_blend_.cancelGoal();
     ac_blend_.waitForResult(ros::Duration(WAIT_FOR_RESULT_TIME_OUT));
     // result
-    pilz_msgs::MoveGroupBlendResultConstPtr res = ac_blend_.getResult();
+    pilz_msgs::MoveGroupSequenceResultConstPtr res = ac_blend_.getResult();
     EXPECT_EQ(res->error_code.val, moveit_msgs::MoveItErrorCodes::PREEMPTED) << "Error code should be preempted.";
   }
 }
@@ -472,7 +472,7 @@ TEST_F(IntegrationTestBlendAction, cancelGoal)
  *    2. Blend goal is sent to the action server.
  *    3. Error code of the blend result is success.
  */
-TEST_F(IntegrationTestBlendAction, blendLINLINOnlyPlanning)
+TEST_F(IntegrationTestSequenceAction, blendLINLINOnlyPlanning)
 {
   for(const auto& test_data : test_data_)
   {
@@ -481,17 +481,17 @@ TEST_F(IntegrationTestBlendAction, blendLINLINOnlyPlanning)
     move_group_->move();
 
     // create request
-    pilz_msgs::MoveGroupBlendGoal blend_goal;
-    blend_goal.planning_options.plan_only = true;
+    pilz_msgs::MoveGroupSequenceGoal seq_goal;
+    seq_goal.planning_options.plan_only = true;
     testutils::generateRequestMsgFromBlendTestData(robot_model_,
                                                    test_data,
                                                    "LIN",
                                                    planning_group_,
                                                    target_link_,
-                                                   blend_goal.request);
+                                                   seq_goal.request);
     // send goal
-    ac_blend_.sendGoalAndWait(blend_goal);
-    pilz_msgs::MoveGroupBlendResultConstPtr res = ac_blend_.getResult();
+    ac_blend_.sendGoalAndWait(seq_goal);
+    pilz_msgs::MoveGroupSequenceResultConstPtr res = ac_blend_.getResult();
     EXPECT_EQ(res->error_code.val, moveit_msgs::MoveItErrorCodes::SUCCESS);
     EXPECT_NE(res->planned_trajectory.joint_trajectory.points.size(), 0u)
         << "Planned trajectory is empty.";
@@ -509,7 +509,7 @@ TEST_F(IntegrationTestBlendAction, blendLINLINOnlyPlanning)
 
 int main(int argc, char **argv)
 {
-  ros::init(argc, argv, "integrationtest_blend_action_capability");
+  ros::init(argc, argv, "integrationtest_sequence_action_capability");
   ros::NodeHandle nh();
 
   testing::InitGoogleTest(&argc, argv);

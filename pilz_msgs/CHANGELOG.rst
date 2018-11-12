@@ -2,6 +2,10 @@
 Changelog for package pilz_msgs
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
+Forthcoming
+-----------
+* Renaming blend -> sequence
+
 0.1.1 (2018-09-25)
 ------------------
 

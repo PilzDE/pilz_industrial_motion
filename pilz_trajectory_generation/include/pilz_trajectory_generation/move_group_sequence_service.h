@@ -15,12 +15,12 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-#ifndef BLEND_SERVICE_CAPABILITY_H
-#define BLEND_SERVICE_CAPABILITY_H
+#ifndef SEQUENCE_SERVICE_CAPABILITY_H
+#define SEQUENCE_SERVICE_CAPABILITY_H
 
 #include <moveit/move_group/move_group_capability.h>
 
-#include <pilz_msgs/GetMotionBlend.h>
+#include <pilz_msgs/GetMotionSequence.h>
 
 namespace pilz_trajectory_generation
 {
@@ -31,22 +31,22 @@ class CommandListManager;
 /**
  * @brief Provide service to blend multiple trajectories in the form of a MoveGroup capability (plugin).
  */
-class MoveGroupBlendService : public move_group::MoveGroupCapability
+class MoveGroupSequenceService : public move_group::MoveGroupCapability
 {
 public:
 
-  MoveGroupBlendService();
-  ~MoveGroupBlendService();
+  MoveGroupSequenceService();
+  ~MoveGroupSequenceService();
 
   virtual void initialize() override;
 
 private:
-  bool plan(pilz_msgs::GetMotionBlend::Request &req,
-            pilz_msgs::GetMotionBlend::Response &res);
+  bool plan(pilz_msgs::GetMotionSequence::Request &req,
+            pilz_msgs::GetMotionSequence::Response &res);
 
 private:
-  ros::ServiceServer blend_service_;
-  std::unique_ptr<CommandListManager> blend_manager_ ;
+  ros::ServiceServer sequence_service_;
+  std::unique_ptr<CommandListManager> sequence_manager_ ;
 
 };
 
@@ -54,4 +54,4 @@ private:
 
 
 
-#endif // BLEND_SERVICE_CAPABILITY_H
+#endif // SEQUENCE_SERVICE_CAPABILITY_H

@@ -17,7 +17,7 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 <launch>
 
-  <node pkg="rosbag" type="record" name="rosbag_log" args="record rosout -o $(find pilz_trajectory_generation)/integrationtest_blend_service_capability_log"/>
+  <node pkg="rosbag" type="record" name="rosbag_log" args="record rosout -o $(find pilz_trajectory_generation)/integrationtest_sequence_action_capability_log"/>
 
   <node name="joint_state_publisher" pkg="joint_state_publisher" type="joint_state_publisher">
     <param name="/use_gui" value="false"/>
@@ -32,15 +32,19 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
     <arg name="fake_execution" value="true"/>
     <arg name="info" value="true"/>
     <arg name="debug" value="$(arg debug)"/>
-    <arg name="capabilities" value="pilz_trajectory_generation/MoveGroupBlendService" />
+    <arg name="capabilities" value="pilz_trajectory_generation/MoveGroupSequenceAction" />
   </include>
 
   <!-- run test -->
-  <test pkg="pilz_trajectory_generation" test-name="integrationtest_blend_service_capability" type="integrationtest_blend_service_capability" time-limit="300.0">
+  <test pkg="pilz_trajectory_generation" test-name="integrationtest_sequence_action_capability" type="integrationtest_sequence_action_capability" time-limit="300.0">
     <param name="planning_group" value="manipulator" />
     <param name="target_link" value="prbt_flange" />
+    <param name="joint_position_tolerance" value="0.01" />
     <param name="blend_dataset_num" value="1" />
     <rosparam command="load" file="$(find pilz_trajectory_generation)/test/test_robots/prbt/test_data/blend_lin_lin_test_data.yaml"  ns="test_data" />
+    <param name="blend_ne_dataset_num" value="1" />
+    <rosparam command="load" file="$(find pilz_trajectory_generation)/test/test_robots/prbt/test_data/blend_lin_lin_negative_test_data.yaml"  ns="ne_test_data" />
+
   </test>
 
 </launch>

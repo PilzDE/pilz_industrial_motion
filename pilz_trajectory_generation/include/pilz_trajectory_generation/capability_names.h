@@ -23,7 +23,7 @@
 namespace pilz_trajectory_generation
 {
 
-static const std::string BLEND_SERVICE_NAME = "plan_blend_path";
+static const std::string SEQUENCE_SERVICE_NAME = "plan_sequence_path";
 
 }
 

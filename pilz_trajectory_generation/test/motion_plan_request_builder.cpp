@@ -19,7 +19,7 @@
 
 #include <moveit/kinematic_constraints/utils.h>
 
-#include "pilz_msgs/MotionBlendRequestList.h"
+#include "pilz_msgs/MotionSequenceRequest.h"
 
 MotionPlanRequestBuilder::MotionPlanRequestBuilder(const moveit_msgs::MotionPlanRequest& req)
 {

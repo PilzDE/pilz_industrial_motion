@@ -56,7 +56,7 @@ CommandListManager::CommandListManager(const ros::NodeHandle &nh, const moveit::
 }
 
 bool CommandListManager::solve(const planning_scene::PlanningSceneConstPtr& planning_scene,
-                               const pilz_msgs::MotionBlendRequestList &req_list,
+                               const pilz_msgs::MotionSequenceRequest &req_list,
                                planning_interface::MotionPlanResponse& res)
 {
   //*****************************
@@ -64,7 +64,7 @@ bool CommandListManager::solve(const planning_scene::PlanningSceneConstPtr& plan
   //*****************************
 
   // Return true on empty request
-  if(req_list.requests.empty())
+  if(req_list.items.empty())
   {
     res.trajectory_.reset(new robot_trajectory::RobotTrajectory(model_, 0));
     res.error_code_.val = moveit_msgs::MoveItErrorCodes::INVALID_MOTION_PLAN;
@@ -93,7 +93,7 @@ bool CommandListManager::solve(const planning_scene::PlanningSceneConstPtr& plan
   // Validate that the blending radii do not overlap
   //*****************************
 
-  const auto group_name = req_list.requests.front().req.group_name;
+  const auto group_name = req_list.items.front().req.group_name;
 
   if(!validateBlendingRadiiDoNotOverlap(motion_plan_responses, radii, group_name))
   {
@@ -112,7 +112,7 @@ bool CommandListManager::solve(const planning_scene::PlanningSceneConstPtr& plan
 
 
   // Case: Only one trajectory in request
-  if(req_list.requests.size() == 1)
+  if(req_list.items.size() == 1)
   {
     ROS_ERROR("Request to merge single trajectory will return the identical trajectory!");
     res.trajectory_ = motion_plan_responses[0].trajectory_;
@@ -136,13 +136,13 @@ bool CommandListManager::solve(const planning_scene::PlanningSceneConstPtr& plan
   return true;
 }
 
-bool CommandListManager::validateRequestList(const pilz_msgs::MotionBlendRequestList &req_list,
+bool CommandListManager::validateRequestList(const pilz_msgs::MotionSequenceRequest &req_list,
                                              planning_interface::MotionPlanResponse &res)
 {
   // Check that all request are about the same group
-  const auto group_name = req_list.requests.front().req.group_name;
-  if(! std::all_of(req_list.requests.begin(), req_list.requests.end(),
-                   [group_name](const pilz_msgs::MotionBlendRequest& req){return (req.req.group_name == group_name);}))
+  const auto group_name = req_list.items.front().req.group_name;
+  if(! std::all_of(req_list.items.begin(), req_list.items.end(),
+                   [group_name](const pilz_msgs::MotionSequenceItem& req){return (req.req.group_name == group_name);}))
   {
     ROS_ERROR_STREAM("Cannot blend. All requests MUST be about the same group!");
     res.trajectory_.reset(new robot_trajectory::RobotTrajectory(model_, 0));
@@ -151,8 +151,8 @@ bool CommandListManager::validateRequestList(const pilz_msgs::MotionBlendRequest
   }
 
   // Validate that all blending radius are non-negative
-  if(! std::all_of(req_list.requests.begin(), req_list.requests.end(),
-                   [](const pilz_msgs::MotionBlendRequest& req){return (req.blend_radius >= 0.0);}))
+  if(! std::all_of(req_list.items.begin(), req_list.items.end(),
+                   [](const pilz_msgs::MotionSequenceItem& req){return (req.blend_radius >= 0.0);}))
   {
     ROS_ERROR_STREAM("Cannot blend. All blending radii MUST be non negative!");
     res.trajectory_.reset(new robot_trajectory::RobotTrajectory(model_, 0));
@@ -161,7 +161,7 @@ bool CommandListManager::validateRequestList(const pilz_msgs::MotionBlendRequest
   }
 
   // Validate that the last blending radius is 0
-  if(req_list.requests.back().blend_radius != 0.0)
+  if(req_list.items.back().blend_radius != 0.0)
   {
     ROS_ERROR_STREAM("Cannot blend. The last blending radius must be zero!");
     res.trajectory_.reset(new robot_trajectory::RobotTrajectory(model_, 0));
@@ -170,9 +170,9 @@ bool CommandListManager::validateRequestList(const pilz_msgs::MotionBlendRequest
   }
 
   // Only the first request is allowed to have a start_state. The others are checked here for empty start_state.
-  if(req_list.requests.size() > 1 &&
-     std::any_of(req_list.requests.begin()+1, req_list.requests.end(),
-        [](const pilz_msgs::MotionBlendRequest& req){
+  if(req_list.items.size() > 1 &&
+     std::any_of(req_list.items.begin()+1, req_list.items.end(),
+        [](const pilz_msgs::MotionSequenceItem& req){
            return !(req.req.start_state.joint_state.position.empty()
                    && req.req.start_state.joint_state.velocity.empty()
                    && req.req.start_state.joint_state.effort.empty()
@@ -215,7 +215,7 @@ bool CommandListManager::validateBlendingRadiiDoNotOverlap(
 }
 
 bool CommandListManager::solveRequests(const planning_scene::PlanningSceneConstPtr& planning_scene,
-                                       const pilz_msgs::MotionBlendRequestList &req_list,
+                                       const pilz_msgs::MotionSequenceRequest &req_list,
                                        planning_interface::MotionPlanResponse &res,
                                        std::vector<planning_interface::MotionPlanResponse> &motion_plan_responses,
                                        std::vector<double> &radii)
@@ -223,15 +223,15 @@ bool CommandListManager::solveRequests(const planning_scene::PlanningSceneConstP
   // Obtain the planning pipeline
   planning_pipeline::PlanningPipelinePtr planning_pipeline(new planning_pipeline::PlanningPipeline(model_, nh_));
 
-  for(auto req_it = req_list.requests.begin(); req_it < req_list.requests.end(); req_it++)
+  for(auto req_it = req_list.items.begin(); req_it < req_list.items.end(); req_it++)
   {
-    size_t idx = std::distance(req_list.requests.begin(), req_it);
+    size_t idx = std::distance(req_list.items.begin(), req_it);
 
     planning_interface::MotionPlanRequest req = req_it->req;
     planning_interface::MotionPlanResponse plan_res;
 
     // Set start state of request to end state of previous trajectory (except for first)
-    if(req_it != req_list.requests.begin())
+    if(req_it != req_list.items.begin())
     {
       moveit::core::robotStateToRobotStateMsg(motion_plan_responses.back().trajectory_->getLastWayPoint(),
                                               req.start_state);
@@ -248,7 +248,7 @@ bool CommandListManager::solveRequests(const planning_scene::PlanningSceneConstP
       return false;
     }
 
-    ROS_DEBUG_STREAM("Solved [" << idx+1 << "/" << req_list.requests.size() << "]");
+    ROS_DEBUG_STREAM("Solved [" << idx+1 << "/" << req_list.items.size() << "]");
 
     motion_plan_responses.push_back(plan_res);
     radii.push_back(req_it->blend_radius);

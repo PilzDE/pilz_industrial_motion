@@ -36,7 +36,7 @@
 
 // Modified by Pilz GmbH & Co. KG
 
-#include "pilz_trajectory_generation/move_group_blend_service.h"
+#include "pilz_trajectory_generation/move_group_sequence_service.h"
 
 #include "pilz_trajectory_generation/capability_names.h"
 #include "pilz_trajectory_generation/command_list_manager.h"
@@ -44,29 +44,29 @@
 namespace pilz_trajectory_generation
 {
 
-MoveGroupBlendService::MoveGroupBlendService() : MoveGroupCapability("BlendService")
+MoveGroupSequenceService::MoveGroupSequenceService() : MoveGroupCapability("SequenceService")
 {
 }
 
-MoveGroupBlendService::~MoveGroupBlendService()
+MoveGroupSequenceService::~MoveGroupSequenceService()
 {
 }
 
-void MoveGroupBlendService::initialize()
+void MoveGroupSequenceService::initialize()
 {
-  blend_manager_.reset(new pilz_trajectory_generation::CommandListManager(ros::NodeHandle("~"),
+  sequence_manager_.reset(new pilz_trajectory_generation::CommandListManager(ros::NodeHandle("~"),
                                                                           context_->planning_scene_monitor_->getRobotModel()));
 
-  blend_service_ = root_node_handle_.advertiseService(BLEND_SERVICE_NAME,
-                                                      &MoveGroupBlendService::plan,
-                                                      this);
+  sequence_service_ = root_node_handle_.advertiseService(SEQUENCE_SERVICE_NAME,
+                                                         &MoveGroupSequenceService::plan,
+                                                         this);
 }
 
 
 
 
-bool MoveGroupBlendService::plan(pilz_msgs::GetMotionBlend::Request& req,
-                                 pilz_msgs::GetMotionBlend::Response& res)
+bool MoveGroupSequenceService::plan(pilz_msgs::GetMotionSequence::Request& req,
+                                 pilz_msgs::GetMotionSequence::Response& res)
 {
   // TODO: Do we lock on the correct scene? Does the lock belong to the scene used for planning?
   planning_scene_monitor::LockedPlanningSceneRO ps(context_->planning_scene_monitor_);
@@ -76,7 +76,7 @@ bool MoveGroupBlendService::plan(pilz_msgs::GetMotionBlend::Request& req,
   try
   {
     planning_interface::MotionPlanResponse mp_res;
-    blend_manager_->solve(ps, req.commands, mp_res);
+    sequence_manager_->solve(ps, req.commands, mp_res);
     mp_res.getMessage(res.plan_response);
   }
   catch (...)
@@ -90,4 +90,4 @@ bool MoveGroupBlendService::plan(pilz_msgs::GetMotionBlend::Request& req,
 }
 
 #include <pluginlib/class_list_macros.h>
-PLUGINLIB_EXPORT_CLASS(pilz_trajectory_generation::MoveGroupBlendService, move_group::MoveGroupCapability)
+PLUGINLIB_EXPORT_CLASS(pilz_trajectory_generation::MoveGroupSequenceService, move_group::MoveGroupCapability)
