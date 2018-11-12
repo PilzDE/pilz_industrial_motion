@@ -134,13 +134,14 @@ INSTANTIATE_TEST_CASE_P(InstantiationName, IntegrationTestCommandListManager, ::
  * Sends a sequence request.
  *
  *  - Test Sequence:
- *    1. Generate request with two trajectories and zero blend radius.
+ *    1. Generate request with three trajectories and zero blend radius.
  *    2. Generate request with first trajectory and zero blend radius.
  *    3. Generate request with second trajectory and zero blend radius.
  *    4. Generate request with third trajectory and zero blend radius.
  *
  *  - Expected Results:
  *    1. blending is successful, result trajectory is not empty
+ *       TODO: all time steps of resulting trajectory are strictly positive
  *    2. blending is successful, result trajectory is not empty
  *    3. blending is successful, result trajectory is not empty
  *    4. blending is successful, result trajectory is not empty
@@ -156,6 +157,16 @@ TEST_P(IntegrationTestCommandListManager, concatThreeSegments)
   ASSERT_TRUE(manager_->solve(scene_, req, res1_2_3));
   EXPECT_EQ(moveit_msgs::MoveItErrorCodes::SUCCESS, res1_2_3.error_code_.val);
   EXPECT_GT(res1_2_3.trajectory_->getWayPointCount(), 0u);
+
+  // Check for strictly positively increasing time steps
+  const double expected_duration_min {0.};
+  for(unsigned int i = 1; i < res1_2_3.trajectory_->getWayPointCount(); ++i)
+  {
+    EXPECT_GT(res1_2_3.trajectory_->getWayPointDurationFromPrevious(i),
+              expected_duration_min) << "Time step between waypoint " << (i-1) << " and " << i
+                                     << " (total time steps: " << res1_2_3.trajectory_->getWayPointCount()
+                                     << ") is not strictly increasing.";
+  }
 
   ROS_INFO("step 2: only first segment");
   req = blend_list_builder.build({std::make_pair<>(req1_, 0)});
