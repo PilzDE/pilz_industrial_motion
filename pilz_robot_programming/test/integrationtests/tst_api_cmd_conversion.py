@@ -17,7 +17,7 @@
 import unittest
 from rospkg import RosPack
 import numpy as np
-from tf.broadcaster import TransformBroadcaster
+import tf
 import tf_conversions.posemath as pm
 from geometry_msgs.msg import Point
 
@@ -140,8 +140,8 @@ class TestAPICmdConversion(unittest.TestCase):
         self.robot = Robot(API_VERSION)
         rospy.logerr("Loading Robot done")
         self.test_data = XmlTestdataLoader(_TEST_DATA_FILE_NAME)
-        self.tf = TransformBroadcaster()
-        self.tf_listener = TransformListener()
+        self.tf = tf.TransformBroadcaster()
+        self.tf_listener = tf.TransformListener()
 
     def tearDown(self):
         if hasattr(self, 'tf_listener'):

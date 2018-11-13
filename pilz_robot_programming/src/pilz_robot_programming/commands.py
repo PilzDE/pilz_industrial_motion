@@ -29,7 +29,9 @@ from operator import add
 from math import pi
 
 from .move_control_request import _MoveControlState
+from .exceptions import RobotCurrentStateError
 from copy import deepcopy
+
 
 __version__ = '0.0.dev1'
 
@@ -241,9 +243,9 @@ class _BaseCmd(_AbstractCmd):
 
     def _get_goal_pose(self, robot):
         """Determines the goal pose for the given command."""
-        current_pose = robot.get_current_pose(base=self._reference_frame if self._reference_frame else "prbt_base")
-
-        if current_pose is None:
+        try:
+            current_pose = robot.get_current_pose(base=self._reference_frame if self._reference_frame else "prbt_base")
+        except RobotCurrentStateError:
             return None
 
         if self._relative:
@@ -263,8 +265,11 @@ class _BaseCmd(_AbstractCmd):
         goal_joint_state = self._goal
 
         if self._relative:
-            goal_joint_state = map(add, goal_joint_state,
+            try:
+                goal_joint_state = map(add, goal_joint_state,
                                    robot.get_current_joint_values(planning_group=self._planning_group))
+            except RobotCurrentStateError:
+                return None
         return goal_joint_state
 
 
