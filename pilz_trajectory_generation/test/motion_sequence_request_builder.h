@@ -15,8 +15,8 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-#ifndef MOTION_BLEND_REQUEST_LIST_BUILDER_H
-#define MOTION_BLEND_REQUEST_LIST_BUILDER_H
+#ifndef MOTION_SEQUENCE_REQUEST_LIST_BUILDER_H
+#define MOTION_SEQUENCE_REQUEST_LIST_BUILDER_H
 
 #include <pilz_msgs/MotionSequenceRequest.h>
 
@@ -28,4 +28,4 @@ public:
   build(std::initializer_list<std::pair<moveit_msgs::MotionPlanRequest, double> > l);
 };
 
-#endif // MOTION_BLEND_REQUEST_LIST_BUILDER_H
+#endif // MOTION_SEQUENCE_REQUEST_LIST_BUILDER_H
