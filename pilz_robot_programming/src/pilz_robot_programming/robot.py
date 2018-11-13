@@ -50,7 +50,7 @@ _DEFAULT_POSITION_TOLERANCE = 2e-3
 _DEFAULT_ORIENTATION_TOLERANCE = 1e-5
 
 
-class Robot:
+class Robot(object):
     """
     Main component of the API which allows the user to execute robot motion commands and pause, resume or stop the
     execution. The following commands are currently supported:
