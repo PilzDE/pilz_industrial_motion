@@ -100,10 +100,10 @@ private:
    * @param res The response used to set the error code on validation error
    * @return True if blending succeeded, false otherwise. On false the res will contain the error code.
    */
-  bool blend(const std::vector<planning_interface::MotionPlanResponse> &motion_plan_responses,
-             const std::vector<double> &radii,
-             robot_trajectory::RobotTrajectoryPtr& result_trajectory,
-             planning_interface::MotionPlanResponse &res);
+  bool generateTrajectory(const std::vector<planning_interface::MotionPlanResponse> &motion_plan_responses,
+                          const std::vector<double> &radii,
+                          robot_trajectory::RobotTrajectoryPtr& result_trajectory,
+                          planning_interface::MotionPlanResponse &res);
 
   /**
    * @brief The the name of the to frame (link) of the given group

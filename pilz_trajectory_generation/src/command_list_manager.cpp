@@ -121,7 +121,7 @@ bool CommandListManager::solve(const planning_scene::PlanningSceneConstPtr& plan
     return true;
   }
 
-  if(!blend(motion_plan_responses, radii, result_trajectory, res))
+  if(!generateTrajectory(motion_plan_responses, radii, result_trajectory, res))
   {
     return false;
   }
@@ -257,7 +257,8 @@ bool CommandListManager::solveRequests(const planning_scene::PlanningSceneConstP
   return true;
 }
 
-bool CommandListManager::blend(const std::vector<planning_interface::MotionPlanResponse> &motion_plan_responses,
+bool CommandListManager::generateTrajectory(
+                               const std::vector<planning_interface::MotionPlanResponse> &motion_plan_responses,
                                const std::vector<double> &radii,
                                robot_trajectory::RobotTrajectoryPtr& result_trajectory,
                                planning_interface::MotionPlanResponse &res)
