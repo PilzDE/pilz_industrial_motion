@@ -93,13 +93,13 @@ namespace pilz_industrial_motion_testutils
  *    </circ>
  *  </circs>
  *
- *  <blends>
+ *  <sequences>
  *    <blend name="TestBlend">
- *      <blendCmd name="TestPtp" type="ptp" blend_radius="0.2" />
- *      <blendCmd name="MyTestLin1" type="lin" blend_radius="0.01" />
- *      <blendCmd name="MyTestCirc1" type="circ" blend_radius="0" />
+ *      <sequenceCmd name="TestPtp" type="ptp" blend_radius="0.2" />
+ *      <sequenceCmd name="MyTestLin1" type="lin" blend_radius="0.01" />
+ *      <sequenceCmd name="MyTestCirc1" type="circ" blend_radius="0" />
  *    </blend>
- *  <blends>
+ *  </sequences>
  *
  * </testdata>
  */
@@ -121,8 +121,8 @@ public:
 
   virtual bool getCirc(const std::string& cmd_name, STestMotionCommand& cmd) const override;
 
-  virtual bool getBlend(const std::string &cmd_name,
-                        std::vector<SBlendCmd> &blend_cmds) const override;
+  virtual bool getSequence(const std::string &cmd_name,
+                           std::vector<SSequenceCmd> &seq_cmds) const override;
 
 private:
   /**
@@ -189,7 +189,7 @@ private:
   const std::string PTPS_PATH_STR {"testdata.ptps"};
   const std::string LINS_PATH_STR {"testdata.lins"};
   const std::string CIRCS_PATH_STR {"testdata.circs"};
-  const std::string BLENDS_PATH_STR {"testdata.blends"};
+  const std::string SEQUENCE_PATH_STR {"testdata.sequences"};
 
   const std::string NAME_PATH_STR {XML_ATTR_STR + ".name"};
   const std::string CMD_TYPE_PATH_STR {XML_ATTR_STR + ".type"};
