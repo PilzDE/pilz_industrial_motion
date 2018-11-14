@@ -93,12 +93,18 @@ private:
                      std::vector<double>& radii);
 
   /**
-   * @brief Blends all trajectories inside motion_plan_responses with the given radii
-   * @param motion_plan_responses Essentially constains the generated trajectories
+   * @brief Merges all given trajectories together into one trajectory.
+   *
+   * Function principle:
+   * Two given consecutive trajectories are blended together if blend radii != 0.
+   * Two given consecutive trajectories are simply put behind one another (if blend radii == 0).
+   *
+   * @param motion_plan_responses Contains the generated trajectories
    * @param radii List of blending radii
-   * @param result_trajectory
+   * @param result_trajectory The final trajectory created from the given trajectories
    * @param res The response used to set the error code on validation error
-   * @return True if blending succeeded, false otherwise. On false the res will contain the error code.
+   *
+   * @return True if trajectory generation succeeded, false otherwise. On false the res will contain the error code.
    */
   bool generateTrajectory(const std::vector<planning_interface::MotionPlanResponse> &motion_plan_responses,
                           const std::vector<double> &radii,
