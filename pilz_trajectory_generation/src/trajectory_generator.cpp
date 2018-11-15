@@ -53,31 +53,8 @@ bool TrajectoryGenerator::validateRequest(const planning_interface::MotionPlanRe
     return false;
   }
 
-  // check start state
-  if(req.start_state.joint_state.name.size() == 0)
+  if(!validateStartState(req, error_code))
   {
-    ROS_ERROR("Empty joint name of start state in planning request.");
-    error_code.val = moveit_msgs::MoveItErrorCodes::INVALID_ROBOT_STATE;
-    return false;
-  }
-  if(req.start_state.joint_state.name.size() != req.start_state.joint_state.position.size())
-  {
-    ROS_ERROR("Joint state name and position do not match in start state.");
-    error_code.val = moveit_msgs::MoveItErrorCodes::INVALID_ROBOT_STATE;
-    return false;
-  }
-  if(!planner_limits_.getJointLimitContainer().verifyPositionLimits(req.start_state.joint_state.name, req.start_state.joint_state.position))
-  {
-    ROS_ERROR("Joint state out of range in start state.") ;
-    error_code.val = moveit_msgs::MoveItErrorCodes::INVALID_ROBOT_STATE;
-    return false;
-  }
-  // does not allow start velocity
-  if(!std::all_of(req.start_state.joint_state.velocity.begin(), req.start_state.joint_state.velocity.end(),
-                  [](double v) { return v==0; }))
-  {
-    ROS_ERROR("Trajectory Generator does not allow non-zero start velocity.");
-    error_code.val = moveit_msgs::MoveItErrorCodes::INVALID_ROBOT_STATE;
     return false;
   }
 
@@ -203,6 +180,45 @@ bool TrajectoryGenerator::validateRequest(const planning_interface::MotionPlanRe
   error_code.val = moveit_msgs::MoveItErrorCodes::SUCCESS;
   return true;
 
+}
+
+bool TrajectoryGenerator::validateStartState(const planning_interface::MotionPlanRequest &req,
+                                             moveit_msgs::MoveItErrorCodes &error_code) const
+{
+  // check start state
+  if(req.start_state.joint_state.name.size() == 0)
+  {
+    ROS_ERROR("Empty joint name of start state in planning request.");
+    error_code.val = moveit_msgs::MoveItErrorCodes::INVALID_ROBOT_STATE;
+    return false;
+  }
+
+  if(req.start_state.joint_state.name.size() != req.start_state.joint_state.position.size())
+  {
+    ROS_ERROR("Joint state name and position do not match in start state.");
+    error_code.val = moveit_msgs::MoveItErrorCodes::INVALID_ROBOT_STATE;
+    return false;
+  }
+
+  if(!planner_limits_.getJointLimitContainer().verifyPositionLimits(req.start_state.joint_state.name,
+                                                                    req.start_state.joint_state.position))
+  {
+    ROS_ERROR("Joint state out of range in start state.") ;
+    error_code.val = moveit_msgs::MoveItErrorCodes::INVALID_ROBOT_STATE;
+    return false;
+  }
+
+  // does not allow start velocity
+  if(!std::all_of(req.start_state.joint_state.velocity.begin(), req.start_state.joint_state.velocity.end(),
+                  [this](double v) { return std::fabs(v) < this->VELOCITY_TOLERANCE; }))
+  {
+    ROS_ERROR("Trajectory Generator does not allow non-zero start velocity.");
+    error_code.val = moveit_msgs::MoveItErrorCodes::INVALID_ROBOT_STATE;
+    return false;
+  }
+
+  error_code.val = moveit_msgs::MoveItErrorCodes::SUCCESS;
+  return true;
 }
 
 bool TrajectoryGenerator::setResponse(const planning_interface::MotionPlanRequest &req,
