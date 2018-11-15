@@ -317,6 +317,14 @@ TEST_P(TrajectoryGeneratorLINTest, cartesianTrapezoidProfile)
   // rotation
   waypoint_aa = waypoint_pose.linear();
   EXPECT_NEAR((0.1+0.15*23/24)*M_PI, waypoint_aa.angle(),other_tolerance_);
+
+  // check last point for vel=acc=0
+  for(size_t idx = 0; idx < res.trajectory_->getLastWayPointPtr()->getVariableCount(); ++idx)
+  {
+    EXPECT_NEAR(0.0, res.trajectory_->getLastWayPointPtr()->getVariableVelocity(idx), other_tolerance_);
+    EXPECT_NEAR(0.0, res.trajectory_->getLastWayPointPtr()->getVariableAcceleration(idx), other_tolerance_);
+  }
+
 }
 
 /**
