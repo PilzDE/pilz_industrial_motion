@@ -232,6 +232,12 @@ void TrajectoryGeneratorCIRCTest::checkCircResult(const planning_interface::Moti
   // rotation
   waypoint_aa = waypoint_pose.linear();
   EXPECT_NEAR(angle_rot, waypoint_aa.angle(),cartesian_angle_tolerance_);
+
+  for(size_t idx = 0; idx < res.trajectory_->getLastWayPointPtr()->getVariableCount(); ++idx)
+  {
+    EXPECT_NEAR(0.0, res.trajectory_->getLastWayPointPtr()->getVariableVelocity(idx), other_tolerance_);
+    EXPECT_NEAR(0.0, res.trajectory_->getLastWayPointPtr()->getVariableAcceleration(idx), other_tolerance_);
+  }
 }
 
 // Instantiate the test cases for robot model with and without gripper
