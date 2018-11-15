@@ -301,7 +301,7 @@ bool pilz::generateJointTrajectory(const moveit::core::RobotModelConstPtr &robot
     {
       point.positions.push_back(ik_solution.at(joint_name));
 
-      if(time_iter!=time_samples.begin())
+      if(time_iter!=time_samples.begin() && time_iter!=time_samples.end()-1)
       {
         double joint_velocity = (ik_solution.at(joint_name) - ik_solution_last.at(joint_name))/duration_current_sample;
         point.velocities.push_back(joint_velocity);
