@@ -92,18 +92,10 @@ bool TrajectoryGeneratorLIN::generate(const planning_interface::MotionPlanReques
     return setResponse(req, res, joint_trajectory, error_code, planning_begin);
   }
 
-  // Last point should be hard velocity and acceleration zero
-  std::fill(joint_trajectory.points.back().velocities.begin(),
-            joint_trajectory.points.back().velocities.end(), 0.0);
-  std::fill(joint_trajectory.points.back().accelerations.begin(),
-            joint_trajectory.points.back().accelerations.end(), 0.0);
-
   ROS_INFO_STREAM("LIN Trajectory with " << joint_trajectory.points.size() << " Points generated. Took "
                   << (ros::Time::now() - planning_begin).toSec() * 1000 << " ms.");
 
   return setResponse(req, res, joint_trajectory, error_code, planning_begin);
-
-
 }
 
 bool TrajectoryGeneratorLIN::extractMotionPlanInfo(const planning_interface::MotionPlanRequest &req, TrajectoryGenerator::MotionPlanInfo &info, moveit_msgs::MoveItErrorCodes &error_code) const
