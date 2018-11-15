@@ -114,7 +114,8 @@ bool verifySampleJointLimits(const std::map<std::string, double>& position_last,
  * @param link_name: name of the target robot link
  * @param initial_joint_position: initial joint positions, needed for selecting the ik solution
  * @param sampling_time: sampling time of the generated trajectory
- * @param joint_trajectory: output as robot joint trajectory
+ * @param joint_trajectory: output as robot joint trajectory, first and last point will have zero velocity
+ * and acceleration
  * @param error_code: detailed error information
  * @param check_self_collision: check for self collision during creation
  * @return true if succeed
