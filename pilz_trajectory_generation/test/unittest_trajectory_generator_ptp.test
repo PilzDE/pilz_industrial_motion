@@ -29,9 +29,9 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
     type="unittest_trajectory_generator_ptp">
       <param name="planning_group" value="manipulator" />
       <param name="target_link" value="prbt_tcp" />
-      <param name="joint_position_tolerance" value="1.0e-3" />
-      <param name="joint_velocity_tolerance" value="1.0e-3" />
-      <param name="joint_acceleration_tolerance" value="1.0e-3" />
+      <param name="joint_position_tolerance" value="1.0e-8" />
+      <param name="joint_velocity_tolerance" value="1.0e-8" />
+      <param name="joint_acceleration_tolerance" value="1.0e-8" />
       <param name="pose_norm_tolerance" value="1.0e-6" />
       <rosparam command="load" file="$(find prbt_moveit_config)/config/joint_limits.yaml" />
     </test>
