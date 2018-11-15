@@ -37,7 +37,7 @@ enum class ECircAuxPosType
   eCENTER
 };
 
-struct SBlendCmd
+struct SSequenceCmd
 {
   std::string cmd_name;
   std::string cmd_type;
@@ -110,8 +110,8 @@ public:
    * @brief Returns a container containing the cmds which make-up the
    * blend cmd. The cmds in the container are in the order of execution.
    */
-  virtual bool getBlend(const std::string &cmd_name,
-                        std::vector<SBlendCmd> &blend_cmds) const = 0;
+  virtual bool getSequence(const std::string &cmd_name,
+                           std::vector<SSequenceCmd> &seq_cmds) const = 0;
 
 public:
    static geometry_msgs::Pose fromVecToMsg(const std::vector<double>& vec);
