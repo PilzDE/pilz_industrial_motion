@@ -244,7 +244,10 @@ TYPED_TEST(TrajectoryGeneratorCommonTest, StartPostionOutOfLimit)
 }
 
 /**
- * @brief joint velocity none zero
+ * @brief Check that no trajectory is generated if a start velocity is given
+ *
+ * @note This test is here for regression, however in general generators that can work with a given
+ * start velocity are highly desired.
  */
 TYPED_TEST(TrajectoryGeneratorCommonTest, StartPositionVelocityNoneZero)
 {

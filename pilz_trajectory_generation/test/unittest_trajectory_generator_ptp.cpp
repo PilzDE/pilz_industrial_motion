@@ -597,7 +597,7 @@ TEST_P(TrajectoryGeneratorPTPTest, testScalingFactor)
  * @brief test the ptp trajectory generator of joint space goal
  * with (almost) zero start velocity
  */
-TEST_P(TrajectoryGeneratorPTPTest, testJointGoalZeroStartVel1)
+TEST_P(TrajectoryGeneratorPTPTest, testJointGoalAndAlmostZeroStartVelocity)
 {
   planning_interface::MotionPlanResponse res;
   planning_interface::MotionPlanRequest req;
