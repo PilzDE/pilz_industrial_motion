@@ -619,6 +619,28 @@ TEST_P(TrajectoryGeneratorCIRCTest, InterimPointJointGoal)
 }
 
 /**
+ * @brief test the circ planner with interim point with joint goal
+ */
+TEST_P(TrajectoryGeneratorCIRCTest, InterimPointJointGoalStartVelNearZero)
+{
+  // get the test data from xml
+  pilz_industrial_motion_testutils::STestMotionCommand circ_cmd;
+  circ_cmd.aux_pos_type = pilz_industrial_motion_testutils::ECircAuxPosType::eINTERMEDIATE;
+  ASSERT_TRUE(tdp_->getCirc("ValidCIRCCmd3", circ_cmd)) << "failed to get circ command from test data";
+  // construct planning request
+  moveit_msgs::MotionPlanRequest req = req_director_.getCIRCJointReq(robot_model_, circ_cmd);
+
+  // Set velocity near zero
+  req.start_state.joint_state.velocity = std::vector<double>(req.start_state.joint_state.position.size(), 1e-16);
+
+  // empty path constraint
+  planning_interface::MotionPlanResponse res;
+  ASSERT_TRUE(circ_->generate(req,res));
+  EXPECT_EQ(res.error_code_.val, moveit_msgs::MoveItErrorCodes::SUCCESS);
+  checkCircResult(req, res);
+}
+
+/**
  * @brief test the circ planner with interim point with pose goal
  */
 TEST_P(TrajectoryGeneratorCIRCTest, InterimPointPoseGoal)

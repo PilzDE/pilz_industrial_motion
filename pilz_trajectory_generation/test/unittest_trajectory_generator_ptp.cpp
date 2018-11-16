@@ -595,7 +595,7 @@ TEST_P(TrajectoryGeneratorPTPTest, testScalingFactor)
 
 /**
  * @brief test the ptp trajectory generator of joint space goal
- * with zero start velocity
+ * with (almost) zero start velocity
  */
 TEST_P(TrajectoryGeneratorPTPTest, testJointGoalZeroStartVel1)
 {
@@ -603,6 +603,10 @@ TEST_P(TrajectoryGeneratorPTPTest, testJointGoalZeroStartVel1)
   planning_interface::MotionPlanRequest req;
   testutils::createDummyRequest(robot_model_, planning_group_, req);
   req.start_state.joint_state.position[2] = 0.1;
+
+  // Set velocity to all 1e-16
+  req.start_state.joint_state.velocity = std::vector<double>(req.start_state.joint_state.position.size(), 1e-16);
+
   moveit_msgs::Constraints gc;
   moveit_msgs::JointConstraint jc;
   jc.joint_name = "prbt_joint_1";
@@ -714,7 +718,7 @@ TEST_P(TrajectoryGeneratorPTPTest, testJointGoalZeroStartVel1)
  * @brief test the ptp_ trajectory generator of joint space goal
  * with zero start velocity
  */
-TEST_P(TrajectoryGeneratorPTPTest, testJointGoalZeroStartVel2)
+TEST_P(TrajectoryGeneratorPTPTest, testJointGoalNoStartVel)
 {
   planning_interface::MotionPlanResponse res;
   planning_interface::MotionPlanRequest req;
