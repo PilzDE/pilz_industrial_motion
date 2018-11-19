@@ -136,9 +136,9 @@ class TestAPICmdConversion(unittest.TestCase):
                                req_position.z)
 
     def setUp(self):
-        rospy.logerr("Loading Robot...")
+        rospy.loginfo("Loading Robot...")
         self.robot = Robot(API_VERSION)
-        rospy.logerr("Loading Robot done")
+        rospy.loginfo("Loading Robot done")
         self.test_data = XmlTestdataLoader(_TEST_DATA_FILE_NAME)
         self.tf = tf.TransformBroadcaster()
         self.tf_listener = tf.TransformListener()
@@ -222,19 +222,18 @@ class TestAPICmdConversion(unittest.TestCase):
                 2. Call ptp convert function with a joint goal, which has more joint values than needed.
 
             Test results:
-                1. None is returned.
-                2. None is returned.
+                1. raises exception.
+                2. raises exception.
         """
         # 1
         ptp_1 = Ptp(vel_scale=EXP_VEL_SCALE, acc_scale=EXP_ACC_SCALE)
-        req_1 = ptp_1._cmd_to_request(self.robot)
-        self.assertIsNone(req_1)
+        self.assertRaises(NameError, ptp_1._cmd_to_request, self.robot)
 
         # 2
-        exp_joint_values = self.test_data.get_joints("LINPose1", PLANNING_GROUP_NAME)
-        ptp_2 = Ptp(goal=exp_joint_values.append(1), vel_scale=EXP_VEL_SCALE, acc_scale=EXP_ACC_SCALE)
-        req_2 = ptp_2._cmd_to_request(self.robot)
-        self.assertIsNone(req_2)
+        exp_joint_values = self.test_data.get_joints("PTPJointValid", PLANNING_GROUP_NAME)
+        exp_joint_values.append(1)
+        ptp_2 = Ptp(goal=exp_joint_values, vel_scale=EXP_VEL_SCALE, acc_scale=EXP_ACC_SCALE)
+        self.assertRaises(IndexError, ptp_2._cmd_to_request, self.robot)
 
     def test_ptp_relative_joint(self):
         """ Test the conversion of ptp command with relative joint works correctly
@@ -399,19 +398,17 @@ class TestAPICmdConversion(unittest.TestCase):
                 2. Call lin convert function with a joint goal, which has less joint values than needed.
 
             Test Results:
-                1. None is returned.
-                2. None is returned.
+                1. raises Exception.
+                2. raises Exception.
         """
         # 1
         lin_1 = Lin(vel_scale=EXP_VEL_SCALE, acc_scale=EXP_ACC_SCALE)
-        req_1 = lin_1._cmd_to_request(self.robot)
-        self.assertIsNone(req_1)
+        self.assertRaises(NameError, lin_1._cmd_to_request, self.robot)
 
         # 2
         exp_joint_values = self.test_data.get_joints("LINPose1", PLANNING_GROUP_NAME)
         lin_2 = Lin(goal=exp_joint_values[:-1], vel_scale=EXP_VEL_SCALE, acc_scale=EXP_ACC_SCALE)
-        req_2 = lin_2._cmd_to_request(self.robot)
-        self.assertIsNone(req_2)
+        self.assertRaises(IndexError, lin_2._cmd_to_request, self.robot)
 
     def test_lin_relative_joint(self):
         """ Test the conversion of lin command with relative joint works correctly
@@ -557,28 +554,25 @@ class TestAPICmdConversion(unittest.TestCase):
                 3. Call circ convert function with both help points.
 
             Test Results:
-                1. None is returned.
-                2. None is returned.
-                3. None is returned.
+                1. raises Exception.
+                2. raises Exception.
+                3. raises Exception.
         """
         exp_goal_pose = self.test_data.get_pose("LINPose1", PLANNING_GROUP_NAME)
         exp_help_pose = self.test_data.get_pose("CIRCCenterPose", PLANNING_GROUP_NAME)
 
         # 1
         circ_1 = Circ(interim=exp_help_pose.position, vel_scale=EXP_VEL_SCALE, acc_scale=EXP_ACC_SCALE)
-        req_1 = circ_1._cmd_to_request(self.robot)
-        self.assertIsNone(req_1)
+        self.assertRaises(NameError, circ_1._cmd_to_request, self.robot)
 
         # 2
         circ_2 = Circ(goal=exp_goal_pose, vel_scale=EXP_VEL_SCALE, acc_scale=EXP_ACC_SCALE)
-        req_2 = circ_2._cmd_to_request(self.robot)
-        self.assertIsNone(req_2)
+        self.assertRaises(NameError, circ_2._cmd_to_request, self.robot)
 
         # 3
         circ_3 = Circ(goal=exp_goal_pose, center=exp_help_pose.position, interim=exp_help_pose.position,
                       vel_scale=EXP_VEL_SCALE, acc_scale=EXP_ACC_SCALE)
-        req_3 = circ_3._cmd_to_request(self.robot)
-        self.assertIsNone(req_3)
+        self.assertRaises(NameError, circ_3._cmd_to_request, self.robot)
 
     def test_circ_default_acc_scale(self):
         """ Test the default acceleration scaling factor for circ commands.
@@ -663,7 +657,7 @@ class TestAPICmdConversion(unittest.TestCase):
 
             Test results:
                 1. -
-                2. None is returned
+                2. raises Exception
         """
         # 1
         exp_goal_pose_1 = self.test_data.get_pose("LINPose1", PLANNING_GROUP_NAME)
@@ -678,8 +672,7 @@ class TestAPICmdConversion(unittest.TestCase):
         seq.append(lin_2, exp_blend_radius_2)
 
         # 2
-        seq_action_goal = seq._get_sequence_request(self.robot)
-        self.assertIsNone(seq_action_goal)
+        self.assertRaises(NameError, seq._get_sequence_request, self.robot)
 
     def test_relative_misusage(self):
         """ Test if using reference frame in strange ways results in the correct response.
@@ -803,16 +796,14 @@ class TestAPICmdConversion(unittest.TestCase):
 
         # test with non existing frame: should return none
         ptp_no_tf = Ptp(goal=goal_pose_bf, reference_frame="this_does_not_exist")
-        req_ptp_no_tf = ptp_no_tf._cmd_to_request(self.robot)
 
-        self.assertIsNone(req_ptp_no_tf)
+        self.assertRaises(RobotCurrentStateError, ptp_no_tf._cmd_to_request, self.robot)
 
         # no rotation assigned: should interpret the rotation as Quaternion(0, 0, 0, 1)
         no_rot = Ptp(goal=Pose(position=Point(0, 0, 1)),
                      reference_frame=self.robot._robot_commander.get_planning_frame())
         no_rot_req = no_rot._cmd_to_request(self.robot)
 
-        self.assertIsNotNone(no_rot_req)
         self._analyze_request_pose(TARGET_LINK_NAME, Pose(position=Point(0, 0, 1), orientation=Quaternion(0, 0, 0, 1)),
                                    no_rot_req)
 

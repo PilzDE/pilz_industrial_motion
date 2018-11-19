@@ -49,12 +49,11 @@ class TestAPIGripper(unittest.TestCase):
                 1. Call gripper convert function with a list.
 
             Test Results:
-                1. None is returned.
+                1. raises Exception.
         """
 
         gripper_cmd = Gripper(goal=[1, 2])
-        req = gripper_cmd._cmd_to_request(self.robot)
-        self.assertIsNone(req)
+        self.assertRaises(RuntimeError, gripper_cmd._cmd_to_request, self.robot)
 
     def test_gripper_cmd_convert(self):
         """ Test the gripper convert function works correctly.

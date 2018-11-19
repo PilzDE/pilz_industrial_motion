@@ -74,10 +74,10 @@ class _AbstractCmd:
     def _execute(self, robot):
         rospy.logdebug("Executing command.")
 
-        sequence_action_goal = self._get_sequence_request(robot)
-
-        if sequence_action_goal is None:
-            rospy.logerr("Failed to create MotionSequenceItem.")
+        try:
+            sequence_action_goal = self._get_sequence_request(robot)
+        except Exception as e:
+            rospy.logerr(str(e))
             return robot._FAILURE
 
         sequence_action_goal.planning_options = self._planning_options
@@ -177,16 +177,13 @@ class _BaseCmd(_AbstractCmd):
 
         # Set goal constraint
         if self._goal is None:
-            rospy.logerr("Goal is not given.")
+            raise NameError("Goal is not given.")
 
         goal_constraints = Constraints()
 
         # goal as Pose in Cartesian space
         if isinstance(self._goal, Pose):
             goal_pose = self._get_goal_pose(robot)
-            if goal_pose is None:
-                rospy.logerr("Get goal pose failed.")
-                return None
 
             robot_reference_frame = robot._robot_commander.get_planning_frame()
             goal_constraints.orientation_constraints.append(
@@ -198,13 +195,9 @@ class _BaseCmd(_AbstractCmd):
         elif isinstance(self._goal, list):
             joint_names = robot._robot_commander.get_group(self._planning_group).get_active_joints()
             joint_values = self._get_joint_pose(robot)
-            if joint_values is None:
-                rospy.logerr("Get goal joint pose failed.")
-                return None
 
             if len(joint_names) != len(joint_values):
-                rospy.logerr("Given joint goal does not match the planning group " + req.group_name + ".")
-                return None
+                raise IndexError("Given joint goal does not match the planning group " + req.group_name + ".")
 
             for joint_name, joint_value in zip(joint_names, joint_values):
                 joint_constraint = JointConstraint()
@@ -214,8 +207,7 @@ class _BaseCmd(_AbstractCmd):
                 goal_constraints.joint_constraints.append(joint_constraint)
 
         else:
-            rospy.logerr("Unknown type of goal is given.")
-            return None
+            raise NotImplementedError("Unknown type of goal is given.")
 
         req.goal_constraints.append(goal_constraints)
 
@@ -232,9 +224,6 @@ class _BaseCmd(_AbstractCmd):
 
         # Fill MotionPlanRequest
         sequence_item.req = self._cmd_to_request(robot)
-        if sequence_item.req is None:
-            rospy.logerr("Transform Command to MotionPlanRequest failed.")
-            return None
 
         # Add request to goal
         sequence_action_goal.request.items.append(sequence_item)
@@ -243,10 +232,7 @@ class _BaseCmd(_AbstractCmd):
 
     def _get_goal_pose(self, robot):
         """Determines the goal pose for the given command."""
-        try:
-            current_pose = robot.get_current_pose(base=self._reference_frame if self._reference_frame else "prbt_base")
-        except RobotCurrentStateError:
-            return None
+        current_pose = robot.get_current_pose(base=self._reference_frame if self._reference_frame else "prbt_base")
 
         if self._relative:
             self._goal = _pose_relative_to_absolute(current_pose, self._goal)
@@ -265,11 +251,8 @@ class _BaseCmd(_AbstractCmd):
         goal_joint_state = self._goal
 
         if self._relative:
-            try:
-                goal_joint_state = map(add, goal_joint_state,
-                                       robot.get_current_joint_states(planning_group=self._planning_group))
-            except RobotCurrentStateError:
-                return None
+            goal_joint_state = map(add, goal_joint_state,
+                                   robot.get_current_joint_states(planning_group=self._planning_group))
         return goal_joint_state
 
 
@@ -561,16 +544,11 @@ class Circ(_BaseCmd):
     def _cmd_to_request(self, robot):
         req = _BaseCmd._cmd_to_request(self, robot)
 
-        if req is None:
-            return None
-
         if self._center is not None and self._interim is not None:
-            rospy.logerr("Both center and interim are set for circ command!")
-            return None
+            raise NameError("Both center and interim are set for circ command!")
 
         if self._center is None and self._interim is None:
-            rospy.logerr("Both center and interim are not set for circ command!")
-            return None
+            raise NameError("Both center and interim are not set for circ command!")
 
         # Set the position constraint
         path_point = Pose()
@@ -659,9 +637,6 @@ class Sequence(_AbstractCmd):
 
             # Fill MotionPlanRequest
             curr_sequence_req.req = item.cmd._cmd_to_request(robot)
-            if curr_sequence_req.req is None:
-                rospy.logerr("Transform Command to MotionPlanRequest failed.")
-                return None
 
             # Add request to goal
             sequence_action_goal.request.items.append(curr_sequence_req)
@@ -724,9 +699,8 @@ class Gripper(_BaseCmd):
             joint_names = robot._robot_commander.get_group(self._planning_group).get_active_joints()
 
             if len(joint_names) != 1:
-                rospy.logerr("PG70 should have only one joint. But group " + req.group_name + " contains "
-                             + str(len(joint_names)) + " joints.")
-                return None
+                raise IndexError("PG70 should have only one joint. But group " + req.group_name
+                                 + " contains " + str(len(joint_names)) + " joints.")
 
             joint_constraint = JointConstraint()
             joint_constraint.joint_name = joint_names[0]
@@ -735,8 +709,7 @@ class Gripper(_BaseCmd):
             goal_constraints.joint_constraints.append(joint_constraint)
 
         else:
-            rospy.logerr("Unknown type of goal is given.")
-            return None
+            raise RuntimeError("Unknown type of goal is given.")
 
         req.goal_constraints.append(goal_constraints)
 
