@@ -30,11 +30,12 @@ namespace pilz_trajectory_generation
  * increasing trajectory. If through appending the last point of the original trajectory gets repeated it is removed here.
  */
 void RobotTrajectoryHelper::appendWithoutRedundantFirstState(robot_trajectory::RobotTrajectoryPtr &robot_trajectory,
-                                                             robot_trajectory::RobotTrajectory &tail)
+                                                             const robot_trajectory::RobotTrajectory &tail)
 {
   size_t start_index = 0;
+  moveit::core::RobotStatePtr rs = std::make_shared<moveit::core::RobotState>(tail.getFirstWayPoint());
   if ( (robot_trajectory->getWayPointCount() > 0) && pilz::isRobotStateEqual(robot_trajectory->getLastWayPointPtr(),
-                                                                             tail.getFirstWayPointPtr(),
+                                                                             rs,
                                                                              robot_trajectory->getGroupName(),
                                                                              ROBOT_STATE_EQUALITY_EPSILON) )
   {

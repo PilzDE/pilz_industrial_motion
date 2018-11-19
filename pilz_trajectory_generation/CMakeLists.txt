@@ -406,6 +406,15 @@ ${catkin_LIBRARIES} ${PROJECT_NAME}_test)
   target_link_libraries(unittest_planning_context
      ${catkin_LIBRARIES} ${PROJECT_NAME}_test)
 
+  # RobotTrajectoryHelper Unit Test
+  add_rostest_gtest(unittest_robot_trajectory_helper
+    test/unittest_robot_trajectory_helper.test
+    test/unittest_robot_trajectory_helper.cpp
+    src/robot_trajectory_helper.cpp)
+
+  target_link_libraries(unittest_robot_trajectory_helper
+    ${PROJECT_NAME} ${catkin_LIBRARIES} ${PROJECT_NAME}_test)
+
   # to run: catkin_make -DENABLE_COVERAGE_TESTING=ON package_name_coverage
   if(ENABLE_COVERAGE_TESTING)
     include(CodeCoverage)

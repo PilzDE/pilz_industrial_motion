@@ -27,7 +27,7 @@ class RobotTrajectoryHelper
 {
 public:
     static void appendWithoutRedundantFirstState(robot_trajectory::RobotTrajectoryPtr &robot_trajectory,
-                                                 robot_trajectory::RobotTrajectory &tail);
+                                                 const robot_trajectory::RobotTrajectory &tail);
 
     // Constant to check for equality of values.
     static constexpr double ROBOT_STATE_EQUALITY_EPSILON = 1e-4;
