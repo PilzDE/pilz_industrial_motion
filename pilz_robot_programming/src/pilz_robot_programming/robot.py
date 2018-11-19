@@ -157,8 +157,8 @@ class Robot(object):
     def _robot_commander(self, robot_commander):
         self.__robot_commander = robot_commander
 
-    def get_current_joint_values(self, planning_group=_DEFAULT_PLANNING_GROUP):
-        """Returns the current joint values of the robot.
+    def get_current_joint_states(self, planning_group=_DEFAULT_PLANNING_GROUP):
+        """Returns the current joint state values of the robot.
         :param planning_group: Name of the planning group, default value is "manipulator".
         :return: Returns the current joint values as array
         :rtype: array of floats

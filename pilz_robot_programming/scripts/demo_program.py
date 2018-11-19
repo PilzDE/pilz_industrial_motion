@@ -31,7 +31,7 @@ def start_program():
     # Simple ptp movement
     r.move(Ptp(goal=[0, 0.5, 0.5, 0, 0, 0], vel_scale=0.4))
 
-    start_joint_values = r.get_current_joint_values()
+    start_joint_values = r.get_current_joint_states()
 
     # Relative ptp movement
     r.move(Ptp(goal=[0.1, 0, 0, 0, 0, 0], relative=True, vel_scale=0.2))

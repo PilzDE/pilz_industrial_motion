@@ -101,7 +101,7 @@ class TestAPIUtilityFunctions(unittest.TestCase):
         self.robot.move(Ptp(goal=goal_joints))
 
         # 2
-        current_joints = self.robot.get_current_joint_values()
+        current_joints = self.robot.get_current_joint_states()
         self.assertEqual(len(goal_joints), len(current_joints))
         for current_joint, goal_joint in zip(current_joints, goal_joints):
             self.assertAlmostEqual(current_joint, goal_joint, COMPARE_PRECISION)
@@ -115,7 +115,7 @@ class TestAPIUtilityFunctions(unittest.TestCase):
             Test Results:
                 1. Exception is raised.
         """
-        self.assertRaises(RobotCurrentStateError, self.robot.get_current_joint_values, planning_group="invalid")
+        self.assertRaises(RobotCurrentStateError, self.robot.get_current_joint_states, planning_group="invalid")
 
 if __name__ == '__main__':
     import rostest

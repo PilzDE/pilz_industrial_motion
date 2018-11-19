@@ -72,7 +72,7 @@ class TestSelfCollision(unittest.TestCase):
         move_thread.join()
         rospy.loginfo("Ptp Movement done.")
 
-        pos_before_lin = self.robot.get_current_joint_values()
+        pos_before_lin = self.robot.get_current_joint_states()
         rospy.loginfo(pos_before_lin)
 
         move_thread_lin = MoveThread(self.robot,
@@ -85,7 +85,7 @@ class TestSelfCollision(unittest.TestCase):
             self.condition.wait()
 
         move_thread_lin.join()
-        pos_after_lin = self.robot.get_current_joint_values()
+        pos_after_lin = self.robot.get_current_joint_states()
 
         self.assertEqual(pos_before_lin, pos_after_lin)
         self.assertTrue(move_thread_lin.exception_thrown)

@@ -165,7 +165,7 @@ class TestAPIGripper(unittest.TestCase):
         self.robot.move(Gripper(goal=goal_joint))
 
         # 2
-        current_joints = self.robot.get_current_joint_values("gripper")
+        current_joints = self.robot.get_current_joint_states("gripper")
         self.assertEqual(1, len(current_joints))
         self.assertAlmostEqual(goal_joint, current_joints[0])
 

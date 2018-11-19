@@ -267,7 +267,7 @@ class _BaseCmd(_AbstractCmd):
         if self._relative:
             try:
                 goal_joint_state = map(add, goal_joint_state,
-                                   robot.get_current_joint_values(planning_group=self._planning_group))
+                                       robot.get_current_joint_states(planning_group=self._planning_group))
             except RobotCurrentStateError:
                 return None
         return goal_joint_state
