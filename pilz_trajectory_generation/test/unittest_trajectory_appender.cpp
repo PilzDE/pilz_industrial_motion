@@ -16,7 +16,11 @@
  */
 
 #include <ros/ros.h>
+#include <ros/console.h>
 #include <gtest/gtest.h>
+
+#include <vector>
+#include <string>
 
 #include <moveit/robot_trajectory/robot_trajectory.h>
 #include <moveit/robot_model_loader/robot_model_loader.h>
@@ -29,6 +33,8 @@
 const std::string PARAM_MODEL_NAME {"robot_description"};
 const std::string PARAM_PLANNING_GROUP_NAME("planning_group");
 const std::string PARAM_TARGET_LINK_NAME("target_link");
+
+constexpr double ROBOT_STATE_EQUAL_TOL {1e-12};
 
 namespace pilz_trajectory_generation
 {
@@ -76,8 +82,10 @@ TEST_F(TrajectoryAppenderTest, testMergeWithRedundantPoint)
   using moveit::core::RobotStatePtr;
   using robot_trajectory::RobotTrajectory;
 
-  // Step 1
-  double duration_from_previous = 0.1;
+  ROS_INFO("++++++++++");
+  ROS_INFO("+ Step 1 +");
+  ROS_INFO("++++++++++");
+  const double duration_from_previous = 0.1;
   std::vector<double> zeros;
   zeros.resize(robot_model_->getVariableCount(), 0.0);
 
@@ -98,14 +106,16 @@ TEST_F(TrajectoryAppenderTest, testMergeWithRedundantPoint)
   traj2.addSuffixWayPoint(robot_state2, duration_from_previous);
   traj2.addSuffixWayPoint(robot_state1, duration_from_previous);
 
-  // Step 2
+  ROS_INFO("++++++++++");
+  ROS_INFO("+ Step 2 +");
+  ROS_INFO("++++++++++");
   appender_.merge(traj1, traj2);
 
   ASSERT_EQ(3u, traj1.getWayPointCount());
 
-  ASSERT_TRUE(pilz::isRobotStateEqual(robot_state1, traj1.getWayPointPtr(0), planning_group_, 1e-12));
-  ASSERT_TRUE(pilz::isRobotStateEqual(robot_state2, traj1.getWayPointPtr(1), planning_group_, 1e-12));
-  ASSERT_TRUE(pilz::isRobotStateEqual(robot_state1, traj1.getWayPointPtr(2), planning_group_, 1e-12));
+  ASSERT_TRUE(pilz::isRobotStateEqual(robot_state1, traj1.getWayPointPtr(0), planning_group_, ROBOT_STATE_EQUAL_TOL));
+  ASSERT_TRUE(pilz::isRobotStateEqual(robot_state2, traj1.getWayPointPtr(1), planning_group_, ROBOT_STATE_EQUAL_TOL));
+  ASSERT_TRUE(pilz::isRobotStateEqual(robot_state1, traj1.getWayPointPtr(2), planning_group_, ROBOT_STATE_EQUAL_TOL));
 
   ASSERT_EQ(duration_from_previous, traj1.getWayPointDurationFromPrevious(0));
   ASSERT_EQ(duration_from_previous, traj1.getWayPointDurationFromPrevious(1));
@@ -129,8 +139,10 @@ TEST_F(TrajectoryAppenderTest, testMergeWithDifferentFirstPoint)
   using moveit::core::RobotStatePtr;
   using robot_trajectory::RobotTrajectory;
 
-  // Step 1
-  double duration_from_previous = 0.1;
+  ROS_INFO("++++++++++");
+  ROS_INFO("+ Step 1 +");
+  ROS_INFO("++++++++++");
+  const double duration_from_previous = 0.1;
   std::vector<double> zeros;
   zeros.resize(robot_model_->getVariableCount(), 0.0);
 
@@ -151,15 +163,17 @@ TEST_F(TrajectoryAppenderTest, testMergeWithDifferentFirstPoint)
   traj2.addSuffixWayPoint(robot_state1, duration_from_previous);
   traj2.addSuffixWayPoint(robot_state2, duration_from_previous);
 
-  // Step 2
+  ROS_INFO("++++++++++");
+  ROS_INFO("+ Step 2 +");
+  ROS_INFO("++++++++++");
   appender_.merge(traj1, traj2);
 
   ASSERT_EQ(4u, traj1.getWayPointCount());
 
-  ASSERT_TRUE(pilz::isRobotStateEqual(robot_state1, traj1.getWayPointPtr(0), planning_group_, 1e-12));
-  ASSERT_TRUE(pilz::isRobotStateEqual(robot_state2, traj1.getWayPointPtr(1), planning_group_, 1e-12));
-  ASSERT_TRUE(pilz::isRobotStateEqual(robot_state1, traj1.getWayPointPtr(2), planning_group_, 1e-12));
-  ASSERT_TRUE(pilz::isRobotStateEqual(robot_state2, traj1.getWayPointPtr(3), planning_group_, 1e-12));
+  ASSERT_TRUE(pilz::isRobotStateEqual(robot_state1, traj1.getWayPointPtr(0), planning_group_, ROBOT_STATE_EQUAL_TOL));
+  ASSERT_TRUE(pilz::isRobotStateEqual(robot_state2, traj1.getWayPointPtr(1), planning_group_, ROBOT_STATE_EQUAL_TOL));
+  ASSERT_TRUE(pilz::isRobotStateEqual(robot_state1, traj1.getWayPointPtr(2), planning_group_, ROBOT_STATE_EQUAL_TOL));
+  ASSERT_TRUE(pilz::isRobotStateEqual(robot_state2, traj1.getWayPointPtr(3), planning_group_, ROBOT_STATE_EQUAL_TOL));
 
   ASSERT_EQ(duration_from_previous, traj1.getWayPointDurationFromPrevious(0));
   ASSERT_EQ(duration_from_previous, traj1.getWayPointDurationFromPrevious(1));

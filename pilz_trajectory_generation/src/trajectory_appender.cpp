@@ -17,17 +17,14 @@
 
 #include <pilz_trajectory_generation/trajectory_appender.h>
 #include <pilz_trajectory_generation/trajectory_functions.h>
-#include <ros/console.h>
 
 namespace pilz_trajectory_generation
 {
 
 void TrajectoryAppender::merge(robot_trajectory::RobotTrajectory &result, const robot_trajectory::RobotTrajectory &source)
 {
-  moveit::core::RobotStatePtr append_traj_first = std::make_shared<moveit::core::RobotState>(source.getFirstWayPoint());
-
-  if ( (!result.empty()) && pilz::isRobotStateEqual(result.getLastWayPointPtr(), append_traj_first,
-                                                    result.getGroupName(), ROBOT_STATE_EQUALITY_EPSILON) )
+  if ( !result.empty() && pilz::isRobotStateEqual(result.getLastWayPoint(), source.getFirstWayPoint(),
+                                                  result.getGroupName(), ROBOT_STATE_EQUALITY_EPSILON) )
   {
     for (size_t i = 1; i < source.getWayPointCount(); ++i)
     {
