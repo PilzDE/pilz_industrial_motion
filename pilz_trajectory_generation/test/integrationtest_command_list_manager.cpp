@@ -141,7 +141,7 @@ INSTANTIATE_TEST_CASE_P(InstantiationName, IntegrationTestCommandListManager, ::
  *
  *  - Expected Results:
  *    1. blending is successful, result trajectory is not empty
- *       TODO: all time steps of resulting trajectory are strictly positive
+ *       all time steps of resulting trajectory are strictly positive
  *    2. blending is successful, result trajectory is not empty
  *    3. blending is successful, result trajectory is not empty
  *    4. blending is successful, result trajectory is not empty

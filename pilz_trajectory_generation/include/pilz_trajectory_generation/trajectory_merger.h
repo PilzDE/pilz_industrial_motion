@@ -15,24 +15,28 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-#ifndef ROBOT_TRAJECTORY_HELPER_H
-#define ROBOT_TRAJECTORY_HELPER_H
+#ifndef TRAJECTORY_MERGER_H
+#define TRAJECTORY_MERGER_H
 
 #include <moveit/robot_trajectory/robot_trajectory.h>
 
 namespace pilz_trajectory_generation
 {
 
-class RobotTrajectoryHelper
+typedef std::vector<robot_trajectory::RobotTrajectory> RobotTrajectoryList;
+
+/**
+ * @brief Base class for merging two or more trajectories.
+ */
+class TrajectoryMerger
 {
 public:
-    static void appendWithoutRedundantFirstState(robot_trajectory::RobotTrajectoryPtr &robot_trajectory,
-                                                 const robot_trajectory::RobotTrajectory &tail);
-
-    // Constant to check for equality of values.
-    static constexpr double ROBOT_STATE_EQUALITY_EPSILON = 1e-4;
+    /**
+     * @brief Merge multiple trajectories into a result trajectory.
+     */
+    virtual void merge(const RobotTrajectoryList& traj_list, robot_trajectory::RobotTrajectory &result) = 0;
 };
 
 }  // namespace pilz_trajectory_generation
 
-#endif  // ROBOT_TRAJECTORY_HELPER_H
+#endif  // TRAJECTORY_MERGER_H

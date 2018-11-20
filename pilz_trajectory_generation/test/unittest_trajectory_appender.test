@@ -20,8 +20,8 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
     <include file="$(find prbt_moveit_config)/launch/test_context.launch" />
 
     <!-- run test -->
-    <test pkg="pilz_trajectory_generation" test-name="unittest_robot_trajectory_helper"
-    type="unittest_robot_trajectory_helper">
+    <test pkg="pilz_trajectory_generation" test-name="unittest_trajectory_appender"
+    type="unittest_trajectory_appender">
       <param name="planning_group" value="manipulator" />
       <param name="target_link" value="prbt_tcp" />
     </test>

@@ -25,7 +25,6 @@
 #include "pilz_trajectory_generation/cartesian_limits_aggregator.h"
 #include "pilz_trajectory_generation/trajectory_blender_transition_window.h"
 #include "pilz_trajectory_generation/trajectory_blend_request.h"
-#include <pilz_trajectory_generation/robot_trajectory_helper.h>
 
 namespace pilz_trajectory_generation {
 
@@ -304,12 +303,12 @@ bool CommandListManager::generateTrajectory(
     // if blend radius == 0.0
     else
     {
-      RobotTrajectoryHelper::appendWithoutRedundantFirstState(result_trajectory, *first_trajectory);
+      appender_.merge(*first_trajectory, *result_trajectory);
       first_trajectory = traj_2;
     }
   }
 
-  RobotTrajectoryHelper::appendWithoutRedundantFirstState(result_trajectory, *first_trajectory); // append tail
+  appender_.merge(*first_trajectory, *result_trajectory); // append tail
   return true;
 }
 
