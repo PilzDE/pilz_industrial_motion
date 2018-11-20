@@ -220,9 +220,11 @@ class TestAPICmdConversion(unittest.TestCase):
             Test sequence:
                 1. Call ptp convert function with no goal.
                 2. Call ptp convert function with a joint goal, which has more joint values than needed.
+                3. Call ptp convert function with goal of unknown type
 
             Test results:
                 1. raises exception.
+                2. raises exception.
                 2. raises exception.
         """
         # 1
@@ -234,6 +236,10 @@ class TestAPICmdConversion(unittest.TestCase):
         exp_joint_values.append(1)
         ptp_2 = Ptp(goal=exp_joint_values, vel_scale=EXP_VEL_SCALE, acc_scale=EXP_ACC_SCALE)
         self.assertRaises(IndexError, ptp_2._cmd_to_request, self.robot)
+
+        #3
+        ptp_3 = Ptp(goal=object(), vel_scale=EXP_VEL_SCALE, acc_scale=EXP_ACC_SCALE)
+        self.assertRaises(NotImplementedError, ptp_3._cmd_to_request, self.robot)
 
     def test_ptp_relative_joint(self):
         """ Test the conversion of ptp command with relative joint works correctly
@@ -931,20 +937,20 @@ class TestAPICmdConversion(unittest.TestCase):
         pose = self.test_data.get_pose("Blend_1_Mid", PLANNING_GROUP_NAME)
         ref = self.robot._robot_commander.get_planning_frame()
 
-        Ptp(goal=pose, relative=True,
-            reference_frame=ref, vel_scale=0.2, acc_scale=0.2).__str__()
-        Ptp(goal=[0, 0, 0, 0, 0, 0], relative=True,
-            reference_frame=ref, vel_scale=0.2, acc_scale=0.2).__str__()
+        str(Ptp(goal=pose, relative=True,
+            reference_frame=ref, vel_scale=0.2, acc_scale=0.2))
+        str(Ptp(goal=[0, 0, 0, 0, 0, 0], relative=True,
+            reference_frame=ref, vel_scale=0.2, acc_scale=0.2))
 
-        Circ(goal=pose, interim=pose.position,
-             reference_frame=ref, vel_scale=0.2, acc_scale=0.2).__str__()
-        Circ(goal=pose, center=pose.position,
-             reference_frame=ref, vel_scale=0.2, acc_scale=0.2).__str__()
+        str(Circ(goal=pose, interim=pose.position,
+             reference_frame=ref, vel_scale=0.2, acc_scale=0.2))
+        str(Circ(goal=pose, center=pose.position,
+             reference_frame=ref, vel_scale=0.2, acc_scale=0.2))
 
-        Lin(goal=pose, relative=True,
-            reference_frame=ref, vel_scale=0.2, acc_scale=0.2).__str__()
-        Lin(goal=[0, 0, 0, 0, 0, 0], relative=True,
-            reference_frame=ref, vel_scale=0.2, acc_scale=0.2).__str__()
+        str(Lin(goal=pose, relative=True,
+            reference_frame=ref, vel_scale=0.2, acc_scale=0.2))
+        str(Lin(goal=[0, 0, 0, 0, 0, 0], relative=True,
+            reference_frame=ref, vel_scale=0.2, acc_scale=0.2))
 
 if __name__ == '__main__':
     import rostest

@@ -56,7 +56,7 @@ _DEFAULT_TARGET_LINK = "prbt_tcp"
 _DEFAULT_GRIPPER_PLANNING_GROUP = "gripper"
 
 
-class _AbstractCmd:
+class _AbstractCmd(object):
     """Base class for all commands."""
     def __init__(self):
         # set robot state as empty diff in planning scene to start with current planning scene
@@ -69,7 +69,7 @@ class _AbstractCmd:
         """Called by robot class to generate a sequence request.
         @note Even single commands are handled as an one-item sequence.
         """
-        raise NotImplementedError
+        raise NotImplementedError("Cannot execute abstract command")
 
     def _execute(self, robot):
         rospy.logdebug("Executing command.")
@@ -529,8 +529,6 @@ class Circ(_BaseCmd):
 
     def __str__(self):
         out_str = _BaseCmd.__str__(self)
-        if self._relative:
-            out_str += " relative: True "
         if isinstance(self._goal, Pose) and self._goal is not None:
             out_str += " goal:\n" + str(self._goal)
         if self._interim is not None:
@@ -575,7 +573,7 @@ class Circ(_BaseCmd):
         return vel_scale
 
 
-class _SequenceSubCmd:
+class _SequenceSubCmd(object):
     def __init__(self, cmd, blend_radius=0):
         self.cmd = cmd
         self.blend_radius = blend_radius
