@@ -417,6 +417,23 @@ bool testutils::checkJointTrajectory(const trajectory_msgs::JointTrajectory &tra
   return true;
 }
 
+::testing::AssertionResult testutils::hasStrictlyIncreasingTime(const robot_trajectory::RobotTrajectoryPtr &trajectory)
+{
+  // Check for strictly positively increasing time steps
+  for(unsigned int i = 1; i < trajectory->getWayPointCount(); ++i)
+  {
+    if(trajectory->getWayPointDurationFromPrevious(i) <= 0.0)
+    {
+       return ::testing::AssertionFailure() << "Waypoint " << (i) << " has "
+                                            << trajectory->getWayPointDurationFromPrevious(i)
+                                            << " time between itself and its predecessor."
+                                            << " Total points in trajectory: " << trajectory->getWayPointCount() << ".";
+    }
+  }
+
+  return ::testing::AssertionSuccess();
+}
+
 void testutils::createDummyRequest(const moveit::core::RobotModelConstPtr &robot_model,
                                    const std::string &planning_group, planning_interface::MotionPlanRequest &req)
 {

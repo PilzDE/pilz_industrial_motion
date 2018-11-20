@@ -248,6 +248,16 @@ bool checkJointTrajectory(const trajectory_msgs::JointTrajectory& trajectory,
                           const pilz::JointLimitsContainer& joint_limits);
 
 /**
+ * @brief Checks that every waypoint in the trajectory has a non-zero duration between itself and its predecessor
+ *
+ * Usage in tests:
+ * @code
+ *    EXPECT_TRUE(HasStrictlyIncreasingTime(trajectory));
+ * @endcode
+ */
+::testing::AssertionResult hasStrictlyIncreasingTime(const robot_trajectory::RobotTrajectoryPtr &trajectory);
+
+/**
  * @brief check if the sizes of the joint position/veloicty/acceleration are correct
  * @param trajectory
  * @return
