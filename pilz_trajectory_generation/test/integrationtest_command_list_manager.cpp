@@ -38,6 +38,8 @@ const std::string PARAM_MODEL_WITH_GRIPPER_NAME {"robot_description_pg70"};
 const std::string PARAM_PLANNING_GROUP_NAME("planning_group");
 const std::string PARAM_TARGET_LINK_NAME("target_link");
 
+using testutils::hasStrictlyIncreasingTime;
+
 class IntegrationTestCommandListManager : public testing::TestWithParam<std::string>
 {
 protected:
@@ -159,14 +161,7 @@ TEST_P(IntegrationTestCommandListManager, concatThreeSegments)
   EXPECT_GT(res1_2_3.trajectory_->getWayPointCount(), 0u);
 
   // Check for strictly positively increasing time steps
-  const double expected_duration_min {0.};
-  for(unsigned int i = 1; i < res1_2_3.trajectory_->getWayPointCount(); ++i)
-  {
-    EXPECT_GT(res1_2_3.trajectory_->getWayPointDurationFromPrevious(i),
-              expected_duration_min) << "Time step between waypoint " << (i-1) << " and " << i
-                                     << " (total time steps: " << res1_2_3.trajectory_->getWayPointCount()
-                                     << ") is not strictly increasing.";
-  }
+  EXPECT_TRUE(hasStrictlyIncreasingTime(res1_2_3.trajectory_));
 
   ROS_INFO("step 2: only first segment");
   req = blend_list_builder.build({std::make_pair<>(req1_, 0)});
