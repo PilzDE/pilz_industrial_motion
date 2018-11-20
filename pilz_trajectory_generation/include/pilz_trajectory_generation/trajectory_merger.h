@@ -23,18 +23,16 @@
 namespace pilz_trajectory_generation
 {
 
-typedef std::vector<robot_trajectory::RobotTrajectory> RobotTrajectoryList;
-
 /**
- * @brief Base class for merging two or more trajectories.
+ * @brief Base class for merging two trajectories.
  */
 class TrajectoryMerger
 {
 public:
     /**
-     * @brief Merge multiple trajectories into a result trajectory.
+     * @brief Merge trajectory into current result trajectory.
      */
-    virtual void merge(const RobotTrajectoryList& traj_list, robot_trajectory::RobotTrajectory &result) = 0;
+    virtual void merge(robot_trajectory::RobotTrajectory &result, const robot_trajectory::RobotTrajectory &source) = 0;
 };
 
 }  // namespace pilz_trajectory_generation

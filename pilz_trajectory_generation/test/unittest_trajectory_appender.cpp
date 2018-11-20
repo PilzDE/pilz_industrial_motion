@@ -99,7 +99,7 @@ TEST_F(TrajectoryAppenderTest, testMergeWithRedundantPoint)
   traj2.addSuffixWayPoint(robot_state1, duration_from_previous);
 
   // Step 2
-  appender_.merge(traj2, traj1);
+  appender_.merge(traj1, traj2);
 
   ASSERT_EQ(3u, traj1.getWayPointCount());
 
@@ -152,7 +152,7 @@ TEST_F(TrajectoryAppenderTest, testMergeWithDifferentFirstPoint)
   traj2.addSuffixWayPoint(robot_state2, duration_from_previous);
 
   // Step 2
-  appender_.merge(traj2, traj1);
+  appender_.merge(traj1, traj2);
 
   ASSERT_EQ(4u, traj1.getWayPointCount());
 

@@ -22,30 +22,21 @@
 namespace pilz_trajectory_generation
 {
 
-void TrajectoryAppender::merge(const robot_trajectory::RobotTrajectory& tail, robot_trajectory::RobotTrajectory &result)
+void TrajectoryAppender::merge(robot_trajectory::RobotTrajectory &result, const robot_trajectory::RobotTrajectory &source)
 {
-  const RobotTrajectoryList traj_list = {tail};
-  merge(traj_list, result);
-}
+  moveit::core::RobotStatePtr append_traj_first = std::make_shared<moveit::core::RobotState>(source.getFirstWayPoint());
 
-void TrajectoryAppender::merge(const RobotTrajectoryList &traj_list, robot_trajectory::RobotTrajectory &result)
-{
-  for (auto &traj: traj_list)
+  if ( (!result.empty()) && pilz::isRobotStateEqual(result.getLastWayPointPtr(), append_traj_first,
+                                                    result.getGroupName(), ROBOT_STATE_EQUALITY_EPSILON) )
   {
-    moveit::core::RobotStatePtr append_traj_first = std::make_shared<moveit::core::RobotState>(traj.getFirstWayPoint());
-
-    if ( (!result.empty()) && pilz::isRobotStateEqual(result.getLastWayPointPtr(), append_traj_first,
-                                                      result.getGroupName(), ROBOT_STATE_EQUALITY_EPSILON) )
+    for (size_t i = 1; i < source.getWayPointCount(); ++i)
     {
-      for (size_t i = 1; i < traj.getWayPointCount(); ++i)
-      {
-        result.addSuffixWayPoint(traj.getWayPoint(i), traj.getWayPointDurationFromPrevious(i));
-      }
+      result.addSuffixWayPoint(source.getWayPoint(i), source.getWayPointDurationFromPrevious(i));
     }
-    else
-    {
-      result.append(traj, 0.0);
-    }
+  }
+  else
+  {
+    result.append(source, 0.0);
   }
 }
 

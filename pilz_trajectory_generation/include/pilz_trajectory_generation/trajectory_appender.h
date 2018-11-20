@@ -35,13 +35,7 @@ public:
      * increasing trajectory. If through appending the last point of the original trajectory gets repeated it is removed
      * here.
      */
-    void merge(const RobotTrajectoryList &traj_list, robot_trajectory::RobotTrajectory &result) override;
-
-    /**
-     * @brief Appends a list of trajectories to a result trajectory iteratively. In each iteration the first point is
-     * left out if it matches the last point of the temporary result trajectory.
-     */
-    void merge(const robot_trajectory::RobotTrajectory& tail, robot_trajectory::RobotTrajectory &result);
+    void merge(robot_trajectory::RobotTrajectory &result, const robot_trajectory::RobotTrajectory &source) override;
 
     //! Constant to check for equality of variables of two RobotState instances.
     static constexpr double ROBOT_STATE_EQUALITY_EPSILON = 1e-4;

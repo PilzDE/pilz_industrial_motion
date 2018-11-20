@@ -303,12 +303,12 @@ bool CommandListManager::generateTrajectory(
     // if blend radius == 0.0
     else
     {
-      appender_.merge(*first_trajectory, *result_trajectory);
+      appender_.merge(*result_trajectory, *first_trajectory);
       first_trajectory = traj_2;
     }
   }
 
-  appender_.merge(*first_trajectory, *result_trajectory); // append tail
+  appender_.merge(*result_trajectory, *first_trajectory); // append tail
   return true;
 }
 
