@@ -25,7 +25,8 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
   </include>
 
   <!-- run test -->
-  <test pkg="pilz_trajectory_generation" test-name="unittest_trajectory_generator_common" type="unittest_trajectory_generator_common">
+  <test pkg="pilz_trajectory_generation" test-name="unittest_trajectory_generator_common"
+        type="unittest_trajectory_generator_common" time-limit="120.0">
     <param name="planning_group" value="manipulator" />
     <param name="target_link" value="prbt_flange" />
     <param name="random_trial_number" value="100" />
