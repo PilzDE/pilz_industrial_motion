@@ -63,9 +63,43 @@ class _AbstractCmd:
 
         return
 
-    def _execute(self, robot):
-        """Called by robot class to execute the specific command."""
+    def _get_sequence_request(self, robot):
+        """Called by robot class to generate a sequence request.
+        @note Even single commands are handled as an one-item sequence.
+        """
         raise NotImplementedError
+
+    def _execute(self, robot):
+        rospy.logdebug("Executing command.")
+
+        sequence_action_goal = self._get_sequence_request(robot)
+
+        if sequence_action_goal is None:
+            rospy.logerr("Failed to create MotionSequenceItem.")
+            return robot._FAILURE
+
+        sequence_action_goal.planning_options = self._planning_options
+
+        rospy.logdebug("Sending goal.")
+        if not _AbstractCmd._locked_send_goal(robot, robot._sequence_client, sequence_action_goal):
+            rospy.logdebug("Command was paused before goal could be send.")
+            return robot._STOPPED
+        rospy.logdebug("Wait till motion finished...")
+        done = robot._sequence_client.wait_for_result()
+        rospy.logdebug("Function wait_for_result() of command finished.")
+
+        if not done:
+            rospy.logerr("Function wait_for_result() of command is finished but the goal is not done.")
+            return robot._FAILURE
+
+        if robot._sequence_client.get_result() is None:
+            rospy.logerr("No result received from action server")
+            return robot._FAILURE
+        else:
+            error_code = robot._map_error_code(robot._sequence_client.get_result().error_code)
+            if error_code != robot._SUCCESS:
+                rospy.logwarn("Command execution failed")
+            return error_code
 
     @staticmethod
     def _locked_send_goal(robot, action_client, goal):
@@ -185,37 +219,25 @@ class _BaseCmd(_AbstractCmd):
 
         return req
 
-    def _execute(self, robot):
-        rospy.logdebug("Execute command called.")
-        # set the motion plan request
-        req = self._cmd_to_request(robot)
+    def _get_sequence_request(self, robot):
+        """Constructs a sequence request from the command.
+        BaseCmds construct a sequence request with a single item and a blend_radius 0"""
+        sequence_action_goal = MoveGroupSequenceGoal()
 
-        if req is None:
+        # Create and fill request
+        sequence_item = MotionSequenceItem()
+        sequence_item.blend_radius = 0.0
+
+        # Fill MotionPlanRequest
+        sequence_item.req = self._cmd_to_request(robot)
+        if sequence_item.req is None:
             rospy.logerr("Transform Command to MotionPlanRequest failed.")
-            return robot._FAILURE
+            return None
 
-        goal = MoveGroupGoal()
-        goal.request = req
-        goal.planning_options = self._planning_options
+        # Add request to goal
+        sequence_action_goal.request.items.append(sequence_item)
 
-        rospy.logdebug("Send motion goal.")
-        if not _AbstractCmd._locked_send_goal(robot, robot._move_client, goal):
-            rospy.logdebug("Command was paused before goal could be send.")
-            return robot._STOPPED
-        rospy.logdebug("Wait till command finished...")
-        done = robot._move_client.wait_for_result()
-        rospy.logdebug("Function wait_for_result() of command finished.")
-        if not done:
-            rospy.logerr("Function wait_for_result() is finished but the goal is not done.")
-
-        if robot._move_client.get_result() is None:
-            rospy.logerr("No result received from action server.")
-            return robot._FAILURE
-        else:
-            error_code = robot._map_error_code(robot._move_client.get_result().error_code)
-            if error_code != robot._SUCCESS:
-                rospy.logwarn("Command execution failed or stopped.")
-            return error_code
+        return sequence_action_goal
 
     def _get_goal_pose(self, robot):
         """Determines the goal pose for the given command."""
@@ -640,38 +662,6 @@ class Sequence(_AbstractCmd):
             sequence_action_goal.request.items.append(curr_sequence_req)
 
         return sequence_action_goal
-
-    def _execute(self, robot):
-        rospy.logdebug("Execute sequence command called.")
-
-        sequence_action_goal = self._get_sequence_request(robot)
-
-        if sequence_action_goal is None:
-            rospy.logerr("Failed to create MotionSequenceItem.")
-            return robot._FAILURE
-
-        sequence_action_goal.planning_options = self._planning_options
-
-        rospy.logdebug("Send sequence goal.")
-        if not _AbstractCmd._locked_send_goal(robot, robot._sequence_client, sequence_action_goal):
-            rospy.logdebug("Sequence command was paused before goal could be send.")
-            return robot._STOPPED
-        rospy.logdebug("Wait till sequence motion finished...")
-        done = robot._sequence_client.wait_for_result()
-        rospy.logdebug("Function wait_for_result() of sequence command finished.")
-
-        if not done:
-            rospy.logerr("Function wait_for_result() of sequence command is finished but the goal is not done.")
-            return robot._FAILURE
-
-        if robot._sequence_client.get_result() is None:
-            rospy.logerr("No result received from action server")
-            return robot._FAILURE
-        else:
-            error_code = robot._map_error_code(robot._sequence_client.get_result().error_code)
-            if error_code != robot._SUCCESS:
-                rospy.logwarn("Sequence command execution failed")
-            return error_code
 
     def __str__(self):
         out_str = _AbstractCmd.__str__(self)

@@ -114,7 +114,6 @@ bool CommandListManager::solve(const planning_scene::PlanningSceneConstPtr& plan
   // Case: Only one trajectory in request
   if(req_list.items.size() == 1)
   {
-    ROS_ERROR("Request to merge single trajectory will return the identical trajectory!");
     res.trajectory_ = motion_plan_responses[0].trajectory_;
     res.error_code_.val = moveit_msgs::MoveItErrorCodes::SUCCESS;
 
