@@ -20,8 +20,9 @@ from geometry_msgs.msg import PoseStamped
 
 class MoveGroupCommanderMock:
     """Mock for testing."""
-    def __init__(self):
+    def __init__(self, num_of_joints):
         rospy.loginfo("Ctor of MoveGroupCommanderMock called")
+        self._num_of_joints = num_of_joints
 
     def get_end_effector_link(self):
         rospy.loginfo("get_end_effector_link called")
@@ -29,28 +30,31 @@ class MoveGroupCommanderMock:
 
     def get_active_joints(self):
         rospy.loginfo("get_active_joints called")
-        return ["joint1", "joint2", "joint3", "joint4", "joint5,", "joint6"]
+        joint_array = []
+        for i in range(self._num_of_joints):
+            joint_array.append("joint" + str(i))
+        rospy.loginfo(joint_array)
+        return joint_array
 
     def get_current_joint_values(self):
         rospy.loginfo("get_current_joint_values called")
-        return [0.0, 0.0, 0.0, 0.0, 0.0, 0.0]
-
-    def get_current_pose(self, target_link=""):
-        rospy.loginfo("get_current_pose called")
-        return PoseStamped()
+        joint_array = []
+        for i in range(self._num_of_joints):
+            joint_array.append(0.0)
+        rospy.loginfo(joint_array)
+        return joint_array
 
 class RobotCommanderMock:
     """Mock for testing."""
     def __init__(self):
         rospy.loginfo("Ctor of RobotCommanderMock called")
 
-    def get_group_names(self):
-        rospy.loginfo("get_group_names called")
-        return ["manipulator"]
-
     def get_group(self, group_name):
         rospy.loginfo("get_group called")
-        return MoveGroupCommanderMock()
+        if group_name == "manipulator":
+            return MoveGroupCommanderMock(6)
+        else:
+            return MoveGroupCommanderMock(1)
 
     def get_planning_frame(self):
         rospy.loginfo("get_planning_frame() called")

@@ -22,6 +22,18 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
   <node pkg="rosbag" type="record" name="rosbag_log" args="record rosout -o $(find pilz_robot_programming)/api_execution_error_log"/>
 
+  <arg name="gripper" default="pg70" />
+  <!-- send urdf to param server -->
+  <param name="robot_description"
+    command="$(find xacro)/xacro --inorder '$(find prbt_support)/urdf/prbt.xacro' gripper:=$(arg gripper)" />
+
+  <node name="robot_state_publisher" pkg="robot_state_publisher" type="robot_state_publisher" />
+
+  <node name="joint_state_publisher" pkg="joint_state_publisher" type="joint_state_publisher">
+    <param name="/use_gui" value="false"/>
+    <rosparam param="/source_list">[/move_group/fake_controller_joint_states]</rosparam>
+  </node>
+
   <node name="moveit_mock" pkg="pilz_robot_programming" type="moveit_mock.py"/>
 
   <!-- test node -->
