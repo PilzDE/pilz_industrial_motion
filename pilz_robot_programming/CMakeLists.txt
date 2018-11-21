@@ -15,7 +15,6 @@ install(PROGRAMS
    scripts/demo_program.py
    scripts/demo_gripper_program.py
    src/${PROJECT_NAME}/commands.py
-   src/${PROJECT_NAME}/movecmd.py
    src/${PROJECT_NAME}/robot.py
    DESTINATION ${CATKIN_PACKAGE_BIN_DESTINATION}
 )
