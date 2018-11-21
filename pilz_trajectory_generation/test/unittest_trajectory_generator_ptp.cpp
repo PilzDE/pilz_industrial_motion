@@ -712,6 +712,16 @@ TEST_P(TrajectoryGeneratorPTPTest, testJointGoalAndAlmostZeroStartVelocity)
   // joint_6
   EXPECT_NEAR(3.0, res_msg.trajectory.joint_trajectory.points[index].positions[5], joint_position_tolerance_);
   EXPECT_NEAR(0.0, res_msg.trajectory.joint_trajectory.points[index].velocities[5], joint_velocity_tolerance_);
+
+  // Check that velocity at the end is all zero
+  EXPECT_TRUE(std::all_of(res_msg.trajectory.joint_trajectory.points.back().velocities.cbegin(),
+                          res_msg.trajectory.joint_trajectory.points.back().velocities.cend(),
+                          [this]( double v){ return std::fabs(v) < this->joint_velocity_tolerance_; }));
+
+  // Check that acceleration at the end is all zero
+  EXPECT_TRUE(std::all_of(res_msg.trajectory.joint_trajectory.points.back().accelerations.cbegin(),
+                          res_msg.trajectory.joint_trajectory.points.back().accelerations.cend(),
+                          [this]( double v){ return std::fabs(v) < this->joint_acceleration_tolerance_; }));
 }
 
 /**
@@ -887,6 +897,11 @@ TEST_P(TrajectoryGeneratorPTPTest, testJointGoalNoStartVel)
   EXPECT_TRUE(std::all_of(res_msg.trajectory.joint_trajectory.points.back().velocities.cbegin(),
                           res_msg.trajectory.joint_trajectory.points.back().velocities.cend(),
                           [this]( double v){ return std::fabs(v) < this->joint_velocity_tolerance_; }));
+
+  // Check that acceleration at the end is all zero
+  EXPECT_TRUE(std::all_of(res_msg.trajectory.joint_trajectory.points.back().accelerations.cbegin(),
+                          res_msg.trajectory.joint_trajectory.points.back().accelerations.cend(),
+                          [this]( double v){ return std::fabs(v) < this->joint_acceleration_tolerance_; }));
 }
 
 int main(int argc, char **argv)
