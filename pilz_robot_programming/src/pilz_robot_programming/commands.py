@@ -248,6 +248,7 @@ class _BaseCmd(_AbstractCmd):
 
     def _get_joint_pose(self, robot):
         """Determines the joint goal for the given command."""
+        assert isinstance(self._goal, list)
         goal_joint_state = self._goal
 
         if self._relative:
@@ -719,16 +720,18 @@ def _to_robot_reference(robot, pose_frame, goal_pose_custom_ref):
 
     :param pose_frame: is the custom reference frame of the pose.
 
-    :param goal_pose_custom_ref: should be the pose in the custom reference frame.
+    :param goal_pose_custom_ref: pose in the custom reference frame.
 
     :return: A goal pose in robot reference frame.
     """
+    assert isinstance(goal_pose_custom_ref, Pose)
+
     robot_ref = robot._robot_commander.get_planning_frame()
 
     if not _is_quaternion_initialized(goal_pose_custom_ref.orientation):
         goal_pose_custom_ref.orientation.w = 1
 
-    if pose_frame == robot_ref or not goal_pose_custom_ref:
+    if pose_frame == robot_ref:
         return goal_pose_custom_ref
 
     stamped = PoseStamped()
@@ -777,7 +780,7 @@ def _is_quaternion_initialized(quaternion):
 
 def _pose_relative_to_absolute(current_pose, relative_pose):
     """Add the offset relative_pose to current_pose and return an absolute goal pose"""
-
+    assert isinstance(current_pose, Pose)
     goal_pose = deepcopy(current_pose)
 
     # translation
