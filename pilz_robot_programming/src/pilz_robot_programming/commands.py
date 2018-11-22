@@ -89,19 +89,14 @@ class _AbstractCmd(object):
         rospy.logdebug("Wait till motion finished...")
         done = robot._sequence_client.wait_for_result()
         rospy.logdebug("Function wait_for_result() of command finished.")
+        assert done is True, "Function wait_for_result() is finished but the goal is not done."
 
-        if not done:
-            rospy.logerr("Function wait_for_result() of command is finished but the goal is not done.")
+        result_code = robot._sequence_client.get_result()
+        if result_code is None: # pragma: no cover  Paranoia-check should actually never happen.
+            rospy.logerr("No result received from action server.")
             return robot._FAILURE
 
-        if robot._sequence_client.get_result() is None:
-            rospy.logerr("No result received from action server")
-            return robot._FAILURE
-        else:
-            error_code = robot._map_error_code(robot._sequence_client.get_result().error_code)
-            if error_code != robot._SUCCESS:
-                rospy.logwarn("Command execution failed")
-            return error_code
+        return robot._map_error_code(result_code.error_code)
 
     @staticmethod
     def _locked_send_goal(robot, action_client, goal):
@@ -781,6 +776,8 @@ def _is_quaternion_initialized(quaternion):
 def _pose_relative_to_absolute(current_pose, relative_pose):
     """Add the offset relative_pose to current_pose and return an absolute goal pose"""
     assert isinstance(current_pose, Pose)
+    assert isinstance(relative_pose, Pose)
+
     goal_pose = deepcopy(current_pose)
 
     # translation
