@@ -24,7 +24,7 @@ from pilz_robot_programming.commands import *
 _TEST_DATA_FILE_NAME = RosPack().get_path("pilz_industrial_motion_testutils") + "/test_data/testdata.xml"
 PLANNING_GROUP_NAME = "manipulator"
 API_VERSION = "0"
-MOTION_TOPIC = "move_group"
+SEQUENCE_TOPIC = "sequence_move_group"
 
 
 class TestAPIExecutionStop(unittest.TestCase):
@@ -381,10 +381,10 @@ class TestAPIExecutionStop(unittest.TestCase):
                 2. Execute methods ends and throws correct exception.
         """
         # Create move_group action client for external stop
-        move_client = SimpleActionClient(MOTION_TOPIC, MoveGroupAction)
-        rospy.loginfo("Waiting for connection to action server " + MOTION_TOPIC + "...")
+        move_client = SimpleActionClient(SEQUENCE_TOPIC, MoveGroupSequenceAction)
+        rospy.loginfo("Waiting for connection to action server " + SEQUENCE_TOPIC + "...")
         move_client.wait_for_server()
-        rospy.logdebug("Connection to action server " + MOTION_TOPIC + " established.")
+        rospy.logdebug("Connection to action server " + SEQUENCE_TOPIC + " established.")
 
         # Move to zero pose
         self.robot.move(Ptp(goal=self.test_data.get_joints("ZeroPose", PLANNING_GROUP_NAME)))

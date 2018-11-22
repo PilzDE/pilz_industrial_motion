@@ -23,7 +23,6 @@ from pilz_robot_programming.commands import *
 _TEST_DATA_FILE_NAME = RosPack().get_path("pilz_industrial_motion_testutils") + "/test_data/testdata.xml"
 PLANNING_GROUP_NAME = "manipulator"
 API_VERSION = "0"
-MOTION_TOPIC = "move_group"
 COMPARE_PRECISION = 6
 
 

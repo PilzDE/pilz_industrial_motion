@@ -108,7 +108,6 @@ class Robot:
     _PAUSE_TOPIC_NAME = "pause_movement"
     _RESUME_TOPIC_NAME = "resume_movement"
     _STOP_TOPIC_NAME = "stop_movement"
-    _MOTION_TOPIC = "move_group"
     _SEQUENCE_TOPIC = "sequence_move_group"
     _SINGLE_INSTANCE_FLAG = "/robot_api_single_instance_flag"
 
@@ -334,7 +333,6 @@ class Robot:
             first_iteration_flag = False
 
     def _cancel_on_all_clients(self):
-        self._move_client.cancel_goal()
         self._sequence_client.cancel_goal()
 
     def _pause_service_callback(self, request):
@@ -387,12 +385,6 @@ class Robot:
             rospy.set_param(self._SINGLE_INSTANCE_FLAG, True)
 
     def _establish_connections(self):
-        # Create move_group action client, for manipulator and gripper
-        self._move_client = SimpleActionClient(self._MOTION_TOPIC, MoveGroupAction)
-        rospy.logdebug("Waiting for connection to action server " + self._MOTION_TOPIC + "...")
-        self._move_client.wait_for_server()
-        rospy.logdebug("Connection to action server " + self._MOTION_TOPIC + " established.")
-
         # Create sequence_move_group client, only for manipulator
         self._sequence_client = SimpleActionClient(self._SEQUENCE_TOPIC, MoveGroupSequenceAction)
         rospy.logdebug("Waiting for connection to action server " + self._SEQUENCE_TOPIC + "...")
