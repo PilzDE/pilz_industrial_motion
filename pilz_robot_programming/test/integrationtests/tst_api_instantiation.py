@@ -48,12 +48,10 @@ class TestAPIInstantiation(unittest.TestCase):
         """ Check that instance of Robot can not be created with None version.
 
             Test sequence:
-                1. Delete existing robot instance.
-                2. Create robot instance with None version.
+                1. Create robot instance with None version.
 
             Test Results:
-                1. -
-                2. Creation failed with RobotVersionError.
+                1. Creation failed with RobotVersionError.
 
         """
         try:

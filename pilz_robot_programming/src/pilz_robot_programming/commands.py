@@ -707,7 +707,7 @@ class Gripper(_BaseCmd):
             goal_constraints.joint_constraints.append(joint_constraint)
 
         else:
-            raise RuntimeError("Unknown type of goal is given.")
+            raise NotImplementedError("Unknown type of goal is given.")
 
         req.goal_constraints.append(goal_constraints)
 
