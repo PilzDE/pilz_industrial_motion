@@ -28,9 +28,9 @@ def start_program():
     robot = Robot('0')
     _test_ptp_pos(robot)
     _test_lin_pos(robot)
-    _test_seq_pos(robot)
     _test_circ_pos(robot)
     _test_blend_pos(robot)
+    _test_seq_pos(robot)
 
 
 def _test_ptp_pos(robot):
