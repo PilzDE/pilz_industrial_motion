@@ -335,10 +335,9 @@ class Robot:
         delete_param(self._SINGLE_INSTANCE_FLAG)
 
         # stop movement
-        timeout = rospy.Duration(2.)
         if self._sequence_client.get_state() != GoalStatus.LOST: # is the client currently tracking a goal?
             self._sequence_client.cancel_goal()
-            self._sequence_client.wait_for_result(timeout)
+            self._sequence_client.wait_for_result(timeout = rospy.Duration(2.))
 
     def _cancel_on_all_clients(self):
         self._sequence_client.cancel_goal()

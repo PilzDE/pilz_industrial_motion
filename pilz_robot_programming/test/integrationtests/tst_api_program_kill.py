@@ -71,6 +71,16 @@ class TestAPIProgramKill(unittest.TestCase):
                 rospy.loginfo("Changed joint values detected: " + str(curr_joint_values))
                 rospy.loginfo("Motion started.")
 
+    def _get_robot_move_command(self):
+        """Build command to move the robot (to be called as subprocess)
+
+        :returns list containing executable with path and appropriate arguments
+        """
+        ptp_goal = [str(x) for x in self.test_data.get_joints(self._PTP_TEST_NAME, _GROUP_NAME)]
+        movecmd = RosPack().get_path("pilz_robot_programming")+'/test/integrationtests/movecmd.py ptp joint'
+
+        return movecmd.split(" ") + ptp_goal
+
     def test_stop_at_program_kill(self):
         """
         Test if robot movement is stopped when program is killed.
@@ -85,12 +95,7 @@ class TestAPIProgramKill(unittest.TestCase):
         """
 
         # 1. Start robot movement
-        ptp_goal = self.test_data.get_joints(self._PTP_TEST_NAME, _GROUP_NAME)
-        movecmd_path = RosPack().get_path("pilz_robot_programming")+'/test/integrationtests/movecmd.py'
-
-        args = [movecmd_path, 'ptp', 'joint']
-        args.extend([str(x) for x in ptp_goal])
-        proc = subprocess.Popen(args)
+        proc = subprocess.Popen(self._get_robot_move_command())
 
         # Wait until movement is detected
         self.wait_cmd_start()
