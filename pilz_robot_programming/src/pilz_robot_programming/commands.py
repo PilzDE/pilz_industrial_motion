@@ -116,9 +116,8 @@ class _AbstractCmd:
         :rtype: bool
         """
         with robot._move_ctrl_sm:
-
             # Only if no orders are present, the calling thread is allowed to send a goal to Moveit.
-            if robot._move_ctrl_sm.state != _MoveControlState.NO_REQUEST:
+            if robot._move_ctrl_sm.state != _MoveControlState.NO_REQUEST or rospy.core.is_shutdown_requested():
                 return False
 
             action_client.send_goal(goal)
