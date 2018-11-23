@@ -28,9 +28,10 @@ def start_program():
     robot = Robot('0')
     _test_ptp_pos(robot)
     _test_lin_pos(robot)
-    _test_seq_pos(robot)
     _test_circ_pos(robot)
     _test_blend_pos(robot)
+    _test_seq_pos1(robot)
+    _test_seq_pos2(robot)
 
 
 def _test_ptp_pos(robot):
@@ -53,7 +54,8 @@ def _test_ptp_pos(robot):
     robot.move(Ptp(goal=Pose(position=Point(-0.46, -0.21, 0.19), orientation=from_euler(0, -3.14, -0.25))))
 
     _askSuccess(_test_ptp_pos.__name__,
-                'The robot should have move to [0,0,0,0,0,0] and after that to the next position.')
+                'The robot should have moved to [0,0,0,0,0,0], after that away from [0,0,0,0,0,0] and then to the upper'
+                + ' pick position.')
 
 
 def _test_lin_pos(robot):
@@ -72,18 +74,22 @@ def _test_lin_pos(robot):
     robot.move(Lin(goal=Pose(position=Point(0.0, 0.0, -0.15)), relative=True, vel_scale=PTP_VEL_PICK))
     robot.move(Lin(goal=Pose(position=Point(0.0, 0.0, 0.15)), relative=True, vel_scale=PTP_VEL_PICK))
 
-    _askSuccess(_test_lin_pos.__name__, 'The robot tcp should move linear 15cm down and then linear 15cm up.')
+    _askSuccess(_test_lin_pos.__name__, 'The robot tcp should have moved linear 15cm down and then linear 15cm up.')
 
 
-def _test_seq_pos(robot):
-    """Tests a motion sequence.
+def _test_seq_pos1(robot):
+    """Tests a motion sequence. Together the two tests _test_seq_pos1 and _test_seq_pos2 contain all possible pairs of
+    consecutive commands from the set of commands (PTP, LIN, CIRC).
 
         Test Sequence:
-            1. Execute sequence consisting of the following motions:
+            1. Execute sequence (PTP-PTP-LIN-LIN-CIRC-CIRC-PTP) consisting of the following motions:
                 a. Move to start position.
                 b. Move to the upper "pick" position.
                 c. Move 15cm linear down.
                 d. Move 15cm linear up.
+                e. Move a quarter circle.
+                f. Move back the quarter circle.
+                g. Move back to start position.
 
         Expected Results:
             1. Robot performes sequence of the following motions stopping in between them:
@@ -91,8 +97,11 @@ def _test_seq_pos(robot):
                 b. Robot moves to the upper "pick" position.
                 c. Robot moves 15cm linear down.
                 d. Robot moves 15cm linear up.
+                e. Robot moves a quarter circle.
+                f. Robot moves back the quarter circle.
+                g. Robot moves back to start position.
     """
-    if _askPermission(_test_seq_pos.__name__) == 0:
+    if _askPermission(_test_seq_pos1.__name__) == 0:
         return
 
     x_pick = 0
@@ -100,21 +109,86 @@ def _test_seq_pos(robot):
     z_pick_low = 0.25
     z_pick_high = 0.4
 
+    x_pick2 = -0.25
+    y_pick2 = 0
+
+    x_center = y_center = 0
+
     rot = Quaternion(0.0, 1.0, 0.0, 0.0)
     p_pick_high = Pose(position=Point(x_pick, y_pick, z_pick_high), orientation=rot)
     p_pick_low = Pose(position=Point(x_pick,  y_pick, z_pick_low),  orientation=rot)
+    p_pick_high2 = Pose(position=Point(x_pick2, y_pick2, z_pick_high), orientation=rot)
+    p_center = Pose(position=Point(x_center, y_center, z_pick_high))
 
     seq_l = Sequence()
     seq_l.append(Ptp(goal=[0, 0, 0, 0, 0, 0]))
     seq_l.append(Ptp(goal=p_pick_high))
     seq_l.append(Lin(goal=p_pick_low))
     seq_l.append(Lin(goal=p_pick_high))
+    seq_l.append(Circ(goal=p_pick_high2, center=p_center.position))
+    seq_l.append(Circ(goal=p_pick_high, center=p_center.position))
+    seq_l.append(Ptp(goal=[0, 0, 0, 0, 0, 0]))
 
     robot.move(seq_l)
 
-    _askSuccess(_test_seq_pos.__name__, 'The robot should have moved to [0,0,0,0,0,0] and back to the upper pick'
-                                        + 'position. After that The robot tcp should have moved linear 15cm down and'
-                                        + 'then linear 15cm up.')
+    _askSuccess(_test_seq_pos1.__name__, 'The robot should have moved to [0,0,0,0,0,0] and then to the upper pick'
+                                         + ' position. After that the robot tcp should have moved linear 15cm down and'
+                                         + ' then linear 15cm up. Further on the robot should have moved a quarter'
+                                         + ' circle forwards and backwards and then back to [0,0,0,0,0,0].')
+
+
+def _test_seq_pos2(robot):
+    """Tests a motion sequence. Together the two tests _test_seq_pos1 and _test_seq_pos2 contain all possible pairs of
+    consecutive commands from the set of commands (PTP, LIN, CIRC).
+
+        Test Sequence:
+            1. Execute sequence (PTP-CIRC-LIN-LIN-PTP) consisting of the following motions:
+                a. Move away from the start position.
+                b. Move a quarter circle arriving at the upper "pick" position.
+                c. Move 15cm linear down.
+                d. Move 15cm linear up.
+                e. Move back to start position.
+
+        Expected Results:
+            1. Robot performes sequence of the following motions stopping in between them:
+                a. Robot moves away from the start position.
+                b. Robot moves a quarter circle arriving at the upper "pick" position.
+                c. Robot moves 15cm linear down.
+                d. Robot moves 15cm linear up.
+                e. Robot moves back to start position.
+    """
+    if _askPermission(_test_seq_pos2.__name__) == 0:
+        return
+
+    x_pick = 0
+    y_pick = 0.25
+    z_pick_low = 0.25
+    z_pick_high = 0.4
+
+    x_pick2 = -0.25
+    y_pick2 = 0
+
+    x_center = y_center = 0
+
+    rot = Quaternion(0.0, 1.0, 0.0, 0.0)
+    p_pick_high = Pose(position=Point(x_pick, y_pick, z_pick_high), orientation=rot)
+    p_pick_low = Pose(position=Point(x_pick,  y_pick, z_pick_low),  orientation=rot)
+    p_pick_high2 = Pose(position=Point(x_pick2, y_pick2, z_pick_high), orientation=rot)
+    p_center = Pose(position=Point(x_center, y_center, z_pick_high))
+
+    seq_l = Sequence()
+    seq_l.append(Ptp(goal=p_pick_high2))
+    seq_l.append(Circ(goal=p_pick_high, center=p_center.position))
+    seq_l.append(Lin(goal=p_pick_low))
+    seq_l.append(Lin(goal=p_pick_high))
+    seq_l.append(Ptp(goal=[0, 0, 0, 0, 0, 0]))
+
+    robot.move(seq_l)
+
+    _askSuccess(_test_seq_pos2.__name__, 'The robot should have moved away from the start position and then a quarter'
+                                         + ' circle arriving at the upper pick position. After that the robot tcp'
+                                         + ' should have moved linear 15cm down and then linear 15cm up. In the end the'
+                                         + ' robot should have moved back to [0,0,0,0,0,0].')
 
 
 def _test_circ_pos(robot):
@@ -139,8 +213,8 @@ def _test_circ_pos(robot):
                     orientation=from_euler(0, -3.14, -0.25)), vel_scale=PTP_VEL_PICK,
                     interim=Point(-0.565, -0.105, 0.19)))
 
-    _askSuccess(_test_circ_pos.__name__, 'The robot should have moved in a half circle stop and move in half\
-                                        a circle to its original position')
+    _askSuccess(_test_circ_pos.__name__, 'The robot should have moved in a half circle stop and move in half a circle'
+                                         + ' to its original position')
 
 
 def _test_blend_pos(robot):
@@ -170,8 +244,8 @@ def _test_blend_pos(robot):
 
     robot.move(seq_l)
 
-    _askSuccess(_test_blend_pos.__name__, 'The robot should move in a square back to its original position.\
-                                         During the motion the robot does not stop.')
+    _askSuccess(_test_blend_pos.__name__, 'The robot should move in a square back to its original position. During the'
+                                         + ' motion the robot does not stop.')
 
 
 if __name__ == "__main__":
