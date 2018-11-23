@@ -213,8 +213,8 @@ def _test_circ_pos(robot):
                     orientation=from_euler(0, -3.14, -0.25)), vel_scale=PTP_VEL_PICK,
                     interim=Point(-0.565, -0.105, 0.19)))
 
-    _askSuccess(_test_circ_pos.__name__, 'The robot should have moved in a half circle stop and move in half\
-                                        a circle to its original position')
+    _askSuccess(_test_circ_pos.__name__, 'The robot should have moved in a half circle stop and move in half a circle'
+                                         + ' to its original position')
 
 
 def _test_blend_pos(robot):
@@ -244,8 +244,8 @@ def _test_blend_pos(robot):
 
     robot.move(seq_l)
 
-    _askSuccess(_test_blend_pos.__name__, 'The robot should move in a square back to its original position.\
-                                         During the motion the robot does not stop.')
+    _askSuccess(_test_blend_pos.__name__, 'The robot should move in a square back to its original position. During the'
+                                         + ' motion the robot does not stop.')
 
 
 if __name__ == "__main__":
