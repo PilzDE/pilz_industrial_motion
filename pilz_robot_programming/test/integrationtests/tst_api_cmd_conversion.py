@@ -611,48 +611,64 @@ class TestAPICmdConversion(unittest.TestCase):
         """ Test the _get_sequence_request function of Sequence command works correctly.
 
             Test sequence:
-                1. Append two valid lin commands with blend radius to Sequence command
+                1. Append valid ptp, lin and circ commands with blend radius to Sequence command
                 2. Call _get_sequence_request function of the Sequence command
 
             Test results:
                 1. -
                 2. Correct MotionSequenceRequest is returned
         """
-        # TODO: replace first command with ptp
         # 1
-        exp_goal_pose_1 = self.test_data.get_pose("LINPose1", PLANNING_GROUP_NAME)
-        exp_goal_pose_2 = self.test_data.get_pose("LINPose2", PLANNING_GROUP_NAME)
-        exp_blend_radius_1 = 0.1
-        exp_blend_radius_2 = 0
+        exp_ptp_goal = self.test_data.get_joints("PTPJointValid", PLANNING_GROUP_NAME)
+        exp_lin_goal = self.test_data.get_pose("LINPose2", PLANNING_GROUP_NAME)
+        exp_circ_goal = self.test_data.get_pose("LINPose1", PLANNING_GROUP_NAME)
+        exp_circ_center = self.test_data.get_pose("CIRCCenterPose", PLANNING_GROUP_NAME)
 
-        lin_1 = Lin(goal=exp_goal_pose_1, vel_scale=EXP_VEL_SCALE, acc_scale=EXP_ACC_SCALE)
-        lin_2 = Lin(goal=exp_goal_pose_2, vel_scale=EXP_VEL_SCALE, acc_scale=EXP_ACC_SCALE)
+        exp_blend_radius_1 = 0.1
+        exp_blend_radius_2 = 0.0
+        exp_blend_radius_3 = 0.3
+
+        exp_joint_names = self.robot._robot_commander.get_group(PLANNING_GROUP_NAME).get_active_joints()
+
+        ptp = Ptp(goal=exp_ptp_goal, vel_scale=EXP_VEL_SCALE, acc_scale=EXP_ACC_SCALE)
+        lin = Lin(goal=exp_lin_goal, vel_scale=EXP_VEL_SCALE, acc_scale=EXP_ACC_SCALE)
+        circ = Circ(goal=exp_circ_goal, center=exp_circ_center.position, vel_scale=EXP_VEL_SCALE, acc_scale=EXP_ACC_SCALE)
 
         seq = Sequence()
-        seq.append(lin_1, exp_blend_radius_1)
-        seq.append(lin_2, exp_blend_radius_2)
+        seq.append(ptp, exp_blend_radius_1)
+        seq.append(lin, exp_blend_radius_2)
+        seq.append(circ, exp_blend_radius_3)
 
         # 2
         seq_action_goal = seq._get_sequence_request(self.robot)
 
         self.assertIsNotNone(seq_action_goal)
-        self.assertEqual(2, len(seq_action_goal.request.items))
+        self.assertEqual(3, len(seq_action_goal.request.items))
 
-        # check first lin
+        # check first command (ptp)
         self.assertEqual(exp_blend_radius_1, seq_action_goal.request.items[0].blend_radius)
-        lin_req_1 = seq_action_goal.request.items[0].req
+        ptp_req = seq_action_goal.request.items[0].req
 
-        self.assertIsNotNone(lin_req_1)
-        self._analyze_request_general(PLANNING_GROUP_NAME, "LIN", EXP_VEL_SCALE, EXP_ACC_SCALE, lin_req_1)
-        self._analyze_request_pose(TARGET_LINK_NAME, exp_goal_pose_1, lin_req_1)
+        self.assertIsNotNone(ptp_req)
+        self._analyze_request_general(PLANNING_GROUP_NAME, "PTP", EXP_VEL_SCALE, EXP_ACC_SCALE, ptp_req)
+        self._analyze_request_joint(exp_joint_names, exp_ptp_goal, ptp_req)
 
-        # check second lin
+        # check second command (lin)
         self.assertEqual(exp_blend_radius_2, seq_action_goal.request.items[1].blend_radius)
-        lin_req_2 = seq_action_goal.request.items[1].req
+        lin_req = seq_action_goal.request.items[1].req
 
-        self.assertIsNotNone(lin_req_2)
-        self._analyze_request_general(PLANNING_GROUP_NAME, "LIN", EXP_VEL_SCALE, EXP_ACC_SCALE, lin_req_2)
-        self._analyze_request_pose(TARGET_LINK_NAME, exp_goal_pose_2, lin_req_2)
+        self.assertIsNotNone(lin_req)
+        self._analyze_request_general(PLANNING_GROUP_NAME, "LIN", EXP_VEL_SCALE, EXP_ACC_SCALE, lin_req)
+        self._analyze_request_pose(TARGET_LINK_NAME, exp_lin_goal, lin_req)
+
+        # check third command (circ)
+        self.assertEqual(exp_blend_radius_3, seq_action_goal.request.items[2].blend_radius)
+        circ_req = seq_action_goal.request.items[2].req
+
+        self.assertIsNotNone(circ_req)
+        self._analyze_request_general(PLANNING_GROUP_NAME, "CIRC", EXP_VEL_SCALE, EXP_ACC_SCALE, circ_req)
+        self._analyze_request_pose(TARGET_LINK_NAME, exp_circ_goal, circ_req)
+        self._analyze_request_circ_help_point("center", exp_circ_center, circ_req)
 
     def test_get_sequence_request_negative(self):
         """ Test the _get_sequence_request function of Sequence command works correctly.
