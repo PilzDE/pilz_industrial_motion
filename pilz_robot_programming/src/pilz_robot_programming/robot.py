@@ -19,13 +19,12 @@ from __future__ import absolute_import
 
 import rospy
 from pilz_msgs.msg import MoveGroupSequenceAction
-from actionlib import SimpleActionClient
+from actionlib import SimpleActionClient, GoalStatus
 from moveit_commander import RobotCommander, MoveItCommanderException
 from moveit_msgs.msg import MoveItErrorCodes, MoveGroupAction
 import time
 import threading
 from std_srvs.srv import Trigger
-import atexit
 from tf.listener import TransformListener
 
 from .move_control_request import _MoveControlState, MoveControlAction,_MoveControlStateMachine
@@ -136,13 +135,8 @@ class Robot:
         # is necessary to ensure testability.
         self.__robot_commander = None
 
-        def delete_param(key):
-            if rospy.has_param(key):
-                rospy.logdebug("Delete parameter " + key + " from parameter server.")
-                rospy.delete_param(key)
-
-        # deletes the single instance parameter when interpreter terminates
-        atexit.register(delete_param, self._SINGLE_INSTANCE_FLAG)
+        # cleanup when ros terminates
+        rospy.on_shutdown(self._on_shutdown)
 
     # The moveit RobotCommander is needed to retrieve robot semantic information.
     # To allow proper testing the RobotCommander is instantiated via lazy initialization.
@@ -331,6 +325,19 @@ class Robot:
                 raise RobotMoveFailed("Execution of move command is stopped")
 
             first_iteration_flag = False
+
+    def _on_shutdown(self):
+        def delete_param(key):
+            if rospy.has_param(key):
+                rospy.logdebug("Delete parameter " + key + " from parameter server.")
+                rospy.delete_param(key)
+        # deletes the single instance parameter when interpreter terminates
+        delete_param(self._SINGLE_INSTANCE_FLAG)
+
+        # stop movement
+        if self._sequence_client.get_state() != GoalStatus.LOST: # is the client currently tracking a goal?
+            self._sequence_client.cancel_goal()
+            self._sequence_client.wait_for_result(timeout = rospy.Duration(2.))
 
     def _cancel_on_all_clients(self):
         self._sequence_client.cancel_goal()
