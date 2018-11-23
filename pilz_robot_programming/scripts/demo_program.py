@@ -55,15 +55,22 @@ def start_program():
     # Move robot with stored pose
     r.move(Ptp(goal=pose_after_relative, vel_scale=0.2))
 
+    # Repeat the previous steps with a sequence command
+    sequence = Sequence()
+    sequence.append(Lin(goal=Pose(position=Point(0.2, 0, 0.8), orientation=from_euler(0, 0, math.radians(15))),
+                        vel_scale=0.1, acc_scale=0.1))
+    sequence.append(Circ(goal=Pose(position=Point(0.2, -0.2, 0.8)), center=Point(0.1, -0.1, 0.8), acc_scale=0.4))
+    sequence.append(Ptp(goal=pose_after_relative, vel_scale=0.2))
+
     # Move to start goal for sequence demonstration
     r.move(Ptp(goal=start_joint_values))
 
-    # Sequence
-    sequence = Sequence()
-    sequence.append(Lin(goal=Pose(position=Point(0.2, 0, 0.7))), blend_radius=0.01)
-    sequence.append(Lin(goal=Pose(position=Point(0.2, 0.1, 0.7))))
+    # Blend sequence
+    blend_sequence = Sequence()
+    blend_sequence.append(Lin(goal=Pose(position=Point(0.2, 0, 0.7))), blend_radius=0.01)
+    blend_sequence.append(Lin(goal=Pose(position=Point(0.2, 0.1, 0.7))))
 
-    r.move(sequence)
+    r.move(blend_sequence)
 
     # Move with custom reference frame
     r.move(Ptp(goal=Pose(position=Point(0, 0, 0.1)), reference_frame="prbt_tcp"))
