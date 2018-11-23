@@ -25,12 +25,11 @@ from moveit_msgs.msg import MoveItErrorCodes, MoveGroupAction
 import time
 import threading
 from std_srvs.srv import Trigger
-from tf.listener import TransformListener
+import tf
 
 from .move_control_request import _MoveControlState, MoveControlAction,_MoveControlStateMachine
 from .commands import _AbstractCmd, _DEFAULT_PLANNING_GROUP, _DEFAULT_TARGET_LINK
 from .exceptions import *
-
 from geometry_msgs.msg import Quaternion, PoseStamped, Pose
 from std_msgs.msg import Header
 
@@ -49,7 +48,7 @@ _DEFAULT_POSITION_TOLERANCE = 2e-3
 _DEFAULT_ORIENTATION_TOLERANCE = 1e-5
 
 
-class Robot:
+class Robot(object):
     """
     Main component of the API which allows the user to execute robot motion commands and pause, resume or stop the
     execution. The following commands are currently supported:
@@ -115,7 +114,7 @@ class Robot:
 
         # tf listener is necessary for pose transformation
         # when using custom reference frames.
-        self.tf_listener_ = TransformListener()
+        self.tf_listener_ = tf.TransformListener()
 
         self._move_lock = threading.Lock()
 
@@ -152,24 +151,26 @@ class Robot:
     def _robot_commander(self, robot_commander):
         self.__robot_commander = robot_commander
 
-    def get_current_joint_values(self, planning_group=_DEFAULT_PLANNING_GROUP):
-        """Returns the current joint values of the robot.
+    def get_current_joint_states(self, planning_group=_DEFAULT_PLANNING_GROUP):
+        """Returns the current joint state values of the robot.
         :param planning_group: Name of the planning group, default value is "manipulator".
-        :return: Returns the current joint values as array, None if given planning group does not exist.
+        :return: Returns the current joint values as array
         :rtype: array of floats
+        :raises RobotCurrentStateError if given planning group does not exist.
         """
-        if not self._robot_commander.get_group(planning_group):
-            rospy.logerr("Robot has no planning group with the name of:" + str(planning_group) + ".")
-            return None
-        else:
+        try:
             return self._robot_commander.get_group(planning_group).get_current_joint_values()
+        except MoveItCommanderException as e:
+            rospy.logerr(e.message)
+            raise RobotCurrentStateError(e.message)
 
     def get_current_pose(self, target_link=_DEFAULT_TARGET_LINK, base="prbt_base"):
         """Returns the current pose of target link in the reference frame.
         :param target_link: Name of the target_link, default value is "prbt_tcp".
         :param base: The target reference system of the pose, default ist "prbt_base".
-        :return: Returns the pose of the given frame, None if pose of given frame is not known.
+        :return: Returns the pose of the given frame
         :rtype: geometry_msgs.msg.Pose
+        :raises RobotCurrentStateError if the pose of the given frame is not known
         """
 
         try:
@@ -178,10 +179,9 @@ class Robot:
             stamped = PoseStamped(header=Header(frame_id=target_link), pose=Pose(orientation=orientation_))
             current_pose = self.tf_listener_.transformPose(base, stamped).pose
             return current_pose
-        except Exception as e:
+        except tf.Exception as e:
             rospy.logerr(e.message)
-            rospy.logerr("Transforming current pose to target system failed.")
-            return None
+            raise RobotCurrentStateError(e.message)
 
     def move(self, cmd):
         """ Allows the user to start/execute robot motion commands.

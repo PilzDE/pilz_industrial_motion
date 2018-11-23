@@ -37,3 +37,7 @@ class RobotMoveInvalidState(Exception):
 
 class RobotUnknownCommandType(Exception):
     pass
+
+
+class RobotCurrentStateError(Exception):
+    pass

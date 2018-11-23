@@ -321,6 +321,20 @@ class TestAPIExecutionStop(unittest.TestCase):
 
         self.assertRaises(RobotMoveFailed, self.robot.move, sequence)
 
+    def test_execute_abstract_cmd(self):
+        """ An AbstractCmd (base class) object should not be executable
+
+            Test sequence:
+                1. Execute an invalid AbstractCmd command
+
+            Test results:
+                1. Move function throws exception.
+        """
+        import pilz_robot_programming.commands as cmd
+        abstract_cmd = cmd._AbstractCmd() # private abstract base
+
+        self.assertRaises(RobotMoveFailed, self.robot.move, abstract_cmd)
+
     def test_ptp_stop_during_command(self):
         """Test stop during ptp command execution.
 

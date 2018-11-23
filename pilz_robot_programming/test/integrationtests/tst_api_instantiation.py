@@ -44,6 +44,24 @@ class TestAPIInstantiation(unittest.TestCase):
             del r
             self.fail('Robot instance can be created with wrong version.')
 
+    def test_none_version(self):
+        """ Check that instance of Robot can not be created with None version.
+
+            Test sequence:
+                1. Create robot instance with None version.
+
+            Test Results:
+                1. Creation failed with RobotVersionError.
+
+        """
+        try:
+            r = Robot(None)
+        except RobotVersionError:
+            pass
+        else:
+            del r
+            self.fail('Robot instance can be created with wrong version.')
+
     def test_multiple_instances(self):
         """ Check that multiple instances of Robot can not created.
 

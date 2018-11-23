@@ -118,6 +118,21 @@ class TestAPIExecutionError(unittest.TestCase):
                                acc_scale=0.1), blend_radius=0)
         self.assertRaises(RobotMoveFailed, self.robot.move, cmd_for_testing)
 
+    def test_gripper_cmd_incorrect_num_joints(self):
+        """Test what happens if RobotCommander returns incorrect number of joints for gripper planning-group.
+
+            Test sequence:
+                1. Trigger execution of gripper command.
+
+            Test Results:
+                1. Move function throws exception.
+        """
+        cmd_for_testing = Gripper(goal=0.01)
+        # Cause RobotCommander-Mock to return incorrect number of joints by setting incorrect planning-group name.
+        cmd_for_testing._planning_group = "manipulator"
+
+        self.assertRaises(IndexError, cmd_for_testing._cmd_to_request, self.robot)
+
 
 if __name__ == '__main__':
     import rostest

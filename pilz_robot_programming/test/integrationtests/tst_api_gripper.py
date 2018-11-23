@@ -49,12 +49,11 @@ class TestAPIGripper(unittest.TestCase):
                 1. Call gripper convert function with a list.
 
             Test Results:
-                1. None is returned.
+                1. raises Exception.
         """
 
         gripper_cmd = Gripper(goal=[1, 2])
-        req = gripper_cmd._cmd_to_request(self.robot)
-        self.assertIsNone(req)
+        self.assertRaises(RuntimeError, gripper_cmd._cmd_to_request, self.robot)
 
     def test_gripper_cmd_convert(self):
         """ Test the gripper convert function works correctly.
@@ -165,7 +164,7 @@ class TestAPIGripper(unittest.TestCase):
         self.robot.move(Gripper(goal=goal_joint))
 
         # 2
-        current_joints = self.robot.get_current_joint_values("gripper")
+        current_joints = self.robot.get_current_joint_states("gripper")
         self.assertEqual(1, len(current_joints))
         self.assertAlmostEqual(goal_joint, current_joints[0])
 

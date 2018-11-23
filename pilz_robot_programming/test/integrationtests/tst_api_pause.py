@@ -454,6 +454,27 @@ class TestAPIPause(unittest.TestCase):
         stop()
         self.assertRaises(RobotMoveFailed, move_thread.join())
 
+    def test_pause_and_new_command(self):
+        """Tests a time critical edge case of the pause/stop behavior, the edge case is explained in detail below.
+
+            Note:
+            To avoid an unstable/time critical test, private functions are called to simulate the time critical
+            edge case of the pause/stop behavior.
+
+            Detailed explanation of edge case (activity sequence):
+            - The move() function of class Robot is called. The move() function starts working and checks
+            the MoveControlState in _move_execution_loop().
+            - Before the _execute() method on the concrete command is called, a pause/stop is triggered.
+            - The _move_execution_loop() function continues its execution and calls the execute method of the
+              concrete command.
+            - If everything works correctly, the MoveControlState is atomically checked and the command execution
+              is halted/stopped because the pause/stop is detected.
+        """
+        self.robot.pause()
+        cmd_for_testing = Ptp(goal=self.test_data.get_joints("PTPJointValid", PLANNING_GROUP_NAME))
+        res = cmd_for_testing._execute(self.robot)
+        self.assertEqual(self.robot._STOPPED, res)  # Command is execution is halted/stopped.
+
 
 if __name__ == '__main__':
     import rostest

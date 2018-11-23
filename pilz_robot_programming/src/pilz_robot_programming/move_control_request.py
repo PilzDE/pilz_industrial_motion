@@ -42,7 +42,7 @@ class _MoveControlState(Enum):
     RESUME_REQUESTED = 4
 
 
-class _MoveControlStateMachine:
+class _MoveControlStateMachine(object):
     """ Implements a light weight finite state machine for controlling the execution of a move command
 
     :note:
@@ -87,19 +87,17 @@ class _MoveControlStateMachine:
             return self.__state
 
     @state.setter
-    def state(self, state):
-        """"switch the state according to current state and action"""
+    def state(self, state): # pragma: no cover
         rospy.logerr("State cannot be set directly, please use switch() instead.")
 
     def switch(self, action):
-        if not isinstance(action, MoveControlAction):
-            rospy.logerr("Unknown type of action, only MoveControlAction is allowed.")
-            return False
+        """"switch the state according to current state and action"""
+        assert isinstance(action, MoveControlAction), \
+            "Unknown type of action, only MoveControlAction is allowed."
         with self._state_lock:
             rospy.loginfo("Switching state from " + self.__state.name + " to " + self._fsm[(self.__state, action)].name)
             self.__state = self._fsm[(self.__state, action)]
             self._state_cv.notify_all()
-            return True
 
     def wait_for_resume(self):
         """helper function for waiting for resume"""

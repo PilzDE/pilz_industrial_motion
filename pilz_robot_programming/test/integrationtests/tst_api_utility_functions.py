@@ -73,6 +73,11 @@ class TestAPIUtilityFunctions(unittest.TestCase):
         current_pose = self.robot.get_current_pose()
         self.comparePose(goal_pose, current_pose)
 
+    def test_get_current_pose_for_invalid_tf(self):
+        """ Check if trying to get the current pose for a nonexistent frame raises an exception
+        """
+        self.assertRaises(RobotCurrentStateError, self.robot.get_current_pose, target_link="invalid")
+
     def test_get_current_joints(self):
         """ Check if the current joints can be retrieved correctly
 
@@ -90,11 +95,15 @@ class TestAPIUtilityFunctions(unittest.TestCase):
         self.robot.move(Ptp(goal=goal_joints))
 
         # 2
-        current_joints = self.robot.get_current_joint_values()
+        current_joints = self.robot.get_current_joint_states()
         self.assertEqual(len(goal_joints), len(current_joints))
         for current_joint, goal_joint in zip(current_joints, goal_joints):
             self.assertAlmostEqual(current_joint, goal_joint, COMPARE_PRECISION)
 
+    def test_get_joints_for_invalid_group(self):
+        """ Check that trying to get the current joint states raises an exception.
+        """
+        self.assertRaises(RobotCurrentStateError, self.robot.get_current_joint_states, planning_group="invalid")
 
 if __name__ == '__main__':
     import rostest
