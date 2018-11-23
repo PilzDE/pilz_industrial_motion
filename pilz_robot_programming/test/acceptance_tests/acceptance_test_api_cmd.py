@@ -53,7 +53,8 @@ def _test_ptp_pos(robot):
     robot.move(Ptp(goal=Pose(position=Point(-0.46, -0.21, 0.19), orientation=from_euler(0, -3.14, -0.25))))
 
     _askSuccess(_test_ptp_pos.__name__,
-                'The robot should have move to [0,0,0,0,0,0] and after that to the next position.')
+                'The robot should have moved to [0,0,0,0,0,0], after that away from [0,0,0,0,0,0] and then to the upper'
+                + ' pick position.')
 
 
 def _test_lin_pos(robot):
@@ -72,7 +73,7 @@ def _test_lin_pos(robot):
     robot.move(Lin(goal=Pose(position=Point(0.0, 0.0, -0.15)), relative=True, vel_scale=PTP_VEL_PICK))
     robot.move(Lin(goal=Pose(position=Point(0.0, 0.0, 0.15)), relative=True, vel_scale=PTP_VEL_PICK))
 
-    _askSuccess(_test_lin_pos.__name__, 'The robot tcp should move linear 15cm down and then linear 15cm up.')
+    _askSuccess(_test_lin_pos.__name__, 'The robot tcp should have moved linear 15cm down and then linear 15cm up.')
 
 
 def _test_seq_pos(robot):
