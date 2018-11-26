@@ -334,8 +334,10 @@ class Robot(object):
         # deletes the single instance parameter when interpreter terminates
         delete_param(self._SINGLE_INSTANCE_FLAG)
 
+        with self._move_ctrl_sm: # wait, if _execute is just starting a send_goal()
+            actionclient_state = self._sequence_client.get_state()
         # stop movement
-        if self._sequence_client.get_state() != GoalStatus.LOST: # is the client currently tracking a goal?
+        if actionclient_state != GoalStatus.LOST: # is the client currently tracking a goal?
             self._sequence_client.cancel_goal()
             self._sequence_client.wait_for_result(timeout = rospy.Duration(2.))
 
