@@ -505,7 +505,7 @@ bool pilz::isRobotStateEqual(const moveit::core::RobotState &state1,
 
   if( (joint_position_1 - joint_position_2).norm() > epsilon)
   {
-    ROS_ERROR_STREAM("Joint positions of the two states are different. state1: " << joint_position_1 << " state2: "
+    ROS_DEBUG_STREAM("Joint positions of the two states are different. state1: " << joint_position_1 << " state2: "
                      << joint_position_2);
     return false;
   }
@@ -517,7 +517,7 @@ bool pilz::isRobotStateEqual(const moveit::core::RobotState &state1,
 
   if( (joint_velocity_1 - joint_velocity_2).norm() > epsilon)
   {
-    ROS_ERROR_STREAM("Joint velocities of the two states are different. state1: " << joint_velocity_1 << " state2: "
+    ROS_DEBUG_STREAM("Joint velocities of the two states are different. state1: " << joint_velocity_1 << " state2: "
                      << joint_velocity_2);
     return false;
   }
@@ -529,7 +529,7 @@ bool pilz::isRobotStateEqual(const moveit::core::RobotState &state1,
 
   if( (joint_acc_1 - joint_acc_2).norm() > epsilon)
   {
-    ROS_ERROR_STREAM("Joint accelerations of the two states are different. state1: " << joint_acc_1 << " state2: "
+    ROS_DEBUG_STREAM("Joint accelerations of the two states are different. state1: " << joint_acc_1 << " state2: "
                      << joint_acc_2);
     return false;
   }
