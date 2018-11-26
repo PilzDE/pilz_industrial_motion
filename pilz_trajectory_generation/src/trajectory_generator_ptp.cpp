@@ -227,6 +227,14 @@ void TrajectoryGeneratorPTP::planPTP(const std::map<std::string, double>& start_
     }
     joint_trajectory.points.push_back(point);
   }
+
+  // Set last point velocity and acceleration to zero
+  std::fill(joint_trajectory.points.back().velocities.begin(),
+            joint_trajectory.points.back().velocities.end(),
+            0.0);
+  std::fill(joint_trajectory.points.back().accelerations.begin(),
+            joint_trajectory.points.back().accelerations.end(),
+            0.0);
 }
 
 

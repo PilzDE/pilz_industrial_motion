@@ -60,6 +60,7 @@ add_library(${PROJECT_NAME}
   src/cartesian_limit.cpp
   src/limits_container.cpp
   src/trajectory_functions.cpp
+  src/trajectory_appender.cpp
 )
 
 target_link_libraries(${PROJECT_NAME}
@@ -120,7 +121,8 @@ target_link_libraries(planning_context_loader_circ
                       ${catkin_LIBRARIES}) # DO NOT LINK ${PROJECT_NAME} here!
 
 add_library(command_list_manager
-            src/command_list_manager.cpp)
+            src/command_list_manager.cpp
+            src/trajectory_appender.cpp)
 target_link_libraries(command_list_manager
             ${catkin_LIBRARIES})
 add_dependencies(command_list_manager
@@ -136,6 +138,7 @@ add_library(sequence_capability
             src/limits_container.cpp
             src/cartesian_limit.cpp
             src/cartesian_limits_aggregator.cpp
+            src/trajectory_appender.cpp
             )
 target_link_libraries(sequence_capability
                       ${catkin_LIBRARIES}) # DO NOT LINK ${PROJECT_NAME} here!
@@ -178,6 +181,12 @@ install(TARGETS
 if(CATKIN_ENABLE_TESTING)
   find_package(rostest REQUIRED)
   find_package(code_coverage REQUIRED)
+
+  if(ENABLE_COVERAGE_TESTING)
+    include(CodeCoverage)
+    APPEND_COVERAGE_COMPILER_FLAGS()
+  endif()
+
   ## Declare a C++ library
   add_library(${PROJECT_NAME}_test
       test/test_utils.cpp
@@ -199,6 +208,7 @@ if(CATKIN_ENABLE_TESTING)
       src/trajectory_blender_transition_window.cpp
       src/cartesian_limits_aggregator.cpp
       src/planning_context_loader.cpp
+      src/trajectory_appender.cpp
   )
 
   target_link_libraries(${PROJECT_NAME}_test
@@ -402,14 +412,21 @@ ${catkin_LIBRARIES} ${PROJECT_NAME}_test)
   target_link_libraries(unittest_planning_context
      ${catkin_LIBRARIES} ${PROJECT_NAME}_test)
 
+  # RobotTrajectoryHelper Unit Test
+  add_rostest_gtest(unittest_trajectory_appender
+    test/unittest_trajectory_appender.test
+    test/unittest_trajectory_appender.cpp
+    src/trajectory_appender.cpp)
+
+  target_link_libraries(unittest_trajectory_appender
+    ${PROJECT_NAME} ${catkin_LIBRARIES} ${PROJECT_NAME}_test)
+
   # to run: catkin_make -DENABLE_COVERAGE_TESTING=ON package_name_coverage
   if(ENABLE_COVERAGE_TESTING)
-    include(CodeCoverage)
-    APPEND_COVERAGE_COMPILER_FLAGS()
     set(COVERAGE_EXCLUDES "*/${PROJECT_NAME}/test*")
     add_code_coverage(
       NAME ${PROJECT_NAME}_coverage
-      DEPENDENCIES tests
+      DEPENDS tests
     )
   endif()
 endif()

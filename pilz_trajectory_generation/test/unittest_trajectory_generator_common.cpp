@@ -111,6 +111,7 @@ protected:
     robot_state::RobotState rstate(robot_model_);
     rstate.setToDefaultValues();
     rstate.setJointGroupPositions(planning_group_, {0,M_PI/2,0,M_PI/2,0,0});
+    rstate.setVariableVelocities(std::vector<double>(rstate.getVariableCount(), 0.0));
     moveit::core::robotStateToRobotStateMsg(rstate,req_.start_state,false);
     moveit_msgs::Constraints goal_constraint;
     moveit_msgs::JointConstraint joint_constraint;
@@ -238,6 +239,19 @@ TYPED_TEST(TrajectoryGeneratorCommonTest, InconsistentStartState)
 TYPED_TEST(TrajectoryGeneratorCommonTest, StartPostionOutOfLimit)
 {
   this->req_.start_state.joint_state.position[0] = 100;
+  EXPECT_FALSE(this->trajectory_generator_->generate(this->req_,this->res_));
+  EXPECT_EQ(this->res_.error_code_.val, moveit_msgs::MoveItErrorCodes::INVALID_ROBOT_STATE);
+}
+
+/**
+ * @brief Check that no trajectory is generated if a start velocity is given
+ *
+ * @note This test is here for regression, however in general generators that can work with a given
+ * start velocity are highly desired.
+ */
+TYPED_TEST(TrajectoryGeneratorCommonTest, StartPositionVelocityNoneZero)
+{
+  this->req_.start_state.joint_state.velocity[0] = 100;
   EXPECT_FALSE(this->trajectory_generator_->generate(this->req_,this->res_));
   EXPECT_EQ(this->res_.error_code_.val, moveit_msgs::MoveItErrorCodes::INVALID_ROBOT_STATE);
 }

@@ -22,6 +22,7 @@
 
 #include "pilz_msgs/MotionSequenceRequest.h"
 #include "pilz_trajectory_generation/trajectory_blender.h"
+#include <pilz_trajectory_generation/trajectory_appender.h>
 
 namespace pilz_trajectory_generation {
 
@@ -123,6 +124,9 @@ private:
 
   /// Robot model
   moveit::core::RobotModelConstPtr model_;
+
+  /// TrajectoryAppender
+  TrajectoryAppender appender_;
 
   /// TrajectoryBlender
   std::unique_ptr<pilz::TrajectoryBlender> blender_;

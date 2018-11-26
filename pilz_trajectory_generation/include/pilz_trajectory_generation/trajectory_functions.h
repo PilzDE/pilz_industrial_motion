@@ -164,17 +164,29 @@ bool determineAndCheckSamplingTime(const robot_trajectory::RobotTrajectoryPtr& f
                                    double& sampling_time);
 
 /**
- * @brief check if the two robot states have the same joint position/velocity/acceleration
- * @param state1:
- * @param state2
- * @param group
- * @param EPSILON
- * @return
+ * @brief Deprecated, do not use this function signature anymore.
+ *
+ * @deprecated use the other function signature taking const references to the robot states.
+ *
  */
 bool isRobotStateEqual(const robot_state::RobotStatePtr& state1,
                        const robot_state::RobotStatePtr& state2,
-                       const std::string& group,
-                       double EPSILON);
+                       const std::string& joint_group_name,
+                       double epsilon);
+
+/**
+ * @brief Check if the two robot states have the same joint position/velocity/acceleration.
+ *
+ * @param joint_group_name The name of the joint group.
+ * @param epsilon Constants defining how close the joint position/velocity/acceleration have to be to be
+ * recognized as equal.
+ *
+ * @return True if joint positions, joint velocities and joint accelerations are equal, otherwise false.
+ */
+bool isRobotStateEqual(const robot_state::RobotState& state1,
+                       const robot_state::RobotState& state2,
+                       const std::string& joint_group_name,
+                       double epsilon);
 
 /**
  * @brief check if the robot state have zero velocity/acceleartion

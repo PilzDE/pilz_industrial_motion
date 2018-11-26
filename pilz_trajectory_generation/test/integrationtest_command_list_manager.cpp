@@ -38,6 +38,8 @@ const std::string PARAM_MODEL_WITH_GRIPPER_NAME {"robot_description_pg70"};
 const std::string PARAM_PLANNING_GROUP_NAME("planning_group");
 const std::string PARAM_TARGET_LINK_NAME("target_link");
 
+using testutils::hasStrictlyIncreasingTime;
+
 class IntegrationTestCommandListManager : public testing::TestWithParam<std::string>
 {
 protected:
@@ -52,9 +54,10 @@ protected:
   planning_scene::PlanningScenePtr scene_ {0};
 
   std::string planning_group_, target_link_;
-  pilz_msgs::MotionSequenceRequest blend_command_list_2_;
-  pilz_msgs::MotionSequenceRequest blend_command_list_3_;
-  moveit_msgs::MotionPlanRequest  req1_, req2_, req3_;
+  pilz_msgs::MotionSequenceRequest blend_command_lin_lin_;
+  pilz_msgs::MotionSequenceRequest blend_command_list_lin_lin_lin_;
+  moveit_msgs::MotionPlanRequest  req_lin1_, req_lin2_, req_lin3_;
+  moveit_msgs::MotionPlanRequest  req_ptp1_, req_ptp2_;
   geometry_msgs::PoseStamped p1_, p2_, p3_;
 };
 
@@ -97,26 +100,24 @@ void IntegrationTestCommandListManager::SetUp()
   builder.setJointStartState(rstate);
   builder.setGoal(target_link_, p1_);
 
-  req1_ = builder.createLin();
+  req_lin1_ = builder.createLin();
+  req_ptp1_ = builder.createPtp();
 
   // Clear the start state for the next goals
   builder.clearJointStartState();
 
   // goal 2
   builder.setGoal(target_link_, p2_);
-  req2_ = builder.createLin();
+  req_lin2_ = builder.createLin();
+  req_ptp2_ = builder.createPtp();
 
   // goal3
   builder.setGoal(target_link_, p3_);
-  req3_ = builder.createLin();
+  req_lin3_ = builder.createLin();
 
-  MotionSequenceRequestBuilder blend_list_builder;
-  blend_command_list_2_ = blend_list_builder.build({std::make_pair<>(req1_, 0.08),
-                                                    std::make_pair<>(req2_, 0)});
-
-  blend_command_list_3_ = blend_list_builder.build({std::make_pair<>(req1_, 0.08),
-                                                    std::make_pair<>(req2_, 0.05),
-                                                    std::make_pair<>(req3_, 0)});
+  MotionSequenceRequestBuilder seq_request_builder;
+  blend_command_lin_lin_ = seq_request_builder.build({ {req_lin1_, 0.08}, {req_lin2_, 0} });
+  blend_command_list_lin_lin_lin_ = seq_request_builder.build({ {req_lin1_, 0.08}, {req_lin2_, 0.05}, {req_lin3_, 0} });
 
   // Define and set the current scene and manager test object
   scene_ = std::make_shared<planning_scene::PlanningScene>(robot_model_);
@@ -132,33 +133,41 @@ INSTANTIATE_TEST_CASE_P(InstantiationName, IntegrationTestCommandListManager, ::
 /**
  * @brief Integration test for the concatenation of motion commands
  * Sends a sequence request.
- *
+ *,
+                                                                                     std::make_pair<>(req_lin3_, 0)});
  *  - Test Sequence:
- *    1. Generate request with two trajectories and zero blend radius.
+ *    1. Generate request with three trajectories and zero blend radius.
  *    2. Generate request with first trajectory and zero blend radius.
  *    3. Generate request with second trajectory and zero blend radius.
  *    4. Generate request with third trajectory and zero blend radius.
  *
  *  - Expected Results:
- *    1. blending is successful, result trajectory is not empty
- *    2. blending is successful, result trajectory is not empty
- *    3. blending is successful, result trajectory is not empty
- *    4. blending is successful, result trajectory is not empty
+ *    1. Generation of concatenated trajectory is successful.
+ *       All time steps of resulting trajectory are strictly positive
+ *    2. Generation of concatenated trajectory is successful.
+ *       All time steps of resulting trajectory are strictly positive
+ *    3. Generation of concatenated trajectory is successful.
+ *       All time steps of resulting trajectory are strictly positive
+ *    4. Generation of concatenated trajectory is successful.
+ *       All time steps of resulting trajectory are strictly positive
  *       resulting duration in step1 is approximately step2 + step3 + step4
  */
 TEST_P(IntegrationTestCommandListManager, concatThreeSegments)
 {
-  MotionSequenceRequestBuilder blend_list_builder;
-  pilz_msgs::MotionSequenceRequest req = blend_list_builder.build({std::make_pair<>(req1_, 0),
-                                                                                     std::make_pair<>(req2_, 0),
-                                                                                     std::make_pair<>(req3_, 0)});
+  MotionSequenceRequestBuilder seq_request_builder;
+  pilz_msgs::MotionSequenceRequest req = seq_request_builder.build({std::make_pair<>(req_lin1_, 0),
+                                                                                     std::make_pair<>(req_lin2_, 0),
+                                                                                     std::make_pair<>(req_lin3_, 0)});
   planning_interface::MotionPlanResponse res1_2_3;
   ASSERT_TRUE(manager_->solve(scene_, req, res1_2_3));
   EXPECT_EQ(moveit_msgs::MoveItErrorCodes::SUCCESS, res1_2_3.error_code_.val);
   EXPECT_GT(res1_2_3.trajectory_->getWayPointCount(), 0u);
 
+  // Check for strictly positively increasing time steps
+  EXPECT_TRUE(hasStrictlyIncreasingTime(res1_2_3.trajectory_));
+
   ROS_INFO("step 2: only first segment");
-  req = blend_list_builder.build({std::make_pair<>(req1_, 0)});
+  req = seq_request_builder.build({std::make_pair<>(req_lin1_, 0)});
   planning_interface::MotionPlanResponse res1;
   ASSERT_TRUE(manager_->solve(scene_, req, res1));
   EXPECT_EQ(moveit_msgs::MoveItErrorCodes::SUCCESS, res1.error_code_.val);
@@ -168,12 +177,12 @@ TEST_P(IntegrationTestCommandListManager, concatThreeSegments)
 
 
   ROS_INFO("step 3: only second segment");
-  // Create duplicate of req2_ with start state
-  MotionPlanRequestBuilder builder_2(req2_);
+  // Create duplicate of req_lin2_ with start state
+  MotionPlanRequestBuilder builder_2(req_lin2_);
   builder_2.setJointStartState(res1.trajectory_->getLastWayPoint());
 
   moveit_msgs::MotionPlanRequest req2 = builder_2.createLin();
-  req = blend_list_builder.build({std::make_pair<>(req2, 0)});
+  req = seq_request_builder.build({std::make_pair<>(req2, 0)});
   planning_interface::MotionPlanResponse res2;
   ASSERT_TRUE(manager_->solve(scene_, req, res2));
   EXPECT_EQ(moveit_msgs::MoveItErrorCodes::SUCCESS, res2.error_code_.val);
@@ -183,12 +192,12 @@ TEST_P(IntegrationTestCommandListManager, concatThreeSegments)
 
 
   ROS_INFO("step 4: only third segment");
-  // Create duplicate of req3_ with start state
-  MotionPlanRequestBuilder builder_3(req3_);
+  // Create duplicate of req_lin3_ with start state
+  MotionPlanRequestBuilder builder_3(req_lin3_);
   builder_3.setJointStartState(res2.trajectory_->getLastWayPoint());
 
   moveit_msgs::MotionPlanRequest req3 = builder_3.createLin();
-  req = blend_list_builder.build({std::make_pair<>(req3, 0)});
+  req = seq_request_builder.build({std::make_pair<>(req3, 0)});
   planning_interface::MotionPlanResponse res3;
   ASSERT_TRUE(manager_->solve(scene_, req, res3));
   EXPECT_EQ(moveit_msgs::MoveItErrorCodes::SUCCESS, res3.error_code_.val);
@@ -207,6 +216,78 @@ TEST_P(IntegrationTestCommandListManager, concatThreeSegments)
 }
 
 /**
+ * @brief Integration test for the concatenation of two ptp commands
+ * Sends a pilz_msgs::MotionSequenceRequest request.
+ *
+ *  - Test Sequence:
+ *    1. Generate request with two PTP trajectories and zero blend radius.
+ *
+ *  - Expected Results:
+ *    1. Generation of concatenated trajectory is successful.
+ *       All time steps of resulting trajectory are strictly positive.
+ */
+TEST_P(IntegrationTestCommandListManager, concatTwoPtpSegments)
+{
+  MotionSequenceRequestBuilder seq_request_builder;
+  pilz_msgs::MotionSequenceRequest req = seq_request_builder.build({ {req_ptp1_, 0},
+                                                                     {req_ptp2_, 0} });
+
+  planning_interface::MotionPlanResponse res;
+  ASSERT_TRUE(manager_->solve(scene_, req, res));
+  EXPECT_EQ(moveit_msgs::MoveItErrorCodes::SUCCESS, res.error_code_.val);
+  EXPECT_GT(res.trajectory_->getWayPointCount(), 0u);
+  EXPECT_TRUE(hasStrictlyIncreasingTime(res.trajectory_));
+}
+
+/**
+ * @brief Integration test for the concatenation of ptp and a lin command
+ * Sends a pilz_msgs::MotionSequenceRequest request.
+ *
+ *  - Test Sequence:
+ *    1. Generate request with PTP and LIN trajectory and zero blend radius.
+ *
+ *  - Expected Results:
+ *    1. Generation of concatenated trajectory is successful.
+ *       All time steps of resulting trajectory are strictly positive.
+ */
+TEST_P(IntegrationTestCommandListManager, concatPtpAndLinSegments)
+{
+  MotionSequenceRequestBuilder seq_request_builder;
+  pilz_msgs::MotionSequenceRequest req = seq_request_builder.build({ {req_ptp1_, 0},
+                                                                     {req_lin2_, 0} });
+
+  planning_interface::MotionPlanResponse res;
+  ASSERT_TRUE(manager_->solve(scene_, req, res));
+  EXPECT_EQ(moveit_msgs::MoveItErrorCodes::SUCCESS, res.error_code_.val);
+  EXPECT_GT(res.trajectory_->getWayPointCount(), 0u);
+  EXPECT_TRUE(hasStrictlyIncreasingTime(res.trajectory_));
+}
+
+/**
+ * @brief Integration test for the concatenation of a lin and a ptp command
+ * Sends a pilz_msgs::MotionSequenceRequest request.
+ *
+ *  - Test Sequence:
+ *    1. Generate request with LIN and PTP trajectory and zero blend radius.
+ *
+ *  - Expected Results:
+ *    1. Generation of concatenated trajectory is successful.
+ *       All time steps of resulting trajectory are strictly positive.
+ */
+TEST_P(IntegrationTestCommandListManager, concatLinAndPtpSegments)
+{
+  MotionSequenceRequestBuilder seq_request_builder;
+  pilz_msgs::MotionSequenceRequest req = seq_request_builder.build({ {req_lin1_, 0},
+                                                                     {req_ptp2_, 0} });
+
+  planning_interface::MotionPlanResponse res;
+  ASSERT_TRUE(manager_->solve(scene_, req, res));
+  EXPECT_EQ(moveit_msgs::MoveItErrorCodes::SUCCESS, res.error_code_.val);
+  EXPECT_GT(res.trajectory_->getWayPointCount(), 0u);
+  EXPECT_TRUE(hasStrictlyIncreasingTime(res.trajectory_));
+}
+
+/**
  * @brief Integration test for the blending of motion commands
  * Sends a blending request. Checks if response is obtained and
  * outputs the trajectory for debugging purposes.
@@ -220,11 +301,11 @@ TEST_P(IntegrationTestCommandListManager, concatThreeSegments)
 TEST_P(IntegrationTestCommandListManager, blendTwoSegments)
 {
   planning_interface::MotionPlanResponse res;
-  ASSERT_TRUE(manager_->solve(scene_, blend_command_list_2_, res));
+  ASSERT_TRUE(manager_->solve(scene_, blend_command_lin_lin_, res));
   EXPECT_EQ(moveit_msgs::MoveItErrorCodes::SUCCESS, res.error_code_.val);
   EXPECT_GT(res.trajectory_->getWayPointCount(), 0u);
   EXPECT_EQ(res.trajectory_->getFirstWayPoint().getVariableCount(),
-            blend_command_list_2_.items[0].req.start_state.joint_state.name.size());
+            blend_command_lin_lin_.items[0].req.start_state.joint_state.name.size());
 
 
   ros::NodeHandle nh;
@@ -275,7 +356,7 @@ TEST_P(IntegrationTestCommandListManager, emptyList)
  */
 TEST_P(IntegrationTestCommandListManager, firstGoalNotReachable)
 {
-  pilz_msgs::MotionSequenceRequest req = blend_command_list_2_;
+  pilz_msgs::MotionSequenceRequest req = blend_command_lin_lin_;
   req.items[0].req.goal_constraints[0].position_constraints[0].constraint_region.primitive_poses[0].position.y = 27;
   planning_interface::MotionPlanResponse res;
   ASSERT_FALSE(manager_->solve(scene_, req, res));
@@ -296,7 +377,7 @@ TEST_P(IntegrationTestCommandListManager, firstGoalNotReachable)
  */
 TEST_P(IntegrationTestCommandListManager, startStateNotFirstGoal)
 {
-  pilz_msgs::MotionSequenceRequest req = blend_command_list_2_;
+  pilz_msgs::MotionSequenceRequest req = blend_command_lin_lin_;
   req.items[1].req.start_state.joint_state = testutils::generateJointState({-1., 2., -3., 4., -5., 0.});
   planning_interface::MotionPlanResponse res;
   ASSERT_FALSE(manager_->solve(scene_, req, res));
@@ -317,7 +398,7 @@ TEST_P(IntegrationTestCommandListManager, startStateNotFirstGoal)
  */
 TEST_P(IntegrationTestCommandListManager, blendingRadiusNegative)
 {
-  pilz_msgs::MotionSequenceRequest req = blend_command_list_2_;
+  pilz_msgs::MotionSequenceRequest req = blend_command_lin_lin_;
   req.items[0].blend_radius = -0.3;
   planning_interface::MotionPlanResponse res;
   ASSERT_FALSE(manager_->solve(scene_, req, res));
@@ -338,7 +419,7 @@ TEST_P(IntegrationTestCommandListManager, blendingRadiusNegative)
  */
 TEST_P(IntegrationTestCommandListManager, lastBlendingRadiusNonZero)
 {
-  pilz_msgs::MotionSequenceRequest req = blend_command_list_2_;
+  pilz_msgs::MotionSequenceRequest req = blend_command_lin_lin_;
   req.items[1].blend_radius = 0.03;
   planning_interface::MotionPlanResponse res;
   ASSERT_FALSE(manager_->solve(scene_, req, res));
@@ -359,7 +440,7 @@ TEST_P(IntegrationTestCommandListManager, lastBlendingRadiusNonZero)
  */
 TEST_P(IntegrationTestCommandListManager, blendRadiusGreaterThanSegment)
 {
-  pilz_msgs::MotionSequenceRequest req = blend_command_list_2_;
+  pilz_msgs::MotionSequenceRequest req = blend_command_lin_lin_;
   req.items[0].blend_radius = 42.;
   planning_interface::MotionPlanResponse res;
   ASSERT_FALSE(manager_->solve(scene_, req, res));
@@ -383,7 +464,7 @@ TEST_P(IntegrationTestCommandListManager, blendRadiusGreaterThanSegment)
  */
 TEST_P(IntegrationTestCommandListManager, blendingRadiusOverlapping)
 {
-  pilz_msgs::MotionSequenceRequest req = blend_command_list_3_;
+  pilz_msgs::MotionSequenceRequest req = blend_command_list_lin_lin_lin_;
 
   planning_interface::MotionPlanResponse res_valid;
   ASSERT_TRUE(manager_->solve(scene_, req, res_valid));
@@ -418,7 +499,7 @@ TEST_P(IntegrationTestCommandListManager, blendingRadiusOverlapping)
 TEST_P(IntegrationTestCommandListManager, largeRequest)
 {
   const int n = 30;
-  pilz_msgs::MotionSequenceRequest req = blend_command_list_3_;
+  pilz_msgs::MotionSequenceRequest req = blend_command_list_lin_lin_lin_;
 
   planning_interface::MotionPlanResponse res_single;
   ros::Time begin1 = ros::Time::now();

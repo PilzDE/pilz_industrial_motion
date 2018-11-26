@@ -88,6 +88,7 @@ as the lead axis.
  - `trajectory/joint_trajectory/joint_names`: a list of the joint names of the generated joint trajectory
  - `trajectory/joint_trajectory/points/(positions,velocities,accelerations,time_from_start)`: a list of generated way
  points. Each point has positions/velocities/accelerations of all joints (same order as the joint names) and time from start.
+   The last point will have zero velocity and acceleration.
  - `group_name`: name of the planning group
  - `error_code/val`: error code of the motion planning
 
@@ -123,6 +124,7 @@ motion plan fails due to violation of joint space limits.
  - `trajectory/joint_trajectory/joint_names`: a list of the joint names of the generated joint trajectory
  - `trajectory/joint_trajectory/points/(positions,velocities,accelerations,time_from_start)`: a list of generated way
  points. Each point has positions/velocities/accelerations of all joints (same order as the joint names) and time from start.
+    The last point will have zero velocity and acceleration.
  - `group_name`: name of the planning group
  - `error_code/val`: error code of the motion planning
 
@@ -164,6 +166,7 @@ the Cartesian velocity/acceleration scaling factor if motion plan fails due to v
  - `trajectory/joint_trajectory/joint_names`: a list of the joint names of the generated joint trajectory
  - `trajectory/joint_trajectory/points/(positions,velocities,accelerations,time_from_start)`: a list of generated way
  points. Each point has positions/velocities/accelerations of all joints (same order as the joint names) and time from start.
+   The last point will have zero velocity and acceleration.
  - `group_name`: name of the planning group
  - `error_code/val`: error code of the motion planning
 
