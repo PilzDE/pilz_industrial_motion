@@ -57,10 +57,11 @@ def start_program():
 
     # Repeat the previous steps with a sequence command
     sequence = Sequence()
-    sequence.append(Lin(goal=Pose(position=Point(0.2, 0, 0.8), orientation=from_euler(0, 0, math.radians(15))),
-                        vel_scale=0.1, acc_scale=0.1))
+    sequence.append(Lin(goal=Pose(position=Point(0.2, 0, 0.8)), vel_scale=0.1, acc_scale=0.1))
     sequence.append(Circ(goal=Pose(position=Point(0.2, -0.2, 0.8)), center=Point(0.1, -0.1, 0.8), acc_scale=0.4))
     sequence.append(Ptp(goal=pose_after_relative, vel_scale=0.2))
+
+    r.move(sequence)
 
     # Move to start goal for sequence demonstration
     r.move(Ptp(goal=start_joint_values))
