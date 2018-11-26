@@ -246,21 +246,34 @@ or add new frames for each object on the tray and do all operations for each obj
 
 Sequence
 ^^^^^^^^
+
 .. code-block:: python
 
-    # Sequence
+    # Repeat the previous steps with a sequence command
     sequence = Sequence()
-    sequence.append(Lin(goal=Pose(position=Point(0.2, 0, 0.6))), blend_radius=0.01)
-    sequence.append(Lin(goal=Pose(position=Point(0.2, 0, 0.7))))
+    sequence.append(Lin(goal=Pose(position=Point(0.2, 0, 0.8)), vel_scale=0.1, acc_scale=0.1))
+    sequence.append(Circ(goal=Pose(position=Point(0.2, -0.2, 0.8)), center=Point(0.1, -0.1, 0.8), acc_scale=0.4))
+    sequence.append(Ptp(goal=pose_after_relative, vel_scale=0.2))
 
-    r.move(seq)
+    r.move(sequence)
 
 :py:class:`.Sequence` commands allow the user to define a robot motion consisting of
 two or more robot motion commands which are executed like a single robot motion command, in other words,
 without stop at the end of each command.
 
-The blending radius states how much the robot trajectory can deviate from the
-original trajectory (trajectory without blending) to blend the robot motion from one trajectory to the next.
+As an optional argument, a blending radius can be given to the :py:class:`.Sequence` command. The blending radius
+states how much the robot trajectory can deviate from the original trajectory (trajectory without blending) to
+blend the robot motion from one trajectory to the next. Setting the blending radius to zero corresponds to a sequence
+without blending like above.
+
+.. code-block:: python
+
+    # Sequence
+    blend_sequence = Sequence()
+    blend_sequence.append(Lin(goal=Pose(position=Point(0.2, 0, 0.6))), blend_radius=0.01)
+    blend_sequence.append(Lin(goal=Pose(position=Point(0.2, 0, 0.7))))
+
+    r.move(blend_sequence)
 
 :note:
     The last command of the sequence has to have zero blending radius which can be achieved by omitting
