@@ -396,7 +396,7 @@ class Robot(object):
     def _establish_connections(self):
         # Create sequence_move_group client, only for manipulator
         self._sequence_client = SimpleActionClient(self._SEQUENCE_TOPIC, MoveGroupSequenceAction)
-        rospy.logdebug("Waiting for connection to action server " + self._SEQUENCE_TOPIC + "...")
+        rospy.loginfo("Waiting for connection to action server " + self._SEQUENCE_TOPIC + "...")
         self._sequence_client.wait_for_server()
         rospy.logdebug("Connection to action server " + self._SEQUENCE_TOPIC + " established.")
 
