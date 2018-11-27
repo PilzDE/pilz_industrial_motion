@@ -33,7 +33,7 @@ from .exceptions import *
 from geometry_msgs.msg import Quaternion, PoseStamped, Pose
 from std_msgs.msg import Header
 
-__version__ = '0.0.dev1'
+__version__ = '1.0.0'
 
 # Default velocities
 _MAX_VEL_SCALE = 1

@@ -24,11 +24,12 @@ GRIPPER_CLOSED = 0.001
 GRIPPER_MIDDLE = 0.01505
 GRIPPER_OPEN = 0.0301
 
+_REQUIRED_API_VERSION = "1"
 
 def start_program():
     print("Executing " + __file__)
 
-    robot = Robot('0')
+    robot = Robot(_REQUIRED_API_VERSION)
     _test_neg_gripper_pos(robot)
     _test_too_large_gripper_pos(robot)
     _test_correct_gripper_pos(robot)

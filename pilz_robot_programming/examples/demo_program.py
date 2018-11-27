@@ -20,7 +20,7 @@ from pilz_robot_programming.commands import *
 import math
 import rospy
 
-__REQUIRED_API_VERSION__ = "0"
+__REQUIRED_API_VERSION__ = "1"
 
 
 def start_program():

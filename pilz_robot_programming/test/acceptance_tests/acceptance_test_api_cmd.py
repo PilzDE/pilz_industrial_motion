@@ -21,11 +21,12 @@ from pilz_industrial_motion_testutils.acceptance_test_utils import _askPermissio
 
 PTP_VEL_PICK = 0.1
 
+_REQUIRED_API_VERSION = "1"
 
 def start_program():
     print("Executing " + __file__)
 
-    robot = Robot('0')
+    robot = Robot(_REQUIRED_API_VERSION)
     _test_ptp_pos(robot)
     _test_lin_pos(robot)
     _test_circ_pos(robot)

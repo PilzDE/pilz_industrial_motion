@@ -21,11 +21,13 @@ from pilz_robot_programming.robot import *
 
 DEFAULT_PTP_VEL = 0.5
 
+_REQUIRED_API_VERSION = "1"
+
 def start_program():
     print("Executing " +__file__)
     print('\n\n___\n')
 
-    robot = Robot()
+    robot = Robot(_REQUIRED_API_VERSION)
 
     _testLinLinBlendWithoutOriChange(robot)
     _testLinLinBlendWithOriChange(robot)

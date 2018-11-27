@@ -22,7 +22,7 @@ from pilz_robot_programming.commands import *
 from pilz_industrial_motion_testutils.integration_test_utils import *
 
 _TEST_DATA_FILE_NAME = RosPack().get_path("pilz_industrial_motion_testutils") + "/test_data/testdata.xml"
-API_VERSION = "0"
+API_VERSION = "1"
 
 
 class TestAPIGripper(unittest.TestCase):

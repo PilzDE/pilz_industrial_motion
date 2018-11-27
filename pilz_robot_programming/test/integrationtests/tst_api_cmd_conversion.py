@@ -29,7 +29,7 @@ from pilz_robot_programming.commands import *
 _TEST_DATA_FILE_NAME = RosPack().get_path("pilz_industrial_motion_testutils") + "/test_data/testdata.xml"
 PLANNING_GROUP_NAME = "manipulator"
 TARGET_LINK_NAME = "prbt_tcp"
-API_VERSION = "0"
+API_VERSION = "1"
 
 EXP_VEL_SCALE = 0.7
 EXP_ACC_SCALE = 0.5
