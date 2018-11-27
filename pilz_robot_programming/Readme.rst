@@ -27,7 +27,7 @@ Afterwards, you can execute the demo program by typing:
 The code ``demo_program.py``
 ----------------------------
 
-.. literalinclude:: ../scripts/demo_program.py
+.. literalinclude:: ../examples/demo_program.py
 
 
 
