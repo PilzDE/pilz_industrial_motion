@@ -76,6 +76,8 @@ function(ADD_PYTHON_COVERAGE)
 endfunction() # SETUP_TARGET_FOR_COVERAGE
 
   # to run: catkin_make -DENABLE_COVERAGE_TESTING=ON package_name_coverage
+  # Import errors may arise when packages are installed in the non-standard path /usr/lib/python2.7/dist-packages
+  # This problem can be avoided by including the path in the PYTHONPATH environment variable
   if(ENABLE_COVERAGE_TESTING)
       set(COVERAGE_EXCLUDES "*/${PROJECT_NAME}/test/*") #comma-sparated list of ignored patterns
       add_python_coverage(
