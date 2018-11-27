@@ -18,7 +18,7 @@ import unittest
 from pilz_robot_programming.robot import *
 
 PLANNING_GROUP_NAME = "manipulator"
-API_VERSION = "0"
+API_VERSION = "1"
 
 
 class TestAPIInstantiation(unittest.TestCase):

@@ -22,12 +22,13 @@ from pilz_industrial_motion_testutils.integration_test_utils import *
 _SLEEP_TIME_S = 0.01
 _TOLERANCE_FOR_MOTION_DETECTION_RAD = 0.3
 _DEFAULT_VEL_SCALE = 0.1
+_REQUIRED_API_VERSION = "1"
 
 
 def start_program():
     print("Executing " + __file__)
 
-    robot = Robot('0')
+    robot = Robot(_REQUIRED_API_VERSION)
     _test_stop(robot)
     _test_pause_resume(robot)
     _test_pause_stop(robot)

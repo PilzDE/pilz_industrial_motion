@@ -19,7 +19,7 @@ from pilz_robot_programming.robot import *
 from pilz_robot_programming.commands import *
 import rospy
 
-__REQUIRED_API_VERSION__ = "0"
+__REQUIRED_API_VERSION__ = "1"
 _DEFAULT_VEL_SCALE = 0.1
 
 

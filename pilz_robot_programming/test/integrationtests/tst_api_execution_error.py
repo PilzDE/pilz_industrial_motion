@@ -24,7 +24,7 @@ import robot_commander_mock
 
 _TEST_DATA_FILE_NAME = RosPack().get_path("pilz_industrial_motion_testutils") + "/test_data/testdata.xml"
 PLANNING_GROUP_NAME = "manipulator"
-API_VERSION = "0"
+API_VERSION = "1"
 
 MOVEIT_MOCK_STATUS_SERVICE_NAME = "moveit_mock_status"
 
