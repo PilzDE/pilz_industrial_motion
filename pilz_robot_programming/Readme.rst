@@ -268,7 +268,7 @@ without blending like above.
 
 .. code-block:: python
 
-    # Sequence
+    # Blend sequence
     blend_sequence = Sequence()
     blend_sequence.append(Lin(goal=Pose(position=Point(0.2, 0, 0.6))), blend_radius=0.01)
     blend_sequence.append(Lin(goal=Pose(position=Point(0.2, 0, 0.7))))
