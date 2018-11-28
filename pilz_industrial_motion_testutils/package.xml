@@ -1,7 +1,7 @@
 <?xml version="1.0"?>
 <package>
   <name>pilz_industrial_motion_testutils</name>
-  <version>0.1.1</version>
+  <version>0.3.0</version>
   <description>Helper scripts and functionality to test industrial motion generation</description>
 
   <maintainer email="ros@pilz.de">Pilz GmbH and Co. KG</maintainer>
