@@ -35,21 +35,21 @@ def detect_motion(joint_values_a, joint_values_b, tolerance):
 
 
 def is_robot_moving(robot, time=0.1, tolerance=0.01):
-    start_position = robot.get_current_joint_values()
+    start_position = robot.get_current_joint_states()
     rospy.sleep(time)
-    return detect_motion(start_position, robot.get_current_joint_values(), tolerance)
+    return detect_motion(start_position, robot.get_current_joint_states(), tolerance)
 
 
 def wait_cmd_start(robot, sleep_time, move_tolerance, group_name="manipulator"):
     """Wait till movement starts. """
     movement_started_flag = False
-    old_joint_values = robot.get_current_joint_values(group_name)
+    old_joint_values = robot.get_current_joint_states(group_name)
     rospy.loginfo("Start joint values: " + str(old_joint_values))
     rospy.loginfo("Wait until motion started...")
     while not movement_started_flag:
         rospy.sleep(sleep_time)
         # Check current joint values
-        curr_joint_values = robot.get_current_joint_values(group_name)
+        curr_joint_values = robot.get_current_joint_states(group_name)
         if detect_motion(curr_joint_values, old_joint_values, move_tolerance):
             movement_started_flag = True
             rospy.loginfo("Changed joint values detected: " + str(curr_joint_values))
@@ -58,7 +58,7 @@ def wait_cmd_start(robot, sleep_time, move_tolerance, group_name="manipulator"):
 
 def wait_cmd_stop(robot, wait_time_out, move_tolerance, sleep_interval=0.01):
     """Wait till movement stops. """
-    old_joint_values = robot.get_current_joint_values()
+    old_joint_values = robot.get_current_joint_states()
 
     rospy.loginfo("Start joint values: " + str(old_joint_values))
     rospy.loginfo("Wait until motion stops...")
@@ -68,7 +68,7 @@ def wait_cmd_stop(robot, wait_time_out, move_tolerance, sleep_interval=0.01):
     while wait_time < wait_time_out:
         rospy.sleep(sleep_interval)
         wait_time += sleep_interval
-        curr_joint_values = robot.get_current_joint_values()
+        curr_joint_values = robot.get_current_joint_states()
         if not detect_motion(curr_joint_values, old_joint_values, move_tolerance):
             rospy.loginfo("Motion stopped.")
             return True
