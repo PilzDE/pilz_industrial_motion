@@ -14,13 +14,13 @@
 # You should have received a copy of the GNU Lesser General Public License
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
+import rospy
 import unittest
 import subprocess
 import signal
 from rospkg import RosPack
-from moveit_commander import RobotCommander
 from pilz_industrial_motion_testutils.xml_testdata_loader import *
-from pilz_industrial_motion_testutils.integration_test_utils import detect_motion
+from pilz_industrial_motion_testutils.robot_motion_observer import RobotMotionObserver
 from pilz_robot_programming.commands import *
 
 _TEST_DATA_FILE_NAME = RosPack().get_path("pilz_industrial_motion_testutils") + "/test_data/testdata.xml"
@@ -32,44 +32,17 @@ class TestAPIProgramKill(unittest.TestCase):
     Test the API behaviour when the python program is killed.
     """
 
-    _SLEEP_TIME_S = 0.01
-    _TOLERANCE_FOR_MOTION_DETECTION_RAD = 0.01
     _PTP_TEST_NAME = "PTPJointValid"
 
     def setUp(self):
         rospy.loginfo("SetUp called...")
         self.test_data = XmlTestdataLoader(_TEST_DATA_FILE_NAME)
-        self.robot_commander = RobotCommander()
+        self.robot_motion_observer = RobotMotionObserver(_GROUP_NAME)
 
     def tearDown(self):
         rospy.loginfo("TearDown called...")
         if hasattr(self, 'test_data'):
             del self.test_data
-
-    def get_current_joint_values(self, group_name="manipulator"):
-        return self.robot_commander.get_group(group_name).get_current_joint_values()
-
-    def detect_motion(self, sleep_time=_SLEEP_TIME_S, move_tolerance=_TOLERANCE_FOR_MOTION_DETECTION_RAD):
-        """Check if robot is currently moving."""
-        old_joint_values = self.get_current_joint_values()
-        rospy.sleep(sleep_time)
-        new_joint_values = self.get_current_joint_values()
-        return detect_motion(new_joint_values, old_joint_values, move_tolerance)
-
-    def wait_cmd_start(self, sleep_time=_SLEEP_TIME_S, move_tolerance=_TOLERANCE_FOR_MOTION_DETECTION_RAD):
-        """Wait till movement starts. """
-        movement_started_flag = False
-        old_joint_values = self.get_current_joint_values()
-        rospy.loginfo("Start joint values: " + str(old_joint_values))
-        rospy.loginfo("Wait until motion started...")
-        while not movement_started_flag:
-            rospy.sleep(sleep_time)
-            # Check current joint values
-            curr_joint_values = self.get_current_joint_values()
-            if detect_motion(curr_joint_values, old_joint_values, move_tolerance):
-                movement_started_flag = True
-                rospy.loginfo("Changed joint values detected: " + str(curr_joint_values))
-                rospy.loginfo("Motion started.")
 
     def _get_robot_move_command(self):
         """Build command to move the robot (to be called as subprocess)
@@ -98,7 +71,7 @@ class TestAPIProgramKill(unittest.TestCase):
         proc = subprocess.Popen(self._get_robot_move_command())
 
         # Wait until movement is detected
-        self.wait_cmd_start()
+        self.robot_motion_observer.wait_motion_start()
 
         # 2. Send kill signal
         proc.send_signal(signal.SIGINT)
@@ -106,7 +79,7 @@ class TestAPIProgramKill(unittest.TestCase):
         # Wait until process has terminated.
         proc.wait()
 
-        self.assertFalse(self.detect_motion())
+        self.assertFalse(self.robot_motion_observer.is_robot_moving())
 
 
 if __name__ == '__main__':
