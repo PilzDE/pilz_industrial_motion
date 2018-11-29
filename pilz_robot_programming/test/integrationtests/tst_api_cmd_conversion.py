@@ -511,15 +511,10 @@ class TestAPICmdConversion(unittest.TestCase):
 
             Test sequence:
                 1. Call circ convert function with center point.
-                2. Call circ convert function with interim point.
 
 
             Test Results:
                 1. Correct MotionPlanRequest is returned.
-                2. Correct MotionPlanRequest is returned.
-                3. None is returned.
-                4. None is returned.
-                5. None is returned.
         """
         exp_goal_pose = self.test_data.get_pose("LINPose1", PLANNING_GROUP_NAME)
         exp_help_pose = self.test_data.get_pose("CIRCCenterPose", PLANNING_GROUP_NAME)
@@ -535,7 +530,7 @@ class TestAPICmdConversion(unittest.TestCase):
         """ Check that conversion to MotionPlanRequest works correctly.
 
             Test sequence:
-                1. Call circ convert function with center point.
+                1. Call circ convert function with interim point.
 
             Test Results:
                 1. Correct MotionPlanRequest is returned.
@@ -550,6 +545,29 @@ class TestAPICmdConversion(unittest.TestCase):
         self._analyze_request_general(PLANNING_GROUP_NAME, "CIRC", EXP_VEL_SCALE, EXP_ACC_SCALE, req)
         self._analyze_request_pose(TARGET_LINK_NAME, exp_goal_pose, req)
         self._analyze_request_circ_help_point("interim", exp_help_pose, req)
+
+    def test_circ_cmd_convert_joint(self):
+        """ Check that conversion to MotionPlanRequest works correctly.
+
+            Test sequence:
+                1. Call circ convert function with joint goal and center point.
+
+
+            Test Results:
+                1. Correct MotionPlanRequest is returned.
+        """
+        exp_joint_values = self.test_data.get_joints("LINPose1", PLANNING_GROUP_NAME)
+        exp_help_pose = self.test_data.get_pose("CIRCCenterPose", PLANNING_GROUP_NAME)
+
+        circ = Circ(goal=exp_joint_values, center=exp_help_pose.position, vel_scale=EXP_VEL_SCALE,
+                    acc_scale=EXP_ACC_SCALE)
+        req = circ._cmd_to_request(self.robot)
+
+        self.assertIsNotNone(req)
+        self._analyze_request_general(PLANNING_GROUP_NAME, "CIRC", EXP_VEL_SCALE, EXP_ACC_SCALE, req)
+        exp_joint_names = self.robot._robot_commander.get_group(req.group_name).get_active_joints()
+        self._analyze_request_joint(exp_joint_names, exp_joint_values, req)
+        self._analyze_request_circ_help_point("center", exp_help_pose, req)
 
     def test_circ_cmd_convert_negative(self):
         """ Check that conversion to MotionPlanRequest works correctly.
