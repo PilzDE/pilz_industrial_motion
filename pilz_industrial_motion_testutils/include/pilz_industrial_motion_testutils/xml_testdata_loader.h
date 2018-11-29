@@ -19,12 +19,16 @@
 
 #include <string>
 #include <vector>
+#include <functional>
+#include <map>
+#include <memory>
 
 #include <boost/property_tree/ptree.hpp>
 
 #include <moveit/robot_model/robot_model.h>
 
 #include "pilz_industrial_motion_testutils/testdata_loader.h"
+#include "sequence.h"
 
 namespace pt = boost::property_tree;
 namespace pilz_industrial_motion_testutils
@@ -108,24 +112,42 @@ class XmlTestdataLoader : public TestdataLoader
 {
 public:
   XmlTestdataLoader(const std::string &path_filename);
+  XmlTestdataLoader(const std::string &path_filename,
+                    moveit::core::RobotModelConstPtr robot_model);
   ~XmlTestdataLoader();
 
 public:
+  //! DEPRECATED
   virtual bool getJoints(const std::string &pos_name, const std::string &group_name,
-                                std::vector<double> &dVec) const override;
+                         std::vector<double> &dVec) const override;
 
+  virtual JointConfiguration getJoints(const std::string &pose_name,
+                                       const std::string &group_name) const override;
+
+  //! DEPRECATED
   virtual bool getPose(const std::string &pose_name, const std::string &group_name,
                        std::vector<double> &dVec) const override;
 
+  virtual CartesianConfiguration getPose(const std::string &pose_name,
+                                         const std::string &group_name) const override;
+
+  virtual PtpJoint getPtpJoint(const std::string& cmd_name) const override;
+  virtual PtpCart getPtpCart(const std::string& cmd_name) const override;
+  virtual PtpJointCart getPtpJointCart(const std::string& cmd_name) const override;
+
+  //! DEPRECATED
   virtual bool getLin(const std::string& cmd_name, STestMotionCommand& cmd) const override;
+
+  virtual LinJoint getLinJoint(const std::string& cmd_name) const override;
 
   virtual bool getCirc(const std::string& cmd_name, STestMotionCommand& cmd) const override;
 
-  virtual bool getSequence(const std::string &cmd_name,
-                           std::vector<SSequenceCmd> &seq_cmds) const override;
+  virtual Sequence getSequence(const std::string &cmd_name) const override;
 
 private:
   /**
+   * DEPRECATED
+   *
    * @brief Use this function to search for a node (like an pos or cmd) with a given name.
    *
    * @param tree Tree containing the node.
@@ -139,7 +161,12 @@ private:
                                                 const std::string &name,
                                                 bool &ok) const;
 
+  const pt::ptree::value_type &findNodeWithName(const boost::property_tree::ptree &tree,
+                                                const std::string &name) const;
+
   /**
+   * DEPRECATED
+   *
    * @brief Use this function to search for a cmd-node with a given name.
    *
    * @param cmd_name Name of the cmd.
@@ -152,18 +179,39 @@ private:
   const pt::ptree::value_type &findCmd(const std::string &cmd_name,
                                        const std::string &cmd_type, bool &ok) const;
 
+  const pt::ptree::value_type &findCmd(const std::string &cmd_name,
+                                       const std::string &cmd_type) const;
+
   bool getCmd(const std::string &path2cmd, const std::string &cmd_name,
               std::string &group_name, std::string &target_link,
               std::string& start_pos_name, std::string& end_pos_name,
               double &vel, double &acc) const;
 
 private:
+  //! DEPRECATED
   //! @brief Converts string vector to double vector.
   inline static void strVec2doubleVec(std::vector<std::string> &strVec, std::vector<double> &dVec);
+
+  inline static std::vector<double> strVec2doubleVec(std::vector<std::string> &strVec);
+
+private:
+  /**
+   * @brief Abstract base class providing a GENERIC getter-function signature
+   * which can be used to load DIFFERENT command types (like Ptp, Lin, etc.)
+   * from the test data file.
+   */
+  class AbstractCmdGetterAdapter
+  {
+  public:
+    virtual ICmdUPtr getCmd(const std::string& /*cmd_name*/) const = 0;
+  };
 
 private:
   std::string path_filename_;
   pt::ptree tree_ {};
+
+  using AbstractCmdGetterUPtr = std::unique_ptr<AbstractCmdGetterAdapter>;
+  std::map<std::string, AbstractCmdGetterUPtr> cmd_getter_funcs_;
 
 private:
   const std::string empty_str_ {};
@@ -206,6 +254,22 @@ void XmlTestdataLoader::strVec2doubleVec(std::vector<std::string> &strVec, std::
     return std::stod(val);
   });
 }
+
+std::vector<double> XmlTestdataLoader::strVec2doubleVec(std::vector<std::string> &strVec)
+{
+  std::vector<double> vec;
+
+  vec.resize(strVec.size());
+  std::transform(strVec.begin(), strVec.end(), vec.begin(), [](const std::string& val)
+  {
+    return std::stod(val);
+  });
+
+  return vec;
+}
+
+using XmlTestDataLoaderUPtr = std::unique_ptr<TestdataLoader>;
+
 }
 
 #endif // XML_TESTDATA_LOADER_H

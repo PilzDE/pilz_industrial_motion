@@ -23,6 +23,7 @@
 #include <mutex>
 #include <condition_variable>
 #include <chrono>
+
 #include <ros/ros.h>
 #include <moveit_msgs/Constraints.h>
 #include <moveit_msgs/JointConstraint.h>
@@ -34,6 +35,9 @@
 #include <moveit/move_group_interface/move_group_interface.h>
 
 #include <pilz_testutils/async_test.h>
+
+#include <pilz_industrial_motion_testutils/xml_testdata_loader.h>
+#include <pilz_industrial_motion_testutils/sequence.h>
 
 #include "pilz_msgs/MoveGroupSequenceAction.h"
 #include "test_utils.h"
@@ -56,6 +60,10 @@ const std::string BLEND_NE_DATASET_NUM("blend_ne_dataset_num");
 // events for callback tests
 const std::string GOAL_SUCCEEDED_EVENT = "GOAL_SUCCEEDED";
 const std::string SERVER_IDLE_EVENT = "SERVER_IDLE";
+
+const std::string TEST_DATA_FILE_NAME("testdata_file_name");
+
+using namespace pilz_industrial_motion_testutils;
 
 class IntegrationTestSequenceAction : public testing::Test, public testing::AsyncTest
 {
@@ -82,6 +90,9 @@ protected:
   std::vector<testutils::blend_test_data> test_data_, ne_test_data_;
   std::string planning_group_, target_link_;
   double joint_position_tolerance_;
+
+  std::string test_data_file_name_;
+  TestdataLoaderUPtr data_loader_;
 };
 
 void IntegrationTestSequenceAction::SetUp()
@@ -105,6 +116,11 @@ void IntegrationTestSequenceAction::SetUp()
   ASSERT_TRUE(ph_.getParam(BLEND_NE_DATASET_NUM, blend_ne_dateset_num));
   ASSERT_TRUE(testutils::getBlendTestData(ph_, blend_dataset_num, BLEND_DATA_PREFIX, test_data_));
   ASSERT_TRUE(testutils::getBlendTestData(ph_, blend_ne_dateset_num, BLEND_NE_DATA_PREFIX, ne_test_data_));
+  ASSERT_TRUE(ph_.getParam(TEST_DATA_FILE_NAME, test_data_file_name_));
+
+  // load the test data provider
+  data_loader_.reset(new XmlTestdataLoader(test_data_file_name_, robot_model_));
+  ASSERT_NE(nullptr, data_loader_) << "Failed to load test data by provider.";
 
   // wait for action server
   ASSERT_TRUE(ac_blend_.waitForServer(ros::Duration(WAIT_FOR_ACTION_SERVER_TIME_OUT))) << "Action server is not active.";
@@ -565,6 +581,24 @@ TEST_F(IntegrationTestSequenceAction, blendLINLINOnlyPlanningIgnoreRobotStateSce
     EXPECT_NEAR(test_data.start_position.at(i), current_state->getVariablePosition(i), joint_position_tolerance_)
         << i << "th joint moved during planning only.";
   }
+}
+
+
+/**
+ * @brief  TODO
+ *
+ * Test Sequence:
+ *    1.
+ *
+ * Expected Results:
+ *    1.
+ */
+TEST_F(IntegrationTestSequenceAction, testComplexSequence)
+{
+  Sequence seq {data_loader_->getSequence("ComplexSequence")};
+  pilz_msgs::MotionSequenceRequest req {seq.toRequest()};
+  // TODO: Add test implementation
+
 }
 
 int main(int argc, char **argv)
