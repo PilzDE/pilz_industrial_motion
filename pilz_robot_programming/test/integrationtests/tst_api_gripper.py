@@ -20,6 +20,7 @@ from pilz_robot_programming.robot import *
 from pilz_industrial_motion_testutils.xml_testdata_loader import *
 from pilz_robot_programming.commands import *
 from pilz_industrial_motion_testutils.integration_test_utils import *
+from pilz_industrial_motion_testutils.robot_motion_observer import RobotMotionObserver
 
 _TEST_DATA_FILE_NAME = RosPack().get_path("pilz_industrial_motion_testutils") + "/test_data/testdata.xml"
 API_VERSION = "1"
@@ -33,6 +34,7 @@ class TestAPIGripper(unittest.TestCase):
 
     def setUp(self):
         self.robot = Robot(API_VERSION)
+        self.robot_motion_observer = RobotMotionObserver("gripper")
         self.test_data = XmlTestdataLoader(_TEST_DATA_FILE_NAME)
 
     def tearDown(self):
@@ -137,7 +139,8 @@ class TestAPIGripper(unittest.TestCase):
 
         # 3
         # Wait till movement started
-        wait_cmd_start(self.robot, self._SLEEP_TIME_S, self._TOLERANCE_FOR_MOTION_DETECTION_RAD, "gripper")
+        self.assertTrue(self.robot_motion_observer.wait_motion_start(
+            move_tolerance=self._TOLERANCE_FOR_MOTION_DETECTION_RAD, sleep_interval=self._SLEEP_TIME_S))
 
         rospy.loginfo("Call stop function.")
         self.robot.stop()

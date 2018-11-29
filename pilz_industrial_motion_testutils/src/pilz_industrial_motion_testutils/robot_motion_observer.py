@@ -64,8 +64,8 @@ class RobotMotionObserver(object):
 
     def wait_motion_start(self,
                           wait_time_out=_DEFAULT_WAIT_TIME_FOR_MOTION_DETECTION,
-                          sleep_interval=_DEFAULT_SLEEP_INTERVAL,
-                          move_tolerance=_DEFAULT_TOLERANCE_FOR_MOTION_DETECTION):
+                          move_tolerance=_DEFAULT_TOLERANCE_FOR_MOTION_DETECTION,
+                          sleep_interval=_DEFAULT_SLEEP_INTERVAL):
         """TRUE if the motion started in the given time interval, otherwise FALSE."""
 
         old_joint_values = self._get_current_joint_states()
@@ -93,8 +93,8 @@ class RobotMotionObserver(object):
 
     def wait_motion_stop(self,
                          wait_time_out=_DEFAULT_WAIT_TIME_FOR_MOTION_DETECTION,
-                         sleep_interval=_DEFAULT_SLEEP_INTERVAL,
-                         move_tolerance=_DEFAULT_TOLERANCE_FOR_MOTION_DETECTION):
+                         move_tolerance=_DEFAULT_TOLERANCE_FOR_MOTION_DETECTION,
+                         sleep_interval=_DEFAULT_SLEEP_INTERVAL):
         """TRUE if the motion stopped in the given time interval, otherwise FALSE."""
 
         motion_stopped = False
