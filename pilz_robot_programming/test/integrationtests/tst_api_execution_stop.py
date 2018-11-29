@@ -19,6 +19,7 @@ from rospkg import RosPack
 from pilz_robot_programming.robot import *
 from pilz_industrial_motion_testutils.xml_testdata_loader import *
 from pilz_industrial_motion_testutils.integration_test_utils import *
+from pilz_industrial_motion_testutils.robot_motion_observer import RobotMotionObserver
 from pilz_robot_programming.commands import *
 
 _TEST_DATA_FILE_NAME = RosPack().get_path("pilz_industrial_motion_testutils") + "/test_data/testdata.xml"
@@ -45,6 +46,7 @@ class TestAPIExecutionStop(unittest.TestCase):
         rospy.loginfo("SetUp called...")
         self.test_data = XmlTestdataLoader(_TEST_DATA_FILE_NAME)
         self.robot = Robot(API_VERSION)
+        self.robot_motion_observer = RobotMotionObserver(PLANNING_GROUP_NAME)
 
     def tearDown(self):
         rospy.loginfo("TearDown called...")
@@ -138,7 +140,8 @@ class TestAPIExecutionStop(unittest.TestCase):
         # +++++++++++++++++++++++
 
         # Wait till movement started
-        wait_cmd_start(self.robot, self._SLEEP_TIME_S, self._TOLERANCE_FOR_MOTION_DETECTION_RAD)
+        self.assertTrue(self.robot_motion_observer.wait_motion_start(
+            move_tolerance=self._TOLERANCE_FOR_MOTION_DETECTION_RAD, sleep_interval=self._SLEEP_TIME_S))
 
         rospy.loginfo("Call stop function.")
         self.robot.stop()
@@ -415,7 +418,8 @@ class TestAPIExecutionStop(unittest.TestCase):
         # +++++++++++++++++++++++
 
         # Wait till movement started
-        wait_cmd_start(self.robot, self._SLEEP_TIME_S, self._TOLERANCE_FOR_MOTION_DETECTION_RAD)
+        self.assertTrue(self.robot_motion_observer.wait_motion_start(
+            move_tolerance=self._TOLERANCE_FOR_MOTION_DETECTION_RAD, sleep_interval=self._SLEEP_TIME_S))
 
         rospy.loginfo("Call stop function from external client.")
         move_client.cancel_all_goals()
@@ -452,7 +456,8 @@ class TestAPIExecutionStop(unittest.TestCase):
         # +++++++++++++++++++++++
 
         # Wait till movement started
-        wait_cmd_start(self.robot, self._SLEEP_TIME_S, self._TOLERANCE_FOR_MOTION_DETECTION_RAD)
+        self.assertTrue(self.robot_motion_observer.wait_motion_start(
+            move_tolerance=self._TOLERANCE_FOR_MOTION_DETECTION_RAD, sleep_interval=self._SLEEP_TIME_S))
 
         # start another command
         try:

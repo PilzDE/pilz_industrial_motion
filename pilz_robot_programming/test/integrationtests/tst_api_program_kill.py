@@ -71,7 +71,7 @@ class TestAPIProgramKill(unittest.TestCase):
         proc = subprocess.Popen(self._get_robot_move_command())
 
         # Wait until movement is detected
-        self.robot_motion_observer.wait_motion_start()
+        self.assertTrue(self.robot_motion_observer.wait_motion_start())
 
         # 2. Send kill signal
         proc.send_signal(signal.SIGINT)

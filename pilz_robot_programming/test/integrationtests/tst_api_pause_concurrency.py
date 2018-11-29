@@ -19,6 +19,7 @@ from rospkg import RosPack
 from pilz_robot_programming.robot import *
 from pilz_industrial_motion_testutils.xml_testdata_loader import *
 from pilz_industrial_motion_testutils.integration_test_utils import *
+from pilz_industrial_motion_testutils.robot_motion_observer import RobotMotionObserver
 from pilz_robot_programming.commands import *
 
 _TEST_DATA_FILE_NAME = RosPack().get_path("pilz_industrial_motion_testutils") + "/test_data/testdata.xml"
@@ -35,6 +36,7 @@ class TestAPIPauseConcurrency(unittest.TestCase):
     def setUp(self):
         self.test_data = XmlTestdataLoader(_TEST_DATA_FILE_NAME)
         self.robot = Robot(API_VERSION)
+        self.robot_motion_observer = RobotMotionObserver(PLANNING_GROUP_NAME)
         self.robot.move(Ptp(goal=self.test_data.get_joints("ZeroPose", PLANNING_GROUP_NAME)))
         self.ptp = Ptp(goal=self.test_data.get_joints("PTPJointLarge", PLANNING_GROUP_NAME))
 
@@ -73,7 +75,8 @@ class TestAPIPauseConcurrency(unittest.TestCase):
         with cv:
             cv.notify_all()
 
-        self.assertFalse(is_robot_moving(robot=self.robot))
+        self.assertFalse(self.robot_motion_observer.is_robot_moving(self._SLEEP_TIME_S,
+                                                                    self._TOLERANCE_FOR_MOTION_DETECTION_RAD))
 
         self.robot.resume()
 
@@ -97,12 +100,13 @@ class TestAPIPauseConcurrency(unittest.TestCase):
         # 1. start the robot motion
         move_thread = MoveThread(self.robot, self.ptp)
         move_thread.start()
-        wait_cmd_start(self.robot, self._SLEEP_TIME_S, self._TOLERANCE_FOR_MOTION_DETECTION_RAD)
+        self.assertTrue(self.robot_motion_observer.wait_motion_start(
+            move_tolerance=self._TOLERANCE_FOR_MOTION_DETECTION_RAD, sleep_interval=self._SLEEP_TIME_S))
 
         # 2. trigger pause
         self.robot.pause()
-        self.assertTrue(wait_cmd_stop(self.robot, self._WAIT_CMD_STOP_TIME_OUT_S,
-                                      self._TOLERANCE_FOR_MOTION_DETECTION_RAD))
+        self.assertTrue(self.robot_motion_observer.wait_motion_stop(self._WAIT_CMD_STOP_TIME_OUT_S,
+                                                                    self._TOLERANCE_FOR_MOTION_DETECTION_RAD))
 
         # 3. trigger stop/resume at the same time
         lock = threading.Lock()
