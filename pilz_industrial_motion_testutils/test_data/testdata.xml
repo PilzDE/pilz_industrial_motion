@@ -158,7 +158,12 @@ limitations under the License.
     </poses>
 
     <ptps>
-
+        <ptp name="FirstPtp">
+          <startPos>ZeroPose</startPos>
+          <endPos>PTPJointValid</endPos>
+          <vel>1.0</vel>
+          <acc>1.0</acc>
+        </ptp>
     </ptps>
 
     <lins>

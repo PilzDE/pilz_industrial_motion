@@ -20,9 +20,9 @@
 #include <string>
 #include <vector>
 #include <utility>
-#include <stdexcept>
 
 #include <geometry_msgs/Pose.h>
+#include "command_types_typedef.h"
 
 namespace pilz_industrial_motion_testutils
 {
@@ -64,6 +64,7 @@ struct STestMotionCommand
   std::vector<double> aux_pose; //cartesian pose, (xyz, only position)
 };
 
+
 /**
  * @brief Abstract base class describing the interface to access
  * test data like robot poses and robot commands.
@@ -88,6 +89,14 @@ public:
    */
   virtual bool getPose(const std::string &pos_name, const std::string &group_name,
                        std::vector<double> &dVec) const = 0;
+
+  /**
+   * @brief Get the PTP motion command structure according to the cmmand name
+   * @param cmd_name
+   * @param cmd
+   * @return
+   */
+  virtual PtpJoint getPtpJoint(const std::string& cmd_name) const = 0;
 
   /**
    * @brief Get the LIN motion command structure according to the cmmand name

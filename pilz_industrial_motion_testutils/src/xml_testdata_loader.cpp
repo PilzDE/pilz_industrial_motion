@@ -23,6 +23,8 @@
 
 #include "pilz_industrial_motion_testutils/default_values.h"
 
+#include "pilz_industrial_motion_testutils/exception_types.h"
+
 namespace pt = boost::property_tree;
 namespace pilz_industrial_motion_testutils
 {
@@ -153,11 +155,47 @@ bool XmlTestdataLoader::getPose(const std::string &pose_name, const std::string 
   boost::split(strs,  xyzQuat_tree.data(), boost::is_any_of(" "));
   strVec2doubleVec(strs, dVec);
 
-//  const boost::property_tree::ptree& linkNode = xyzEuler_tree.get_child(LINK_NAME_PATH_STR, empty_tree_);
-//  if (linkNode == empty_tree_) { return false; }
-//  link_name = linkNode.data();
+  //  const boost::property_tree::ptree& linkNode = xyzEuler_tree.get_child(LINK_NAME_PATH_STR, empty_tree_);
+  //  if (linkNode == empty_tree_) { return false; }
+  //  link_name = linkNode.data();
 
   return true;
+}
+
+PtpJoint XmlTestdataLoader::getPtpJoint(const std::string& cmd_name) const
+{
+  std::string start_pos_name, goal_pos_name, planning_group, target_link;
+  double vel_scale, acc_scale;
+  if(!getCmd(PTPS_PATH_STR, cmd_name, planning_group, target_link,
+             start_pos_name, goal_pos_name, vel_scale, acc_scale))
+  {
+    throw TestDataLoaderReadingException("Did not find \"" + cmd_name +  "\"");
+  }
+
+  std::vector<double> start_position;
+  if(!getJoints(start_pos_name, planning_group, start_position))
+  {
+    throw TestDataLoaderReadingException("Did not find \"" + start_pos_name +  "\"");
+  }
+
+  std::vector<double> goal_position;
+  if(!getJoints(goal_pos_name, planning_group, goal_position))
+  {
+    throw TestDataLoaderReadingException("Did not find \"" + goal_pos_name +  "\"");
+  }
+
+  Ptp<JointConfiguration, JointConfiguration> ptp;
+  ptp.setPlanningGroup(planning_group);
+  ptp.setTargetLink(target_link);
+  ptp.setVelocityScale(vel_scale);
+  ptp.setAccelerationScale(acc_scale);
+
+  JointConfiguration start(start_position);
+  JointConfiguration goal(goal_position);
+  ptp.setStartConfiguration(start);
+  ptp.setGoalConfiguration(goal);
+
+  return ptp;
 }
 
 bool XmlTestdataLoader::getLin(const std::string &cmd_name, STestMotionCommand &cmd) const
@@ -213,6 +251,7 @@ bool XmlTestdataLoader::getCmd(const std::string &path2cmd,
                                double &acc) const
 {
   bool ok {false};
+  ROS_ERROR("Foo.");
   const pt::ptree::value_type &cmd_node { findCmd(cmd_name, path2cmd, ok) };
   if (!ok){ return false; }
 
@@ -255,7 +294,7 @@ bool XmlTestdataLoader::getCirc(const std::string &cmd_name, STestMotionCommand 
   // get start and goal
   std::string start_pos_name, goal_pos_name;
   if(!getCmd(CIRCS_PATH_STR, cmd_name, cmd.planning_group, cmd.target_link,
-            start_pos_name, goal_pos_name, cmd.vel_scale, cmd.acc_scale))
+             start_pos_name, goal_pos_name, cmd.vel_scale, cmd.acc_scale))
   {
     ROS_ERROR_STREAM(cmd_name << " does not exist.");
     return false;

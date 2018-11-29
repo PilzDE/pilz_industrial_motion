@@ -117,6 +117,8 @@ public:
   virtual bool getPose(const std::string &pose_name, const std::string &group_name,
                        std::vector<double> &dVec) const override;
 
+  virtual PtpJoint getPtpJoint(const std::string& cmd_name) const override;
+
   virtual bool getLin(const std::string& cmd_name, STestMotionCommand& cmd) const override;
 
   virtual bool getCirc(const std::string& cmd_name, STestMotionCommand& cmd) const override;
