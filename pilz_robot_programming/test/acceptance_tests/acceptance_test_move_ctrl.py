@@ -18,11 +18,13 @@ from pilz_robot_programming.robot import *
 from pilz_robot_programming.commands import *
 from pilz_industrial_motion_testutils.acceptance_test_utils import _askPermission, _askSuccess
 from pilz_industrial_motion_testutils.integration_test_utils import *
+from pilz_industrial_motion_testutils.robot_motion_observer import RobotMotionObserver
 
 _SLEEP_TIME_S = 0.01
 _TOLERANCE_FOR_MOTION_DETECTION_RAD = 0.3
 _DEFAULT_VEL_SCALE = 0.1
 _REQUIRED_API_VERSION = "1"
+_PLANNING_GROUP = "manipulator"
 
 
 def start_program():
@@ -52,11 +54,14 @@ def _test_stop(robot):
     if _askPermission(_test_stop.__name__) == 0:
         return
 
+    _robot_motion_observer = RobotMotionObserver(_PLANNING_GROUP)
+
     # 1. Create simple ptp command and start thread for movement
     ptp = Ptp(goal=[0, -0.78, 0.78, 0, 1.56, 0], vel_scale=_DEFAULT_VEL_SCALE)
     move_thread = MoveThread(robot, ptp)
     move_thread.start()
-    wait_cmd_start(robot, _SLEEP_TIME_S, _TOLERANCE_FOR_MOTION_DETECTION_RAD)
+    _robot_motion_observer.wait_motion_start(sleep_interval=_SLEEP_TIME_S,
+                                             move_tolerance=_TOLERANCE_FOR_MOTION_DETECTION_RAD)
 
     # 2. Trigger stop
     robot.stop()
@@ -88,11 +93,14 @@ def _test_pause_resume(robot):
     if _askPermission(_test_pause_resume.__name__) == 0:
         return
 
+    _robot_motion_observer = RobotMotionObserver(_PLANNING_GROUP)
+
     # 1. Create simple ptp command and start thread for movement
     ptp = Ptp(goal=[0, 0.39, -0.39, 0, 0.78, 0], vel_scale=_DEFAULT_VEL_SCALE)
     move_thread = MoveThread(robot, ptp)
     move_thread.start()
-    wait_cmd_start(robot, _SLEEP_TIME_S, _TOLERANCE_FOR_MOTION_DETECTION_RAD)
+    _robot_motion_observer.wait_motion_start(sleep_interval=_SLEEP_TIME_S,
+                                             move_tolerance=_TOLERANCE_FOR_MOTION_DETECTION_RAD)
 
     # 2. Trigger pause
     robot.pause()
@@ -124,11 +132,14 @@ def _test_pause_stop(robot):
     if _askPermission(_test_pause_stop.__name__) == 0:
         return
 
+    _robot_motion_observer = RobotMotionObserver(_PLANNING_GROUP)
+
     # 1. Create simple ptp command and start thread for movement
     ptp = Ptp(goal=[0, -0.78, 0.78, 0, 1.56, 0], vel_scale=_DEFAULT_VEL_SCALE)
     move_thread = MoveThread(robot, ptp)
     move_thread.start()
-    wait_cmd_start(robot, _SLEEP_TIME_S, _TOLERANCE_FOR_MOTION_DETECTION_RAD)
+    _robot_motion_observer.wait_motion_start(sleep_interval=_SLEEP_TIME_S,
+                                             move_tolerance=_TOLERANCE_FOR_MOTION_DETECTION_RAD)
 
     # 2. Trigger pause
     robot.pause()
