@@ -25,6 +25,7 @@
 #include <moveit/robot_model_loader/robot_model_loader.h>
 #include <moveit/robot_model/robot_model.h>
 #include <moveit/robot_model/joint_model_group.h>
+#include <moveit/planning_scene/planning_scene.h>
 #include <moveit_msgs/RobotTrajectory.h>
 #include <moveit_msgs/RobotState.h>
 #include <Eigen/Geometry>
@@ -64,9 +65,9 @@ const std::string IK_FAST_LINK_NAME("ik_fast_link");
 const std::string RANDOM_TEST_NUMBER("random_test_number");
 
 /**
- * @brief test fixtures
+ * @brief test fixtures base class
  */
-class TrajectoryFunctionsTest: public testing::TestWithParam<std::string>
+class TrajectoryFunctionsTestBase: public testing::TestWithParam<std::string>
 {
 protected:
 
@@ -103,7 +104,7 @@ protected:
   random_numbers::RandomNumberGenerator rng_{random_seed_};
 };
 
-void TrajectoryFunctionsTest::SetUp()
+void TrajectoryFunctionsTestBase::SetUp()
 {
   // parameters
   ASSERT_TRUE(ph_.getParam(PARAM_PLANNING_GROUP_NAME, planning_group_));
@@ -123,7 +124,7 @@ void TrajectoryFunctionsTest::SetUp()
   }
 }
 
-bool TrajectoryFunctionsTest::tfNear(const Eigen::Affine3d& pose1, const Eigen::Affine3d& pose2, const double& epsilon)
+bool TrajectoryFunctionsTestBase::tfNear(const Eigen::Affine3d& pose1, const Eigen::Affine3d& pose2, const double& epsilon)
 {
   for(std::size_t i=0; i<3; ++i)
     for(std::size_t j=0; j<4; ++j)
@@ -134,9 +135,24 @@ bool TrajectoryFunctionsTest::tfNear(const Eigen::Affine3d& pose1, const Eigen::
   return true;
 }
 
+/**
+ * @brief Parametrized class for tests with and without gripper.
+ */
+class TrajectoryFunctionsTestFlangeAndGripper: public TrajectoryFunctionsTestBase {};
+
+/**
+ * @brief Parametrized class for tests, that only run with a gripper
+ */
+class TrajectoryFunctionsTestOnlyGripper: public TrajectoryFunctionsTestBase {};
+
 // Instantiate the test cases for robot model with and without gripper
-INSTANTIATE_TEST_CASE_P(InstantiationName, TrajectoryFunctionsTest, ::testing::Values(
+INSTANTIATE_TEST_CASE_P(InstantiationName, TrajectoryFunctionsTestFlangeAndGripper, ::testing::Values(
                           PARAM_MODEL_NO_GRIPPER_NAME,
+                          PARAM_MODEL_WITH_GRIPPER_NAME
+                          ));
+
+// Instantiate the test cases for robot model with and without gripper
+INSTANTIATE_TEST_CASE_P(InstantiationName, TrajectoryFunctionsTestOnlyGripper, ::testing::Values(
                           PARAM_MODEL_WITH_GRIPPER_NAME
                           ));
 
@@ -144,7 +160,7 @@ INSTANTIATE_TEST_CASE_P(InstantiationName, TrajectoryFunctionsTest, ::testing::V
  * @brief Test the forward kinematics function with simple robot poses for robot tip link
  * using robot model without gripper.
  */
-TEST_P(TrajectoryFunctionsTest, TipLinkFK)
+TEST_P(TrajectoryFunctionsTestFlangeAndGripper, TipLinkFK)
 {
   Eigen::Affine3d tip_pose;
   std::map<std::string, double> test_state = zero_state_;
@@ -175,7 +191,7 @@ TEST_P(TrajectoryFunctionsTest, TipLinkFK)
 /**
  * @brief Test the inverse kinematics directly through ikfast solver
  */
-TEST_P(TrajectoryFunctionsTest, testIKSolver)
+TEST_P(TrajectoryFunctionsTestFlangeAndGripper, testIKSolver)
 {
   // Load solver
   const robot_model::JointModelGroup* jmg = robot_model_->getJointModelGroup(planning_group_);
@@ -234,7 +250,7 @@ TEST_P(TrajectoryFunctionsTest, testIKSolver)
 /**
  * @brief Test the inverse kinematics using RobotState class (setFromIK) using robot model
  */
-TEST_P(TrajectoryFunctionsTest, testIKRobotState)
+TEST_P(TrajectoryFunctionsTestFlangeAndGripper, testIKRobotState)
 {
   // robot state
   robot_state::RobotState rstate(robot_model_);
@@ -292,7 +308,7 @@ TEST_P(TrajectoryFunctionsTest, testIKRobotState)
 /**
  * @brief Test the wrapper function to compute inverse kinematics using robot model
  */
-TEST_P(TrajectoryFunctionsTest, testComputePoseIK)
+TEST_P(TrajectoryFunctionsTestFlangeAndGripper, testComputePoseIK)
 {
   // robot state
   robot_state::RobotState rstate(robot_model_);
@@ -346,7 +362,7 @@ TEST_P(TrajectoryFunctionsTest, testComputePoseIK)
 /**
  * @brief Test computePoseIK for invalid group_name
  */
-TEST_P(TrajectoryFunctionsTest, testComputePoseIKInvalidGroupName)
+TEST_P(TrajectoryFunctionsTestFlangeAndGripper, testComputePoseIKInvalidGroupName)
 {
   const std::string frame_id = robot_model_->getModelFrame();
   Eigen::Affine3d pose_expect;
@@ -368,7 +384,7 @@ TEST_P(TrajectoryFunctionsTest, testComputePoseIKInvalidGroupName)
 /**
  * @brief Test computePoseIK for invalid link_name
  */
-TEST_P(TrajectoryFunctionsTest, testComputePoseIKInvalidLinkName)
+TEST_P(TrajectoryFunctionsTestFlangeAndGripper, testComputePoseIKInvalidLinkName)
 {
   const std::string frame_id = robot_model_->getModelFrame();
   Eigen::Affine3d pose_expect;
@@ -392,7 +408,7 @@ TEST_P(TrajectoryFunctionsTest, testComputePoseIKInvalidLinkName)
  *
  * Currently only robot_model_->getModelFrame() == frame_id
  */
-TEST_P(TrajectoryFunctionsTest, testComputePoseIKInvalidFrameId)
+TEST_P(TrajectoryFunctionsTestFlangeAndGripper, testComputePoseIKInvalidFrameId)
 {
   Eigen::Affine3d pose_expect;
 
@@ -411,6 +427,107 @@ TEST_P(TrajectoryFunctionsTest, testComputePoseIKInvalidFrameId)
 }
 
 /**
+ * @brief Test if self collision is checked with a valid pose and from a starting position that results in first ik result to have self collision.
+ */
+TEST_P(TrajectoryFunctionsTestOnlyGripper, testComputePoseIKSelfCollisionForValidPosition)
+{
+  const std::string frame_id = robot_model_->getModelFrame();
+  const robot_model::JointModelGroup* jmg = robot_model_->getJointModelGroup(planning_group_);
+
+  // create seed
+  std::vector<double> ik_seed_states = {-0.553, 0.956, 1.758, 0.146, -1.059, 1.247};
+  auto joint_names = jmg->getActiveJointModelNames();
+
+  std::map<std::string, double> ik_seed;
+  for (unsigned int i=0; i < ik_seed_states.size(); ++i)
+  {
+    ik_seed[joint_names[i]] = ik_seed_states[i];
+  }
+
+
+  // create expected pose
+  geometry_msgs::Pose pose;
+  pose.position.x = -0.454;
+  pose.position.y = -0.15;
+  pose.position.z = 0.431;
+  pose.orientation.y = 0.991562;
+  pose.orientation.w = -0.1296328;
+  Eigen::Affine3d pose_expect;
+  tf::poseMsgToEigen(pose, pose_expect);
+
+  // compute the ik with one atemt and expect it to self collide and thus fail.
+  std::map<std::string, double> ik_actual1;
+  EXPECT_TRUE(pilz::computePoseIK(robot_model_,
+                                  planning_group_,
+                                  tcp_link_,
+                                  pose_expect,
+                                  frame_id,
+                                  ik_seed,
+                                  ik_actual1,
+                                  false,
+                                  1));
+
+  std::map<std::string, double> ik_actual2;
+  // compute the ik with several atempts and expect it to find a solution.
+  EXPECT_TRUE(pilz::computePoseIK(robot_model_,
+                                  planning_group_,
+                                  tcp_link_,
+                                  pose_expect,
+                                  frame_id,
+                                  ik_seed,
+                                  ik_actual2,
+                                  true,
+                                  10));
+}
+
+/**
+ * @brief Test if self collision is considered by using a pose that always has self collision.
+ */
+TEST_P(TrajectoryFunctionsTestFlangeAndGripper, testComputePoseIKSelfCollisionForInvalidPose)
+{
+  // robot state
+  robot_state::RobotState rstate(robot_model_);
+
+  const std::string frame_id = robot_model_->getModelFrame();
+  const robot_model::JointModelGroup* jmg = robot_model_->getJointModelGroup(planning_group_);
+
+  // create seed
+  std::map<std::string, double> ik_seed;
+  for (auto joint_name: jmg->getActiveJointModelNames())
+  {
+    ik_seed[joint_name] = 0;
+  }
+
+  // create goal
+  std::vector<double> ik_goal = {0, 2.3, -2.3, 0, 0, 0};
+
+  rstate.setJointGroupPositions(jmg, ik_goal);
+
+  Eigen::Affine3d pose_expect = rstate.getFrameTransform(tcp_link_);
+
+  // compute the ik with disabled collision check
+  std::map<std::string, double> ik_actual;
+  EXPECT_TRUE(pilz::computePoseIK(robot_model_,
+                                  planning_group_,
+                                  tcp_link_,
+                                  pose_expect,
+                                  frame_id,
+                                  ik_seed,
+                                  ik_actual,
+                                  false));
+
+  // compute the ik with enabled collision check
+  EXPECT_FALSE(pilz::computePoseIK(robot_model_,
+                                  planning_group_,
+                                  tcp_link_,
+                                  pose_expect,
+                                  frame_id,
+                                  ik_seed,
+                                  ik_actual,
+                                  true));
+}
+
+/**
  * @brief Check that function VerifySampleJointLimits() returns 'false' in case
  * of very small sample duration.
  *
@@ -420,7 +537,7 @@ TEST_P(TrajectoryFunctionsTest, testComputePoseIKInvalidFrameId)
  * Expected Results:
  *    1. Function returns 'false'.
  */
-TEST_P(TrajectoryFunctionsTest, testVerifySampleJointLimitsWithSmallDuration)
+TEST_P(TrajectoryFunctionsTestFlangeAndGripper, testVerifySampleJointLimitsWithSmallDuration)
 {
   const std::map<std::string, double> position_last, velocity_last, position_current;
   double duration_last;
@@ -442,7 +559,7 @@ TEST_P(TrajectoryFunctionsTest, testVerifySampleJointLimitsWithSmallDuration)
  * Expected Results:
  *    1. Function returns 'false'.
  */
-TEST_P(TrajectoryFunctionsTest, testVerifySampleJointLimitsVelocityViolation)
+TEST_P(TrajectoryFunctionsTestFlangeAndGripper, testVerifySampleJointLimitsVelocityViolation)
 {
   const std::string test_joint_name {"joint"};
 
@@ -474,7 +591,7 @@ TEST_P(TrajectoryFunctionsTest, testVerifySampleJointLimitsVelocityViolation)
  * Expected Results:
  *    1. Function returns 'false'.
  */
-TEST_P(TrajectoryFunctionsTest, testVerifySampleJointLimitsAccelerationViolation)
+TEST_P(TrajectoryFunctionsTestFlangeAndGripper, testVerifySampleJointLimitsAccelerationViolation)
 {
   const std::string test_joint_name {"joint"};
 
@@ -513,7 +630,7 @@ TEST_P(TrajectoryFunctionsTest, testVerifySampleJointLimitsAccelerationViolation
  * Expected Results:
  *    1. Function returns 'false'.
  */
-TEST_P(TrajectoryFunctionsTest, testVerifySampleJointLimitsDecelerationViolation)
+TEST_P(TrajectoryFunctionsTestFlangeAndGripper, testVerifySampleJointLimitsDecelerationViolation)
 {
   const std::string test_joint_name {"joint"};
 
@@ -555,7 +672,7 @@ TEST_P(TrajectoryFunctionsTest, testVerifySampleJointLimitsDecelerationViolation
  * Expected Results:
  *    1. Function returns 'false'.
  */
-TEST_P(TrajectoryFunctionsTest, testGenerateJointTrajectoryWithInvalidCartesianTrajectory)
+TEST_P(TrajectoryFunctionsTestFlangeAndGripper, testGenerateJointTrajectoryWithInvalidCartesianTrajectory)
 {
   // Create random test trajectory
   // Note: 'path' is deleted by KDL::Trajectory_Segment
@@ -605,7 +722,7 @@ TEST_P(TrajectoryFunctionsTest, testGenerateJointTrajectoryWithInvalidCartesianT
  * Expected Results:
  *    1. Function returns 'false'.
  */
-TEST_P(TrajectoryFunctionsTest, testDetermineAndCheckSamplingTimeInvalidVectorSize)
+TEST_P(TrajectoryFunctionsTestFlangeAndGripper, testDetermineAndCheckSamplingTimeInvalidVectorSize)
 {
   robot_trajectory::RobotTrajectoryPtr first_trajectory =
       std::make_shared<robot_trajectory::RobotTrajectory>(robot_model_, planning_group_);
@@ -632,7 +749,7 @@ TEST_P(TrajectoryFunctionsTest, testDetermineAndCheckSamplingTimeInvalidVectorSi
  * Expected Results:
  *    1. Function returns 'true'.
  */
-TEST_P(TrajectoryFunctionsTest, testDetermineAndCheckSamplingTimeCorrectSamplingTime)
+TEST_P(TrajectoryFunctionsTestFlangeAndGripper, testDetermineAndCheckSamplingTimeCorrectSamplingTime)
 {
   robot_trajectory::RobotTrajectoryPtr first_trajectory =
       std::make_shared<robot_trajectory::RobotTrajectory>(robot_model_, planning_group_);
@@ -665,7 +782,7 @@ TEST_P(TrajectoryFunctionsTest, testDetermineAndCheckSamplingTimeCorrectSampling
  * Expected Results:
  *    1. Function returns 'false'.
  */
-TEST_P(TrajectoryFunctionsTest, testDetermineAndCheckSamplingTimeViolateSamplingTime)
+TEST_P(TrajectoryFunctionsTestFlangeAndGripper, testDetermineAndCheckSamplingTimeViolateSamplingTime)
 {
   robot_trajectory::RobotTrajectoryPtr first_trajectory =
       std::make_shared<robot_trajectory::RobotTrajectory>(robot_model_, planning_group_);
@@ -703,7 +820,7 @@ TEST_P(TrajectoryFunctionsTest, testDetermineAndCheckSamplingTimeViolateSampling
  * Expected Results:
  *    1. Function returns 'false'.
  */
-TEST_P(TrajectoryFunctionsTest, testIsRobotStateEqualPositionUnequal)
+TEST_P(TrajectoryFunctionsTestFlangeAndGripper, testIsRobotStateEqualPositionUnequal)
 {
   robot_state::RobotStatePtr rstate_1 = std::make_shared<robot_state::RobotState>(robot_model_);
   robot_state::RobotStatePtr rstate_2 = std::make_shared<robot_state::RobotState>(robot_model_);
@@ -729,7 +846,7 @@ TEST_P(TrajectoryFunctionsTest, testIsRobotStateEqualPositionUnequal)
  * Expected Results:
  *    1. Function returns 'false'.
  */
-TEST_P(TrajectoryFunctionsTest, testIsRobotStateEqualVelocityUnequal)
+TEST_P(TrajectoryFunctionsTestFlangeAndGripper, testIsRobotStateEqualVelocityUnequal)
 {
   robot_state::RobotStatePtr rstate_1 = std::make_shared<robot_state::RobotState>(robot_model_);
   robot_state::RobotStatePtr rstate_2 = std::make_shared<robot_state::RobotState>(robot_model_);
@@ -760,7 +877,7 @@ TEST_P(TrajectoryFunctionsTest, testIsRobotStateEqualVelocityUnequal)
  * Expected Results:
  *    1. Function returns 'false'.
  */
-TEST_P(TrajectoryFunctionsTest, testIsRobotStateEqualAccelerationUnequal)
+TEST_P(TrajectoryFunctionsTestFlangeAndGripper, testIsRobotStateEqualAccelerationUnequal)
 {
   robot_state::RobotStatePtr rstate_1 = std::make_shared<robot_state::RobotState>(robot_model_);
   robot_state::RobotStatePtr rstate_2 = std::make_shared<robot_state::RobotState>(robot_model_);
@@ -796,7 +913,7 @@ TEST_P(TrajectoryFunctionsTest, testIsRobotStateEqualAccelerationUnequal)
  * Expected Results:
  *    1. Function returns 'false'.
  */
-TEST_P(TrajectoryFunctionsTest, testIsRobotStateStationaryVelocityUnequal)
+TEST_P(TrajectoryFunctionsTestFlangeAndGripper, testIsRobotStateStationaryVelocityUnequal)
 {
   robot_state::RobotStatePtr rstate_1 = std::make_shared<robot_state::RobotState>(robot_model_);
 
@@ -819,7 +936,7 @@ TEST_P(TrajectoryFunctionsTest, testIsRobotStateStationaryVelocityUnequal)
  * Expected Results:
  *    1. Function returns 'false'.
  */
-TEST_P(TrajectoryFunctionsTest, testIsRobotStateStationaryAccelerationUnequal)
+TEST_P(TrajectoryFunctionsTestFlangeAndGripper, testIsRobotStateStationaryAccelerationUnequal)
 {
   robot_state::RobotStatePtr rstate_1 = std::make_shared<robot_state::RobotState>(robot_model_);
 
