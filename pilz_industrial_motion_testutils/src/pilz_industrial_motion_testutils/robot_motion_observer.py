@@ -29,9 +29,9 @@ class RobotMotionObserver(object):
     :param group_name: Name of the planning group, default value is 'manipulator'
     """
 
-    _DEFAULT_WAIT_TIME_FOR_MOTION_DETECTION = 3.0
-    _DEFAULT_TOLERANCE_FOR_MOTION_DETECTION = 0.01
-    _DEFAULT_SLEEP_INTERVAL = 0.01
+    _DEFAULT_WAIT_TIME_FOR_MOTION_DETECTION_SEC = 3.0
+    _DEFAULT_TOLERANCE_FOR_MOTION_DETECTION_RAD = 0.01
+    _DEFAULT_SLEEP_INTERVAL_SEC = 0.01
     _DEFAULT_GROUP_NAME = "manipulator"
 
     def __init__(self, group_name=_DEFAULT_GROUP_NAME):
@@ -39,7 +39,7 @@ class RobotMotionObserver(object):
         self._group_name = group_name
 
     @staticmethod
-    def _detect_motion(joint_values_a, joint_values_b, tolerance=_DEFAULT_TOLERANCE_FOR_MOTION_DETECTION):
+    def _detect_motion(joint_values_a, joint_values_b, tolerance=_DEFAULT_TOLERANCE_FOR_MOTION_DETECTION_RAD):
         """TRUE if a significant motion was detected, otherwise FALSE."""
         return not numpy.allclose(joint_values_a, joint_values_b,
                                   atol=tolerance)
@@ -55,17 +55,17 @@ class RobotMotionObserver(object):
             raise RobotCurrentStateError(e.message)
 
     def is_robot_moving(self,
-                        sleep_interval=_DEFAULT_SLEEP_INTERVAL,
-                        move_tolerance=_DEFAULT_TOLERANCE_FOR_MOTION_DETECTION):
+                        sleep_interval=_DEFAULT_SLEEP_INTERVAL_SEC,
+                        move_tolerance=_DEFAULT_TOLERANCE_FOR_MOTION_DETECTION_RAD):
         """TRUE if the robot is currently moving, otherwise FLASE."""
         start_position = self._get_current_joint_states()
         rospy.sleep(sleep_interval)
         return RobotMotionObserver._detect_motion(start_position, self._get_current_joint_states(), move_tolerance)
 
     def wait_motion_start(self,
-                          wait_time_out=_DEFAULT_WAIT_TIME_FOR_MOTION_DETECTION,
-                          move_tolerance=_DEFAULT_TOLERANCE_FOR_MOTION_DETECTION,
-                          sleep_interval=_DEFAULT_SLEEP_INTERVAL):
+                          wait_time_out=_DEFAULT_WAIT_TIME_FOR_MOTION_DETECTION_SEC,
+                          move_tolerance=_DEFAULT_TOLERANCE_FOR_MOTION_DETECTION_RAD,
+                          sleep_interval=_DEFAULT_SLEEP_INTERVAL_SEC):
         """TRUE if the motion started in the given time interval, otherwise FALSE."""
 
         old_joint_values = self._get_current_joint_states()
@@ -92,9 +92,9 @@ class RobotMotionObserver(object):
         return motion_started
 
     def wait_motion_stop(self,
-                         wait_time_out=_DEFAULT_WAIT_TIME_FOR_MOTION_DETECTION,
-                         move_tolerance=_DEFAULT_TOLERANCE_FOR_MOTION_DETECTION,
-                         sleep_interval=_DEFAULT_SLEEP_INTERVAL):
+                         wait_time_out=_DEFAULT_WAIT_TIME_FOR_MOTION_DETECTION_SEC,
+                         move_tolerance=_DEFAULT_TOLERANCE_FOR_MOTION_DETECTION_RAD,
+                         sleep_interval=_DEFAULT_SLEEP_INTERVAL_SEC):
         """TRUE if the motion stopped in the given time interval, otherwise FALSE."""
 
         motion_stopped = False

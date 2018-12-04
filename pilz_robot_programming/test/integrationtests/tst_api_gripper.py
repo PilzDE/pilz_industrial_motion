@@ -34,7 +34,7 @@ class TestAPIGripper(unittest.TestCase):
 
     def setUp(self):
         self.robot = Robot(API_VERSION)
-        self.robot_motion_observer = RobotMotionObserver("gripper")
+        self.robot_motion_observer = RobotMotionObserver(group_name="gripper")
         self.test_data = XmlTestdataLoader(_TEST_DATA_FILE_NAME)
 
     def tearDown(self):
