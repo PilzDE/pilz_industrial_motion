@@ -339,13 +339,6 @@ TEST_P(TrajectoryFunctionsTest, testComputePoseIK)
       EXPECT_NEAR(joint_pair.second, ik_expect.at(joint_pair.first), 4*IK_SEED_OFFSET);
     }
 
-    // compute the pose from ik_solution
-    rstate.setVariablePositions(ik_actual);
-    rstate.update();
-    Eigen::Affine3d pose_actual = rstate.getFrameTransform(tcp_link_);
-
-    EXPECT_TRUE(tfNear(pose_expect,pose_actual,4*EPSILON));
-
     --random_test_number_;
   }
 }
