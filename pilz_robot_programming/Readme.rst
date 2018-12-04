@@ -298,7 +298,7 @@ Current TCP pose and current joint values
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 .. code-block:: python
 
-     start_joint_values = r.get_current_joint_values()
+     start_joint_values = r.get_current_joint_states()
 
 .. code-block:: python
 
@@ -328,13 +328,13 @@ Move control orders
 The user can make service calls in order to control the movement of the robot.
 A running program can be paused by typing
 
-.. code-block:: none
+.. code-block:: console
 
     rosservice call pause_movement
 
 If the robot is currently moving, it is stopped. A paused execution can be resumed via
 
-.. code-block:: get_current_joint_values
+.. code-block:: console
 
     rosservice call resume_movement
 
@@ -342,7 +342,7 @@ This also resumes the last robot movement from where it stopped. A resume order 
 preceding pause has no effects. There also exists the possibility to abort the program using
 
 
-.. code-block:: none
+.. code-block:: console
 
     rosservice call stop_movement
 
