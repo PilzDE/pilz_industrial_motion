@@ -2,6 +2,11 @@
 Changelog for package pilz_industrial_motion
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
+Forthcoming
+-----------
+* add pilz_robot_programming to depends of the meta-package
+* Contributors: Pilz GmbH and Co. KG
+
 0.3.0 (2018-11-28)
 ------------------
 
