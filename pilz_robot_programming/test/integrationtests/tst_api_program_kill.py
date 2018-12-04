@@ -33,6 +33,7 @@ class TestAPIProgramKill(unittest.TestCase):
     """
 
     _PTP_TEST_NAME = "PTPJointValid"
+    _WAIT_TIME_FOR_MOTION_DETECTION_SEC = 8.0
 
     def setUp(self):
         rospy.loginfo("SetUp called...")
@@ -71,7 +72,8 @@ class TestAPIProgramKill(unittest.TestCase):
         proc = subprocess.Popen(self._get_robot_move_command())
 
         # Wait until movement is detected
-        self.assertTrue(self.robot_motion_observer.wait_motion_start())
+        self.assertTrue(
+            self.robot_motion_observer.wait_motion_start(wait_time_out=self._WAIT_TIME_FOR_MOTION_DETECTION_SEC))
 
         # 2. Send kill signal
         proc.send_signal(signal.SIGINT)
