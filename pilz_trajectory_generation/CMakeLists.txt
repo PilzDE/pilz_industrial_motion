@@ -23,6 +23,7 @@ find_package(catkin REQUIRED COMPONENTS
   moveit_ros_move_group
   moveit_ros_planning_interface
   pilz_industrial_motion_testutils
+  pilz_testutils
 )
 
 
@@ -223,7 +224,7 @@ add_dependencies(${PROJECT_NAME}_test
 #########################
 
 # Planning Integration tests
-add_rostest_gtest(integrationtest_sequence_action_capability
+add_rostest_gmock(integrationtest_sequence_action_capability
   test/integrationtest_sequence_action_capability.test
   test/integrationtest_sequence_action_capability.cpp
 )
@@ -231,7 +232,7 @@ add_rostest_gtest(integrationtest_sequence_action_capability
 target_link_libraries(integrationtest_sequence_action_capability
    ${catkin_LIBRARIES} ${PROJECT_NAME}_test)
 
-add_rostest_gtest(integrationtest_sequence_action_capability_with_gripper
+add_rostest_gmock(integrationtest_sequence_action_capability_with_gripper
   test/integrationtest_sequence_action_capability_with_gripper.test
   test/integrationtest_sequence_action_capability.cpp
 )

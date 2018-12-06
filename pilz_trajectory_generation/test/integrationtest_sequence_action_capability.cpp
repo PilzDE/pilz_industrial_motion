@@ -16,6 +16,7 @@
  */
 
 #include <gtest/gtest.h>
+#include <gmock/gmock.h>
 #include <iostream>
 #include <memory>
 #include <thread>
@@ -31,6 +32,8 @@
 #include <moveit/robot_model/robot_model.h>
 #include <actionlib/client/simple_action_client.h>
 #include <moveit/move_group_interface/move_group_interface.h>
+
+#include <pilz_testutils/async_test.h>
 
 #include "pilz_msgs/MoveGroupSequenceAction.h"
 #include "test_utils.h"
@@ -50,13 +53,23 @@ const std::string JOINT_POSITION_TOLERANCE("joint_position_tolerance");
 const std::string BLEND_DATASET_NUM("blend_dataset_num");
 const std::string BLEND_NE_DATASET_NUM("blend_ne_dataset_num");
 
-class IntegrationTestSequenceAction : public ::testing::Test
+// events for callback tests
+const std::string GOAL_SUCCEEDED_EVENT = "GOAL_SUCCEEDED";
+const std::string SERVER_IDLE_EVENT = "SERVER_IDLE";
+
+class IntegrationTestSequenceAction : public testing::Test, public testing::AsyncTest
 {
 protected:
 
   virtual void SetUp();
 
   virtual void TearDown() {}
+
+public:
+  MOCK_METHOD0(active_callback, void());
+  MOCK_METHOD1(feedback_callback, void(const pilz_msgs::MoveGroupSequenceFeedbackConstPtr& feedback));
+  MOCK_METHOD2(done_callback, void(const actionlib::SimpleClientGoalState& state,
+                                   const pilz_msgs::MoveGroupSequenceResultConstPtr& result));
 
 protected:
   ros::NodeHandle ph_ {"~"};
@@ -297,65 +310,12 @@ TEST_F(IntegrationTestSequenceAction, negativeBlendLINLIN)
 }
 
 
-//*******************************************
-//*** callback functions of action server ***
-//*******************************************
-static bool activeCb_called {false};
-static bool feedbackCb_called {false};
-static bool doneCb_called {false};
-static std::string blend_action_server_state;
-static bool blend_as_state_planning {false};
-static bool blend_as_state_monitor {false};
-static bool blend_as_state_idle {false};
-
-static std::mutex m;
-static std::condition_variable cv;
-
-void activeCb()
-{
-  std::cout << "activeCb" << std::endl;
-  std::cout << "Goal just went active"<< std::endl;
-  activeCb_called = true;
-}
-
-void feedbackCb(const pilz_msgs::MoveGroupSequenceFeedbackConstPtr& feedback)
-{
-  std::cout << "feedbackCb" << std::endl;
-  std::cout << "Received feedback: " << feedback->state << std::endl;
-  feedbackCb_called = true;
-  blend_action_server_state = feedback->state;
-
-  if(feedback->state == "PLANNING")
-  {
-    blend_as_state_planning = true;
-  }
-
-  if(feedback->state == "MONITOR")
-  {
-    blend_as_state_monitor = true;
-  }
-
-  if(feedback->state == "IDLE")
-  {
-    blend_as_state_idle = true;
-    std::unique_lock<std::mutex> lock_cb(m);
-    cv.notify_all();
-  }
-}
-
-void doneCb(const actionlib::SimpleClientGoalState& state,
-                                        const pilz_msgs::MoveGroupSequenceResultConstPtr& result)
-{
-  std::cout << "doneCb" << std::endl;
-  doneCb_called = true;
-  if(result)
-  {
-    EXPECT_EQ(result->error_code.val, moveit_msgs::MoveItErrorCodes::SUCCESS) << "Plan and execute blend request failed.";
-    EXPECT_NE(result->planned_trajectory.joint_trajectory.points.size(), 0u)
-        << "Planned trajectory is empty.";
-  }
-}
-
+//*******************************************************
+//*** matcher for callback functions of action server ***
+//*******************************************************
+MATCHER_P(FeedbackStateEq, state, "") { return arg->state == state; }
+MATCHER(IsResultSuccess, "") { return arg->error_code.val == moveit_msgs::MoveItErrorCodes::SUCCESS; }
+MATCHER(IsResultNotEmpty, "") { return arg->planned_trajectory.joint_trajectory.points.size() > 0; }
 
 /**
  * @brief  Tests the blend action server of LIN-LIN blend using callbacks
@@ -368,21 +328,19 @@ void doneCb(const actionlib::SimpleClientGoalState& state,
  * Expected Results:
  *    1. Robot moved to start position.
  *    2. Blend goal is sent to the action server.
- *    3. Error code of the blend result is success.
- *       Callbacks
+ *    3. Error code of the blend result is success. Active-, feedback- and done-callbacks are called.
  */
 TEST_F(IntegrationTestSequenceAction, blendLINLINcb)
 {
+  using ::testing::_;
+  using ::testing::AllOf;
+  using ::testing::AtLeast;
+  using ::testing::InSequence;
+
+  namespace ph = std::placeholders;
+
   for(const auto& test_data : test_data_)
   {
-    activeCb_called = false;
-    doneCb_called = false;
-    feedbackCb_called = false;
-
-    blend_as_state_planning = false;
-    blend_as_state_monitor = false;
-    blend_as_state_idle = false;
-
     // move the robot to start position with ptp
     move_group_->setJointValueTarget(test_data.start_position);
     move_group_->move();
@@ -395,24 +353,38 @@ TEST_F(IntegrationTestSequenceAction, blendLINLINcb)
                                                    planning_group_,
                                                    target_link_,
                                                    seq_goal.request);
-    // send goal
-    ac_blend_.sendGoal(seq_goal, &doneCb, &activeCb, &feedbackCb);
-    ASSERT_TRUE(ac_blend_.waitForResult());
 
-    //check if all callbacks are called
-    EXPECT_TRUE(activeCb_called) << "Active callback has not been called.";
-    EXPECT_TRUE(doneCb_called) << "Done callback has not been called.";
-    EXPECT_TRUE(feedbackCb_called) << "Feedback callback has not been called.";
+    // set expectations (no guarantee, that done callback is called before idle feedback)
+    EXPECT_CALL(*this, active_callback())
+        .Times(1)
+        .RetiresOnSaturation();
 
-    //check the move group state
-    EXPECT_TRUE(blend_as_state_planning) << "move group state PLANNING not set.";
-    EXPECT_TRUE(blend_as_state_monitor) << "move group state MONITOR not set.";
+    EXPECT_CALL(*this, done_callback(_, AllOf(IsResultSuccess(), IsResultNotEmpty())))
+        .Times(1)
+        .WillOnce(ACTION_OPEN_BARRIER_VOID(GOAL_SUCCEEDED_EVENT))
+        .RetiresOnSaturation();
 
-    std::unique_lock<std::mutex> lock(m);
-    while(!blend_as_state_idle)
-      cv.wait_for(lock, std::chrono::seconds(WAIT_FOR_RESULT_TIME_OUT));
-    EXPECT_TRUE(blend_as_state_idle) << "move group state IDLE not set.";
-    EXPECT_TRUE(blend_action_server_state=="IDLE") << "expected IDLE but is " << blend_action_server_state << ".";
+    // the feedbacks are expected in order
+    {
+      InSequence dummy;
+
+      EXPECT_CALL(*this, feedback_callback(FeedbackStateEq("PLANNING")))
+        .Times(AtLeast(1));
+      EXPECT_CALL(*this, feedback_callback(FeedbackStateEq("MONITOR")))
+        .Times(AtLeast(1));
+      EXPECT_CALL(*this, feedback_callback(FeedbackStateEq("IDLE")))
+        .Times(AtLeast(1))
+        .WillOnce(ACTION_OPEN_BARRIER_VOID(SERVER_IDLE_EVENT))
+        .RetiresOnSaturation();
+    }
+
+    // send goal using mocked callback methods
+    ac_blend_.sendGoal(seq_goal, std::bind(&IntegrationTestSequenceAction::done_callback, this, ph::_1, ph::_2),
+                                 std::bind(&IntegrationTestSequenceAction::active_callback, this),
+                                 std::bind(&IntegrationTestSequenceAction::feedback_callback, this, ph::_1));
+
+    // wait for the ecpected events
+    BARRIER2({GOAL_SUCCEEDED_EVENT, SERVER_IDLE_EVENT});
   }
 }
 
