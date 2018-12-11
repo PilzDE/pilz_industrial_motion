@@ -2,6 +2,11 @@
 Changelog for package pilz_industrial_motion_testutils
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
+Forthcoming
+-----------
+* Use Eigen::Isometry3d to keep up with the recent changes in moveit
+* Contributors: Chris Lalancette
+
 0.2.2 (2018-09-26)
 ------------------
 * fix missing dependency for melodic

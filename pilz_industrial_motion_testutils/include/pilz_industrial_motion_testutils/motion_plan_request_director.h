@@ -75,7 +75,7 @@ private:
    * @param pose
    * @return
    */
-  Eigen::Affine3d rawQuatVectorToEigen(const std::vector<double> &pose);
+  Eigen::Isometry3d rawQuatVectorToEigen(const std::vector<double> &pose);
 
   /**
    * @brief Construct a robot state from the start joint values in cmd.

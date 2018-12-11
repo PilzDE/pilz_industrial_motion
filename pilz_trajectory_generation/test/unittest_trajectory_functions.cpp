@@ -146,7 +146,7 @@ INSTANTIATE_TEST_CASE_P(InstantiationName, TrajectoryFunctionsTest, ::testing::V
  */
 TEST_P(TrajectoryFunctionsTest, TipLinkFK)
 {
-  Eigen::Affine3d tip_pose;
+  Eigen::Isometry3d tip_pose;
   std::map<std::string, double> test_state = zero_state_;
   EXPECT_TRUE(pilz::computeLinkFK(robot_model_, group_tip_link_, test_state, tip_pose));
   EXPECT_NEAR(tip_pose(0,3),0,EPSILON);
@@ -245,7 +245,7 @@ TEST_P(TrajectoryFunctionsTest, testIKRobotState)
     // sample random robot state
     rstate.setToRandomPositions(jmg, rng_);
 
-    Eigen::Affine3d pose_expect = rstate.getFrameTransform(tcp_link_);
+    Eigen::Isometry3d pose_expect = rstate.getFrameTransform(tcp_link_);
 
     // copy the random state and set ik seed
     std::map<std::string, double> ik_seed, ik_expect;
@@ -305,7 +305,7 @@ TEST_P(TrajectoryFunctionsTest, testComputePoseIK)
     // sample random robot state
     rstate.setToRandomPositions(jmg, rng_);
 
-    Eigen::Affine3d pose_expect = rstate.getFrameTransform(tcp_link_);
+    Eigen::Isometry3d pose_expect = rstate.getFrameTransform(tcp_link_);
 
     // copy the random state and set ik seed
     std::map<std::string, double> ik_seed, ik_expect;
@@ -356,7 +356,7 @@ TEST_P(TrajectoryFunctionsTest, testComputePoseIK)
 TEST_P(TrajectoryFunctionsTest, testComputePoseIKInvalidGroupName)
 {
   const std::string frame_id = robot_model_->getModelFrame();
-  Eigen::Affine3d pose_expect;
+  Eigen::Isometry3d pose_expect;
 
   std::map<std::string, double> ik_seed;
 
@@ -378,7 +378,7 @@ TEST_P(TrajectoryFunctionsTest, testComputePoseIKInvalidGroupName)
 TEST_P(TrajectoryFunctionsTest, testComputePoseIKInvalidLinkName)
 {
   const std::string frame_id = robot_model_->getModelFrame();
-  Eigen::Affine3d pose_expect;
+  Eigen::Isometry3d pose_expect;
 
   std::map<std::string, double> ik_seed;
 
@@ -401,7 +401,7 @@ TEST_P(TrajectoryFunctionsTest, testComputePoseIKInvalidLinkName)
  */
 TEST_P(TrajectoryFunctionsTest, testComputePoseIKInvalidFrameId)
 {
-  Eigen::Affine3d pose_expect;
+  Eigen::Isometry3d pose_expect;
 
   std::map<std::string, double> ik_seed;
 

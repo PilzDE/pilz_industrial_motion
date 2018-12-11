@@ -49,7 +49,7 @@ namespace pilz {
 bool computePoseIK(const robot_model::RobotModelConstPtr& robot_model,
                    const std::string& group_name,
                    const std::string& link_name,
-                   const Eigen::Affine3d& pose,
+                   const Eigen::Isometry3d& pose,
                    const std::string& frame_id,
                    const std::map<std::string, double>& seed,
                    std::map<std::string, double>& solution,
@@ -77,13 +77,13 @@ bool computePoseIK(const robot_model::RobotModelConstPtr& robot_model,
 bool computeLinkFK(const robot_model::RobotModelConstPtr& robot_model,
                    const std::string& link_name,
                    const std::map<std::string, double>& joint_state,
-                   Eigen::Affine3d& pose);
+                   Eigen::Isometry3d& pose);
 
 bool computeLinkFK(const robot_model::RobotModelConstPtr& robot_model,
                    const std::string& link_name,
                    const std::vector<std::string>& joint_names,
                    const std::vector<double>& joint_positions,
-                   Eigen::Affine3d& pose);
+                   Eigen::Isometry3d& pose);
 
 /**
  * @brief verify the velocity/acceleration limits of current sample (based on backward difference computation)
