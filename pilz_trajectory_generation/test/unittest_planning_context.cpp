@@ -124,14 +124,14 @@ protected:
     // state state in joint space, used as initial positions, since IK does not work at zero positions
     rstate.setJointGroupPositions(this->planning_group_, {4.430233957464225e-12, 0.007881892504574495, -1.8157263253868452,
                                  1.1801525390026025e-11, 1.8236082178909834, 8.591793942969161e-12});
-    Eigen::Affine3d start_pose(Eigen::Affine3d::Identity());
+    Eigen::Isometry3d start_pose(Eigen::Isometry3d::Identity());
     start_pose.translation() = Eigen::Vector3d(0.3, 0, 0.65);
     rstate.setFromIK(this->robot_model_->getJointModelGroup(this->planning_group_),
                      start_pose);
     moveit::core::robotStateToRobotStateMsg(rstate,req.start_state,false);
 
     // goal constraint
-    Eigen::Affine3d goal_pose(Eigen::Affine3d::Identity());
+    Eigen::Isometry3d goal_pose(Eigen::Isometry3d::Identity());
     goal_pose.translation() = Eigen::Vector3d(0, 0.3, 0.65);
     Eigen::Matrix3d goal_rotation;
     goal_rotation = Eigen::AngleAxisd(0*M_PI, Eigen::Vector3d::UnitZ());

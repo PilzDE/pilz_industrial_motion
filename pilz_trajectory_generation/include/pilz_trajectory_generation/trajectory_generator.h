@@ -67,8 +67,8 @@ protected:
   public:
     std::string group_name;
     std::string link_name;
-    Eigen::Affine3d start_pose;
-    Eigen::Affine3d goal_pose;
+    Eigen::Isometry3d start_pose;
+    Eigen::Isometry3d goal_pose;
     std::map<std::string, double> start_joint_position;
     std::map<std::string, double> goal_joint_position;
     std::pair<std::string, Eigen::Vector3d> circ_path_point;

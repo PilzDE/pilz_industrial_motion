@@ -124,7 +124,7 @@ moveit_msgs::MotionPlanRequest MotionPlanRequestDirector::getCIRCCartReq(const m
   return builder.getRequest();
 }
 
-Eigen::Affine3d MotionPlanRequestDirector::rawQuatVectorToEigen(const std::vector<double>& pose)
+Eigen::Isometry3d MotionPlanRequestDirector::rawQuatVectorToEigen(const std::vector<double>& pose)
 {
   geometry_msgs::Pose pose_msg;
   pose_msg.position.x = pose.at(0);
@@ -135,7 +135,7 @@ Eigen::Affine3d MotionPlanRequestDirector::rawQuatVectorToEigen(const std::vecto
   pose_msg.orientation.z = pose.at(5);
   pose_msg.orientation.w = pose.at(6);
 
-  Eigen::Affine3d pose_eigen;
+  Eigen::Isometry3d pose_eigen;
   tf::poseMsgToEigen(pose_msg, pose_eigen);
   return pose_eigen;
 }
@@ -158,7 +158,7 @@ moveit::core::RobotState MotionPlanRequestDirector::getStartStateFromPose(
   robot_state::RobotState rstate = getStartStateFromJoints(robot_model, cmd);
 
   // set to Cartesian pose
-  Eigen::Affine3d start_pose = rawQuatVectorToEigen(cmd.start_pose);
+  Eigen::Isometry3d start_pose = rawQuatVectorToEigen(cmd.start_pose);
   if(!rstate.setFromIK(rstate.getRobotModel()->getJointModelGroup(cmd.planning_group), start_pose, cmd.target_link))
   {
     ROS_ERROR_STREAM("no solution for ik \n" << start_pose.translation() << "\n" << start_pose.linear());
@@ -185,7 +185,7 @@ moveit::core::RobotState MotionPlanRequestDirector::getGoalStateFromPose(
   robot_state::RobotState rstate = getGoalStateFromJoints(robot_model, cmd);
 
   // set to Cartesian pose
-  Eigen::Affine3d goal_pose = rawQuatVectorToEigen(cmd.goal_pose);
+  Eigen::Isometry3d goal_pose = rawQuatVectorToEigen(cmd.goal_pose);
   if(!rstate.setFromIK(rstate.getRobotModel()->getJointModelGroup(cmd.planning_group), goal_pose, cmd.target_link))
   {
     ROS_ERROR_STREAM("no solution for ik \n" << goal_pose.translation() << "\n" << goal_pose.linear());
