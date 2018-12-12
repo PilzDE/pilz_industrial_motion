@@ -17,6 +17,8 @@
 
 #include "pilz_trajectory_generation/trajectory_functions.h"
 
+#include <moveit/planning_scene/planning_scene.h>
+
 bool pilz::computePoseIK(const moveit::core::RobotModelConstPtr &robot_model,
                          const std::string &group_name,
                          const std::string &link_name,
@@ -57,7 +59,6 @@ bool pilz::computePoseIK(const moveit::core::RobotModelConstPtr &robot_model,
   ik_constraint_function = boost::bind(&pilz::isStateColliding, check_self_collision, robot_model, _1, _2, _3);
 
   // call ik
-  // TODO: Should consider self collision already.
   if(rstate.setFromIK(robot_model->getJointModelGroup(group_name),
                       pose,
                       link_name,

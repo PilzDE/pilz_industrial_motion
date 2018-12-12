@@ -151,7 +151,7 @@ INSTANTIATE_TEST_CASE_P(InstantiationName, TrajectoryFunctionsTestFlangeAndGripp
                           PARAM_MODEL_WITH_GRIPPER_NAME
                           ));
 
-// Instantiate the test cases for robot model with and without gripper
+// Instantiate the test cases for robot model with a gripper
 INSTANTIATE_TEST_CASE_P(InstantiationName, TrajectoryFunctionsTestOnlyGripper, ::testing::Values(
                           PARAM_MODEL_WITH_GRIPPER_NAME
                           ));
@@ -427,7 +427,7 @@ TEST_P(TrajectoryFunctionsTestFlangeAndGripper, testComputePoseIKInvalidFrameId)
 }
 
 /**
- * @brief Test if self collision is checked with a valid pose and from a starting position that results in first ik result to have self collision.
+ * @brief Test if activated self collision for a pose that would be in self collision without the check results in a valid ik solution.
  */
 TEST_P(TrajectoryFunctionsTestOnlyGripper, testComputePoseIKSelfCollisionForValidPosition)
 {
@@ -455,7 +455,7 @@ TEST_P(TrajectoryFunctionsTestOnlyGripper, testComputePoseIKSelfCollisionForVali
   Eigen::Affine3d pose_expect;
   tf::poseMsgToEigen(pose, pose_expect);
 
-  // compute the ik with one atemt and expect it to self collide and thus fail.
+  // compute the ik without self collision check and expect the resulting pose to be in self collission.
   std::map<std::string, double> ik_actual1;
   EXPECT_TRUE(pilz::computePoseIK(robot_model_,
                                   planning_group_,
@@ -464,11 +464,30 @@ TEST_P(TrajectoryFunctionsTestOnlyGripper, testComputePoseIKSelfCollisionForVali
                                   frame_id,
                                   ik_seed,
                                   ik_actual1,
-                                  false,
-                                  1));
+                                  false));
 
+  robot_state::RobotState rstate(robot_model_);
+  planning_scene::PlanningScene rscene(robot_model_);
+
+  std::vector<double> ik_state;
+  std::transform(ik_actual1.begin(),
+                 ik_actual1.end(),
+                 std::back_inserter(ik_state),
+                 boost::bind(&std::map<std::string, double>::value_type::second,_1));
+
+  rstate.setJointGroupPositions(jmg, ik_state);
+  rstate.update();
+
+  collision_detection::CollisionRequest collision_req;
+  collision_req.group_name = jmg->getName();
+  collision_detection::CollisionResult collision_res;
+
+  rscene.checkSelfCollision(collision_req, collision_res, rstate);
+
+  EXPECT_TRUE(collision_res.collision);
+
+  // compute the ik with collision detection activated and expect the resulting pose to be without self collision.
   std::map<std::string, double> ik_actual2;
-  // compute the ik with several atempts and expect it to find a solution.
   EXPECT_TRUE(pilz::computePoseIK(robot_model_,
                                   planning_group_,
                                   tcp_link_,
@@ -476,8 +495,20 @@ TEST_P(TrajectoryFunctionsTestOnlyGripper, testComputePoseIKSelfCollisionForVali
                                   frame_id,
                                   ik_seed,
                                   ik_actual2,
-                                  true,
-                                  10));
+                                  true));
+
+  std::vector<double> ik_state2;
+  std::transform(ik_actual2.begin(),
+                 ik_actual2.end(),
+                 std::back_inserter(ik_state2),
+                 boost::bind(&std::map<std::string, double>::value_type::second,_1));
+  rstate.setJointGroupPositions(jmg, ik_state2);
+  rstate.update();
+
+  collision_detection::CollisionResult collision_res2;
+  rscene.checkSelfCollision(collision_req, collision_res2, rstate);
+
+  EXPECT_FALSE(collision_res2.collision);
 }
 
 /**

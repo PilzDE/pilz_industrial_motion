@@ -22,7 +22,6 @@
 #include <kdl/trajectory.hpp>
 #include <moveit/robot_model/robot_model.h>
 #include <moveit/robot_state/robot_state.h>
-#include <moveit/planning_scene/planning_scene.h>
 #include <eigen_conversions/eigen_kdl.h>
 #include <eigen_conversions/eigen_msg.h>
 #include <trajectory_msgs/MultiDOFJointTrajectory.h>
@@ -228,7 +227,7 @@ bool intersectionFound(const Eigen::Vector3d &p_center,
 /**
  * @brief Checks if current robot state is in self collision.
  * @param test_for_self_collision Flag to deactivate this check during IK.
- * @param planning_scene Current planning scene.
+ * @param robot_model: robot kinematics model.
  * @param state Robot state instance used for .
  * @param group
  * @param ik_solution
