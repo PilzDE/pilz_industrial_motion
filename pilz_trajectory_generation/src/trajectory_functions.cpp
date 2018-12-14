@@ -28,7 +28,7 @@ bool pilz::computePoseIK(const moveit::core::RobotModelConstPtr &robot_model,
                          std::map<std::string, double> &solution,
                          bool check_self_collision,
                          int max_attempt,
-                         double timeout)
+                         const double timeout)
 {
   if(!robot_model->hasJointModelGroup(group_name))
   {
@@ -92,7 +92,7 @@ bool pilz::computePoseIK(const moveit::core::RobotModelConstPtr &robot_model,
                          std::map<std::string, double> &solution,
                          bool check_self_collision,
                          int max_attempt,
-                         double timeout)
+                         const double timeout)
 {
   Eigen::Affine3d pose_eigen;
   tf::poseMsgToEigen(pose, pose_eigen);
@@ -104,7 +104,8 @@ bool pilz::computePoseIK(const moveit::core::RobotModelConstPtr &robot_model,
                        seed,
                        solution,
                        check_self_collision,
-                       max_attempt);
+                       max_attempt,
+                       timeout);
 }
 
 bool pilz::computeLinkFK(const moveit::core::RobotModelConstPtr &robot_model,
@@ -596,24 +597,23 @@ bool pilz::intersectionFound(const Eigen::Vector3d &p_center,
   return ((p_current - p_center).norm() <= r) && ((p_next - p_center).norm() >= r);
 }
 
-bool pilz::isStateColliding(bool test_for_self_collision,
+bool pilz::isStateColliding(const bool test_for_self_collision,
                             const moveit::core::RobotModelConstPtr &robot_model,
-                             robot_state::RobotState* rstate,
-                             const robot_state::JointModelGroup* group,
-                             const double* ik_solution)
+                            robot_state::RobotState* rstate,
+                            const robot_state::JointModelGroup * const group,
+                            const double * const ik_solution)
 {
   if (!test_for_self_collision)
   {
     return true;
   }
 
-  planning_scene::PlanningScene rscene(robot_model);
   rstate->setJointGroupPositions(group, ik_solution);
   rstate->update();
   collision_detection::CollisionRequest collision_req;
   collision_req.group_name = group->getName();
   collision_detection::CollisionResult collision_res;
-  rscene.checkSelfCollision(collision_req, collision_res, *rstate);
+  planning_scene::PlanningScene(robot_model).checkSelfCollision(collision_req, collision_res, *rstate);
 
   return !collision_res.collision;
 }
