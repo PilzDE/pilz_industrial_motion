@@ -43,7 +43,7 @@ _PATH_TO_POSE = "./poses/pos[@name='{pose_name}']/group[@name='{group_name}']/xy
 _PATH_TO_PTP = "./ptps/ptp[@name='{name_of_cmd}']"
 _PATH_TO_LIN = "./lins/lin[@name='{name_of_cmd}']"
 _PATH_TO_CIRC = "./circs/circ[@name='{name_of_cmd}']"
-_PATH_TO_BLEND = "./blends/blend[@name='{name_of_cmd}']"
+_PATH_TO_SEQUENCE = "./sequences/sequence[@name='{name_of_cmd}']"
 
 
 class XmlTestdataLoader:
@@ -108,29 +108,29 @@ class XmlTestdataLoader:
                 PLANNING_GROUP_STR: cmdRes[PLANNING_GROUP_STR], LINK_NAME_STR: cmdRes[LINK_NAME_STR]}
 
     # Returns a list of dictionaries containing the cmds which make-up the
-    # blend cmd. The cmds in the list are in the order of execution.
+    # sequence cmd. The cmds in the list are in the order of execution.
     # In case of an error 'None' is returned.
-    def get_blend(self, name_of_cmd):
-        # Find the blend command with the given name
-        blendNode = self._root.find(_PATH_TO_BLEND.format(name_of_cmd=name_of_cmd))
-        if blendNode is None:
+    def get_sequence(self, name_of_cmd):
+        # Find the sequence command with the given name
+        sequenceNode = self._root.find(_PATH_TO_SEQUENCE.format(name_of_cmd=name_of_cmd))
+        if sequenceNode is None:
             return None
 
         # Loop over all blend commands
-        blendCmds = []
-        for blendCmdNode in blendNode.getchildren():
-            cmd_name = blendCmdNode.get(NAME_STR)
+        sequenceCmds = []
+        for sequenceCmdNode in sequenceNode.getchildren():
+            cmd_name = sequenceCmdNode.get(NAME_STR)
             if cmd_name is None:
                 return None
 
-            cmd_type = blendCmdNode.get(TYPE_STR)
+            cmd_type = sequenceCmdNode.get(TYPE_STR)
             if cmd_type is None:
                 return None
 
-            blend_radius = blendCmdNode.get(BLEND_RADIUS_STR, DEFAULT_BLEND_RADIUS)
-            blendCmds.append({NAME_STR: cmd_name, TYPE_STR: cmd_type, BLEND_RADIUS_STR: blend_radius})
+            blend_radius = sequenceCmdNode.get(BLEND_RADIUS_STR, DEFAULT_BLEND_RADIUS)
+            sequenceCmds.append({NAME_STR: cmd_name, TYPE_STR: cmd_type, BLEND_RADIUS_STR: blend_radius})
 
-        return blendCmds
+        return sequenceCmds
 
     # Returns the start- and end-position, as well as
     # the velocity and acceleration of the given command type, given by its name.

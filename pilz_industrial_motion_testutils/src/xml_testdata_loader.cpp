@@ -311,45 +311,45 @@ bool XmlTestdataLoader::getCirc(const std::string &cmd_name, STestMotionCommand 
   return true;
 }
 
-bool XmlTestdataLoader::getBlend(const std::string &cmd_name,
-                                 std::vector<SBlendCmd> &blend_cmds) const
+bool XmlTestdataLoader::getSequence(const std::string &cmd_name,
+                                    std::vector<SSequenceCmd> &seq_cmds) const
 {
-  // Find blend cmd with given name
+  // Find sequence cmd with given name
   bool ok {false};
-  const pt::ptree::value_type &blend_node { findCmd(cmd_name, BLENDS_PATH_STR, ok) };
+  const pt::ptree::value_type &sequence_node { findCmd(cmd_name, SEQUENCE_PATH_STR, ok) };
   if (!ok){ return false; }
 
-  // Loop over all blend cmds.
-  const auto& blend_cmd_tree = blend_node.second;
-  for (const pt::ptree::value_type& blend_cmd : blend_cmd_tree)
+  // Loop over all sequence cmds.
+  const auto& sequence_cmd_tree = sequence_node.second;
+  for (const pt::ptree::value_type& seq_cmd : sequence_cmd_tree)
   {
     // Ignore attributes which are always the first element of a tree.
-    if (blend_cmd.first == XML_ATTR_STR){ continue; }
+    if (seq_cmd.first == XML_ATTR_STR){ continue; }
 
     // Get name of blend cmd.
-    const boost::property_tree::ptree& cmd_name_attr = blend_cmd.second.get_child(NAME_PATH_STR, empty_tree_);
+    const boost::property_tree::ptree& cmd_name_attr = seq_cmd.second.get_child(NAME_PATH_STR, empty_tree_);
     if (cmd_name_attr == empty_tree_)
     {
-      ROS_ERROR("Did not find name of blend cmd.");
+      ROS_ERROR("Did not find name of sequence cmd.");
       return false;
     }
-    SBlendCmd blend_cmd_data;
-    blend_cmd_data.cmd_name = cmd_name_attr.data();
+    SSequenceCmd sequence_cmd_data;
+    sequence_cmd_data.cmd_name = cmd_name_attr.data();
 
     // Get type of blend cmd.
-    const boost::property_tree::ptree& type_name_attr = blend_cmd.second.get_child(CMD_TYPE_PATH_STR, empty_tree_);
+    const boost::property_tree::ptree& type_name_attr = seq_cmd.second.get_child(CMD_TYPE_PATH_STR, empty_tree_);
     if (type_name_attr == empty_tree_)
     {
-      ROS_ERROR_STREAM("Did not find type of blend cmd '" << blend_cmd_data.cmd_name << "'." );
+      ROS_ERROR_STREAM("Did not find type of sequence cmd '" << sequence_cmd_data.cmd_name << "'." );
       return false;
     }
-    blend_cmd_data.cmd_type = type_name_attr.data();
+    sequence_cmd_data.cmd_type = type_name_attr.data();
 
     // Get blend radius of blend cmd.
-    blend_cmd_data.blend_radius = blend_cmd.second.get<double>(BLEND_RADIUS_PATH_STR, DEFAULT_BLEND_RADIUS);
+    sequence_cmd_data.blend_radius = seq_cmd.second.get<double>(BLEND_RADIUS_PATH_STR, DEFAULT_BLEND_RADIUS);
 
     // Add blend cmd to container.
-    blend_cmds.push_back(blend_cmd_data);
+    seq_cmds.push_back(sequence_cmd_data);
   }
   return true;
 }

@@ -43,7 +43,7 @@ fontsize=10
       <w>190</w>
       <h>30</h>
     </coordinates>
-    <panel_attributes>GetMotionBlendRequest</panel_attributes>
+    <panel_attributes>GetMotionSequenceItem</panel_attributes>
     <additional_attributes/>
   </element>
   <element>
@@ -372,7 +372,7 @@ The trajectories are always joint trajectories</panel_attributes>
       <w>170</w>
       <h>30</h>
     </coordinates>
-    <panel_attributes>MoveGroupBlendGoal</panel_attributes>
+    <panel_attributes>MoveGroupSequenceGoal</panel_attributes>
     <additional_attributes/>
   </element>
   <element>
@@ -394,7 +394,7 @@ The trajectories are always joint trajectories</panel_attributes>
       <w>180</w>
       <h>30</h>
     </coordinates>
-    <panel_attributes>MoveGroupBlendResult</panel_attributes>
+    <panel_attributes>MoveGroupSequenceResult</panel_attributes>
     <additional_attributes/>
   </element>
   <element>
@@ -424,16 +424,16 @@ The trajectories are always joint trajectories</panel_attributes>
       <w>300</w>
       <h>140</h>
     </coordinates>
-    <panel_attributes>MoveGroupBlendAction
+    <panel_attributes>MoveGroupSequenceAction
 --
 - move_action_serve_
 - move_state_
-- blend_manager_
+- sequence_manager_
 - move_feedback_
 --
 /+initialize()/
-- executeBlendCallback(
-    goal: const pilz_msgs::MoveGroupBlendGoalConstPtr&amp; )
+- executeSequenceCallback(
+    goal: const pilz_msgs::MoveGroupSequenceGoalConstPtr&amp; )
 
 </panel_attributes>
     <additional_attributes/>
@@ -446,7 +446,7 @@ The trajectories are always joint trajectories</panel_attributes>
       <w>210</w>
       <h>30</h>
     </coordinates>
-    <panel_attributes>MoveGroupBlendFeedback</panel_attributes>
+    <panel_attributes>MoveGroupSequenceFeedback</panel_attributes>
     <additional_attributes/>
   </element>
   <element>
@@ -457,7 +457,7 @@ The trajectories are always joint trajectories</panel_attributes>
       <w>190</w>
       <h>70</h>
     </coordinates>
-    <panel_attributes>Defined in pilz_msgs/MoveGroupBlend.action</panel_attributes>
+    <panel_attributes>Defined in pilz_msgs/MoveGroupSequence.action</panel_attributes>
     <additional_attributes/>
   </element>
   <element>
@@ -490,14 +490,14 @@ The trajectories are always joint trajectories</panel_attributes>
       <w>280</w>
       <h>110</h>
     </coordinates>
-    <panel_attributes>MoveGroupBlendService
+    <panel_attributes>MoveGroupSequenceService
 --
 - service_serve_
-- blend_manager_
+- sequence_manager_
 --
 /+initialize()/
-- plan(req: pilz_msgs::GetMotionBlend::Request&amp;, 
-          res: pilz_msgs::GetMotionBlend::Response&amp;)
+- plan(req: pilz_msgs::GetMotionSequence::Request&amp;,
+          res: pilz_msgs::GetMotionSequence::Response&amp;)
 
 </panel_attributes>
     <additional_attributes/>
@@ -510,7 +510,7 @@ The trajectories are always joint trajectories</panel_attributes>
       <w>200</w>
       <h>30</h>
     </coordinates>
-    <panel_attributes>GetMotionBlendResponse</panel_attributes>
+    <panel_attributes>GetMotionSequenceResponse</panel_attributes>
     <additional_attributes/>
   </element>
   <element>
@@ -521,7 +521,7 @@ The trajectories are always joint trajectories</panel_attributes>
       <w>170</w>
       <h>70</h>
     </coordinates>
-    <panel_attributes>Defined in pilz_msgs/GetMotionBlend.srv</panel_attributes>
+    <panel_attributes>Defined in pilz_msgs/GetMotionSequence.srv</panel_attributes>
     <additional_attributes/>
   </element>
   <element>
@@ -606,7 +606,7 @@ The trajectories are always joint trajectories</panel_attributes>
 --
 + solve(
   planning_scene: const planning_scene::PlanningSceneConstPtr&amp;,
-  req_list: const pilz_msgs::MotionBlendRequestList &amp;,
+  req_list: const pilz_msgs::MotionSequenceRequest &amp;,
   res: planning_interface::MotionPlanResponse&amp;)
 
 </panel_attributes>

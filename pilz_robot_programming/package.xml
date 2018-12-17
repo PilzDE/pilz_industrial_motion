@@ -1,0 +1,31 @@
+<?xml version="1.0"?>
+<package>
+  <name>pilz_robot_programming</name>
+  <version>0.3.1</version>
+  <description>
+  An Easy to use API to execute standard industrial robot commands like Ptp, Lin, Circ and Sequence using Moveit.
+  </description>
+
+  <maintainer email="ros@pilz.de">Pilz GmbH and Co. KG</maintainer>
+
+  <license>LGPLv3</license>
+
+  <run_depend>moveit_commander</run_depend>
+  <run_depend>tf</run_depend>
+  <run_depend>rospy</run_depend>
+  <run_depend>pilz_trajectory_generation</run_depend>
+  <run_depend>pilz_msgs</run_depend>
+
+  <buildtool_depend>catkin</buildtool_depend>
+
+  <build_depend>rospy</build_depend>
+  <build_depend>roslint</build_depend>
+
+  <test_depend>python-docopt</test_depend>
+  <test_depend>rostest</test_depend>
+  <test_depend>prbt_moveit_config</test_depend>
+  <test_depend>prbt_pg70_support</test_depend>
+  <test_depend>pilz_industrial_motion_testutils</test_depend>
+  <test_depend>python-coverage</test_depend>
+
+</package>

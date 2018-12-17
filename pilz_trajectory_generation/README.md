@@ -88,6 +88,7 @@ as the lead axis.
  - `trajectory/joint_trajectory/joint_names`: a list of the joint names of the generated joint trajectory
  - `trajectory/joint_trajectory/points/(positions,velocities,accelerations,time_from_start)`: a list of generated way
  points. Each point has positions/velocities/accelerations of all joints (same order as the joint names) and time from start.
+   The last point will have zero velocity and acceleration.
  - `group_name`: name of the planning group
  - `error_code/val`: error code of the motion planning
 
@@ -123,6 +124,7 @@ motion plan fails due to violation of joint space limits.
  - `trajectory/joint_trajectory/joint_names`: a list of the joint names of the generated joint trajectory
  - `trajectory/joint_trajectory/points/(positions,velocities,accelerations,time_from_start)`: a list of generated way
  points. Each point has positions/velocities/accelerations of all joints (same order as the joint names) and time from start.
+    The last point will have zero velocity and acceleration.
  - `group_name`: name of the planning group
  - `error_code/val`: error code of the motion planning
 
@@ -164,6 +166,7 @@ the Cartesian velocity/acceleration scaling factor if motion plan fails due to v
  - `trajectory/joint_trajectory/joint_names`: a list of the joint names of the generated joint trajectory
  - `trajectory/joint_trajectory/points/(positions,velocities,accelerations,time_from_start)`: a list of generated way
  points. Each point has positions/velocities/accelerations of all joints (same order as the joint names) and time from start.
+   The last point will have zero velocity and acceleration.
  - `group_name`: name of the planning group
  - `error_code/val`: error code of the motion planning
 
@@ -179,7 +182,7 @@ the user can interact with the planner through rviz.
 ## Using the command planner
 The *pilz::CommandPlanner* is provided as MoveIt! Motion Planning Pipeline and, therefore, can be used with all
 other manipulators using MoveIt!. Loading the plugin requires the param `/move_group/planner_plugin` to be set to `pilz::CommandPlanner`
-before the move_group nodes is startet.
+before the `move_group` node is started.
 
 To use the command planner cartesian limits have to be defined.
 The limits are expected to be under the namespace `<robot_description>_planning`.  Where `<robot_description>` refers to the parameter under which the urdf is loaded.
@@ -187,3 +190,40 @@ E.g. if the urdf was loaded into `/robot_description` the cartesian limits have 
 
 An example showing the cartesian limits which have to be defined can be found
 ![here](https://github.com/PilzDE/pilz_robots/blob/kinetic-devel/prbt_moveit_config/config/cartesian_limits.yaml).
+
+# Sequence of multiple segments
+To concatenate multiple trajectories and plan the trajectory at once, you can use the sequence capability.
+This reduces the planning overhead and allows to follow a pre-desribed path without stopping at intermediate points.
+
+## User interface sequence capability
+A specialized MoveIt! capability takes a
+`pilz_msgs::MotionSequenceRequest` as input. The request contains a list of subsequent goals as described above and an additional
+`blend_radius` parameter. If the given `blend_radius` in meter is greater than zero, the corresponding trajectory is merged together
+with the following goal in a way, that the robot does not stop at the current goal. When the tcp comes closer to the goal than the
+given `blend_radius`, it is allowed to travel towards the next goal already. When leaving a sphere around the current goal, the robot
+returns onto the trajectory he would have taken without blending.
+
+For details about the blend algorithm please refer to `/doc/MotionBlendAlgorithmDescription.pdf`.
+
+![blend figure](doc/figure/blend_radius.png)
+
+
+### Restrictions for `MotionSequenceRequest`
+* Only the first goal may have a start state. Following trajectories start at the previous goal.
+* Two subsequent `blend_radius` spheres must not overlap. `blend_radius`(i) + `blend_radius`(i+1) has to be smaller than
+  the distance between the goals.
+
+### Action interface
+In analogy to the `MoveGroup` action interface the user can plan and execute a `pilz_msgs::MotionSequenceRequest`
+through the action server at `/sequence_move_group`.
+
+In one point the `MoveGroupSequenceAction` differs from the standard MoveGroup capability: If the robot is already at the goal
+position, the path is still executed. The underlying PlannerManager can check, if the constraints of an individual
+`moveit_msgs::MotionPlanRequest` are already satisfied but the `MoveGroupSequenceAction` capability doesn't implement such a
+check to allow moving on a circular or comparable path.
+
+See the `pilz_robot_programming` package for an example python script that shows how to use the capability.
+
+### Service interface
+The service `plan_sequence_path` allows the user to generate a joint trajectory for a `pilz_msgs::MotionSequenceRequest`.
+The trajectory is returned and not executed.

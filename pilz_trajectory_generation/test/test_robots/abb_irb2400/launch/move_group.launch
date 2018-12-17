@@ -49,8 +49,8 @@
     <param name="jiggle_fraction" value="$(arg jiggle_fraction)" />
 
     <!-- MoveGroup capabilities to load -->
-    <param name="capabilities" value="pilz_trajectory_generation/MoveGroupBlendAction
-                                      pilz_trajectory_generation/MoveGroupBlendService
+    <param name="capabilities" value="pilz_trajectory_generation/MoveGroupSequenceAction
+                                      pilz_trajectory_generation/MoveGroupSequenceService
                       " />
 
     <!-- Publish the planning scene of the physical robot so that rviz plugin can know actual robot -->

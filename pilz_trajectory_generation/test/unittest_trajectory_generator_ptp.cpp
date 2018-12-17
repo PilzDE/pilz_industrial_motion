@@ -595,14 +595,18 @@ TEST_P(TrajectoryGeneratorPTPTest, testScalingFactor)
 
 /**
  * @brief test the ptp trajectory generator of joint space goal
- * with zero start velocity
+ * with (almost) zero start velocity
  */
-TEST_P(TrajectoryGeneratorPTPTest, testJointGoalZeroStartVel1)
+TEST_P(TrajectoryGeneratorPTPTest, testJointGoalAndAlmostZeroStartVelocity)
 {
   planning_interface::MotionPlanResponse res;
   planning_interface::MotionPlanRequest req;
   testutils::createDummyRequest(robot_model_, planning_group_, req);
   req.start_state.joint_state.position[2] = 0.1;
+
+  // Set velocity to all 1e-16
+  req.start_state.joint_state.velocity = std::vector<double>(req.start_state.joint_state.position.size(), 1e-16);
+
   moveit_msgs::Constraints gc;
   moveit_msgs::JointConstraint jc;
   jc.joint_name = "prbt_joint_1";
@@ -708,13 +712,23 @@ TEST_P(TrajectoryGeneratorPTPTest, testJointGoalZeroStartVel1)
   // joint_6
   EXPECT_NEAR(3.0, res_msg.trajectory.joint_trajectory.points[index].positions[5], joint_position_tolerance_);
   EXPECT_NEAR(0.0, res_msg.trajectory.joint_trajectory.points[index].velocities[5], joint_velocity_tolerance_);
+
+  // Check that velocity at the end is all zero
+  EXPECT_TRUE(std::all_of(res_msg.trajectory.joint_trajectory.points.back().velocities.cbegin(),
+                          res_msg.trajectory.joint_trajectory.points.back().velocities.cend(),
+                          [this]( double v){ return std::fabs(v) < this->joint_velocity_tolerance_; }));
+
+  // Check that acceleration at the end is all zero
+  EXPECT_TRUE(std::all_of(res_msg.trajectory.joint_trajectory.points.back().accelerations.cbegin(),
+                          res_msg.trajectory.joint_trajectory.points.back().accelerations.cend(),
+                          [this]( double v){ return std::fabs(v) < this->joint_acceleration_tolerance_; }));
 }
 
 /**
  * @brief test the ptp_ trajectory generator of joint space goal
  * with zero start velocity
  */
-TEST_P(TrajectoryGeneratorPTPTest, testJointGoalZeroStartVel2)
+TEST_P(TrajectoryGeneratorPTPTest, testJointGoalNoStartVel)
 {
   planning_interface::MotionPlanResponse res;
   planning_interface::MotionPlanRequest req;
@@ -875,6 +889,19 @@ TEST_P(TrajectoryGeneratorPTPTest, testJointGoalZeroStartVel2)
   // joint_6
   EXPECT_NEAR(3.0, res_msg.trajectory.joint_trajectory.points[index].positions[5], joint_position_tolerance_);
   EXPECT_NEAR(0.0, res_msg.trajectory.joint_trajectory.points[index].velocities[5], joint_velocity_tolerance_);
+
+  // Check last point
+  EXPECT_NEAR(3.0, res_msg.trajectory.joint_trajectory.points[index].positions[5], joint_position_tolerance_);
+
+  // Check that velocity at the end is all zero
+  EXPECT_TRUE(std::all_of(res_msg.trajectory.joint_trajectory.points.back().velocities.cbegin(),
+                          res_msg.trajectory.joint_trajectory.points.back().velocities.cend(),
+                          [this]( double v){ return std::fabs(v) < this->joint_velocity_tolerance_; }));
+
+  // Check that acceleration at the end is all zero
+  EXPECT_TRUE(std::all_of(res_msg.trajectory.joint_trajectory.points.back().accelerations.cbegin(),
+                          res_msg.trajectory.joint_trajectory.points.back().accelerations.cend(),
+                          [this]( double v){ return std::fabs(v) < this->joint_acceleration_tolerance_; }));
 }
 
 int main(int argc, char **argv)

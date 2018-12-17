@@ -20,8 +20,9 @@
 #include <moveit/planning_interface/planning_interface.h>
 #include <moveit_msgs/MotionPlanResponse.h>
 
-#include "pilz_msgs/MotionBlendRequestList.h"
+#include "pilz_msgs/MotionSequenceRequest.h"
 #include "pilz_trajectory_generation/trajectory_blender.h"
+#include <pilz_trajectory_generation/trajectory_appender.h>
 
 namespace pilz_trajectory_generation {
 
@@ -29,7 +30,7 @@ namespace pilz_trajectory_generation {
  * @brief The CommandListManager class
  * This class can create a smooth trajectory from a given list of motion commands.
  * The trajectory generated from the motion commands are blended with each other within a blend radius given
- * within the MotionBlendRequestList.
+ * within the MotionSequenceRequest.
  */
 class CommandListManager {
 
@@ -49,7 +50,7 @@ public:
    * @return True if the generation was successful, false otherwise
    */
   bool solve(const planning_scene::PlanningSceneConstPtr& planning_scene,
-             const pilz_msgs::MotionBlendRequestList& req_list,
+             const pilz_msgs::MotionSequenceRequest& req_list,
              planning_interface::MotionPlanResponse &res);
 
 private:
@@ -63,7 +64,7 @@ private:
    * @param res The response used to set the error code on validation error
    * @return True if all conditions hold, false otherwise
    */
-  bool validateRequestList(const pilz_msgs::MotionBlendRequestList &req_list, planning_interface::MotionPlanResponse& res);
+  bool validateRequestList(const pilz_msgs::MotionSequenceRequest &req_list, planning_interface::MotionPlanResponse& res);
 
   /**
    * @brief Validates that two consecutive blending radii do not overlap
@@ -87,23 +88,29 @@ private:
    * @return True if trajectories for all request could be generated
    */
   bool solveRequests(const planning_scene::PlanningSceneConstPtr& planning_scene,
-                     const pilz_msgs::MotionBlendRequestList &req_list,
+                     const pilz_msgs::MotionSequenceRequest &req_list,
                      planning_interface::MotionPlanResponse &res,
                      std::vector<planning_interface::MotionPlanResponse>& motion_plan_responses,
                      std::vector<double>& radii);
 
   /**
-   * @brief Blends all trajectories inside motion_plan_responses with the given radii
-   * @param motion_plan_responses Essentially constains the generated trajectories
+   * @brief Merges all given trajectories together into one trajectory.
+   *
+   * Function principle:
+   * Two given consecutive trajectories are blended together if blend radii != 0.
+   * Two given consecutive trajectories are simply put behind one another (if blend radii == 0).
+   *
+   * @param motion_plan_responses Contains the generated trajectories
    * @param radii List of blending radii
-   * @param result_trajectory
+   * @param result_trajectory The final trajectory created from the given trajectories
    * @param res The response used to set the error code on validation error
-   * @return True if blending succeeded, false otherwise. On false the res will contain the error code.
+   *
+   * @return True if trajectory generation succeeded, false otherwise. On false the res will contain the error code.
    */
-  bool blend(const std::vector<planning_interface::MotionPlanResponse> &motion_plan_responses,
-             const std::vector<double> &radii,
-             robot_trajectory::RobotTrajectoryPtr& result_trajectory,
-             planning_interface::MotionPlanResponse &res);
+  bool generateTrajectory(const std::vector<planning_interface::MotionPlanResponse> &motion_plan_responses,
+                          const std::vector<double> &radii,
+                          robot_trajectory::RobotTrajectoryPtr& result_trajectory,
+                          planning_interface::MotionPlanResponse &res);
 
   /**
    * @brief The the name of the to frame (link) of the given group
@@ -117,6 +124,9 @@ private:
 
   /// Robot model
   moveit::core::RobotModelConstPtr model_;
+
+  /// TrajectoryAppender
+  TrajectoryAppender appender_;
 
   /// TrajectoryBlender
   std::unique_ptr<pilz::TrajectoryBlender> blender_;

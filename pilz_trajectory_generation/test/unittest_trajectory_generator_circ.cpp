@@ -232,6 +232,12 @@ void TrajectoryGeneratorCIRCTest::checkCircResult(const planning_interface::Moti
   // rotation
   waypoint_aa = waypoint_pose.linear();
   EXPECT_NEAR(angle_rot, waypoint_aa.angle(),cartesian_angle_tolerance_);
+
+  for(size_t idx = 0; idx < res.trajectory_->getLastWayPointPtr()->getVariableCount(); ++idx)
+  {
+    EXPECT_NEAR(0.0, res.trajectory_->getLastWayPointPtr()->getVariableVelocity(idx), other_tolerance_);
+    EXPECT_NEAR(0.0, res.trajectory_->getLastWayPointPtr()->getVariableAcceleration(idx), other_tolerance_);
+  }
 }
 
 // Instantiate the test cases for robot model with and without gripper
@@ -604,6 +610,30 @@ TEST_P(TrajectoryGeneratorCIRCTest, InterimPointJointGoal)
   ASSERT_TRUE(tdp_->getCirc("ValidCIRCCmd3", circ_cmd)) << "failed to get circ command from test data";
   // construct planning request
   moveit_msgs::MotionPlanRequest req = req_director_.getCIRCJointReq(robot_model_, circ_cmd);
+
+  // empty path constraint
+  planning_interface::MotionPlanResponse res;
+  ASSERT_TRUE(circ_->generate(req,res));
+  EXPECT_EQ(res.error_code_.val, moveit_msgs::MoveItErrorCodes::SUCCESS);
+  checkCircResult(req, res);
+}
+
+/**
+ * @brief test the circ planner with interim point with joint goal and a close to zero velocity of the start state
+ *
+ * The generator is expected to be robust against a velocity beeing almost zero.
+ */
+TEST_P(TrajectoryGeneratorCIRCTest, InterimPointJointGoalStartVelNearZero)
+{
+  // get the test data from xml
+  pilz_industrial_motion_testutils::STestMotionCommand circ_cmd;
+  circ_cmd.aux_pos_type = pilz_industrial_motion_testutils::ECircAuxPosType::eINTERMEDIATE;
+  ASSERT_TRUE(tdp_->getCirc("ValidCIRCCmd3", circ_cmd)) << "failed to get circ command from test data";
+  // construct planning request
+  moveit_msgs::MotionPlanRequest req = req_director_.getCIRCJointReq(robot_model_, circ_cmd);
+
+  // Set velocity near zero
+  req.start_state.joint_state.velocity = std::vector<double>(req.start_state.joint_state.position.size(), 1e-16);
 
   // empty path constraint
   planning_interface::MotionPlanResponse res;
