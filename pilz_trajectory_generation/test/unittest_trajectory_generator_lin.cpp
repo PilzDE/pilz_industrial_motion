@@ -207,6 +207,33 @@ TEST_P(TrajectoryGeneratorLINTest, jointSpaceGoal)
 }
 
 /**
+ * @brief test the lin planner with joint space goal with start velocity almost zero
+ */
+TEST_P(TrajectoryGeneratorLINTest, jointSpaceGoalNearZeroStartVelocity)
+{
+  // get the test data from xml
+  pilz_industrial_motion_testutils::STestMotionCommand lin_cmd;
+  ASSERT_TRUE(tdp_->getLin("LINCmd1", lin_cmd));
+
+  // construct motion plan request
+  moveit_msgs::MotionPlanRequest lin_joint_req = req_director_.getLINJointReq(robot_model_, lin_cmd);
+
+  // Set velocity near zero
+  lin_joint_req.start_state.joint_state.velocity
+    = std::vector<double>(lin_joint_req.start_state.joint_state.position.size(), 1e-16);
+
+  ROS_ERROR_STREAM(lin_joint_req);
+
+  // generate the LIN trajectory
+  planning_interface::MotionPlanResponse res;
+  ASSERT_TRUE(lin_->generate(lin_joint_req, res));
+  EXPECT_TRUE(res.error_code_.val == moveit_msgs::MoveItErrorCodes::SUCCESS);
+
+  // check the resulted trajectory
+  EXPECT_TRUE(checkLinResponse(lin_joint_req, res));
+}
+
+/**
  * @brief test the lin planner with Cartesian goal
  */
 TEST_P(TrajectoryGeneratorLINTest, cartesianSpaceGoal)
@@ -317,6 +344,14 @@ TEST_P(TrajectoryGeneratorLINTest, cartesianTrapezoidProfile)
   // rotation
   waypoint_aa = waypoint_pose.linear();
   EXPECT_NEAR((0.1+0.15*23/24)*M_PI, waypoint_aa.angle(),other_tolerance_);
+
+  // check last point for vel=acc=0
+  for(size_t idx = 0; idx < res.trajectory_->getLastWayPointPtr()->getVariableCount(); ++idx)
+  {
+    EXPECT_NEAR(0.0, res.trajectory_->getLastWayPointPtr()->getVariableVelocity(idx), other_tolerance_);
+    EXPECT_NEAR(0.0, res.trajectory_->getLastWayPointPtr()->getVariableAcceleration(idx), other_tolerance_);
+  }
+
 }
 
 /**

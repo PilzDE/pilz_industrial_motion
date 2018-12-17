@@ -301,7 +301,7 @@ bool pilz::generateJointTrajectory(const moveit::core::RobotModelConstPtr &robot
     {
       point.positions.push_back(ik_solution.at(joint_name));
 
-      if(time_iter!=time_samples.begin())
+      if(time_iter!=time_samples.begin() && time_iter!=time_samples.end()-1)
       {
         double joint_velocity = (ik_solution.at(joint_name) - ik_solution_last.at(joint_name))/duration_current_sample;
         point.velocities.push_back(joint_velocity);
@@ -486,41 +486,50 @@ bool pilz::determineAndCheckSamplingTime(const robot_trajectory::RobotTrajectory
 
 bool pilz::isRobotStateEqual(const moveit::core::RobotStatePtr &state1,
                              const moveit::core::RobotStatePtr &state2,
-                             const std::string &group,
-                             double EPSILON)
+                             const std::string &joint_group_name,
+                             double epsilon)
+{
+  ROS_WARN("This signature of isRobotStateEqual is deprecated. Please use the new one in the future.");
+  return isRobotStateEqual(*state1, *state2, joint_group_name, epsilon);
+}
+
+bool pilz::isRobotStateEqual(const moveit::core::RobotState &state1,
+                             const moveit::core::RobotState &state2,
+                             const std::string &joint_group_name,
+                             double epsilon)
 {
   Eigen::VectorXd joint_position_1, joint_position_2;
 
-  state1->copyJointGroupPositions(group, joint_position_1);
-  state2->copyJointGroupPositions(group, joint_position_2);
+  state1.copyJointGroupPositions(joint_group_name, joint_position_1);
+  state2.copyJointGroupPositions(joint_group_name, joint_position_2);
 
-  if( (joint_position_1 - joint_position_2).norm() > EPSILON)
+  if( (joint_position_1 - joint_position_2).norm() > epsilon)
   {
-    ROS_ERROR_STREAM("Joint positions of the two states are different. state1: " << joint_position_1 << " state2: "
+    ROS_DEBUG_STREAM("Joint positions of the two states are different. state1: " << joint_position_1 << " state2: "
                      << joint_position_2);
     return false;
   }
 
   Eigen::VectorXd joint_velocity_1, joint_velocity_2;
 
-  state1->copyJointGroupVelocities(group, joint_velocity_1);
-  state2->copyJointGroupVelocities(group, joint_velocity_2);
+  state1.copyJointGroupVelocities(joint_group_name, joint_velocity_1);
+  state2.copyJointGroupVelocities(joint_group_name, joint_velocity_2);
 
-  if( (joint_velocity_1 - joint_velocity_2).norm() > EPSILON)
+  if( (joint_velocity_1 - joint_velocity_2).norm() > epsilon)
   {
-    ROS_ERROR_STREAM("Joint velocities of the two states are different. state1: " << joint_velocity_1 << " state2: "
+    ROS_DEBUG_STREAM("Joint velocities of the two states are different. state1: " << joint_velocity_1 << " state2: "
                      << joint_velocity_2);
     return false;
   }
 
   Eigen::VectorXd joint_acc_1, joint_acc_2;
 
-  state1->copyJointGroupAccelerations(group, joint_acc_1);
-  state2->copyJointGroupAccelerations(group, joint_acc_2);
+  state1.copyJointGroupAccelerations(joint_group_name, joint_acc_1);
+  state2.copyJointGroupAccelerations(joint_group_name, joint_acc_2);
 
-  if( (joint_acc_1 - joint_acc_2).norm() > EPSILON)
+  if( (joint_acc_1 - joint_acc_2).norm() > epsilon)
   {
-    ROS_ERROR_STREAM("Joint accelerations of the two states are different. state1: " << joint_acc_1 << " state2: "
+    ROS_DEBUG_STREAM("Joint accelerations of the two states are different. state1: " << joint_acc_1 << " state2: "
                      << joint_acc_2);
     return false;
   }

@@ -41,7 +41,8 @@ public:
 
   TrajectoryGenerator(const robot_model::RobotModelConstPtr& robot_model,
                       const pilz::LimitsContainer& planner_limits)
-    :robot_model_(robot_model), planner_limits_(planner_limits), MIN_SCALING_FACTOR(0.0001)
+    :robot_model_(robot_model),
+      planner_limits_(planner_limits)
   {
   }
 
@@ -102,6 +103,20 @@ protected:
                                moveit_msgs::MoveItErrorCodes& error_code) const;
 
   /**
+   * @brief Validate that the start state of the request matches the requirements of the trajectory generator
+   *
+   * These requirements are:
+   *     - Names of the joints and given joint position match in size and are non-zero
+   *     - The start state is withing the position limits
+   *     - The start state velocity is below TrajectoryGenerator::VELOCITY_TOLERANCE
+
+   * @return true if the start state fullfills all requirements
+   * @return false if the start state violates one requirement
+   */
+  virtual bool validateStartState(const planning_interface::MotionPlanRequest &req,
+                                  moveit_msgs::MoveItErrorCodes &error_code) const;
+
+  /**
    * @brief build cartesian velocity profile for the path
    *
    * Uses the path to get the cartesian length and the angular distance from start to goal.
@@ -141,7 +156,8 @@ protected:
 protected:
   const robot_model::RobotModelConstPtr robot_model_;
   const pilz::LimitsContainer planner_limits_;
-  const double MIN_SCALING_FACTOR;
+  static constexpr double MIN_SCALING_FACTOR {0.0001};
+  static constexpr double VELOCITY_TOLERANCE {1e-8};
 };
 
 /**

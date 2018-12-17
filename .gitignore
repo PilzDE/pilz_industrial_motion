@@ -3,4 +3,5 @@
 *.pyc
 .idea/
 *.bag
-doc/
+*/doc/html
+*/doc/manifest.yaml

@@ -1,14 +1,14 @@
 <?xml version="1.0"?>
 <package>
   <name>pilz_trajectory_generation</name>
-  <version>0.2.2</version>
+  <version>0.3.1</version>
   <description>The pilz_trajectory_generation package</description>
 
   <maintainer email="ros@pilz.de">Pilz GmbH and Co. KG</maintainer>
 
   <license>LGPLv3</license>
 
-  <url type="website">https://wiki.ros.org/pilz_industrial_motion</url>
+  <url type="website">https://wiki.ros.org/pilz_trajectory_generation</url>
   <url type="bugtracker">https://github.com/PilzDE/pilz_industrial_motion/issues</url>
   <url type="repository">https://github.com/PilzDE/pilz_industrial_motion</url>
 
@@ -61,7 +61,7 @@
   <!-- The export tag contains other, unspecified, tags -->
   <export>
     <moveit_core plugin="${prefix}/plugins/command_planner_plugin_description.xml"/>
-    <moveit_ros_move_group plugin="${prefix}/plugins/blend_capability_plugin_description.xml"/>
+    <moveit_ros_move_group plugin="${prefix}/plugins/sequence_capability_plugin_description.xml"/>
     <pilz_trajectory_generation plugin="${prefix}/plugins/planning_context_plugin_description.xml"/>
   </export>
 </package>

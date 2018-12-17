@@ -260,17 +260,17 @@ limitations under the License.
         </circ>
     </circs>
 
-    <blends>
-        <blend name="LINLINBlend">
-            <blendCmd name="Blend_1_1_Lin" type="lin" blend_radius="0.1"/>
-            <blendCmd name="Blend_1_2_Lin" type="lin" blend_radius="0" />
-        </blend>
+    <sequences>
+        <sequence name="LINLINBlend">
+            <sequenceCmd name="Blend_1_1_Lin" type="lin" blend_radius="0.1"/>
+            <sequenceCmd name="Blend_1_2_Lin" type="lin" blend_radius="0" />
+        </sequence>
 
-        <blend name="InvalidLINLINBlend">
-            <blendCmd name="Blend_1_1_Lin_invalid" type="lin" blend_radius="0.12"/>
-            <blendCmd name="Blend_1_2_Lin" type="lin" blend_radius="0.1" />
-            <blendCmd name="Blend_1_3_Lin" type="lin" blend_radius="0" />
-        </blend>
-    </blends>
+        <sequence name="InvalidLINLINBlend">
+            <sequenceCmd name="Blend_1_1_Lin_invalid" type="lin" blend_radius="0.12"/>
+            <sequenceCmd name="Blend_1_2_Lin" type="lin" blend_radius="0.1" />
+            <sequenceCmd name="Blend_1_3_Lin" type="lin" blend_radius="0" />
+        </sequence>
+    </sequences>
 
 </testdata>
