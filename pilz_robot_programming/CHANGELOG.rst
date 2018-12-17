@@ -2,8 +2,8 @@
 Changelog for package pilz_robot_programming
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
-Forthcoming
------------
+0.3.1 (2018-12-17)
+------------------
 * Add RobotMotionObserver in testutils
 * Contributors: Pilz GmbH and Co. KG
 
