@@ -2,8 +2,8 @@
 Changelog for package pilz_industrial_motion_testutils
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
-Forthcoming
------------
+0.4.0 (2018-12-18)
+------------------
 * Use Eigen::Isometry3d to keep up with the recent changes in moveit
 * Contributors: Chris Lalancette
 
