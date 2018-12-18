@@ -2,6 +2,10 @@
 Changelog for package pilz_robot_programming
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
+Forthcoming
+-----------
+* Release Python-API from kinetic version 0.3.1
+
 0.3.1 (2018-12-17)
 ------------------
 * Add RobotMotionObserver in testutils
