@@ -35,18 +35,6 @@ from std_msgs.msg import Header
 
 __version__ = '1.0.0'
 
-# Default velocities
-_MAX_VEL_SCALE = 1
-_DEFAULT_VEL_SCALE = 0.1
-
-# Default accelerations
-_MAX_ACC_SCALE = 1
-_DEFAULT_ACC_SCALE = 0.1
-
-# Tolerance for cartesian pose
-_DEFAULT_POSITION_TOLERANCE = 2e-3
-_DEFAULT_ORIENTATION_TOLERANCE = 1e-5
-
 
 class Robot(object):
     """
