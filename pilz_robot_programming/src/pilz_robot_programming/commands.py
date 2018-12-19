@@ -471,7 +471,7 @@ class Circ(_BaseCmd):
 
     :param target_link: Name of the target link if Cartesian goal is given, default as "prbt_tcp"
 
-    :param interim: Position in cartesian space (geometry_msgs/Position),
+    :param interim: Position in cartesian space (geometry_msgs/Point),
         which lies on the circle on which the robot is supposed to move.
         The position has to lie between the current position of the robot and the goal position.
         The interim position indicates in which direction of the circle the robot is supposed to move.
