@@ -2,6 +2,11 @@
 Changelog for package pilz_trajectory_generation
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
+Forthcoming
+-----------
+* use collision-aware ik calculation
+* Contributors: Pilz GmbH and Co. KG
+
 0.3.1 (2018-12-17)
 ------------------
 
