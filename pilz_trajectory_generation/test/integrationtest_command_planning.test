@@ -30,8 +30,7 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
     <arg name="fake_execution" value="true"/>
     <arg name="info" value="true"/>
     <arg name="debug" value="$(arg debug)"/>
-    <arg name="capabilities" value="pilz_trajectory_generation/MoveGroupSequenceAction
-                                    pilz_trajectory_generation/MoveGroupSequenceService"/>
+    <arg name="pipeline" value="command_planner" />
   </include>
 
   <!-- run test -->
