@@ -23,7 +23,7 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
     <pos name="ZeroPose">
         <group name="panda_arm">
-            <joints>0.0 0.0 0.0 -1.5708 0.0 0.0 0.0</joints>
+            <joints>0.0 0.0 0.0 -1.5708 0.0 1.5708 0.0</joints>
         </group>
     </pos>
 
