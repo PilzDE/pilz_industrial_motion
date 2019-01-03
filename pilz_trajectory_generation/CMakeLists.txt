@@ -266,8 +266,8 @@ add_rostest(test/integrationtest_command_planning_with_gripper.test
 add_rostest(test/integrationtest_command_planning_abb_irb2400.test
   DEPENDENCIES integrationtest_command_planning )
 
-#add_rostest(test/integrationtest_command_planning_frankaemika_panda.test
-#  DEPENDENCIES integrationtest_command_planning )
+add_rostest(test/integrationtest_command_planning_frankaemika_panda.test
+  DEPENDENCIES integrationtest_command_planning )
 
 # Blending Integration tests
 add_rostest_gtest(integrationtest_command_list_manager
