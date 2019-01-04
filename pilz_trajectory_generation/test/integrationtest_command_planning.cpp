@@ -371,7 +371,7 @@ TEST_F(IntegrationTestCommandPlanning, LinJointGoal)
  *  2. Goal position correponds with the given goal position.
  *  3. Trajectory is a straight line.
  */
-TEST_F(IntegrationTestCommandPlanning, LinPosGoal)
+TEST_F(IntegrationTestCommandPlanning, LinPoseGoal)
 {
   ros::NodeHandle node_handle("~");
 
@@ -384,8 +384,6 @@ TEST_F(IntegrationTestCommandPlanning, LinPosGoal)
   std::cout << "++++++++++" << std::endl;
 
   // The start state
-  std::vector<double> joints;
-  ASSERT_TRUE(test_data_->getJoints("ZeroPose",  planning_group_, joints));
   sensor_msgs::JointState start_state = testutils::generateJointState(lin_cmd.start_position, joint_prefix_);
 
   // The goal
