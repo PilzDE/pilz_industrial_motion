@@ -135,11 +135,11 @@ TEST_F(IntegrationTestCommandPlanning, PTPJointGoal)
   srv.request.motion_plan_request.group_name = planning_group_;
   srv.request.motion_plan_request.planner_id = "PTP";
 
-  ros::service::waitForService(PLAN_SERVICE_NAME, ros::Duration(10));
+  ASSERT_TRUE(ros::service::waitForService(PLAN_SERVICE_NAME, ros::Duration(testutils::DEFAULT_SERVICE_TIMEOUT)));
   ros::ServiceClient client = node_handle.serviceClient<moveit_msgs::GetMotionPlan>(PLAN_SERVICE_NAME);
 
   // Call the service client
-  client.call(srv);
+  ASSERT_TRUE(client.call(srv));
 
   // Obtain the response
   const moveit_msgs::MotionPlanResponse& response = srv.response.motion_plan_response;
@@ -223,11 +223,11 @@ TEST_F(IntegrationTestCommandPlanning, PTPPoseGoal)
   srv.request.motion_plan_request.group_name = planning_group_;
   srv.request.motion_plan_request.planner_id = "PTP";
 
-  ros::service::waitForService(PLAN_SERVICE_NAME, ros::Duration(10));
+  ASSERT_TRUE(ros::service::waitForService(PLAN_SERVICE_NAME, ros::Duration(testutils::DEFAULT_SERVICE_TIMEOUT)));
   ros::ServiceClient client = node_handle.serviceClient<moveit_msgs::GetMotionPlan>(PLAN_SERVICE_NAME);
 
   // Call the service client
-  client.call(srv);
+  ASSERT_TRUE(client.call(srv));
 
   // Obtain the response
   const moveit_msgs::MotionPlanResponse& response = srv.response.motion_plan_response;
@@ -320,11 +320,11 @@ TEST_F(IntegrationTestCommandPlanning, LinJointGoal)
   moveit_msgs::GetMotionPlan srv;
   srv.request.motion_plan_request = req;
 
-  ros::service::waitForService(PLAN_SERVICE_NAME, ros::Duration(testutils::DEFAULT_SERVICE_TIMEOUT));
+  ASSERT_TRUE(ros::service::waitForService(PLAN_SERVICE_NAME, ros::Duration(testutils::DEFAULT_SERVICE_TIMEOUT)));
   ros::ServiceClient client = node_handle.serviceClient<moveit_msgs::GetMotionPlan>(PLAN_SERVICE_NAME);
 
   // Call the service client
-  client.call(srv);
+  ASSERT_TRUE(client.call(srv));
 
   // Obtain the response
   const moveit_msgs::MotionPlanResponse& response = srv.response.motion_plan_response;
@@ -408,11 +408,11 @@ TEST_F(IntegrationTestCommandPlanning, LinPoseGoal)
   moveit_msgs::GetMotionPlan srv;
   srv.request.motion_plan_request = req;
 
-  ros::service::waitForService(PLAN_SERVICE_NAME, ros::Duration(testutils::DEFAULT_SERVICE_TIMEOUT));
+  ASSERT_TRUE(ros::service::waitForService(PLAN_SERVICE_NAME, ros::Duration(testutils::DEFAULT_SERVICE_TIMEOUT)));
   ros::ServiceClient client = node_handle.serviceClient<moveit_msgs::GetMotionPlan>(PLAN_SERVICE_NAME);
 
   // Call the service client
-  client.call(srv);
+  ASSERT_TRUE(client.call(srv));
 
   // Obtain the response
   const moveit_msgs::MotionPlanResponse& response = srv.response.motion_plan_response;
@@ -470,11 +470,11 @@ TEST_F(IntegrationTestCommandPlanning, CIRCJointGoal)
   moveit_msgs::GetMotionPlan srv;
   srv.request.motion_plan_request = req;
 
-  ros::service::waitForService(PLAN_SERVICE_NAME, ros::Duration(10));
+  ASSERT_TRUE(ros::service::waitForService(PLAN_SERVICE_NAME, ros::Duration(testutils::DEFAULT_SERVICE_TIMEOUT)));
   ros::ServiceClient client = node_handle.serviceClient<moveit_msgs::GetMotionPlan>(PLAN_SERVICE_NAME);
 
   // Call the service client
-  client.call(srv);
+  ASSERT_TRUE(client.call(srv));
 
   // Obtain the response
   const moveit_msgs::MotionPlanResponse& response = srv.response.motion_plan_response;
@@ -559,11 +559,11 @@ TEST_F(IntegrationTestCommandPlanning, CIRCPoseGoal)
   moveit_msgs::GetMotionPlan srv;
   srv.request.motion_plan_request = req;
 
-  ros::service::waitForService(PLAN_SERVICE_NAME, ros::Duration(10));
+  ASSERT_TRUE(ros::service::waitForService(PLAN_SERVICE_NAME, ros::Duration(testutils::DEFAULT_SERVICE_TIMEOUT)));
   ros::ServiceClient client = node_handle.serviceClient<moveit_msgs::GetMotionPlan>(PLAN_SERVICE_NAME);
 
   // Call the service client
-  client.call(srv);
+  ASSERT_TRUE(client.call(srv));
 
   // Obtain the response
   const moveit_msgs::MotionPlanResponse& response = srv.response.motion_plan_response;
@@ -629,5 +629,6 @@ int main(int argc, char **argv)
 {
   testing::InitGoogleTest(&argc, argv);
   ros::init(argc, argv, "integrationtest_command_planning");
+  ros::NodeHandle nh; // For output via ROS_ERROR etc during test
   return RUN_ALL_TESTS();
 }
