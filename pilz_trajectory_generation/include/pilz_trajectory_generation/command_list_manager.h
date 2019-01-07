@@ -46,6 +46,11 @@ public:
    * @brief Returns a full trajectory consistenting of planned trajectory blended with each other in the given blend_radius
    * @param planning_scene The current planning scene
    * @param req_list List of motion requests. Contains PTP, LIN and CIRC commands.
+   *        A request is valid if:
+   *        - All request are about the same group
+   *        - All blending radii are non negative
+   *        - The blending radius of the last request is 0
+   *        - Only the first request has a start state
    * @param[out] res The resulting trajectory
    * @return True if the generation was successful, false otherwise
    */
@@ -55,11 +60,8 @@ public:
 
 private:
   /**
-   * @brief Validate if the request list fullfills the following conditions
-   * - All request are about the same group
-   * - All blending radii are non negative
-   * - The blending radius of the last request is 0
-   * - Only the first request has a start state
+   * @brief Validate if the request list fullfills the conditions noted
+   *        under pilz_trajectory_generation::CommandListManager::solve
    * @param req_list The request
    * @param res The response used to set the error code on validation error
    * @return True if all conditions hold, false otherwise
