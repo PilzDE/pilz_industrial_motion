@@ -38,6 +38,21 @@ nochmal im Team über die Güte der neuen Daten diskutieren zu können.
 
 ![BuilderVariant](diagrams/diag_seq_usage_testloader_option_builder.png)
 
+## Combination of both approaches
+The builder free variant clearly breaks SRP as noted in the disadvantages above.
+This would be solved with the builder approach (still would be to solve how different joint_prefixes are
+handled if different robots are used).
+
+One problem is that the type of configuration is inside the template of the command.
+So if a PtpJoint (aka Ptp<JointConfiguration, JointConfiguration>) is passed to the builder the builder would
+have to deduce the type of the Configuration.
+
+By using a builder inside the PtpJoint Class the Seperation would be kept to some degree since the class itself would only
+now that it can be transformed and to what but the "how" would be hidden in the builder.
+
+
+
+
 ## Class diagrams
 
 ### Robot configurations
