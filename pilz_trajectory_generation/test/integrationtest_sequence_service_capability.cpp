@@ -201,7 +201,8 @@ TEST_F(IntegrationTestSequenceService, blendRadiusNegative)
   // Obtain the response
   const moveit_msgs::MotionPlanResponse& response = srv.response.plan_response;
 
-  EXPECT_EQ(moveit_msgs::MoveItErrorCodes::FAILURE, response.error_code.val) << "Planning should have failed but did not.";
+  EXPECT_EQ(moveit_msgs::MoveItErrorCodes::INVALID_MOTION_PLAN, response.error_code.val)
+    << "Planning should have failed but did not.";
   EXPECT_EQ(0u, response.trajectory.joint_trajectory.points.size()) << "Trajectory should not contain any points.";
 }
 
@@ -259,7 +260,7 @@ TEST_F(IntegrationTestSequenceService, startStateNotFirstGoal)
   // Obtain the response
   const moveit_msgs::MotionPlanResponse& response = srv.response.plan_response;
 
-  EXPECT_EQ(moveit_msgs::MoveItErrorCodes::START_STATE_VIOLATES_PATH_CONSTRAINTS, response.error_code.val) << "Incorrect error code.";
+  EXPECT_EQ(moveit_msgs::MoveItErrorCodes::INVALID_ROBOT_STATE, response.error_code.val) << "Incorrect error code.";
   EXPECT_EQ(0u, response.trajectory.joint_trajectory.points.size()) << "Trajectory should not contain any points.";
 }
 
