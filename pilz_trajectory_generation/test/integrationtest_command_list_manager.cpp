@@ -381,7 +381,7 @@ TEST_P(IntegrationTestCommandListManager, startStateNotFirstGoal)
   req.items[1].req.start_state.joint_state = testutils::generateJointState({-1., 2., -3., 4., -5., 0.});
   planning_interface::MotionPlanResponse res;
   ASSERT_FALSE(manager_->solve(scene_, req, res));
-  EXPECT_EQ(moveit_msgs::MoveItErrorCodes::START_STATE_VIOLATES_PATH_CONSTRAINTS, res.error_code_.val);
+  EXPECT_EQ(moveit_msgs::MoveItErrorCodes::INVALID_ROBOT_STATE, res.error_code_.val);
   EXPECT_EQ(0u, res.trajectory_->getWayPointCount());
 }
 
@@ -402,7 +402,7 @@ TEST_P(IntegrationTestCommandListManager, blendingRadiusNegative)
   req.items[0].blend_radius = -0.3;
   planning_interface::MotionPlanResponse res;
   ASSERT_FALSE(manager_->solve(scene_, req, res));
-  EXPECT_EQ(moveit_msgs::MoveItErrorCodes::FAILURE, res.error_code_.val);
+  EXPECT_EQ(moveit_msgs::MoveItErrorCodes::INVALID_MOTION_PLAN, res.error_code_.val);
   EXPECT_EQ(0u, res.trajectory_->getWayPointCount());
 }
 
@@ -423,7 +423,7 @@ TEST_P(IntegrationTestCommandListManager, lastBlendingRadiusNonZero)
   req.items[1].blend_radius = 0.03;
   planning_interface::MotionPlanResponse res;
   ASSERT_FALSE(manager_->solve(scene_, req, res));
-  EXPECT_EQ(moveit_msgs::MoveItErrorCodes::FAILURE, res.error_code_.val);
+  EXPECT_EQ(moveit_msgs::MoveItErrorCodes::INVALID_MOTION_PLAN, res.error_code_.val);
   EXPECT_EQ(0u, res.trajectory_->getWayPointCount());
 }
 
@@ -479,7 +479,7 @@ TEST_P(IntegrationTestCommandListManager, blendingRadiusOverlapping)
   auto distance = (p2.translation()-p1.translation()).norm();
   req.items[1].blend_radius = distance - req.items[0].blend_radius + 0.01; // overlapping radii
   ASSERT_FALSE(manager_->solve(scene_, req, res_overlap));
-  EXPECT_EQ(moveit_msgs::MoveItErrorCodes::FAILURE, res_overlap.error_code_.val);
+  EXPECT_EQ(moveit_msgs::MoveItErrorCodes::INVALID_MOTION_PLAN, res_overlap.error_code_.val);
   EXPECT_EQ(0u, res_overlap.trajectory_->getWayPointCount());
 }
 
