@@ -55,7 +55,7 @@ bool computePoseIK(const robot_model::RobotModelConstPtr& robot_model,
                    std::map<std::string, double>& solution,
                    bool check_self_collision = true,
                    int max_attempt = 10,
-                   const double timeout = 0.005);
+                   const double timeout = 0.1);
 
 bool computePoseIK(const robot_model::RobotModelConstPtr& robot_model,
                    const std::string& group_name,
@@ -66,7 +66,7 @@ bool computePoseIK(const robot_model::RobotModelConstPtr& robot_model,
                    std::map<std::string, double>& solution,
                    bool check_self_collision = true,
                    int max_attempt = 10,
-                   const double timeout = 0.005);
+                   const double timeout = 0.1);
 
 /**
  * @brief compute the pose of a link at give robot state
