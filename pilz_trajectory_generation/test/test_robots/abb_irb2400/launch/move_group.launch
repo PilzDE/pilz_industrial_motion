@@ -10,7 +10,7 @@
     <rosparam command="load" file="$(find pilz_trajectory_generation)/test/test_robots/config/cartesian_limits.yaml"/>
   </group>
 
-  <arg name="pipeline" default="command_planner" />
+  <arg name="pipeline" default="pilz_command_planner" />
 
   <!-- GDB Debug Option -->
   <arg name="debug" default="false" />

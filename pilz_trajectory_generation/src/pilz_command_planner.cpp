@@ -15,7 +15,7 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-#include "pilz_trajectory_generation/command_planner.h"
+#include "pilz_trajectory_generation/pilz_command_planner.h"
 
 #include "pilz_trajectory_generation/planning_context_loader.h"
 #include "pilz_trajectory_generation/planning_context_loader_ptp.h"

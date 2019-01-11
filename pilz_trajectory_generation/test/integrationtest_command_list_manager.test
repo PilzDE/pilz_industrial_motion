@@ -39,7 +39,7 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
         args="/my_planned_path"  />
 
   <include ns="integrationtest_command_list_manager" file="$(find prbt_moveit_config)/launch/planning_pipeline.launch.xml">
-    <arg name="pipeline" value="command_planner" />
+    <arg name="pipeline" value="pilz_command_planner" />
   </include>
 
   <!-- run test -->
