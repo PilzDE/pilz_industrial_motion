@@ -12,42 +12,42 @@ template <class StartType, class GoalType>
 class BaseCommand
 {
 public:
-  void setPlanningGroup(const std::string &planning_group)
+  inline void setPlanningGroup(const std::string &planning_group)
   {
     planning_group_ = planning_group;
   }
 
-  void setTargetLink(const std::string &target_link)
+  inline void setTargetLink(const std::string &target_link)
   {
     target_link_ = target_link;
   }
 
-  void setVelocityScale(double velocity_scale)
+  inline void setVelocityScale(double velocity_scale)
   {
     vel_scale_ = velocity_scale;
   }
 
-  void setAccelerationScale(double acceleration_scale)
+  inline void setAccelerationScale(double acceleration_scale)
   {
     acc_scale_ = acceleration_scale;
   }
 
-  void setStartConfiguration(StartType &start)
+  inline void setStartConfiguration(StartType &start)
   {
     start_ = start;
   }
 
-  void setGoalConfiguration(GoalType &goal)
+  inline void setGoalConfiguration(GoalType &goal)
   {
     goal_ = goal;
   }
 
-  GoalType& getStartConfiguration()
+  inline GoalType& getStartConfiguration()
   {
     return start_;
   }
 
-  GoalType& getGoalConfiguration()
+  inline GoalType& getGoalConfiguration()
   {
     return goal_;
   }

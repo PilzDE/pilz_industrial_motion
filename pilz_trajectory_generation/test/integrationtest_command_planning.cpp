@@ -171,11 +171,6 @@ TEST_F(IntegrationTestCommandPlanning, PTPPoseGoal)
 
   planning_interface::MotionPlanRequest req;
 
-  // The start state
-  std::vector<double> joints;
-  ASSERT_TRUE(test_data_->getJoints("ZeroPose",  planning_group_, joints));
-  sensor_msgs::JointState start_state = testutils::generateJointState(joints, joint_prefix_);
-
   // Generate start state
   std::vector<double> pose_vec;
   ASSERT_TRUE(test_data_->getPose("PTPPose",  planning_group_, pose_vec));
@@ -201,7 +196,7 @@ TEST_F(IntegrationTestCommandPlanning, PTPPoseGoal)
   // Generate the service request
   moveit_msgs::GetMotionPlan srv;
   srv.request.motion_plan_request = req;
-  srv.request.motion_plan_request.start_state.joint_state = start_state;
+  srv.request.motion_plan_request.start_state.joint_state = test_data_->getJoints("ZeroPose",  planning_group_).setJointPrefix(joint_prefix_).toSensorMsg();;
 
   // select planner by parameter
   srv.request.motion_plan_request.group_name = planning_group_;

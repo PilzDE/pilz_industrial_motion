@@ -65,6 +65,25 @@ const pt::ptree::value_type& XmlTestdataLoader::findNodeWithName(const boost::pr
   return empty_value_type_;
 }
 
+const pt::ptree::value_type& XmlTestdataLoader::findNodeWithName(const boost::property_tree::ptree &tree,
+                                                                 const std::string &name) const
+{
+  // Search for node with given name.
+  for (const pt::ptree::value_type& val : tree)
+  {
+    // Ignore attributes which are always the first element of a tree.
+    if (val.first == XML_ATTR_STR){ continue; }
+
+    const auto& node = val.second.get_child(NAME_PATH_STR, empty_tree_);
+    if (node == empty_tree_) { break; }
+    if (node.data() == name) { return val; }
+  }
+
+  std::string msg;
+  msg.append("Node \"").append(name).append("\" not found.");
+  throw TestDataLoaderReadingException(msg);
+}
+
 bool XmlTestdataLoader::getJoints(const std::string &pose_name, const std::string &group_name,
                                   std::vector<double> &dVec) const
 {
@@ -109,6 +128,39 @@ bool XmlTestdataLoader::getJoints(const std::string &pose_name, const std::strin
   boost::split(strs,  joint_tree.data(), boost::is_any_of(" "));
   strVec2doubleVec(strs, dVec);
   return true;
+}
+
+JointConfiguration XmlTestdataLoader::getJoints(const std::string &pose_name,
+                                                const std::string &group_name) const
+{
+  // Search for node with given name.
+  const auto& poses_tree {tree_.get_child(POSES_PATH_STR, empty_tree_)};
+  if (poses_tree == empty_tree_)
+  {
+    throw TestDataLoaderReadingException("No poses found.");
+  }
+
+  const auto& pose_node {findNodeWithName(poses_tree, pose_name)};
+
+  // Search group node with given name.
+  const auto& group_tree {pose_node.second};
+  if (group_tree == empty_tree_)
+  {
+    throw TestDataLoaderReadingException("No groups found.");
+  }
+
+  const auto& group_node {findNodeWithName(group_tree, group_name)};
+
+  // Read joint values
+  const auto& joint_tree {group_node.second.get_child(JOINT_STR, empty_tree_)};
+  if (joint_tree == empty_tree_)
+  {
+    throw TestDataLoaderReadingException("No joint node found.");
+  }
+
+  std::vector<std::string> strs;
+  boost::split(strs,  joint_tree.data(), boost::is_any_of(" "));
+  return JointConfiguration(strVec2doubleVec(strs));
 }
 
 bool XmlTestdataLoader::getPose(const std::string &pose_name, const std::string &group_name,

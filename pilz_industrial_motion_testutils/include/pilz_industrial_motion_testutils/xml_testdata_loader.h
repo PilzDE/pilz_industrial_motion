@@ -111,8 +111,12 @@ public:
   ~XmlTestdataLoader();
 
 public:
+  //! DEPRECATED
   virtual bool getJoints(const std::string &pos_name, const std::string &group_name,
                                 std::vector<double> &dVec) const override;
+
+  virtual JointConfiguration getJoints(const std::string &pose_name,
+                                       const std::string &group_name) const override;
 
   virtual bool getPose(const std::string &pose_name, const std::string &group_name,
                        std::vector<double> &dVec) const override;
@@ -128,6 +132,8 @@ public:
 
 private:
   /**
+   * DEPRECATED
+   *
    * @brief Use this function to search for a node (like an pos or cmd) with a given name.
    *
    * @param tree Tree containing the node.
@@ -140,6 +146,9 @@ private:
   const pt::ptree::value_type &findNodeWithName(const boost::property_tree::ptree &tree,
                                                 const std::string &name,
                                                 bool &ok) const;
+
+  const pt::ptree::value_type &findNodeWithName(const boost::property_tree::ptree &tree,
+                                                const std::string &name) const;
 
   /**
    * @brief Use this function to search for a cmd-node with a given name.
@@ -160,8 +169,11 @@ private:
               double &vel, double &acc) const;
 
 private:
+  //! DEPRECATED
   //! @brief Converts string vector to double vector.
   inline static void strVec2doubleVec(std::vector<std::string> &strVec, std::vector<double> &dVec);
+
+  inline static std::vector<double> strVec2doubleVec(std::vector<std::string> &strVec);
 
 private:
   std::string path_filename_;
@@ -208,6 +220,21 @@ void XmlTestdataLoader::strVec2doubleVec(std::vector<std::string> &strVec, std::
     return std::stod(val);
   });
 }
+
+std::vector<double> XmlTestdataLoader::strVec2doubleVec(std::vector<std::string> &strVec)
+{
+  std::vector<double> vec;
+
+  vec.resize(strVec.size());
+  std::transform(strVec.begin(), strVec.end(), vec.begin(), [](const std::string& val)
+  {
+    return std::stod(val);
+  });
+
+  return vec;
+}
+
+
 }
 
 #endif // XML_TESTDATA_LOADER_H

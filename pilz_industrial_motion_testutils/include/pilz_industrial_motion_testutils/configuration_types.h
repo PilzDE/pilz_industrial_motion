@@ -3,8 +3,10 @@
 
 #include <string>
 #include <vector>
+#include <cassert>
 
 #include <geometry_msgs/Pose.h>
+#include <sensor_msgs/JointState.h>
 #include <moveit_msgs/RobotState.h>
 #include <moveit_msgs/Constraints.h>
 #include <moveit_msgs/JointConstraint.h>
@@ -29,19 +31,31 @@ public:
   JointConfiguration(const std::vector<double>& config)
     : RobotConfiguration()
     , joints_(config)
-  {}
+  {
+  }
+
 
 public:
-  void setJointPrefix(const std::string& joint_prefix)
+  inline JointConfiguration& setJointPrefix(const std::string& joint_prefix)
   {
     joint_prefix_ = joint_prefix;
+    return *this;
   }
 
   moveit_msgs::Constraints toConstraints() const override;
   moveit_msgs::RobotState toMoveitMsgsRobotState() const override;
+  sensor_msgs::JointState toSensorMsg() const;
 
 private:
-  std::vector<double> joints_; // joint positions
+  inline static std::string createJointName(const std::string& joint_prefix,
+                                            const size_t& joint_number)
+  {
+    return joint_prefix + std::to_string(joint_number);
+  }
+
+private:
+  //! Joint positions
+  std::vector<double> joints_;
   std::string joint_prefix_ {};
 };
 
@@ -52,7 +66,7 @@ public:
   moveit_msgs::RobotState toMoveitMsgsRobotState() const override;
 
 private:
-  std::vector<double> pose_; // joint positions
+  std::vector<double> pose_;
 };
 
 // +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
@@ -60,18 +74,14 @@ private:
 // TODO NOT OPTIMAL!
 inline moveit_msgs::Constraints JointConfiguration::toConstraints() const
 {
-  moveit_msgs::Constraints gc; // TODO Code duplication test_utils.h generateJointConstraint
-
-  auto pos_it = joints_.begin();
+  moveit_msgs::Constraints gc;
 
   for(size_t i = 0; i < joints_.size(); ++i)
   {
     moveit_msgs::JointConstraint jc;
-    jc.joint_name = joint_prefix_ + std::to_string(i+1);
-    jc.position = *pos_it;
+    jc.joint_name = createJointName(joint_prefix_, i+1);
+    jc.position = joints_.at(i);
     gc.joint_constraints.push_back(jc);
-
-    ++pos_it;
   }
 
   return gc;
@@ -81,24 +91,33 @@ inline moveit_msgs::Constraints JointConfiguration::toConstraints() const
 inline moveit_msgs::RobotState JointConfiguration::toMoveitMsgsRobotState() const
 {
   moveit_msgs::RobotState robot_state;
-
-  auto posit = joints_.begin();
-  size_t i = 0;
-
-  while(posit != joints_.end())
+  for (size_t i = 0; i < joints_.size(); ++i)
   {
-    robot_state.joint_state.name.push_back(joint_prefix_ + std::to_string(i+1)); // TODO Code duplication getJointName
-    robot_state.joint_state.position.push_back(*posit);
-
-    i++;
-    posit++;
+    robot_state.joint_state.name.emplace_back( createJointName(joint_prefix_, i+1) );
+    robot_state.joint_state.position.push_back(joints_.at(i));
   }
   return robot_state;
+}
+
+// TODO Inlining NOT OPTIMAL!
+inline sensor_msgs::JointState JointConfiguration::toSensorMsg() const
+{
+  sensor_msgs::JointState state;
+  for (size_t i = 0; i < joints_.size(); ++i)
+  {
+    state.name.emplace_back( createJointName(joint_prefix_, i+1) );
+    state.position.push_back(joints_.at(i));
+  }
+
+  return state;
 }
 
 inline moveit_msgs::Constraints CartesianConfiguration::toConstraints() const
 {
   moveit_msgs::Constraints gc;
+
+  // TODO Add implementation
+
   return gc;
 }
 
@@ -106,7 +125,7 @@ inline moveit_msgs::RobotState CartesianConfiguration::toMoveitMsgsRobotState() 
 {
   moveit_msgs::RobotState robot_state;
 
-  // TODO
+  // TODO Add implementation
 
   return robot_state;
 }

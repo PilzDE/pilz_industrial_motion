@@ -77,11 +77,16 @@ public:
 
 public:
   /**
+   * DEPRECATED
+   *
    * @brief Returns the joint values for the given pos and group.
    *
    */
   virtual bool getJoints(const std::string &pos_name, const std::string &group_name,
                          std::vector<double> &dVec) const = 0;
+
+  virtual JointConfiguration getJoints(const std::string &pos_name,
+                                       const std::string &group_name) const = 0;
 
   /**
    * @brief Returns the Cartesian Pose for the given pos and group.
@@ -123,7 +128,7 @@ public:
                            std::vector<SSequenceCmd> &seq_cmds) const = 0;
 
 public:
-   static geometry_msgs::Pose fromVecToMsg(const std::vector<double>& vec);
+  static geometry_msgs::Pose fromVecToMsg(const std::vector<double>& vec);
 };
 
 inline geometry_msgs::Pose TestdataLoader::fromVecToMsg(const std::vector<double>& vec)
