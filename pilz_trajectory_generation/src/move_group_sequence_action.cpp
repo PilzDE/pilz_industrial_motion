@@ -215,11 +215,6 @@ void MoveGroupSequenceAction::startMoveExecutionCallback()
   setMoveState(move_group::MONITOR);
 }
 
-void MoveGroupSequenceAction::startMoveLookCallback()
-{
-  setMoveState(move_group::LOOK);
-}
-
 void MoveGroupSequenceAction::preemptMoveCallback()
 {
   context_->plan_execution_->stop();
