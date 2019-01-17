@@ -85,15 +85,20 @@ public:
   virtual bool getJoints(const std::string &pos_name, const std::string &group_name,
                          std::vector<double> &dVec) const = 0;
 
-  virtual JointConfiguration getJoints(const std::string &pos_name,
+  virtual JointConfiguration getJoints(const std::string &pose_name,
                                        const std::string &group_name) const = 0;
 
   /**
+   * DEPRECATED
+   *
    * @brief Returns the Cartesian Pose for the given pos and group.
    *
    */
   virtual bool getPose(const std::string &pos_name, const std::string &group_name,
                        std::vector<double> &dVec) const = 0;
+
+  virtual CartesianConfiguration getPose(const std::string &pose_name,
+                                         const std::string &group_name) const = 0;
 
   /**
    * @brief Get the PTP motion command structure according to the cmmand name

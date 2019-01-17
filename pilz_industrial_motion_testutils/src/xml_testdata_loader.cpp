@@ -214,6 +214,39 @@ bool XmlTestdataLoader::getPose(const std::string &pose_name, const std::string 
   return true;
 }
 
+CartesianConfiguration XmlTestdataLoader::getPose(const std::string &pose_name,
+                                                  const std::string &group_name) const
+{
+  // Search for node with given name.
+  const auto& poses_tree = tree_.get_child(POSES_PATH_STR, empty_tree_);
+  if (poses_tree == empty_tree_)
+  {
+    throw TestDataLoaderReadingException("No poses found.");
+  }
+
+  const auto& pose_node {findNodeWithName(poses_tree, pose_name)};
+
+  // Search group node with given name.
+  const auto& group_tree = pose_node.second;
+  if (group_tree == empty_tree_)
+  {
+    throw TestDataLoaderReadingException("No groups found.");
+  }
+
+  const auto& group_node {findNodeWithName(group_tree, group_name)};
+
+  // Read joint values
+  const auto& xyzQuat_tree {group_node.second.get_child(XYZ_QUAT_STR, empty_tree_)};
+  if (xyzQuat_tree == empty_tree_)
+  {
+    throw TestDataLoaderReadingException("No cartesian node found.");
+  }
+
+  std::vector<std::string> strs;
+  boost::split(strs,  xyzQuat_tree.data(), boost::is_any_of(" "));
+  return CartesianConfiguration(strVec2doubleVec(strs));
+}
+
 PtpJoint XmlTestdataLoader::getPtpJoint(const std::string& cmd_name) const
 {
   std::string start_pos_name, goal_pos_name, planning_group, target_link;

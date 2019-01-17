@@ -23,7 +23,6 @@ class RobotConfiguration
 class JointConfiguration : public RobotConfiguration
 {
 public:
-
   JointConfiguration()
     : RobotConfiguration()
   {}
@@ -61,6 +60,17 @@ private:
 
 class CartesianConfiguration : public RobotConfiguration
 {
+public:
+  CartesianConfiguration()
+    : RobotConfiguration()
+  {}
+
+  CartesianConfiguration(const std::vector<double>& config)
+    : RobotConfiguration()
+    , pose_(config)
+  {
+  }
+
 public:
   moveit_msgs::Constraints toConstraints() const override;
   moveit_msgs::RobotState toMoveitMsgsRobotState() const override;
