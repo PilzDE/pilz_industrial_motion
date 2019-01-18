@@ -371,6 +371,103 @@ TEST_P(TrajectoryBlenderTransitionWindowTest, searchIntersectionPoint)
 }
 
 /**
+ * @brief  Tests the blending of two cartesian linear trajectories with the
+ * shared point (last point of first, first point of second trajectory) having a non-zero velocity
+ *
+ * The test sequence is repeated twice, using robot model with and without gripper
+ * Test Sequence:
+ *    1. Generate two linear trajectories from the test data set.
+ *    2. Generate blending trajectory modify the shared point to have velocity.
+ * Expected Results:
+ *    1. Two linear trajectories generated.
+ *    2. Blending trajectory cannot be generated.
+ */
+
+TEST_P(TrajectoryBlenderTransitionWindowTest, testNonStationaryPoint)
+{
+  auto test_data = test_data_.front();
+  // generate two lin trajectories
+  planning_interface::MotionPlanResponse res_lin_1, res_lin_2;
+  double dis_lin_1, dis_lin_2;
+  ASSERT_TRUE(testutils::generateTrajFromBlendTestData(robot_model_,
+                                                       lin_,
+                                                       planning_group_,
+                                                       target_link_,
+                                                       test_data,
+                                                       sampling_time_, sampling_time_,
+                                                       res_lin_1, res_lin_2,
+                                                       dis_lin_1, dis_lin_2))
+      << "Failed to generate LIN trajectories from test data";
+
+  // blend two lin trajectories and check the result
+  pilz::TrajectoryBlendRequest blend_req;
+  pilz::TrajectoryBlendResponse blend_res;
+
+  blend_req.group_name = planning_group_;
+  blend_req.link_name = target_link_;
+  blend_req.blend_radius = dis_lin_1 > dis_lin_2 ? 0.5*dis_lin_2 : 0.5*dis_lin_1;
+
+  blend_req.first_trajectory = res_lin_1.trajectory_;
+  blend_req.second_trajectory = res_lin_2.trajectory_;
+
+  // Modify last waypoint of first trajectory and first point of second trajectory
+  blend_req.first_trajectory->getLastWayPointPtr()->setVariableVelocity(0, 1.0);
+  blend_req.second_trajectory->getFirstWayPointPtr()->setVariableVelocity(0, 1.0);
+
+  EXPECT_FALSE(blender_->blend(blend_req, blend_res));
+}
+
+/**
+ * @brief  Tests the blending of two cartesian linear trajectories where one trajectory is completely withing the
+ *         sphere defined by the blend radius
+ * The test sequence is repeated twice, using robot model with and without gripper
+ * Test Sequence:
+ *    1. Generate two linear trajectories from the test data set.
+ *    2. Generate blending trajectory with a blend_radius larger than the smaller trajectory.
+ *
+ * Expected Results:
+ *    1. Two linear trajectories generated.
+ *    2. Blending trajectory cannot be generated.
+ */
+
+TEST_P(TrajectoryBlenderTransitionWindowTest, testLINLINBlendingTrajectoryInsideBlendRadius)
+{
+  // Use only subset of testdata
+  std::vector<testutils::blend_test_data> test_data_set;
+  test_data_set.push_back(test_data_[0]);
+  test_data_set.push_back(test_data_[1]);
+
+  for(auto const &test_data : test_data_set)
+  {
+    // generate two lin trajectories
+    planning_interface::MotionPlanResponse res_lin_1, res_lin_2;
+    double dis_lin_1, dis_lin_2;
+    ASSERT_TRUE(testutils::generateTrajFromBlendTestData(robot_model_,
+                                                        lin_,
+                                                        planning_group_,
+                                                        target_link_,
+                                                        test_data,
+                                                        sampling_time_, sampling_time_,
+                                                        res_lin_1, res_lin_2,
+                                                        dis_lin_1, dis_lin_2))
+        << "Failed to generate LIN trajectories from test data";
+
+    // blend two lin trajectories and check the result
+    pilz::TrajectoryBlendRequest blend_req;
+    pilz::TrajectoryBlendResponse blend_res;
+
+    blend_req.group_name = planning_group_;
+    blend_req.link_name = target_link_;
+    blend_req.blend_radius = dis_lin_1 > dis_lin_2 ? 1.1*dis_lin_2 : 1.1*dis_lin_1;
+
+    blend_req.first_trajectory = res_lin_1.trajectory_;
+    blend_req.second_trajectory = res_lin_2.trajectory_;
+
+    EXPECT_FALSE(blender_->blend(blend_req, blend_res));
+  }
+}
+
+/**
  * @brief  Tests the blending of two cartesian linear trajectories using robot model
  * The test sequence is repeated twice, using robot model with and without gripper
  * Test Sequence:

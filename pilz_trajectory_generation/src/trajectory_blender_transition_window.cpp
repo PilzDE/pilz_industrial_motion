@@ -79,9 +79,11 @@ bool pilz::TrajectoryBlenderTransitionWindow::blend(const pilz::TrajectoryBlendR
                               error_code,
                               true))
   {
+    // LCOV_EXCL_START
     ROS_INFO("Failed to generate joint trajectory for blending trajectory.");
     res.error_code.val = error_code.val;
     return false;
+    // LCOV_EXCL_STOP
   }
 
   res.first_trajectory = std::shared_ptr<robot_trajectory::RobotTrajectory>(new robot_trajectory::RobotTrajectory(
@@ -130,22 +132,26 @@ bool pilz::TrajectoryBlenderTransitionWindow::validateRequest(const pilz::Trajec
     return false;
   }
 
-  // same uniform sampling time
-  if (!pilz::determineAndCheckSamplingTime(req.first_trajectory,
-                                           req.second_trajectory,
-                                           EPSILON,
-                                           sampling_time))
-  {
-    error_code.val = moveit_msgs::MoveItErrorCodes::INVALID_MOTION_PLAN;
-    return false;
-  }
-
   // end position of the first trajectory and start position of second trajectory must be the same
   if(!pilz::isRobotStateEqual(req.first_trajectory->getLastWayPointPtr(),
                               req.second_trajectory->getFirstWayPointPtr(),
                               req.group_name,
                               EPSILON))
   {
+    ROS_ERROR_STREAM("During blending the last point (" << req.first_trajectory->getLastWayPoint()
+                     << " of the preceding and the first point of the succeding trajectory ("
+                     << req.second_trajectory->getFirstWayPoint() << " do not match");
+    error_code.val = moveit_msgs::MoveItErrorCodes::INVALID_MOTION_PLAN;
+    return false;
+  }
+
+  // same uniform sampling time
+  if (!pilz::determineAndCheckSamplingTime(req.first_trajectory,
+                                           req.second_trajectory,
+                                           EPSILON,
+                                           sampling_time))
+  {
+
     error_code.val = moveit_msgs::MoveItErrorCodes::INVALID_MOTION_PLAN;
     return false;
   }
@@ -155,19 +161,6 @@ bool pilz::TrajectoryBlenderTransitionWindow::validateRequest(const pilz::Trajec
      !pilz::isRobotStateStationary(req.second_trajectory->getFirstWayPointPtr(), req.group_name, EPSILON) )
   {
     ROS_ERROR("Intersection point of the blending trajectories has non-zero velocities/accelerations.");
-    error_code.val = moveit_msgs::MoveItErrorCodes::INVALID_MOTION_PLAN;
-    return false;
-  }
-
-  // trajectories should exceed the blending sphere
-  Eigen::Affine3d first_start = req.first_trajectory->getFirstWayPointPtr()->getFrameTransform(req.link_name);
-  Eigen::Affine3d first_end = req.first_trajectory->getLastWayPointPtr()->getFrameTransform(req.link_name);
-  Eigen::Affine3d second_end = req.second_trajectory->getLastWayPointPtr()->getFrameTransform(req.link_name);
-
-  if((first_end.translation() - first_start.translation()).norm() <= req.blend_radius ||
-     (first_end.translation() - second_end.translation()).norm() <= req.blend_radius )
-  {
-    ROS_ERROR("Blending radius is too large.");
     error_code.val = moveit_msgs::MoveItErrorCodes::INVALID_MOTION_PLAN;
     return false;
   }
