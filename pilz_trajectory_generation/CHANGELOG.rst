@@ -4,6 +4,7 @@ Changelog for package pilz_trajectory_generation
 
 Forthcoming
 -----------
+* use pilz_testutils package for blend test
 * use collision-aware ik calculation
 * Contributors: Pilz GmbH and Co. KG
 
