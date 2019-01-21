@@ -79,11 +79,14 @@ bool MoveGroupSequenceService::plan(pilz_msgs::GetMotionSequence::Request& req,
     sequence_manager_->solve(ps, req.commands, mp_res);
     mp_res.getMessage(res.plan_response);
   }
+  // LCOV_EXCL_START // Keep moveit up even if lower parts throw
   catch (...)
   {
     ROS_ERROR("Planner threw an exception.");
     sentResponseToCaller = false;
   }
+  // LCOV_EXCL_STOP
+
   return sentResponseToCaller;
 }
 

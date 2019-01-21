@@ -192,6 +192,43 @@ TEST_F(IntegrationTestSequenceAction, blendLINLIN)
 }
 
 /**
+ * @brief  Tests that robot state in planning_scene_diff is ignored (Mainly for full coverage)
+ *
+ * Test Sequence:
+ *    1. Move the robot to start position.
+ *    2. Send blend goal with "empty" planning scene for planning and execution.
+ *    3. Evaluate the result
+ *
+ * Expected Results:
+ *    1. Robot moved to start position.
+ *    2. Blend goal is sent to the action server.
+ *    3. Error code of the blend result is success.
+ */
+TEST_F(IntegrationTestSequenceAction, blendLINLINIgnoreRobotStateSceneDiff)
+{
+  const auto test_data = test_data_.front();
+  // move the robot to start position with ptp
+  move_group_->setJointValueTarget(test_data.start_position);
+  move_group_->move();
+ // create request
+  pilz_msgs::MoveGroupSequenceGoal seq_goal;
+  testutils::generateRequestMsgFromBlendTestData(robot_model_,
+                                                 test_data,
+                                                 "LIN",
+                                                 planning_group_,
+                                                 target_link_,
+                                                 seq_goal.request);
+
+  seq_goal.planning_options.planning_scene_diff.robot_state.is_diff = true;
+
+  ac_blend_.sendGoalAndWait(seq_goal);
+  pilz_msgs::MoveGroupSequenceResultConstPtr res = ac_blend_.getResult();
+  EXPECT_EQ(res->error_code.val, moveit_msgs::MoveItErrorCodes::SUCCESS) << "Blend failed.";
+  EXPECT_NE(res->planned_trajectory.joint_trajectory.points.size(), 0u)
+      << "Planned trajectory is empty.";
+}
+
+/**
  * @brief  Tests the blend action server of LIN-LIN blend using invalid (differing) group names
  *
  * Test Sequence:
@@ -476,6 +513,57 @@ TEST_F(IntegrationTestSequenceAction, blendLINLINOnlyPlanning)
       EXPECT_NEAR(test_data.start_position.at(i), current_state->getVariablePosition(i), joint_position_tolerance_)
           << i << "th joint moved during planning only.";
     }
+  }
+}
+
+
+/**
+ * @brief  Tests that robot state in planning_scene_diff is ignored (Mainly for full coverage)
+ *
+ * Test Sequence:
+ *    1. Move the robot to start position.
+ *    2. Send blend goal with "empty" planning scene for planning and execution.
+ *    3. Evaluate the result
+ *
+ * Expected Results:
+ *    1. Robot moved to start position.
+ *    2. Blend goal is sent to the action server.
+ *    3. Error code of the blend result is success.
+ */
+TEST_F(IntegrationTestSequenceAction, blendLINLINOnlyPlanningIgnoreRobotStateSceneDiff)
+{
+  const auto test_data = test_data_.front();
+
+  // move the robot to start position with ptp
+  move_group_->setJointValueTarget(test_data.start_position);
+  move_group_->move();
+
+  // create request
+  pilz_msgs::MoveGroupSequenceGoal seq_goal;
+  seq_goal.planning_options.plan_only = true;
+  testutils::generateRequestMsgFromBlendTestData(robot_model_,
+                                                  test_data,
+                                                  "LIN",
+                                                  planning_group_,
+                                                  target_link_,
+                                                  seq_goal.request);
+
+  seq_goal.planning_options.planning_scene_diff.robot_state.is_diff = true;
+
+  // send goal
+  ac_blend_.sendGoalAndWait(seq_goal);
+  pilz_msgs::MoveGroupSequenceResultConstPtr res = ac_blend_.getResult();
+  EXPECT_EQ(res->error_code.val, moveit_msgs::MoveItErrorCodes::SUCCESS);
+  EXPECT_NE(res->planned_trajectory.joint_trajectory.points.size(), 0u)
+      << "Planned trajectory is empty.";
+
+  // check if robot moved after PTP
+  robot_state::RobotStateConstPtr current_state = move_group_->getCurrentState();
+  ASSERT_GE(current_state->getVariableCount(), test_data.start_position.size());
+  for(size_t i=0; i<test_data.start_position.size(); ++i)
+  {
+    EXPECT_NEAR(test_data.start_position.at(i), current_state->getVariablePosition(i), joint_position_tolerance_)
+        << i << "th joint moved during planning only.";
   }
 }
 
