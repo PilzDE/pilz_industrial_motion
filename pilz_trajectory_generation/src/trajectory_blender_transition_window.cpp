@@ -24,9 +24,7 @@ bool pilz::TrajectoryBlenderTransitionWindow::blend(const pilz::TrajectoryBlendR
                                          pilz::TrajectoryBlendResponse& res)
 {
   ROS_INFO("Start trajectory blending using transition window.");
-  // search for intersection points of the two trajectories with the blending sphere
-  // intersection points belongs to blend trajectory after blending
-  // blend the trajectory
+
   double sampling_time = 0.;
   if(!validateRequest(req, sampling_time, res.error_code))
   {
@@ -34,6 +32,8 @@ bool pilz::TrajectoryBlenderTransitionWindow::blend(const pilz::TrajectoryBlendR
     return false;
   }
 
+  // search for intersection points of the two trajectories with the blending sphere
+  // intersection points belongs to blend trajectory after blending
   std::size_t first_intersection_index;
   std::size_t second_intersection_index;
   if(!searchIntersectionPoints(req, first_intersection_index, second_intersection_index))
@@ -100,11 +100,12 @@ bool pilz::TrajectoryBlenderTransitionWindow::blend(const pilz::TrajectoryBlendR
   // erase the points [first_intersection_index, back()] from the first trajectory
   for(size_t i = 0; i < first_intersection_index; ++i)
   {
-    res.first_trajectory->insertWayPoint(i,req.first_trajectory->getWayPoint(i), req.first_trajectory->getWayPointDurationFromPrevious(i));
+    res.first_trajectory->insertWayPoint(i, req.first_trajectory->getWayPoint(i),
+                                         req.first_trajectory->getWayPointDurationFromPrevious(i));
   }
 
   // append the blend trajectory
-  res.blend_trajectory->setRobotTrajectoryMsg(req.first_trajectory->getFirstWayPoint(), blend_joint_trajectory); // TODO: correct? unnecessary?
+  res.blend_trajectory->setRobotTrajectoryMsg(req.first_trajectory->getFirstWayPoint(), blend_joint_trajectory);
   // copy the points [second_intersection_index, len] from the second trajectory
   for(size_t i = second_intersection_index+1; i < req.second_trajectory->getWayPointCount(); ++i)
   {

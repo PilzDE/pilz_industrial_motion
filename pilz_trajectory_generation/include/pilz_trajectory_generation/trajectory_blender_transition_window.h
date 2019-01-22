@@ -41,7 +41,8 @@ public:
 
 
   /**
-   * @brief Blend two trajectories using transition window.
+   * @brief Blend two trajectories using transition window. The trajectories have to be equally and uniformly
+   * discretized.
    * @param req: following fields need to be filled for a valid request
    *    group_name : name of the planning group
    *    link_name : name of the target link
@@ -87,24 +88,24 @@ private:
 
   /**
    * @brief Determine how the second trajectory should be aligned with the first trajectory for blend.
-   * tau_1 is the time of the first trajectory from the first_interse_index to the end
-   * tau_2 is the time of the second trajectory from begin to  the second_interse_index
+   * Let tau_1 be the time of the first trajectory from the first_interse_index to the end and tau_2 the time of the
+   * second trajectory from the beginning to the second_interse_index:
    * if tau_1 > tau_2
-   *    change the first intersection index to fit tau_2
+   *    align the end of the first trajectory with second_interse_index
    *    first traj:  |-------------|--------!--------------|
    *    second traj:                        |--------------|-------------------|
-   *    blend phase:                     |--------------|
+   *    blend phase:               |-----------------------|
    * else
-   *    change the second intersection index to fit tau_1
+   *    align the first_interse_index with the beginning of the second trajectory
    *    first traj:  |-------------|-----------------------|
    *    second traj:               |-----------------------!----------|-------------------|
-   *    blend phase:            |-----------------------|
+   *    blend phase:               |----------------------------------|
    *
    * @param req: trajectory blend request
    * @param first_interse_index: index of the intersection point between first trajectory and blend sphere
    * @param second_interse_index: index of the intersection point between second trajectory and blend sphere
    * @param blend_align_index: index on the first trajectory, to which the first point on the second trajectory should
-   * be aligned to for motion blend. It is now always same as first intersection index
+   * be aligned to for motion blend. It is now always same as first_interse_index
    * @param blend_time: time of the motion blend period
    */
   void determineTrajectoryAlignment(const pilz::TrajectoryBlendRequest& req,
@@ -116,8 +117,11 @@ private:
    * @brief blend two trajectories in Cartesian space, result in a MultiDOFJointTrajectory which consists
    * of a list of transforms for the blend phase.
    * @param req
+   * @param first_interse_index
+   * @param second_interse_index
    * @param blend_begin_index
-   * @param blend_end_index
+   * @param sampling_time
+   * @param trajectory: the resulting blend trajectory inside the blending sphere
    */
   void blendTrajectoryCartesian(const pilz::TrajectoryBlendRequest& req,
                                 const std::size_t first_interse_index,
