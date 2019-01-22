@@ -8,7 +8,9 @@ notifications:
   email:
     on_failure: always
     recipients:
-      - ros@pilz.de
+      - a.gutenkunst@pilz.de
+      - h.slusarek@pilz.de
+      - i.martini@pilz.de
 env:
   global:
     - AFTER_SCRIPT='apt list --installed | grep "^ros-"'
