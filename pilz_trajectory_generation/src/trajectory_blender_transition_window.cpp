@@ -38,7 +38,7 @@ bool pilz::TrajectoryBlenderTransitionWindow::blend(const pilz::TrajectoryBlendR
   std::size_t second_intersection_index;
   if(!searchIntersectionPoints(req, first_intersection_index, second_intersection_index))
   {
-    ROS_ERROR("Trajectory blend request is not valid.");
+    ROS_ERROR("Blend radius to large.");
     res.error_code.val = moveit_msgs::MoveItErrorCodes::INVALID_MOTION_PLAN;
     return false;
   }
