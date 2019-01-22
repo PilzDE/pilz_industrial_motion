@@ -230,7 +230,7 @@ TEST_F(IntegrationTestSequenceService, emptyList)
   // Obtain the response
   const moveit_msgs::MotionPlanResponse& response = srv.response.plan_response;
 
-  EXPECT_EQ(moveit_msgs::MoveItErrorCodes::INVALID_MOTION_PLAN, response.error_code.val) << "Planning did failed.";
+  EXPECT_EQ(moveit_msgs::MoveItErrorCodes::SUCCESS, response.error_code.val) << "Planning failed.";
   EXPECT_EQ(0u, response.trajectory.joint_trajectory.points.size()) << "Trajectory should not contain any points.";
 }
 

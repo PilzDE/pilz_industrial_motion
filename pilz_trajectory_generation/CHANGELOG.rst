@@ -2,6 +2,10 @@
 Changelog for package pilz_trajectory_generation
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
+Forthcoming
+-----------
+* change handling of empty sequences in capabilities to be non-erroneous
+
 0.3.2 (2019-01-18)
 ------------------
 * use pilz_testutils package for blend test

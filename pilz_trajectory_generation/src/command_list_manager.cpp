@@ -67,8 +67,8 @@ bool CommandListManager::solve(const planning_scene::PlanningSceneConstPtr& plan
   if(req_list.items.empty())
   {
     res.trajectory_.reset(new robot_trajectory::RobotTrajectory(model_, 0));
-    res.error_code_.val = moveit_msgs::MoveItErrorCodes::INVALID_MOTION_PLAN;
-    return false;
+    res.error_code_.val = moveit_msgs::MoveItErrorCodes::SUCCESS;
+    return true;
   }
 
   if(!validateRequestList(req_list, res))

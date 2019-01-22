@@ -71,11 +71,23 @@ void MoveGroupSequenceAction::initialize()
 void MoveGroupSequenceAction::executeSequenceCallback(const pilz_msgs::MoveGroupSequenceGoalConstPtr& goal)
 {
   setMoveState(move_group::PLANNING);
+
+  pilz_msgs::MoveGroupSequenceResult action_res;
+
+  // Handle empty requests
+  if(goal->request.items.empty())
+  {
+    ROS_WARN("Received empty request. That's ok but maybe not what you intended.");
+    setMoveState(move_group::IDLE);
+    action_res.error_code.val = moveit_msgs::MoveItErrorCodes::SUCCESS;
+    move_action_server_->setSucceeded(action_res, "Received empty request.");
+    return;
+  }
+
   // before we start planning, ensure that we have the latest robot state received...
   context_->planning_scene_monitor_->waitForCurrentRobotState(ros::Time::now());
   context_->planning_scene_monitor_->updateFrameTransforms();
 
-  pilz_msgs::MoveGroupSequenceResult action_res;
   if (goal->planning_options.plan_only || !context_->allow_trajectory_execution_)
   {
     if (!goal->planning_options.plan_only)
