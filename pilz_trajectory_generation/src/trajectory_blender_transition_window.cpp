@@ -266,11 +266,10 @@ void pilz::TrajectoryBlenderTransitionWindow::determineTrajectoryAlignment(const
                                                                 std::size_t second_interse_index,
                                                                 std::size_t &blend_align_index) const
 {
-  double tau_1 = (req.first_trajectory->getWayPointDurationFromStart(req.first_trajectory->getWayPointCount()) -
-                  req.first_trajectory->getWayPointDurationFromStart(first_interse_index));
-  double tau_2 = req.second_trajectory->getWayPointDurationFromStart(second_interse_index);
+  size_t way_point_count_1 = req.first_trajectory->getWayPointCount() - first_interse_index;
+  size_t way_point_count_2 = second_interse_index+1;
 
-  if(tau_1 > tau_2)
+  if(way_point_count_1 > way_point_count_2)
   {
     blend_align_index = req.first_trajectory->getWayPointCount() - second_interse_index -1;
   }
