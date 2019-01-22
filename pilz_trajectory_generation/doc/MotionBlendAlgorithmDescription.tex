@@ -1,4 +1,4 @@
-﻿%% Based on a TeXnicCenter-Template by Gyorgy SZEIDL.
+%% Based on a TeXnicCenter-Template by Gyorgy SZEIDL.
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
 %------------------------------------------------------------
@@ -84,7 +84,7 @@ This article describes the techniques used to blend the position and orientation
 
 \subsection{Introduction}
 
-Suppose we have two trajectories $x_1(t)$, $x_2(t)$ and we want to make a transition from $x_1(t)$ to $x_2(t)$. The transition window technique assumes that the transition happens in a predefined time window. During this transition window, the resulted trajectory (blending trajectory) is given by:
+Suppose we have two trajectories $x_1(t)$, $t\in[0,T_1]$ and $x_2(t)$, $t\in[0,T_2]$ and we want to make a transition from $x_1(t)$ to $x_2(t)$. The transition window technique assumes that the transition happens in a predefined time window. During this transition window, the resulted trajectory (blending trajectory) is given by:
 \begin{equation}
 	x_b(t) = x_1(t) + \alpha(s(t))(x_2(t)-x_1(t)), t \in [t_0, t_0 + T]
 \end{equation}
@@ -110,9 +110,9 @@ We want to move the robot from $p_1$ to $p_2$, then from $p_2$ to $p_3$. $p_2$ i
 	\label{ori_traj}%
 	\end{figure}
 
-	\item According to the blending radius $r$, the points $p_{b1}$ on $x_1(t)$ and $p_{b2}$ on $x_2(t)$ which intersects with the blending sphere are computed. The transition window should starts earliest from the time of $p_{b1}$ on $x_1(t)$ is reached, and ends latest at the time of $p_{b2}$ on $x_2(t)$ is reached. In the example, we take $r=3$ and $p_{b1} = p_{b2} = 5$ (see Figure.\ref{ori_traj}).
+	\item According to the blending radius $r$, the points $p_{b1}$ on $x_1(t)$ and $p_{b2}$ on $x_2(t)$ which intersects with the blending sphere are computed. We also compute the durations $d_1$ for moving from $p_{b1}$ to $p_2$ on $x_1$ and $d_2$ for moving from $p_2$ to $p_{b2}$ on $x_2$. The transition window should start earliest from the time of $p_{b1}$ on $x_1(t)$ is reached, and ends latest at the time of $p_{b2}$ on $x_2(t)$ is reached. In the example, we take $r=3$ and $p_{b1} = p_{b2} = 5$ (see Figure.\ref{ori_traj}).
 
-	\item Timely shift the $x_2(t)$ and select the transition window time $T$ according to the above rules. In order to avoid stop on the blending trajectory, the time shift $T_s$ of $x_2(t)$ should smaller than the duration of $x_1(t)$. We now have the second trajectory as $x_2(t-T_s)$ for blending. In the example the duration of $x_1(t)$ is $6s$. Figure.\ref{blend_case_1} shows a blending case that we shift the $x_2(t)$ with $6s$, which is almost the same as motion without blending. Figure.\ref{blend_case_2} shows a blending case that we shift the $x_2(t)$ with $3.5s$ and the blending starts at 3.5s, ends at 5.5s. Figure.\ref{blend_case_3} shows a blending case that we shift the $x_2(t)$ with $4.5s$ and the blending starts at 3.5s, ends at 6.5s.
+	\item Timely shift the $x_2(t)$ and select the transition window time $T$ according to the above rules. In order to avoid stop on the blending trajectory, the time shift $T_s$ of $x_2(t)$ should be smaller than the duration of $x_1(t)$. We now have the second trajectory as $x_2(t-T_s)$ for blending. In the example the duration of $x_1(t)$ is $6s$. Figure.\ref{blend_case_1} shows a blending case that we shift the $x_2(t)$ with $6s$, which is almost the same as motion without blending. Figure.\ref{blend_case_2} shows a blending case that we shift the $x_2(t)$ with $3.5s$ and the blending starts at 3.5s, ends at 5.5s. Figure.\ref{blend_case_3} shows a blending case that we shift the $x_2(t)$ with $4.5s$ and the blending starts at 3.5s, ends at 6.5s.
 
 	\begin{figure}%
 	\includegraphics[width=\columnwidth]{figure/blend_case_1.eps}%
@@ -133,6 +133,12 @@ We want to move the robot from $p_1$ to $p_2$, then from $p_2$ to $p_3$. $p_2$ i
 	\end{figure}
 
 \end{enumerate}
+
+In the actual implementation, we make the following choice given the durations $d_1$ and $d_2$ inside the blending sphere:
+\begin{itemize}
+\item If $d_1\leq d_2$ we shift exactly to the time when $p_{b1}$ is reached on $x_1$ (when the blending sphere is entered),
+\item if $d_1>d_2$ we compute $T_s$ such that $T_s+d_2=T_1$. This choice minimizes increases in acceleration/deceleration on the resulting blend trajectory.
+\end{itemize}
 
 
 \section{Blending the orientation}
