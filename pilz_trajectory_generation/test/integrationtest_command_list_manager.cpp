@@ -338,8 +338,8 @@ TEST_P(IntegrationTestCommandListManager, emptyList)
 {
   pilz_msgs::MotionSequenceRequest empty_list;
   planning_interface::MotionPlanResponse res;
-  ASSERT_FALSE(manager_->solve(scene_, empty_list, res));
-  EXPECT_EQ(moveit_msgs::MoveItErrorCodes::INVALID_MOTION_PLAN, res.error_code_.val);
+  ASSERT_TRUE(manager_->solve(scene_, empty_list, res));
+  EXPECT_EQ(moveit_msgs::MoveItErrorCodes::SUCCESS, res.error_code_.val);
   EXPECT_EQ(0u, res.trajectory_->getWayPointCount());
 }
 

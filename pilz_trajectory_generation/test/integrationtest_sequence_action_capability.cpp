@@ -138,7 +138,7 @@ void IntegrationTestSequenceAction::SetUp()
  * Expected Results:
  *    1. Robot moved to start position.
  *    2. Empty blend goal is sent to the action server.
- *    3. Error code of the blend result is INVALIDE_MOTION_PLAN.
+ *    3. Error code of the blend result is SUCCESS.
  */
 TEST_F(IntegrationTestSequenceAction, blendEmptyBlendList)
 {
@@ -147,7 +147,7 @@ TEST_F(IntegrationTestSequenceAction, blendEmptyBlendList)
   // send goal
   ac_blend_.sendGoalAndWait(seq_goal);
   pilz_msgs::MoveGroupSequenceResultConstPtr res = ac_blend_.getResult();
-  EXPECT_EQ(res->error_code.val, moveit_msgs::MoveItErrorCodes::INVALID_MOTION_PLAN);
+  EXPECT_EQ(res->error_code.val, moveit_msgs::MoveItErrorCodes::SUCCESS);
   EXPECT_EQ(res->planned_trajectory.joint_trajectory.points.size(), 0u)
       << "Planned trajectory is not empty of empty motion blend list.";
 }
