@@ -153,10 +153,93 @@ INSTANTIATE_TEST_CASE_P(InstantiationName, TrajectoryBlenderTransitionWindowTest
 
 
 /**
- * @brief  Tests the blending of two trajectories with a negative blending radius.
+ * @brief  Tests the blending of two trajectories with an invalid group name.
+ * The test sequence is repeated twice, using robot model with and without gripper
  * Test Sequence:
  *    1. Generate two linear trajectories.
- *    2. Try to generate blending trajectory with negatvie blending radius.
+ *    2. Try to generate blending trajectory with invalid group name.
+ *
+ * Expected Results:
+ *    1. Two linear trajectories generated.
+ *    2. Blending trajectory cannot be generated.
+ */
+TEST_P(TrajectoryBlenderTransitionWindowTest, invalidGroupName)
+{
+  auto test_data = test_data_.front();
+  // generate two lin trajectories from test dataset
+  planning_interface::MotionPlanResponse res_lin_1, res_lin_2;
+  double dis_lin_1, dis_lin_2;
+  ASSERT_TRUE(testutils::generateTrajFromBlendTestData(robot_model_,
+                                                       lin_,
+                                                       planning_group_,
+                                                       target_link_,
+                                                       test_data,
+                                                       sampling_time_, sampling_time_,
+                                                       res_lin_1, res_lin_2,
+                                                       dis_lin_1, dis_lin_2))
+      << "Failed to generate LIN trajectories from test data";
+
+  // Generate blend trajectory
+  pilz::TrajectoryBlendRequest blend_req;
+  pilz::TrajectoryBlendResponse blend_res;
+
+  blend_req.group_name = "invalid_group_name";
+  blend_req.link_name = target_link_;
+  blend_req.first_trajectory = res_lin_1.trajectory_;
+  blend_req.second_trajectory = res_lin_2.trajectory_;
+
+  // select blend radius
+  blend_req.blend_radius = dis_lin_1 > dis_lin_2 ? 0.5*dis_lin_2 : 0.5*dis_lin_1;
+  EXPECT_FALSE(blender_->blend(blend_req, blend_res));
+}
+
+/**
+ * @brief  Tests the blending of two trajectories with an invalid target link.
+ * The test sequence is repeated twice, using robot model with and without gripper
+ * Test Sequence:
+ *    1. Generate two linear trajectories.
+ *    2. Try to generate blending trajectory with invalid target link.
+ *
+ * Expected Results:
+ *    1. Two linear trajectories generated.
+ *    2. Blending trajectory cannot be generated.
+ */
+TEST_P(TrajectoryBlenderTransitionWindowTest, invalidTargetLink)
+{
+  auto test_data = test_data_.front();
+  // generate two lin trajectories from test dataset
+  planning_interface::MotionPlanResponse res_lin_1, res_lin_2;
+  double dis_lin_1, dis_lin_2;
+  ASSERT_TRUE(testutils::generateTrajFromBlendTestData(robot_model_,
+                                                       lin_,
+                                                       planning_group_,
+                                                       target_link_,
+                                                       test_data,
+                                                       sampling_time_, sampling_time_,
+                                                       res_lin_1, res_lin_2,
+                                                       dis_lin_1, dis_lin_2))
+      << "Failed to generate LIN trajectories from test data";
+
+  // Generate blend trajectory
+  pilz::TrajectoryBlendRequest blend_req;
+  pilz::TrajectoryBlendResponse blend_res;
+
+  blend_req.group_name = planning_group_;
+  blend_req.link_name = "invalid_target_link";
+  blend_req.first_trajectory = res_lin_1.trajectory_;
+  blend_req.second_trajectory = res_lin_2.trajectory_;
+
+  // select blend radius
+  blend_req.blend_radius = dis_lin_1 > dis_lin_2 ? 0.5*dis_lin_2 : 0.5*dis_lin_1;
+  EXPECT_FALSE(blender_->blend(blend_req, blend_res));
+}
+
+/**
+ * @brief  Tests the blending of two trajectories with a negative blending radius.
+ * The test sequence is repeated twice, using robot model with and without gripper
+ * Test Sequence:
+ *    1. Generate two linear trajectories.
+ *    2. Try to generate blending trajectory with negative blending radius.
  *
  * Expected Results:
  *    1. Two linear trajectories generated.
@@ -188,21 +271,22 @@ TEST_P(TrajectoryBlenderTransitionWindowTest, negativeRadius)
   blend_req.second_trajectory = res_lin_2.trajectory_;
 
   // select blend radius
-  blend_req.blend_radius = dis_lin_1 < dis_lin_2 ? -0.2*dis_lin_1 : -0.2*dis_lin_2 ;
+  blend_req.blend_radius = -0.1;
   EXPECT_FALSE(blender_->blend(blend_req, blend_res));
 }
 
 /**
- * @brief  Tests the blending of two trajectories with a too large blending radius.
+ * @brief  Tests the blending of two trajectories with zero blending radius.
+ * The test sequence is repeated twice, using robot model with and without gripper
  * Test Sequence:
  *    1. Generate two linear trajectories.
- *    2. Try to generate blending trajectory with too large blending radius.
+ *    2. Try to generate blending trajectory with zero blending radius.
  *
  * Expected Results:
  *    1. Two linear trajectories generated.
  *    2. Blending trajectory cannot be generated.
  */
-TEST_P(TrajectoryBlenderTransitionWindowTest, tooLargeBlendingRadius)
+TEST_P(TrajectoryBlenderTransitionWindowTest, zeroRadius)
 {
   auto test_data = test_data_.front();
   // generate two lin trajectories from test dataset
@@ -227,8 +311,8 @@ TEST_P(TrajectoryBlenderTransitionWindowTest, tooLargeBlendingRadius)
   blend_req.first_trajectory = res_lin_1.trajectory_;
   blend_req.second_trajectory = res_lin_2.trajectory_;
 
-  // test too large blend radius
-  blend_req.blend_radius = dis_lin_1 > dis_lin_2 ? 1.2*dis_lin_1 : 1.2*dis_lin_2 ;
+  // select blend radius
+  blend_req.blend_radius = 0.0;
   EXPECT_FALSE(blender_->blend(blend_req, blend_res));
 }
 
@@ -267,16 +351,60 @@ TEST_P(TrajectoryBlenderTransitionWindowTest, differentSamplingTimes)
   blend_req.link_name = target_link_;
   blend_req.first_trajectory = res_lin_1.trajectory_;
   blend_req.second_trajectory = res_lin_2.trajectory_;
-  blend_req.blend_radius = 0.1;
+  blend_req.blend_radius = dis_lin_1 > dis_lin_2 ? 0.5*dis_lin_2 : 0.5*dis_lin_1;
   EXPECT_FALSE(blender_->blend(blend_req, blend_res));
 }
 
 /**
- * @brief  Tests the blending of two lineare trajectories which do not intersect.
+ * @brief  Tests the blending of two trajectories with one trajectory having non-uniform sampling time (apart from the
+ * last sample, which is ignored).
  * The test sequence is repeated twice, using robot model with and without gripper
  * Test Sequence:
- *    1. Generate two linear trajectories from valid test data set.
- *    2. Reverse the second trajectory.
+ *    1. Generate two linear trajectories and corrupt uniformity of sampling time.
+ *    2. Try to generate blending trajectory.
+ *
+ * Expected Results:
+ *    1. Two linear trajectories generated.
+ *    2. Blending trajectory cannot be generated.
+ */
+TEST_P(TrajectoryBlenderTransitionWindowTest, nonUniformSamplingTime)
+{
+  auto test_data = test_data_.front();
+  // generate two lin trajectories from test dataset
+  planning_interface::MotionPlanResponse res_lin_1, res_lin_2;
+  double dis_lin_1, dis_lin_2;
+  ASSERT_TRUE(testutils::generateTrajFromBlendTestData(robot_model_,
+                                                       lin_generator_,
+                                                       planning_group_,
+                                                       target_link_,
+                                                       test_data,
+                                                       sampling_time_, sampling_time_,
+                                                       res_lin_1, res_lin_2,
+                                                       dis_lin_1, dis_lin_2))
+      << "Failed to generate LIN trajectories from test data";
+
+  // Modify first time interval
+  EXPECT_GT(res_lin_1.trajectory_->getWayPointCount(), 2u);
+  res_lin_1.trajectory_->setWayPointDurationFromPrevious(1, 2*sampling_time_);
+
+  // Generate blend trajectory
+  pilz::TrajectoryBlendRequest blend_req;
+  pilz::TrajectoryBlendResponse blend_res;
+
+  blend_req.group_name = planning_group_;
+  blend_req.link_name = target_link_;
+  blend_req.first_trajectory = res_lin_1.trajectory_;
+  blend_req.second_trajectory = res_lin_2.trajectory_;
+  blend_req.blend_radius = dis_lin_1 > dis_lin_2 ? 0.5*dis_lin_2 : 0.5*dis_lin_1;
+  EXPECT_FALSE(blender_->blend(blend_req, blend_res));
+}
+
+/**
+ * @brief  Tests the blending of two linear trajectories which do not intersect.
+ * The test sequence is repeated twice, using robot model with and without gripper
+ * Test Sequence:
+ *    1. Generate two linear trajectories from valid test data set
+ *    2. Replace the second trajectory by the first one
  *    2. Try to generate blending trajectory.
  *
  * Expected Results:
@@ -300,8 +428,8 @@ TEST_P(TrajectoryBlenderTransitionWindowTest, notIntersectingLinTrajectories)
                                                        dis_lin_1, dis_lin_2))
       << "Failed to generate LIN trajectories from test data";
 
-  // reverse the second trajectory to make the two LIN trajectories timely not intersect
-  res_lin_2.trajectory_->reverse();
+  // replace the second trajectory to make the two LIN trajectories timely not intersect
+  res_lin_2.trajectory_ = res_lin_1.trajectory_;
 
   // try to blend the two LIN trajectories
   // Generate blend trajectory
@@ -314,89 +442,6 @@ TEST_P(TrajectoryBlenderTransitionWindowTest, notIntersectingLinTrajectories)
   blend_req.second_trajectory = res_lin_2.trajectory_;
   blend_req.blend_radius = dis_lin_1>dis_lin_2 ? 0.5*dis_lin_2 : 0.5*dis_lin_1;
   EXPECT_FALSE(blender_->blend(blend_req, blend_res));
-}
-
-/**
- * @brief Tests the linear search function for intersection points.
- *
- * Test Sequence:
- *    1. Generate two linear trajectories from the test data set.
- *    2. Set the blending radius larger than the translational distance of LIN and apply linear search.
- *    3. Set the blending radius smaller than the translational distance of LIN and apply linear search.
- *
- * Expected Results:
- *    1. Two linear trajectories generated.
- *    2. Linear search failed.
- *    3. Linear search succeeded.
- *
- */
-TEST_P(TrajectoryBlenderTransitionWindowTest, searchIntersectionPoint)
-{
-  auto test_data = test_data_.front();
-  planning_interface::MotionPlanResponse res_lin_1, res_lin_2;
-  double dis_lin_1, dis_lin_2;
-  ASSERT_TRUE(testutils::generateTrajFromBlendTestData(robot_model_,
-                                                       lin_generator_,
-                                                       planning_group_,
-                                                       target_link_,
-                                                       test_data,
-                                                       sampling_time_, sampling_time_,
-                                                       res_lin_1, res_lin_2,
-                                                       dis_lin_1, dis_lin_2))
-      << "Failed to generate LIN trajectories from test data";
-
-  //++++++++++++++++++++++++++
-  //+++ test linear search +++
-  //++++++++++++++++++++++++++
-  robot_state::RobotState intersection_state(robot_model_);
-  intersection_state.setJointGroupPositions(planning_group_, test_data.mid_position);
-
-  // test r > dis
-  const double larger_scale = 1.2;
-  size_t index;
-  ASSERT_FALSE(pilz::linearSearchIntersectionPoint(target_link_,
-                                                   intersection_state.getFrameTransform(target_link_).translation(),
-                                                   larger_scale*dis_lin_1,
-                                                   res_lin_1.trajectory_,
-                                                   true,
-                                                   index))
-      << "Linear search should fail but succeeded"
-      << std::endl << "r: " << larger_scale*dis_lin_1 << "; dis:" << dis_lin_1 << "."
-      << "; found dis:" << (res_lin_1.trajectory_->getWayPointPtr(index)->getFrameTransform(target_link_).translation()
-                            - intersection_state.getFrameTransform(target_link_).translation()).norm();
-
-  ASSERT_FALSE(pilz::linearSearchIntersectionPoint(target_link_,
-                                                   intersection_state.getFrameTransform(target_link_).translation(),
-                                                   larger_scale*dis_lin_2,
-                                                   res_lin_2.trajectory_,
-                                                   false,
-                                                   index))
-      << "Linear search should fail but succeeded"
-      << std::endl << "r: " << larger_scale*dis_lin_2 << "; dis:" << dis_lin_2 << "."
-      << "; found dis:" << (res_lin_2.trajectory_->getWayPointPtr(index)->getFrameTransform(target_link_).translation()
-                            - intersection_state.getFrameTransform(target_link_).translation()).norm();
-
-
-  // test r < dis
-  const double smaller_scale = 0.2;
-  ASSERT_TRUE(pilz::linearSearchIntersectionPoint(target_link_,
-                                                  intersection_state.getFrameTransform(target_link_).translation(),
-                                                  smaller_scale*dis_lin_1,
-                                                  res_lin_1.trajectory_,
-                                                  true,
-                                                  index))
-      << "Linear search should succeed but failed" << std::endl
-      << "r: " << smaller_scale*dis_lin_1 << "; dis:" << dis_lin_1 << ".";
-
-  ASSERT_TRUE(pilz::linearSearchIntersectionPoint(target_link_,
-                                                  intersection_state.getFrameTransform(target_link_).translation(),
-                                                  smaller_scale*dis_lin_2,
-                                                  res_lin_2.trajectory_,
-                                                  false,
-                                                  index))
-      << "Linear search should succeed but failed" << std::endl
-      << "r: " << smaller_scale*dis_lin_2 << "; dis:" << dis_lin_2 << ".";
-
 }
 
 /**
@@ -447,7 +492,7 @@ TEST_P(TrajectoryBlenderTransitionWindowTest, testNonStationaryPoint)
 }
 
 /**
- * @brief  Tests the blending of two cartesian linear trajectories where one trajectory is completely withing the
+ * @brief  Tests the blending of two cartesian linear trajectories where one trajectory is completely within the
  *         sphere defined by the blend radius
  * The test sequence is repeated twice, using robot model with and without gripper
  * Test Sequence:
@@ -458,7 +503,6 @@ TEST_P(TrajectoryBlenderTransitionWindowTest, testNonStationaryPoint)
  *    1. Two linear trajectories generated.
  *    2. Blending trajectory cannot be generated.
  */
-
 TEST_P(TrajectoryBlenderTransitionWindowTest, testLINLINBlendingTrajectoryInsideBlendRadius)
 {
   // Use only subset of testdata
@@ -513,7 +557,6 @@ TEST_P(TrajectoryBlenderTransitionWindowTest, testLINLINBlendingTrajectoryInside
  *    3. No bound is violated, the trajectories are continuous
  *        in joint and cartesian space.
  */
-
 TEST_P(TrajectoryBlenderTransitionWindowTest, testLINLINBlending)
 {
   Sequence seq {data_loader_->getSequence("TestBlend")};
@@ -542,6 +585,64 @@ TEST_P(TrajectoryBlenderTransitionWindowTest, testLINLINBlending)
                                           cartesian_velocity_tolerance_,
                                           cartesian_angular_velocity_tolerance_));
 
+}
+
+/**
+ * @brief  Tests the blending of two cartesian linear trajectories with a non-trivial overlap using robot model
+ * The test sequence is repeated twice, using robot model with and without gripper
+ * Test Sequence:
+ *    1. Generate two linear trajectories from the test data set, such that the second one is the reversed first one.
+ *    2. Generate blending trajectory.
+ *    3. Check blending trajectory:
+ *      - for position, velocity, and acceleration bounds,
+ *      - for continuity in joint space,
+ *      - for continuity in cartesian space.
+ *
+ * Expected Results:
+ *    1. Two linear trajectories generated.
+ *    2. Blending trajectory generated.
+ *    3. No bound is violated, the trajectories are continuous
+ *        in joint and cartesian space.
+ */
+TEST_P(TrajectoryBlenderTransitionWindowTest, testLINLINBlendingOverlappingTrajectories)
+{
+  auto test_data = test_data_.front();
+
+  // modify end position such that trajectories overlap
+  test_data.end_position = test_data.start_position;
+
+  // generate two lin trajectories from test dataset
+  planning_interface::MotionPlanResponse res_lin_1, res_lin_2;
+  double dis_lin_1, dis_lin_2;
+  ASSERT_TRUE(testutils::generateTrajFromBlendTestData(robot_model_,
+                                                       lin_,
+                                                       planning_group_,
+                                                       target_link_,
+                                                       test_data,
+                                                       sampling_time_, sampling_time_,
+                                                       res_lin_1, res_lin_2,
+                                                       dis_lin_1, dis_lin_2))
+      << "Failed to generate LIN trajectories from test data";
+
+  // blend two lin trajectories and check the result
+  pilz::TrajectoryBlendRequest blend_req;
+  pilz::TrajectoryBlendResponse blend_res;
+
+  blend_req.group_name = planning_group_;
+  blend_req.link_name = target_link_;
+  blend_req.first_trajectory = res_lin_1.trajectory_;
+  blend_req.second_trajectory = res_lin_2.trajectory_;
+  blend_req.blend_radius = 0.5*dis_lin_1;
+  EXPECT_TRUE(blender_->blend(blend_req, blend_res));
+
+  // check the blend result
+  EXPECT_TRUE(testutils::checkBlendResult(blend_req,
+                                          blend_res,
+                                          planner_limits_,
+                                          joint_velocity_tolerance_,
+                                          joint_acceleration_tolerance_,
+                                          cartesian_velocity_tolerance_,
+                                          cartesian_angular_velocity_tolerance_));
 }
 
 int main(int argc, char **argv)
