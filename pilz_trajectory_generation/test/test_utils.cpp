@@ -57,6 +57,7 @@ bool testutils::getExpectedGoalPose(const moveit::core::RobotModelConstPtr &robo
   goal_pose_msg.position = req.goal_constraints.front().position_constraints.front()
       .constraint_region.primitive_poses.front().position;
   goal_pose_msg.orientation = req.goal_constraints.front().orientation_constraints.front().orientation;
+  normalizeQuaternion(goal_pose_msg.orientation);
   tf::poseMsgToEigen(goal_pose_msg, goal_pose_expect);
   return true;
 }

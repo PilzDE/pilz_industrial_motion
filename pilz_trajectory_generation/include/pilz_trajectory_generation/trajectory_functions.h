@@ -26,6 +26,7 @@
 #include <eigen_conversions/eigen_msg.h>
 #include <trajectory_msgs/MultiDOFJointTrajectory.h>
 #include <moveit/robot_trajectory/robot_trajectory.h>
+#include <tf/transform_datatypes.h>
 
 #include "pilz_trajectory_generation/limits_container.h"
 #include "pilz_trajectory_generation/cartesian_trajectory.h"
@@ -240,6 +241,6 @@ bool isStateColliding(const bool test_for_self_collision,
                       const double * const ik_solution);
 }
 
-
+void normalizeQuaternion(geometry_msgs::Quaternion & quat);
 
 #endif // TRAJECTORY_FUNCTIONS_H

@@ -453,6 +453,7 @@ TEST_P(TrajectoryFunctionsTestOnlyGripper, testComputePoseIKSelfCollisionForVali
   pose.orientation.y = 0.991562;
   pose.orientation.w = -0.1296328;
   Eigen::Affine3d pose_expect;
+  normalizeQuaternion(pose.orientation);
   tf::poseMsgToEigen(pose, pose_expect);
 
   // compute the ik without self collision check and expect the resulting pose to be in self collission.
