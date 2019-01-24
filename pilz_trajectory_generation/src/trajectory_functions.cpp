@@ -617,3 +617,9 @@ bool pilz::isStateColliding(const bool test_for_self_collision,
 
   return !collision_res.collision;
 }
+
+void normalizeQuaternion(geometry_msgs::Quaternion & quat){
+  tf::Quaternion q;
+  quaternionMsgToTF(quat, q);
+  quaternionTFToMsg(q.normalize(), quat);
+}

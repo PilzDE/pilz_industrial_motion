@@ -274,6 +274,7 @@ bool TrajectoryGeneratorPTP::extractMotionPlanInfo(const planning_interface::Mot
     pose.position = p;
     pose.orientation = req.goal_constraints.at(0).orientation_constraints.at(0).orientation;
     Eigen::Affine3d pose_eigen;
+    normalizeQuaternion(pose.orientation);
     tf::poseMsgToEigen(pose,pose_eigen);
     if(!computePoseIK(robot_model_,
                       req.group_name,
