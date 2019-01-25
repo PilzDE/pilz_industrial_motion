@@ -29,7 +29,7 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
     <arg name="fake_execution" value="true"/>
     <arg name="info" value="true"/>
     <arg name="gripper" value="pg70"/>
-    <arg name="pipeline" value="command_planner" />
+    <arg name="pipeline" value="pilz_command_planner" />
   </include>
 
   <!-- run test -->

@@ -6,6 +6,7 @@ Forthcoming
 -----------
 * add more details to blend algorithm description
 * change handling of empty sequences in capabilities to be non-erroneous
+* rename command_planner -> pilz_command_planner
 
 0.3.2 (2019-01-18)
 ------------------

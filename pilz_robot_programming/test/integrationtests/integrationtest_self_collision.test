@@ -35,7 +35,7 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
     <arg name="info" value="true"/>
     <arg name="debug" value="false"/>
     <arg name="gripper" value="pg70"/>
-    <arg name="pipeline" value="command_planner" />
+    <arg name="pipeline" value="pilz_command_planner" />
   </include>
 
   <!-- test node -->

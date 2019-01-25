@@ -8,7 +8,7 @@ All examples are given for a PRBT robot but the API is general enough to be used
 has a MoveIt! configuration.
 
 The robot API has some similarity to the ``moveit_commander`` package but differs in its specialization for
-classical industrial robot commands to be executed by the ``CommandPlanner`` MoveIt! plugin. The
+classical industrial robot commands to be executed by the ``pilz_command_planner`` MoveIt! plugin. The
 robot API connects to MoveIt! using the standard ``move_group`` action interface and the custom ``sequence_move_group``
 action, that the sequence capability implements.
 

@@ -52,7 +52,7 @@ include_directories(
 
 ## Declare a C++ library
 add_library(${PROJECT_NAME}
-  src/command_planner.cpp
+  src/pilz_command_planner.cpp
   src/planning_context_loader.cpp
   src/joint_limits_validator.cpp
   src/joint_limits_aggregator.cpp
@@ -71,8 +71,8 @@ target_link_libraries(${PROJECT_NAME}
 #############
 ## Plugins ##
 #############
-add_library(command_planner
-            src/command_planner.cpp
+add_library(pilz_command_planner
+            src/pilz_command_planner.cpp
             src/planning_context_loader.cpp
             src/joint_limits_aggregator.cpp
             src/joint_limits_container.cpp
@@ -80,7 +80,7 @@ add_library(command_planner
             src/cartesian_limit.cpp
             src/cartesian_limits_aggregator.cpp
             )
-target_link_libraries(command_planner
+target_link_libraries(pilz_command_planner
                       ${catkin_LIBRARIES})
 
 add_library(planning_context_loader_ptp
@@ -151,14 +151,14 @@ add_dependencies(sequence_capability
 #############
 install(FILES
        plugins/sequence_capability_plugin_description.xml
-       plugins/command_planner_plugin_description.xml
+       plugins/pilz_command_planner_plugin_description.xml
        plugins/planning_context_plugin_description.xml
        DESTINATION ${CATKIN_PACKAGE_SHARE_DESTINATION}/plugins
        )
 
 ## Mark libraries for installation
 install(TARGETS
-   command_planner
+   pilz_command_planner
    planning_context_loader_ptp
    planning_context_loader_lin
    planning_context_loader_circ
@@ -284,10 +284,10 @@ ${catkin_LIBRARIES} ${PROJECT_NAME}_test)
 ##################
 
   ## Add gtest based cpp test target and link libraries
-  catkin_add_gtest(unittest_command_planner_direct
-                   test/unittest_command_planner_direct.cpp
+  catkin_add_gtest(unittest_pilz_command_planner_direct
+                   test/unittest_pilz_command_planner_direct.cpp
                    src/planning_context_loader_ptp.cpp)
-  target_link_libraries(unittest_command_planner_direct
+  target_link_libraries(unittest_pilz_command_planner_direct
     ${PROJECT_NAME} ${catkin_LIBRARIES} ${PROJECT_NAME}_test)
 
   ## Add gtest based cpp test target and link libraries
@@ -353,12 +353,12 @@ ${catkin_LIBRARIES} ${PROJECT_NAME}_test)
     ${catkin_LIBRARIES} ${PROJECT_NAME}_test)
 
   # Command Planner Unit Test
-  add_rostest_gtest(unittest_command_planner
-    test/unittest_command_planner.test
-    test/unittest_command_planner.cpp
+  add_rostest_gtest(unittest_pilz_command_planner
+    test/unittest_pilz_command_planner.test
+    test/unittest_pilz_command_planner.cpp
   )
 
-  target_link_libraries(unittest_command_planner
+  target_link_libraries(unittest_pilz_command_planner
     ${catkin_LIBRARIES})
 
   # JointLimitsAggregator Unit Test

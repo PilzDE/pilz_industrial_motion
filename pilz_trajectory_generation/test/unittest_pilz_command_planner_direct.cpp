@@ -16,12 +16,12 @@
  */
 #include <gtest/gtest.h>
 
-#include <pilz_trajectory_generation/command_planner.h>
+#include <pilz_trajectory_generation/pilz_command_planner.h>
 #include <pilz_trajectory_generation/planning_context_loader_ptp.h>
 #include <pilz_trajectory_generation/planning_exceptions.h>
 
 /**
-  *  This test uses pilz::CommandPlanner directly and is thus seperated from unittest_command_planner.cpp
+  *  This test uses pilz::CommandPlanner directly and is thus seperated from unittest_pilz_command_planner.cpp
   *  since plugin loading via pluginlib does not allow loading of classes already defined.
   */
 

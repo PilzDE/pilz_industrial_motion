@@ -2,7 +2,7 @@
 <package>
   <name>pilz_trajectory_generation</name>
   <version>0.3.2</version>
-  <description>The pilz_trajectory_generation package</description>
+  <description>The pilz_trajectory_generation package containing the MoveIt! plugin pilz_command_planner.</description>
 
   <maintainer email="a.gutenkunst@pilz.de">Alexander Gutenkunst</maintainer>
   <maintainer email="h.slusarek@pilz.de">Hagen Slusarek</maintainer>
@@ -63,7 +63,7 @@
 
   <!-- The export tag contains other, unspecified, tags -->
   <export>
-    <moveit_core plugin="${prefix}/plugins/command_planner_plugin_description.xml"/>
+    <moveit_core plugin="${prefix}/plugins/pilz_command_planner_plugin_description.xml"/>
     <moveit_ros_move_group plugin="${prefix}/plugins/sequence_capability_plugin_description.xml"/>
     <pilz_trajectory_generation plugin="${prefix}/plugins/planning_context_plugin_description.xml"/>
   </export>

@@ -15,8 +15,8 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-#ifndef COMMAND_PLANNER_H
-#define COMMAND_PLANNER_H
+#ifndef PILZ_COMMAND_PLANNER_H
+#define PILZ_COMMAND_PLANNER_H
 
 #include <ros/ros.h>
 
@@ -115,4 +115,4 @@ MOVEIT_CLASS_FORWARD(CommandPlanner)
 
 } // namespace
 
-#endif // COMMAND_PLANNER_H
+#endif // PILZ_COMMAND_PLANNER_H

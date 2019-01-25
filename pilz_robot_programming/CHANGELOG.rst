@@ -2,6 +2,10 @@
 Changelog for package pilz_robot_programming
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
+Forthcoming
+-----------
+* apply renaming command_planner -> pilz_command_planner
+
 0.3.2 (2019-01-18)
 ------------------
 
