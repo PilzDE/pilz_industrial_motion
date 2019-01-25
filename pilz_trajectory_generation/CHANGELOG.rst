@@ -2,8 +2,8 @@
 Changelog for package pilz_trajectory_generation
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
-Forthcoming
------------
+0.3.3 (2019-01-25)
+------------------
 * add more details to blend algorithm description
 * change handling of empty sequences in capabilities to be non-erroneous
 * rename command_planner -> pilz_command_planner
