@@ -5,6 +5,7 @@ Changelog for package pilz_trajectory_generation
 Forthcoming
 -----------
 * update dependencies of trajectory_generation
+* Enable gripper commands inside a sequence
 
 0.3.6 (2019-02-26)
 ------------------
