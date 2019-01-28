@@ -23,10 +23,23 @@ pilz_msgs::MotionSequenceRequest Sequence::toRequest() const
 {
   pilz_msgs::MotionSequenceRequest req;
 
+  bool first_cmd {true};
   for (const auto& cmd : cmds_)
   {
     pilz_msgs::MotionSequenceItem item;
     item.req = cmd.first->toRequest();
+
+    if (!first_cmd)
+    {
+      // Remove start state because only the first request
+      // is allowed to have a start state in a sequence.
+      item.req.start_state = moveit_msgs::RobotState();
+    }
+    else
+    {
+      first_cmd = false;
+    }
+
     item.blend_radius = cmd.second;
     req.items.push_back(item);
   }

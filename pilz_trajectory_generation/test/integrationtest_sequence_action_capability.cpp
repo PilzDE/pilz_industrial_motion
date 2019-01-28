@@ -596,8 +596,15 @@ TEST_F(IntegrationTestSequenceAction, blendLINLINOnlyPlanningIgnoreRobotStateSce
 TEST_F(IntegrationTestSequenceAction, testComplexSequence)
 {
   Sequence seq {data_loader_->getSequence("ComplexSequence")};
-  pilz_msgs::MotionSequenceRequest req {seq.toRequest()};
-  // TODO: Add test implementation
+
+  pilz_msgs::MoveGroupSequenceGoal seq_goal;
+  seq_goal.request = seq.toRequest();
+
+  ac_blend_.sendGoalAndWait(seq_goal);
+  pilz_msgs::MoveGroupSequenceResultConstPtr res = ac_blend_.getResult();
+  EXPECT_EQ(res->error_code.val, moveit_msgs::MoveItErrorCodes::SUCCESS);
+  EXPECT_NE(res->planned_trajectory.joint_trajectory.points.size(), 0u)
+      << "Planned trajectory is empty.";
 
 }
 
