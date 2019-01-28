@@ -28,6 +28,8 @@ namespace pilz {
 
 /**
  * @brief Trajectory blender implementing transition window algorithm
+ *
+ * See doc/MotionBlendAlgorithmDescription.pdf for a mathematical description of the algorithmn.
  */
 class TrajectoryBlenderTransitionWindow : public TrajectoryBlender
 {
@@ -43,22 +45,22 @@ public:
   /**
    * @brief Blend two trajectories using transition window. The trajectories have to be equally and uniformly
    * discretized.
-   * @param req: following fields need to be filled for a valid request
-   *    group_name : name of the planning group
-   *    link_name : name of the target link
-   *    first_trajectory: Joint trajectory stops at end point.
-   *                      The last point must be the same as the first point of the second trajectory.
-   *    second trajectory: Joint trajectory stops at end point.
-   *                       The first point must be the same as the last point of the first trajectory.
-   *    blend_radius: The blend radius determines a shpere with the intersection point of the two trajectories
-   *                     as the center. Trajectory blend happens inside of this sphere.
+   * @param req: following fields need to be filled for a valid request:
+   *    - group_name : name of the planning group
+   *    - link_name : name of the target link
+   *    - first_trajectory: Joint trajectory stops at end point.
+   *                        The last point must be the same as the first point of the second trajectory.
+   *    - second trajectory: Joint trajectory stops at end point.
+   *                         The first point must be the same as the last point of the first trajectory.
+   *    - blend_radius: The blend radius determines a sphere with the intersection point of the two trajectories
+   *                    as the center. Trajectory blending happens inside of this sphere.
    * @param res: following fields are returned as response by the blend algorithm
-   *    group_name : name of the planning group
-   *    first_trajectory: Part of the first original trajectory which is outside of the blend sphere.
-   *    blend_trajectory: Joint trajectory connecting the first and second trajectories without stop.
-   *                      The first waypoint has non-zero time from start.
-   *    second trajectory: Part of the second original trajectory which is outside of the blend sphere.
-   *                       The first waypoint has non-zero time from start.
+   *    - group_name : name of the planning group
+   *    - first_trajectory: Part of the first original trajectory which is outside of the blend sphere.
+   *    - blend_trajectory: Joint trajectory connecting the first and second trajectories without stop.
+   *                        The first waypoint has non-zero time from start.
+   *    - second trajectory: Part of the second original trajectory which is outside of the blend sphere.
+   *                         The first waypoint has non-zero time from start.
    * error_code: information of failed blend
    * @return true if succeed
    */
@@ -79,8 +81,8 @@ private:
   /**
    * @brief searchBlendPoint
    * @param req: trajectory blend request
-   * @param first_interse_index: index of the intersection point between first trajectory and blend sphere
-   * @param second_interse_index: index of the intersection point between second trajectory and blend sphere
+   * @param first_interse_index: index of the first point of the first trajectory that is inside the blend sphere
+   * @param second_interse_index: index of the last point of the second trajectory that is still inside the blend sphere
    */
   bool searchIntersectionPoints(const pilz::TrajectoryBlendRequest& req,
                                 std::size_t& first_interse_index,
