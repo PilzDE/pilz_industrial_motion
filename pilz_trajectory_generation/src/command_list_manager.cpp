@@ -139,15 +139,24 @@ bool CommandListManager::validateRequestList(const pilz_msgs::MotionSequenceRequ
                                              planning_interface::MotionPlanResponse &res)
 {
   // Check that all request are about the same group
-  const auto group_name = req_list.items.front().req.group_name;
-  if(! std::all_of(req_list.items.begin(), req_list.items.end(),
-                   [group_name](const pilz_msgs::MotionSequenceItem& req){return (req.req.group_name == group_name);}))
-  {
-    ROS_ERROR_STREAM("Cannot blend. All requests MUST be about the same group!");
-    res.trajectory_.reset(new robot_trajectory::RobotTrajectory(model_, 0));
-    res.error_code_.val = moveit_msgs::MoveItErrorCodes::INVALID_GROUP_NAME;
-    return false;
-  }
+  // const auto group_name = req_list.items.front().req.group_name;
+  // if(! std::all_of(req_list.items.begin(), req_list.items.end(),
+  //                  [group_name](const pilz_msgs::MotionSequenceItem& req){
+  //                     if(req.req.group_name != group_name) {
+  //                       ROS_ERROR_STREAM("Cannot blend. All requests MUST be about the same group!"
+  //                                        << " Groups: '" << req.req.group_name << "' and '" << group_name << "'"
+  //                                        << " can not be used in the same sequence");
+  //                       return false;
+  //                     }
+
+  //                     return true;
+  //                   }))
+  // {
+  //   ROS_ERROR_STREAM("Cannot blend. All requests MUST be about the same group!");
+  //   res.trajectory_.reset(new robot_trajectory::RobotTrajectory(model_, 0));
+  //   res.error_code_.val = moveit_msgs::MoveItErrorCodes::INVALID_GROUP_NAME;
+  //   return false;
+  // }
 
   // Validate that all blending radius are non-negative
   if(! std::all_of(req_list.items.begin(), req_list.items.end(),
@@ -196,6 +205,10 @@ bool CommandListManager::validateBlendingRadiiDoNotOverlap(
   {
     for(unsigned long i = 0; i < motion_plan_responses.size()-2; i++)
     {
+      auto sum_radii = radii.at(i) + radii.at(i+1);
+
+      if(sum_radii == 0) continue;
+
       auto traj_1 = motion_plan_responses.at(i).trajectory_;
       auto traj_2 = motion_plan_responses.at(i+1).trajectory_;
       auto distance_endpoints = (traj_1->getLastWayPoint().getFrameTransform(getTipFrame(group_name)).translation() -
@@ -282,7 +295,7 @@ bool CommandListManager::generateTrajectory(
       blend_request.second_trajectory = traj_2;
       blend_request.blend_radius = blend_radius;
       blend_request.group_name = first_trajectory->getGroupName();
-      blend_request.link_name = model_->getJointModelGroup(blend_request.group_name)->getSolverInstance()->getTipFrame();
+      blend_request.link_name = getTipFrame(blend_request.group_name);
 
       // The response
       pilz::TrajectoryBlendResponse blend_response;
@@ -313,7 +326,29 @@ bool CommandListManager::generateTrajectory(
 
 const std::string &CommandListManager::getTipFrame(const std::string& group_name)
 {
-  return model_->getJointModelGroup(group_name)->getSolverInstance()->getTipFrame();
+  auto group = model_->getJointModelGroup(group_name);
+  if(group->isEndEffector()) {
+    auto links = group->getLinkModels();
+
+    if(links.size() > 1) {
+      throw std::runtime_error("Endeffector with multiple links is not supported");
+    }
+
+    if(links.size() < 1) {
+      throw std::runtime_error("Endeffector with no links is not supported");
+    }
+
+    return links.front()->getName();
+  }
+
+  auto solver = group->getSolverInstance();
+
+  if(solver == nullptr)
+  {
+    throw std::runtime_error("No solver for group " + group_name);
+  }
+
+  return solver->getTipFrame();
 }
 
 }
