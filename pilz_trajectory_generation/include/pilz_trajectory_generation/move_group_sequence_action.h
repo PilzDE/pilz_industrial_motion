@@ -31,8 +31,7 @@ namespace pilz_trajectory_generation
 class CommandListManager;
 
 /**
- * @brief Provide action to handle multiple trajectories and execute the result
- * in the form of a MoveGroup capability (plugin).
+ * @brief MoveGroup capability providing an action server to plan and execute sequences.
  */
 class MoveGroupSequenceAction : public move_group::MoveGroupCapability
 {
@@ -42,15 +41,31 @@ public:
   virtual void initialize() override;
 
 private:
+  /**
+   * @brief  Directly called if the action server receives a new goal
+   *
+   * Redirects based on the `goal->planning_options.plan_only` flag to the subsequent
+   * MoveGroupSequenceAction::executeSequenceCallback_PlanAndExecute or MoveGroupSequenceAction::executeMoveCallback_PlanOnly callback.
+   */
   void executeSequenceCallback(const pilz_msgs::MoveGroupSequenceGoalConstPtr &goal);
   void executeSequenceCallback_PlanAndExecute(const pilz_msgs::MoveGroupSequenceGoalConstPtr& goal,
                                           pilz_msgs::MoveGroupSequenceResult& action_res);
   void executeMoveCallback_PlanOnly(const pilz_msgs::MoveGroupSequenceGoalConstPtr& goal,
                                     pilz_msgs::MoveGroupSequenceResult& action_res);
+
+  /** @brief Passed via plan_execution::PlanExecution::Options to plan_execution::PlanExecution.
+   *
+   *  Used to changes the state to move_group::MONITOR
+   */
   void startMoveExecutionCallback();
-  void startMoveLookCallback();
+
+  /// Invoked when a new preempt request is available. Stops the plan execution.
   void preemptMoveCallback();
+
+  /// Called if the internal state changes. See http://docs.ros.org/kinetic/api/moveit_ros_move_group/html/namespacemove__group.html#a4a295c26dbc5ac7780dfa7ae10350bfb
   void setMoveState(move_group::MoveGroupState state);
+
+  /// Passed via plan_execution::PlanExecution::Options to plan_execution::PlanExecution
   bool planUsingSequenceManager(const pilz_msgs::MotionSequenceRequest &req,
                                  plan_execution::ExecutableMotionPlan& plan);
 private:

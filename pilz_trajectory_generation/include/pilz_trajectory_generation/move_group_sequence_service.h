@@ -29,7 +29,7 @@ namespace pilz_trajectory_generation
 class CommandListManager;
 
 /**
- * @brief Provide service to blend multiple trajectories in the form of a MoveGroup capability (plugin).
+ * @brief MoveGroup capability providing a service to plan sequences.
  */
 class MoveGroupSequenceService : public move_group::MoveGroupCapability
 {
@@ -41,6 +41,12 @@ public:
   virtual void initialize() override;
 
 private:
+  /**
+   * @brief Use a CommandListManager to plan the given request
+   *
+   * @return true If there was no error during planning. Does not imply that a proper plan was found.
+   * @return false False if the planing failed
+   */
   bool plan(pilz_msgs::GetMotionSequence::Request &req,
             pilz_msgs::GetMotionSequence::Response &res);
 
@@ -51,7 +57,5 @@ private:
 };
 
 }
-
-
 
 #endif // SEQUENCE_SERVICE_CAPABILITY_H
