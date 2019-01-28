@@ -50,6 +50,9 @@ public:
   virtual moveit_msgs::Constraints toGoalConstraints() const override;
   virtual moveit_msgs::RobotState toMoveitMsgsRobotState() const override;
 
+  const std::string& getLinkName() const;
+  const geometry_msgs::Pose &getPose() const;
+
 private:
   static geometry_msgs::Pose toPose(const std::vector<double>& pose);
   static geometry_msgs::PoseStamped toStampedPose(const geometry_msgs::Pose& pose);
@@ -58,6 +61,16 @@ private:
   std::string link_name_ {"prbt_tcp"};
   geometry_msgs::Pose pose_;
 };
+
+inline const std::string& CartesianConfiguration::getLinkName() const
+{
+  return link_name_;
+}
+
+inline const geometry_msgs::Pose& CartesianConfiguration::getPose() const
+{
+  return pose_;
+}
 
 inline moveit_msgs::Constraints CartesianConfiguration::toGoalConstraints() const
 {

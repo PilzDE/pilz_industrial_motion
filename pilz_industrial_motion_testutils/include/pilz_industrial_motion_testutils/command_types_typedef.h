@@ -19,8 +19,10 @@
 
 #include "ptp.h"
 #include "lin.h"
+#include "circ.h"
 #include "jointconfiguration.h"
 #include "cartesianconfiguration.h"
+#include "circ_auxiliary_types.h"
 
 namespace pilz_industrial_motion_testutils
 {
@@ -30,6 +32,12 @@ typedef Ptp<JointConfiguration, CartesianConfiguration> PtpJointCart;
 typedef Ptp<CartesianConfiguration, CartesianConfiguration> PtpCart;
 
 typedef Lin<JointConfiguration, JointConfiguration> LinJoint;
+
+typedef Circ<CartesianConfiguration, CartesianCenter, CartesianConfiguration> CircCenterCart;
+typedef Circ<CartesianConfiguration, CartesianInterim, CartesianConfiguration> CircInterimCart;
+
+typedef Circ<JointConfiguration, CartesianCenter, JointConfiguration> CircJointCenterCart;
+typedef Circ<JointConfiguration, CartesianInterim, JointConfiguration> CircJointInterimCart;
 
 }
 

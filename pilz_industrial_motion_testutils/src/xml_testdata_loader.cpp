@@ -308,7 +308,7 @@ PtpJoint XmlTestdataLoader::getPtpJoint(const std::string& cmd_name) const
     throw TestDataLoaderReadingException("Did not find \"" + goal_pos_name +  "\"");
   }
 
-  Ptp<JointConfiguration, JointConfiguration> cmd;
+  PtpJoint cmd;
   cmd.setPlanningGroup(planning_group);
   cmd.setTargetLink(target_link);
   cmd.setVelocityScale(vel_scale);
@@ -564,6 +564,71 @@ bool XmlTestdataLoader::getCirc(const std::string &cmd_name, STestMotionCommand 
   }
 
   return true;
+}
+
+CartesianCenter XmlTestdataLoader::getCartesianCenter(const std::string &cmd_name,
+                                                      const std::string &planning_group) const
+{
+  const pt::ptree::value_type &cmd_node { findCmd(cmd_name, CIRCS_PATH_STR) };
+  std::string aux_pos_name;
+  try
+  {
+    aux_pos_name = cmd_node.second.get<std::string>(CENTER_POS_STR);
+  }
+  catch(...)
+  {
+    throw TestDataLoaderReadingException("Did not find center of circe");
+  }
+
+  CartesianCenter aux;
+  aux.setConfiguration(getPose(aux_pos_name, planning_group));
+  return aux;
+}
+
+CircCenterCart XmlTestdataLoader::getCircCartCenterCart(const std::string &cmd_name) const
+{
+  std::string start_pos_name, goal_pos_name, planning_group, target_link;
+  double vel_scale, acc_scale;
+  if(!getCmd(CIRCS_PATH_STR, cmd_name, planning_group, target_link,
+             start_pos_name, goal_pos_name, vel_scale, acc_scale))
+  {
+    throw TestDataLoaderReadingException("Did not \"" + cmd_name +  "\"");
+  }
+
+  CircCenterCart cmd;
+  cmd.setPlanningGroup(planning_group);
+  cmd.setTargetLink(target_link);
+  cmd.setVelocityScale(vel_scale);
+  cmd.setAccelerationScale(acc_scale);
+
+  cmd.setStartConfiguration(getPose(start_pos_name, planning_group));
+  cmd.setAuxiliaryConfiguration(getCartesianCenter(cmd_name, planning_group));
+  cmd.setGoalConfiguration(getPose(goal_pos_name, planning_group));
+
+  return cmd;
+}
+
+CircJointCenterCart XmlTestdataLoader::getCircJointCenterCart(const std::string &cmd_name) const
+{
+  std::string start_pos_name, goal_pos_name, planning_group, target_link;
+  double vel_scale, acc_scale;
+  if(!getCmd(CIRCS_PATH_STR, cmd_name, planning_group, target_link,
+             start_pos_name, goal_pos_name, vel_scale, acc_scale))
+  {
+    throw TestDataLoaderReadingException("Did not \"" + cmd_name +  "\"");
+  }
+
+  CircJointCenterCart cmd;
+  cmd.setPlanningGroup(planning_group);
+  cmd.setTargetLink(target_link);
+  cmd.setVelocityScale(vel_scale);
+  cmd.setAccelerationScale(acc_scale);
+
+  cmd.setStartConfiguration(getJoints(start_pos_name, planning_group));
+  cmd.setAuxiliaryConfiguration(getCartesianCenter(cmd_name, planning_group));
+  cmd.setGoalConfiguration(getJoints(goal_pos_name, planning_group));
+
+  return cmd;
 }
 
 Sequence XmlTestdataLoader::getSequence(const std::string &cmd_name) const

@@ -140,7 +140,11 @@ public:
 
   virtual LinJoint getLinJoint(const std::string& cmd_name) const override;
 
+  //! DEPRECATED
   virtual bool getCirc(const std::string& cmd_name, STestMotionCommand& cmd) const override;
+
+  virtual CircCenterCart getCircCartCenterCart(const std::string &cmd_name) const override;
+  virtual CircJointCenterCart getCircJointCenterCart(const std::string &cmd_name) const override;
 
   virtual Sequence getSequence(const std::string &cmd_name) const override;
 
@@ -186,6 +190,9 @@ private:
               std::string &group_name, std::string &target_link,
               std::string& start_pos_name, std::string& end_pos_name,
               double &vel, double &acc) const;
+
+  CartesianCenter getCartesianCenter(const std::string &cmd_name,
+                                     const std::string &planning_group) const;
 
 private:
   //! DEPRECATED

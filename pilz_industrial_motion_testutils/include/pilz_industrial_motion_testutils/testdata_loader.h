@@ -126,6 +126,8 @@ public:
   virtual LinJoint getLinJoint(const std::string& cmd_name) const = 0;
 
   /**
+   * DEPRECATED
+   *
    * @brief Returns the start-, end- and auxility-position, as well as
    * the velocity and acceleration of the circ command given by its name.
    *
@@ -133,6 +135,9 @@ public:
    * of the circ command is stored as intermediate or center point.
    */
   virtual bool getCirc(const std::string &cmd_name, STestMotionCommand& cmd) const = 0;
+
+  virtual CircCenterCart getCircCartCenterCart(const std::string &cmd_name) const = 0;
+  virtual CircJointCenterCart getCircJointCenterCart(const std::string &cmd_name) const = 0;
 
   /**
    * @brief Returns a container containing the cmds which make-up the
