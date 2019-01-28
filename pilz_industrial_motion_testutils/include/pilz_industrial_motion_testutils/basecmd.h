@@ -40,7 +40,7 @@ public:
   void setStartConfiguration(StartType start);
   void setGoalConfiguration(GoalType goal);
 
-  GoalType& getStartConfiguration();
+  StartType& getStartConfiguration();
   GoalType& getGoalConfiguration();
 
 protected:
@@ -63,7 +63,7 @@ inline void BaseCmd<StartType, GoalType>::setGoalConfiguration(GoalType goal)
 }
 
 template <class StartType, class GoalType>
-inline GoalType& BaseCmd<StartType, GoalType>::getStartConfiguration()
+inline StartType& BaseCmd<StartType, GoalType>::getStartConfiguration()
 {
   return start_;
 }
