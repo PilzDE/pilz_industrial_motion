@@ -92,16 +92,20 @@ private:
    * @brief Determine how the second trajectory should be aligned with the first trajectory for blend.
    * Let tau_1 be the time of the first trajectory from the first_interse_index to the end and tau_2 the time of the
    * second trajectory from the beginning to the second_interse_index:
-   * if tau_1 > tau_2
+   *  - if tau_1 > tau_2:<br>
    *    align the end of the first trajectory with second_interse_index
+   *    <pre>
    *    first traj:  |-------------|--------!--------------|
    *    second traj:                        |--------------|-------------------|
    *    blend phase:               |-----------------------|
-   * else
+   *    </pre>
+   *  - else:<br>
    *    align the first_interse_index with the beginning of the second trajectory
+   *    <pre>
    *    first traj:  |-------------|-----------------------|
    *    second traj:               |-----------------------!----------|-------------------|
    *    blend phase:               |----------------------------------|
+   *    </pre>
    *
    * @param req: trajectory blend request
    * @param first_interse_index: index of the intersection point between first trajectory and blend sphere
