@@ -583,6 +583,63 @@ TEST_F(IntegrationTestSequenceAction, blendLINLINOnlyPlanningIgnoreRobotStateSce
   }
 }
 
+/**
+ * @brief Tests the execution of a sequence command (without blending)
+ * consisting of most of the possible command type combination.
+ *
+ * Test Sequence:
+ *    1. Create sequence goal and send it via ActionClient.
+ *    2. Wait for successful completion of command.
+ *
+ * Expected Results:
+ *    1. -
+ *    2. ActionClient reports successful completion of command.
+ */
+TEST_F(IntegrationTestSequenceAction, testComplexSequenceWithoutBlending)
+{
+  Sequence seq {data_loader_->getSequence("ComplexSequence")};
+
+  seq.setAllBlendRadiiToZero();
+
+  pilz_msgs::MoveGroupSequenceGoal seq_goal;
+  seq_goal.request = seq.toRequest();
+
+  ac_blend_.sendGoalAndWait(seq_goal);
+  pilz_msgs::MoveGroupSequenceResultConstPtr res = ac_blend_.getResult();
+  EXPECT_EQ(res->error_code.val, moveit_msgs::MoveItErrorCodes::SUCCESS);
+  EXPECT_NE(res->planned_trajectory.joint_trajectory.points.size(), 0u)
+      << "Planned trajectory is empty.";
+
+}
+
+/**
+ * @brief Tests the execution of a sequence command (with blending)
+ * consisting of most of the possible command type combination.
+ *
+ * Test Sequence:
+ *    1. Create sequence goal and send it via ActionClient.
+ *    2. Wait for successful completion of command.
+ *
+ * Expected Results:
+ *    1. -
+ *    2. ActionClient reports successful completion of command.
+ */
+TEST_F(IntegrationTestSequenceAction, testComplexSequenceWithBlending)
+{
+  Sequence seq {data_loader_->getSequence("ComplexSequence")};
+
+  pilz_msgs::MoveGroupSequenceGoal seq_goal;
+  seq_goal.request = seq.toRequest();
+
+  ac_blend_.sendGoalAndWait(seq_goal);
+  pilz_msgs::MoveGroupSequenceResultConstPtr res = ac_blend_.getResult();
+  EXPECT_EQ(res->error_code.val, moveit_msgs::MoveItErrorCodes::SUCCESS);
+  EXPECT_NE(res->planned_trajectory.joint_trajectory.points.size(), 0u)
+      << "Planned trajectory is empty.";
+
+}
+
+
 int main(int argc, char **argv)
 {
   ros::init(argc, argv, "integrationtest_sequence_action_capability");
