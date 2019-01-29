@@ -44,7 +44,7 @@ public:
    * @brief Blend two robot trajectories with the given blending radius
    * @param req: trajectory blend request
    * @param res: trajectroy blend response
-   * @return ture if blend succeed
+   * @return true if blend succeed
    */
   virtual bool blend(const pilz::TrajectoryBlendRequest& req,
                      pilz::TrajectoryBlendResponse& res) = 0;

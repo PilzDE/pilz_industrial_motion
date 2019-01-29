@@ -28,6 +28,8 @@ namespace pilz {
 
 /**
  * @brief Trajectory blender implementing transition window algorithm
+ *
+ * See doc/MotionBlendAlgorithmDescription.pdf for a mathematical description of the algorithmn.
  */
 class TrajectoryBlenderTransitionWindow : public TrajectoryBlender
 {
@@ -41,23 +43,24 @@ public:
 
 
   /**
-   * @brief Blend two trajectories using transition window.
-   * @param req: following fields need to be filled for a valid request
-   *    group_name : name of the planning group
-   *    link_name : name of the target link
-   *    first_trajectory: Joint trajectory stops at end point.
-   *                      The last point must be the same as the first point of the second trajectory.
-   *    second trajectory: Joint trajectory stops at end point.
-   *                       The first point must be the same as the last point of the first trajectory.
-   *    blend_radius: The blend radius determines a shpere with the intersection point of the two trajectories
-   *                     as the center. Trajectory blend happens inside of this sphere.
+   * @brief Blend two trajectories using transition window. The trajectories have to be equally and uniformly
+   * discretized.
+   * @param req: following fields need to be filled for a valid request:
+   *    - group_name : name of the planning group
+   *    - link_name : name of the target link
+   *    - first_trajectory: Joint trajectory stops at end point.
+   *                        The last point must be the same as the first point of the second trajectory.
+   *    - second trajectory: Joint trajectory stops at end point.
+   *                         The first point must be the same as the last point of the first trajectory.
+   *    - blend_radius: The blend radius determines a sphere with the intersection point of the two trajectories
+   *                    as the center. Trajectory blending happens inside of this sphere.
    * @param res: following fields are returned as response by the blend algorithm
-   *    group_name : name of the planning group
-   *    first_trajectory: Part of the first original trajectory which is outside of the blend sphere.
-   *    blend_trajectory: Joint trajectory connecting the first and second trajectories without stop.
-   *                      The first waypoint has non-zero time from start.
-   *    second trajectory: Part of the second original trajectory which is outside of the blend sphere.
-   *                       The first waypoint has non-zero time from start.
+   *    - group_name : name of the planning group
+   *    - first_trajectory: Part of the first original trajectory which is outside of the blend sphere.
+   *    - blend_trajectory: Joint trajectory connecting the first and second trajectories without stop.
+   *                        The first waypoint has non-zero time from start.
+   *    - second trajectory: Part of the second original trajectory which is outside of the blend sphere.
+   *                         The first waypoint has non-zero time from start.
    * error_code: information of failed blend
    * @return true if succeed
    */
@@ -78,8 +81,8 @@ private:
   /**
    * @brief searchBlendPoint
    * @param req: trajectory blend request
-   * @param first_interse_index: index of the intersection point between first trajectory and blend sphere
-   * @param second_interse_index: index of the intersection point between second trajectory and blend sphere
+   * @param first_interse_index: index of the first point of the first trajectory that is inside the blend sphere
+   * @param second_interse_index: index of the last point of the second trajectory that is still inside the blend sphere
    */
   bool searchIntersectionPoints(const pilz::TrajectoryBlendRequest& req,
                                 std::size_t& first_interse_index,
@@ -87,24 +90,28 @@ private:
 
   /**
    * @brief Determine how the second trajectory should be aligned with the first trajectory for blend.
-   * tau_1 is the time of the first trajectory from the first_interse_index to the end
-   * tau_2 is the time of the second trajectory from begin to  the second_interse_index
-   * if tau_1 > tau_2
-   *    change the first intersection index to fit tau_2
+   * Let tau_1 be the time of the first trajectory from the first_interse_index to the end and tau_2 the time of the
+   * second trajectory from the beginning to the second_interse_index:
+   *  - if tau_1 > tau_2:<br>
+   *    align the end of the first trajectory with second_interse_index
+   *    <pre>
    *    first traj:  |-------------|--------!--------------|
    *    second traj:                        |--------------|-------------------|
-   *    blend phase:                     |--------------|
-   * else
-   *    change the second intersection index to fit tau_1
+   *    blend phase:               |-----------------------|
+   *    </pre>
+   *  - else:<br>
+   *    align the first_interse_index with the beginning of the second trajectory
+   *    <pre>
    *    first traj:  |-------------|-----------------------|
    *    second traj:               |-----------------------!----------|-------------------|
-   *    blend phase:            |-----------------------|
+   *    blend phase:               |----------------------------------|
+   *    </pre>
    *
    * @param req: trajectory blend request
    * @param first_interse_index: index of the intersection point between first trajectory and blend sphere
    * @param second_interse_index: index of the intersection point between second trajectory and blend sphere
    * @param blend_align_index: index on the first trajectory, to which the first point on the second trajectory should
-   * be aligned to for motion blend. It is now always same as first intersection index
+   * be aligned to for motion blend. It is now always same as first_interse_index
    * @param blend_time: time of the motion blend period
    */
   void determineTrajectoryAlignment(const pilz::TrajectoryBlendRequest& req,
@@ -116,8 +123,11 @@ private:
    * @brief blend two trajectories in Cartesian space, result in a MultiDOFJointTrajectory which consists
    * of a list of transforms for the blend phase.
    * @param req
+   * @param first_interse_index
+   * @param second_interse_index
    * @param blend_begin_index
-   * @param blend_end_index
+   * @param sampling_time
+   * @param trajectory: the resulting blend trajectory inside the blending sphere
    */
   void blendTrajectoryCartesian(const pilz::TrajectoryBlendRequest& req,
                                 const std::size_t first_interse_index,

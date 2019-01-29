@@ -2,6 +2,10 @@
 Changelog for package pilz_trajectory_generation
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
+Forthcoming
+-----------
+* refactor determining the trajectory alignment in the blend implementation
+
 0.3.3 (2019-01-25)
 ------------------
 * add more details to blend algorithm description
