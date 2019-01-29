@@ -74,10 +74,23 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
     </ptp>
   </ptps>
 
+  <circs>
+    <circ name="circ3_interim">
+      <planningGroup>manipulator</planningGroup>
+      <targetLink>prbt_tcp</targetLink>
+      <startPos>P1</startPos>
+      <intermediatePos>P2</intermediatePos>
+      <endPos>P3</endPos>
+      <vel>0.1</vel>
+      <acc>0.4</acc>
+    </circ>
+  </circs>
+
+
   <sequences>
     <blend name="ComplexSequence">
       <sequenceCmd name="Ptp1" type="ptp_joint_cart" blend_radius="0.0" />
-      <sequenceCmd name="Ptp2" type="ptp_cart_cart" blend_radius="0.0" />
+      <sequenceCmd name="circ3_interim" type="circ_interim_cart" blend_radius="0.0" />
     </blend>
   </sequences>
 
