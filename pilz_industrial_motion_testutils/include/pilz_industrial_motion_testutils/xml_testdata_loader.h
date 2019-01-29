@@ -144,6 +144,7 @@ public:
   virtual bool getCirc(const std::string& cmd_name, STestMotionCommand& cmd) const override;
 
   virtual CircCenterCart getCircCartCenterCart(const std::string &cmd_name) const override;
+  virtual CircInterimCart getCircCartInterimCart(const std::string &cmd_name) const override;
   virtual CircJointCenterCart getCircJointCenterCart(const std::string &cmd_name) const override;
 
   virtual Sequence getSequence(const std::string &cmd_name) const override;
@@ -193,6 +194,9 @@ private:
 
   CartesianCenter getCartesianCenter(const std::string &cmd_name,
                                      const std::string &planning_group) const;
+
+  CartesianInterim getCartesianInterim(const std::string &cmd_name,
+                                       const std::string &planning_group) const;
 
 private:
   //! DEPRECATED

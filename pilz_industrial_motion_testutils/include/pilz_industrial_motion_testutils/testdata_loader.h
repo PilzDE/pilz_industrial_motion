@@ -139,6 +139,8 @@ public:
   virtual CircCenterCart getCircCartCenterCart(const std::string &cmd_name) const = 0;
   virtual CircJointCenterCart getCircJointCenterCart(const std::string &cmd_name) const = 0;
 
+  virtual CircInterimCart getCircCartInterimCart(const std::string &cmd_name) const = 0;
+
   /**
    * @brief Returns a container containing the cmds which make-up the
    * blend cmd. The cmds in the container are in the order of execution.
