@@ -63,9 +63,12 @@ XmlTestdataLoader::XmlTestdataLoader(const std::string &path_filename)
 
   using std::placeholders::_1;
   cmd_getter_funcs_["ptp"] = AbstractCmdGetterUPtr(new CmdGetterAdapter<PtpJoint>(std::bind(&XmlTestdataLoader::getPtpJoint, this, _1)));
-  cmd_getter_funcs_["lin"] = AbstractCmdGetterUPtr(new CmdGetterAdapter<LinJoint>(std::bind(&XmlTestdataLoader::getLinJoint, this, _1)));
   cmd_getter_funcs_["ptp_joint_cart"] = AbstractCmdGetterUPtr(new CmdGetterAdapter<PtpJointCart>(std::bind(&XmlTestdataLoader::getPtpJointCart, this, _1)));
   cmd_getter_funcs_["ptp_cart_cart"] = AbstractCmdGetterUPtr(new CmdGetterAdapter<PtpCart>(std::bind(&XmlTestdataLoader::getPtpCart, this, _1)));
+
+  cmd_getter_funcs_["lin"] = AbstractCmdGetterUPtr(new CmdGetterAdapter<LinJoint>(std::bind(&XmlTestdataLoader::getLinJoint, this, _1)));
+  cmd_getter_funcs_["lin_cart"] = AbstractCmdGetterUPtr(new CmdGetterAdapter<LinCart>(std::bind(&XmlTestdataLoader::getLinCart, this, _1)));
+
   cmd_getter_funcs_["circ_center_cart"] = AbstractCmdGetterUPtr(new CmdGetterAdapter<CircCenterCart>(std::bind(&XmlTestdataLoader::getCircCartCenterCart, this, _1)));
   cmd_getter_funcs_["circ_interim_cart"] = AbstractCmdGetterUPtr(new CmdGetterAdapter<CircInterimCart>(std::bind(&XmlTestdataLoader::getCircCartInterimCart, this, _1)));
 }
@@ -400,28 +403,36 @@ LinJoint XmlTestdataLoader::getLinJoint(const std::string& cmd_name) const
     throw TestDataLoaderReadingException("Could not load \"" + cmd_name +  "\"");
   }
 
-  std::vector<double> start_position;
-  if (!getJoints(start_pos_name, planning_group, start_position))
-  {
-    throw TestDataLoaderReadingException("Loading of start pose \"" + start_pos_name +  "\" failed");
-  }
-
-  std::vector<double> goal_position;
-  if (!getJoints(goal_pos_name, planning_group, goal_position))
-  {
-    throw TestDataLoaderReadingException("Loading of goal pose \"" + goal_pos_name +  "\" failed");
-  }
-
   LinJoint cmd;
   cmd.setPlanningGroup(planning_group);
   cmd.setTargetLink(target_link);
   cmd.setVelocityScale(vel_scale);
   cmd.setAccelerationScale(acc_scale);
 
-  JointConfiguration start(planning_group, start_position, robot_model_);
-  JointConfiguration goal(planning_group, goal_position, robot_model_);
-  cmd.setStartConfiguration(start);
-  cmd.setGoalConfiguration(goal);
+  cmd.setStartConfiguration(getJoints(start_pos_name, planning_group));
+  cmd.setGoalConfiguration(getJoints(goal_pos_name, planning_group));
+
+  return cmd;
+}
+
+LinCart XmlTestdataLoader::getLinCart(const std::string& cmd_name) const
+{
+  std::string start_pos_name, goal_pos_name, planning_group, target_link;
+  double vel_scale, acc_scale;
+  if(!getCmd(LINS_PATH_STR, cmd_name, planning_group, target_link,
+             start_pos_name, goal_pos_name, vel_scale, acc_scale))
+  {
+    throw TestDataLoaderReadingException("Could not load \"" + cmd_name +  "\"");
+  }
+
+  LinCart cmd;
+  cmd.setPlanningGroup(planning_group);
+  cmd.setTargetLink(target_link);
+  cmd.setVelocityScale(vel_scale);
+  cmd.setAccelerationScale(acc_scale);
+
+  cmd.setStartConfiguration(getPose(start_pos_name, planning_group));
+  cmd.setGoalConfiguration(getPose(goal_pos_name, planning_group));
 
   return cmd;
 }

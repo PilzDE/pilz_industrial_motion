@@ -124,6 +124,7 @@ public:
   virtual bool getLin(const std::string& cmd_name, STestMotionCommand& cmd) const = 0;
 
   virtual LinJoint getLinJoint(const std::string& cmd_name) const = 0;
+  virtual LinCart getLinCart(const std::string& cmd_name) const = 0;
 
   /**
    * DEPRECATED

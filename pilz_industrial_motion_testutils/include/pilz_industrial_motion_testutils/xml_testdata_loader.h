@@ -139,6 +139,8 @@ public:
   virtual bool getLin(const std::string& cmd_name, STestMotionCommand& cmd) const override;
 
   virtual LinJoint getLinJoint(const std::string& cmd_name) const override;
+  virtual LinCart getLinCart(const std::string& cmd_name) const override;
+
 
   //! DEPRECATED
   virtual bool getCirc(const std::string& cmd_name, STestMotionCommand& cmd) const override;
