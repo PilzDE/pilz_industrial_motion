@@ -126,6 +126,15 @@ bool pilz::TrajectoryBlenderTransitionWindow::validateRequest(const pilz::Trajec
                                                    moveit_msgs::MoveItErrorCodes &error_code) const
 {
   ROS_DEBUG("Validate the trajectory blend request.");
+
+  // check planning group
+  if (!req.first_trajectory->getRobotModel()->hasJointModelGroup(req.group_name))
+  {
+    ROS_ERROR_STREAM("Unknown planning group: " << req.group_name);
+    error_code.val = moveit_msgs::MoveItErrorCodes::INVALID_GROUP_NAME;
+    return false;
+  }
+
   if(req.blend_radius <=0 )
   {
     ROS_ERROR("Blending radius must be positive");
