@@ -46,5 +46,13 @@ pilz_msgs::MotionSequenceRequest Sequence::toRequest() const
   return req;
 }
 
+void Sequence::setAllBlendRadiiToZero()
+{
+  for (auto& cmd : cmds_)
+  {
+    cmd.second = 0.0;
+  }
+}
+
 
 }

@@ -44,6 +44,8 @@ public:
    */
   void add(ICmdUPtr cmd, double radius = 0.);
 
+  void setAllBlendRadiiToZero();
+
   MotionCmd& getCmd(size_t index_cmd);
   const MotionCmd& getCmd(size_t index_cmd) const;
 
