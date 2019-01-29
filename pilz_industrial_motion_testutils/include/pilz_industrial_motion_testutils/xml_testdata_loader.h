@@ -216,7 +216,7 @@ private:
   class AbstractCmdGetterAdapter
   {
   public:
-    virtual ICmdUPtr getCmd(const std::string& /*cmd_name*/) const = 0;
+    virtual MotionCmdUPtr getCmd(const std::string& /*cmd_name*/) const = 0;
   };
 
 private:

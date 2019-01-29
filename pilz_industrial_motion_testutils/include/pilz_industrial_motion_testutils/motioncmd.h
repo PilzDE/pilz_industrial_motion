@@ -69,7 +69,7 @@ inline void MotionCmd::setAccelerationScale(double acceleration_scale)
   acc_scale_ = acceleration_scale;
 }
 
-using ICmdUPtr = std::unique_ptr<MotionCmd>;
+using MotionCmdUPtr = std::unique_ptr<MotionCmd>;
 
 }
 

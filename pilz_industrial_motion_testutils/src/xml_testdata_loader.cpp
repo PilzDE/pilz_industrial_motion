@@ -42,12 +42,12 @@ public:
   }
 
 public:
-  ICmdUPtr getCmd(const std::string& cmd_name) const override
+  MotionCmdUPtr getCmd(const std::string& cmd_name) const override
   {
     std::unique_ptr<CmdType> cmd_ptr { new CmdType() };
     CmdType& cmd {*cmd_ptr};
     cmd = func_(cmd_name);
-    return ICmdUPtr(std::move(cmd_ptr));
+    return MotionCmdUPtr(std::move(cmd_ptr));
   }
 
 private:
@@ -718,7 +718,7 @@ Sequence XmlTestdataLoader::getSequence(const std::string &cmd_name) const
     double blend_radius {seq_cmd.second.get<double>(BLEND_RADIUS_PATH_STR, DEFAULT_BLEND_RADIUS)};
 
     // Read current command from test data
-    ICmdUPtr curr_cmd {std::move(cmd_getter_funcs_.at(cmd_type)->getCmd(cmd_name))};
+    MotionCmdUPtr curr_cmd {std::move(cmd_getter_funcs_.at(cmd_type)->getCmd(cmd_name))};
 
     // Add command to sequence
     seq.add(std::move(curr_cmd), blend_radius);

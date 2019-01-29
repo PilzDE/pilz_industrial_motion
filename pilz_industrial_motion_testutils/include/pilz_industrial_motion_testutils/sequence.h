@@ -42,7 +42,7 @@ public:
    * @brief Adds a command to the end of the sequence.
    * @param cmd The command which has to be added.
    */
-  void add(ICmdUPtr cmd, double radius = 0.);
+  void add(MotionCmdUPtr cmd, double radius = 0.);
 
   void setAllBlendRadiiToZero();
 
@@ -54,10 +54,10 @@ public:
   pilz_msgs::MotionSequenceRequest toRequest() const;
 
 private:
-  std::vector<std::pair<ICmdUPtr, double> > cmds_;
+  std::vector<std::pair<MotionCmdUPtr, double> > cmds_;
 };
 
-inline void Sequence::add(ICmdUPtr cmd, double radius)
+inline void Sequence::add(MotionCmdUPtr cmd, double radius)
 {
   assert(cmd);
   cmds_.emplace_back( std::move(cmd), radius );
