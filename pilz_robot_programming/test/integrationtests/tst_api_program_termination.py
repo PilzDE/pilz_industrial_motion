@@ -88,7 +88,7 @@ class TestAPIProgramTermination(unittest.TestCase):
     def test09_instantiation_after_program_kill(self):
         """
         Test if robot can be instantiated after a program was killed. In case of a failure, the robot can no longer be
-        instantiated. So this should be the last test case.
+        instantiated and a robot movement may still be executed. So this should be the last test case.
 
         Test Sequence:
             1. Request robot movement in a subprocess.
