@@ -29,9 +29,9 @@ _GROUP_NAME = "manipulator"
 _API_VERSION = "1"
 
 
-class TestAPIProgramKill(unittest.TestCase):
+class TestAPIProgramTermination(unittest.TestCase):
     """
-    Test the API behaviour when the python program is killed.
+    Test the API behaviour when the python program is terminated.
     """
 
     _PTP_TEST_NAME = "PTPJointValid"
@@ -57,13 +57,13 @@ class TestAPIProgramKill(unittest.TestCase):
 
         return movecmd.split(" ") + ptp_goal
 
-    def test01_stop_at_program_kill(self):
+    def test01_stop_at_program_interrupt(self):
         """
-        Test if robot movement is stopped when program is killed.
+        Test if robot movement is stopped when program is interrupted (Ctrl-c).
 
         Test Sequence:
             1. Request robot movement in a subprocess.
-            2. Send kill signal.
+            2. Send interrupt signal.
 
         Expected Results:
             1. -
@@ -77,7 +77,7 @@ class TestAPIProgramKill(unittest.TestCase):
         self.assertTrue(
             self.robot_motion_observer.wait_motion_start(wait_time_out=self._WAIT_TIME_FOR_MOTION_DETECTION_SEC))
 
-        # 2. Send kill signal
+        # 2. Send interrupt signal
         proc.send_signal(signal.SIGINT)
 
         # Wait until process has terminated.
@@ -124,5 +124,5 @@ class TestAPIProgramKill(unittest.TestCase):
 
 if __name__ == '__main__':
     import rostest
-    rospy.init_node('test_api_program_kill')
-    rostest.rosrun('pilz_robot_programming', 'test_api_program_kill', TestAPIProgramKill)
+    rospy.init_node('test_api_program_termination')
+    rostest.rosrun('pilz_robot_programming', 'test_api_program_termination', TestAPIProgramTermination)
