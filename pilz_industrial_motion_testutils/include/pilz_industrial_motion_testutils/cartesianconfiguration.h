@@ -34,6 +34,10 @@
 namespace pilz_industrial_motion_testutils
 {
 
+/**
+ * @brief Class to define a robot configuration in space
+ * with the help of cartesian coordinates.
+ */
 class CartesianConfiguration : public RobotConfiguration
 {
 public:

@@ -104,10 +104,7 @@ public:
                                          const std::string &group_name) const = 0;
 
   /**
-   * @brief Get the PTP motion command structure according to the cmmand name
-   * @param cmd_name
-   * @param cmd
-   * @return
+   * @brief Returns the command with the specified name from the test data.
    */
   virtual PtpJoint getPtpJoint(const std::string& cmd_name) const = 0;
   virtual PtpCart getPtpCart(const std::string& cmd_name) const = 0;
@@ -123,6 +120,9 @@ public:
    */
   virtual bool getLin(const std::string& cmd_name, STestMotionCommand& cmd) const = 0;
 
+  /**
+   * @brief Returns the command with the specified name from the test data.
+   */
   virtual LinJoint getLinJoint(const std::string& cmd_name) const = 0;
   virtual LinCart getLinCart(const std::string& cmd_name) const = 0;
 
@@ -137,14 +137,15 @@ public:
    */
   virtual bool getCirc(const std::string &cmd_name, STestMotionCommand& cmd) const = 0;
 
+  /**
+   * @brief Returns the command with the specified name from the test data.
+   */
   virtual CircCenterCart getCircCartCenterCart(const std::string &cmd_name) const = 0;
   virtual CircJointCenterCart getCircJointCenterCart(const std::string &cmd_name) const = 0;
-
   virtual CircInterimCart getCircCartInterimCart(const std::string &cmd_name) const = 0;
 
   /**
-   * @brief Returns a container containing the cmds which make-up the
-   * blend cmd. The cmds in the container are in the order of execution.
+   * @brief Returns the command with the specified name from the test data.
    */
   virtual Sequence getSequence(const std::string &cmd_name) const = 0;
 

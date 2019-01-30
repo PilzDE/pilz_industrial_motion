@@ -27,6 +27,9 @@
 namespace pilz_industrial_motion_testutils
 {
 
+/**
+ * @brief Class to define robot configuration in space.
+ */
 class RobotConfiguration : public RobotStateMsgConvertible, public GoalConstraintMsgConvertible
 {
 public:

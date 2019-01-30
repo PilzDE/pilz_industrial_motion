@@ -22,6 +22,10 @@
 namespace pilz_industrial_motion_testutils
 {
 
+/**
+ * @brief Class to define the center point of the circle
+ * on which the robot is supposed to move via circ command.
+ */
 template<class ConfigType, class BuilderType>
 class Center : public CircAuxiliary<ConfigType>
 {

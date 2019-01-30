@@ -24,9 +24,6 @@
 namespace pilz_industrial_motion_testutils
 {
 
-/**
- * @brief Base class for all command data classes.
- */
 template <class StartType, class GoalType>
 class BaseCmd : public MotionCmd
 {

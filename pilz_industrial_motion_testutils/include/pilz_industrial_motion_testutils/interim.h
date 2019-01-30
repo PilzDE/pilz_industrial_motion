@@ -22,6 +22,10 @@
 namespace pilz_industrial_motion_testutils
 {
 
+/**
+ * @brief Class to define a point on the circle on which the robot is supposed
+ * to move via circ command.
+ */
 template<class ConfigType, class BuilderType>
 class Interim : public CircAuxiliary<ConfigType>
 {

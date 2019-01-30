@@ -224,6 +224,12 @@ private:
   pt::ptree tree_ {};
 
   using AbstractCmdGetterUPtr = std::unique_ptr<AbstractCmdGetterAdapter>;
+
+  //! Stores the mapping between command type and the getter function
+  //! which have to be called.
+  //!
+  //! Please note:
+  //! This mapping is only relevant for sequence commands.
   std::map<std::string, AbstractCmdGetterUPtr> cmd_getter_funcs_;
 
 private:

@@ -29,6 +29,10 @@
 namespace pilz_industrial_motion_testutils
 {
 
+/**
+ * @brief Class to define a robot configuration in space with the help
+ * of joint values.
+ */
 class JointConfiguration : public RobotConfiguration
 {
 public:

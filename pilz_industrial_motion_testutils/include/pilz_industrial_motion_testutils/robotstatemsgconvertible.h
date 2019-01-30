@@ -23,6 +23,10 @@
 namespace pilz_industrial_motion_testutils
 {
 
+/**
+ * @brief Interface class to express that a derived class can be converted
+ * into a moveit_msgs::RobotState.
+ */
 class RobotStateMsgConvertible
 {
 public:

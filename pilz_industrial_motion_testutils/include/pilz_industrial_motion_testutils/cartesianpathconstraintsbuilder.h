@@ -26,6 +26,10 @@
 namespace pilz_industrial_motion_testutils
 {
 
+/**
+ * @brief Helper class to build moveit_msgs::Constraints from a
+ * given configuration.
+ */
 class CartesianPathConstraintsBuilder
 {
 public:

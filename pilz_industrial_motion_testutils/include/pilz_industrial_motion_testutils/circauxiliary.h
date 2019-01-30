@@ -22,6 +22,10 @@
 namespace pilz_industrial_motion_testutils
 {
 
+/**
+ * @brief Base class to define an auxiliary point needed to specify
+ * circ commands.
+ */
 template<class AuxiliaryConfigType>
 class CircAuxiliary
 {
