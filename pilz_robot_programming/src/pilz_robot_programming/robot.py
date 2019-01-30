@@ -110,8 +110,6 @@ class Robot(object):
         # manage the move control request
         self._move_ctrl_sm = _MoveControlStateMachine()
 
-        self._ctor_exception_flag = False
-
         self._single_instance_flag = False
 
         self._check_version(version)
@@ -353,14 +351,12 @@ class Robot(object):
         # check if version is set by user
         if version is None:
             rospy.logerr("Version of Robot API is not set!")
-            self._ctor_exception_flag = True
             raise RobotVersionError("Version of Robot API is not set!"
                                     "Current installed version is " + __version__ + "!")
 
         # check given version is correct
         if version != __version__.split(".")[0]:
             rospy.logerr("Version of Robot API does not match!")
-            self._ctor_exception_flag = True
             raise RobotVersionError("Version of Robot API does not match! "
                                     "Current installed version is " + __version__ + "!")
 
