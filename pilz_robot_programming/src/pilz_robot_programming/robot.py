@@ -26,7 +26,7 @@ import time
 import threading
 from std_srvs.srv import Trigger
 import tf
-import os
+import psutil
 
 from .move_control_request import _MoveControlState, MoveControlAction,_MoveControlStateMachine
 from .commands import _AbstractCmd, _DEFAULT_PLANNING_GROUP, _DEFAULT_TARGET_LINK
@@ -96,7 +96,11 @@ class Robot(object):
     _RESUME_TOPIC_NAME = "resume_movement"
     _STOP_TOPIC_NAME = "stop_movement"
     _SEQUENCE_TOPIC = "sequence_move_group"
-    _INSTANCE_PID = "/robot_api_instance_pid"
+    _INSTANCE_PARAM = "/robot_api_instance"
+
+    # string constants
+    _PID_STRING = "pid"
+    _PROCESS_CREATE_TIME_STRING = "create_time"
 
     def __init__(self, version=None):
         rospy.logdebug("Initialize Robot Api.")
@@ -114,7 +118,7 @@ class Robot(object):
 
         self._check_version(version)
 
-        self._check_single_instance()
+        self._claim_single_instance()
 
         self._establish_connections()
 
@@ -360,26 +364,33 @@ class Robot(object):
             raise RobotVersionError("Version of Robot API does not match! "
                                     "Current installed version is " + __version__ + "!")
 
+    def _claim_single_instance(self):
+        # check if an instance exists
+        self._check_single_instance()
+
+        # If no exception has been raised, the pid and create_time is stored (overwrites old one)
+        self._single_instance_flag = True
+        process = psutil.Process()
+        rospy.set_param(self._INSTANCE_PARAM, {self._PID_STRING: process.pid,
+                                               self._PROCESS_CREATE_TIME_STRING: process.create_time()})
+
     def _check_single_instance(self):
         # If running the same program twice the second should kill the first, however the parameter server
         # has a small delay so we check twice for the single instance flag.
-        if rospy.has_param(self._INSTANCE_PID):
+        if rospy.has_param(self._INSTANCE_PARAM):
             time.sleep(1)
 
-        if rospy.has_param(self._INSTANCE_PID):
-            pid = rospy.get_param(self._INSTANCE_PID)
-            # check for the existence of pid
-            try:
-                os.kill(pid, 0)
-            except OSError:
-                pass
-            else:
-                rospy.logerr("An instance of Robot class already exists (pid=" + str(pid) + ").")
-                raise RobotMultiInstancesError("Only one instance of Robot class can be created!")
+        if rospy.has_param(self._INSTANCE_PARAM):
+            instance = rospy.get_param(self._INSTANCE_PARAM)
+            pid = instance[self._PID_STRING]
+            create_time = instance[self._PROCESS_CREATE_TIME_STRING]
 
-        # If no exception has been raised, the pid is stored (overwrites old one)
-        self._single_instance_flag = True
-        rospy.set_param(self._INSTANCE_PID, os.getpid())
+            if psutil.pid_exists(pid):
+                process = psutil.Process(pid)
+
+                if (process.create_time() == create_time):
+                    rospy.logerr("An instance of Robot class already exists (pid=" + str(pid) + ").")
+                    raise RobotMultiInstancesError("Only one instance of Robot class can be created!")
 
     def _establish_connections(self):
         # Create sequence_move_group client, only for manipulator
