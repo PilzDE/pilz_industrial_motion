@@ -299,7 +299,7 @@ def _testOriChangeInABC(robot):
     robot.move(Ptp(goal=Pose(position=Point(0.15, 0.25, 0.75), orientation=from_euler(0,0,0)), vel_scale=DEFAULT_PTP_VEL))
 
     seq = Sequence()
-    seq.append(Lin(goal=Pose(position=Point(0.5, 0, 0.4), orientation=from_euler(1,0.7,0.8)), vel_scale=0.25, acc_scale=0.1), blend_radius=0.3)
+    seq.append(Lin(goal=Pose(position=Point(0.5, 0.25, 0.4), orientation=from_euler(1.2,0.8,-3)), vel_scale=0.25, acc_scale=0.1), blend_radius=0.3)
     seq.append(Lin(goal=Pose(position=Point(0.5, 0, 0.75), orientation=from_euler(0,0,0)), vel_scale=0.25, acc_scale=0.1), blend_radius=0)
     robot.move(seq)
 
