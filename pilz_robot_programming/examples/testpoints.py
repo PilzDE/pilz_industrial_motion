@@ -30,19 +30,19 @@ def start_program():
     L = 0.2
     M = 0.1
 
-    P1 = Pose(position=Point(0.2, 0, 0.8))
+    P1 = Pose(position=Point(0.2, 0, 0.9))
     P2 = Pose(position=Point(P1.position.x+L, P1.position.y+L, P1.position.z-M))
     P3 = Pose(position=Point(P1.position.x, P1.position.y+2*L, P1.position.z-2*M))
     P4 = Pose(position=Point(P1.position.x, P1.position.y+L, P1.position.z-M))
 
-    ptp1 = Ptp(goal=P1, acc_scale=0.6)
-    ptp2 = Ptp(goal=P2, acc_scale=0.6)
-    ptp3 = Ptp(goal=P3, acc_scale=0.6)
-    ptp4 = Ptp(goal=P4, acc_scale=0.6)
-    lin1 = Lin(goal=P1, acc_scale=0.6)
-    lin2 = Lin(goal=P2, acc_scale=0.6)
-    lin3 = Lin(goal=P3, acc_scale=0.6)
-    lin4 = Lin(goal=P4, acc_scale=0.6)
+    ptp1 = Ptp(goal=P1, acc_scale=0.5)
+    ptp2 = Ptp(goal=P2, acc_scale=0.5)
+    ptp3 = Ptp(goal=P3, acc_scale=0.5)
+    ptp4 = Ptp(goal=P4, acc_scale=0.5)
+    lin1 = Lin(goal=P1, acc_scale=0.3)
+    lin2 = Lin(goal=P2, acc_scale=0.3)
+    lin3 = Lin(goal=P3, acc_scale=0.3)
+    lin4 = Lin(goal=P4, acc_scale=0.3)
 
     circ3_interim_2 = Circ(goal=P3, interim=P2.position, acc_scale=0.4)
     circ1_center_2 = Circ(goal=P1, center=P2.position, acc_scale=0.4)
