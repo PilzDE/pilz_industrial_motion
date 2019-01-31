@@ -205,7 +205,7 @@ TEST_F(IntegrationTestSequenceAction, TestDifferingGroupNames)
 }
 
 /**
- * @brief Tests that invalid blend radius are detected.
+ * @brief Tests that negative blend radii are detected.
  *
  * Test Sequence:
  *    1. Move the robot to start position.
@@ -217,30 +217,78 @@ TEST_F(IntegrationTestSequenceAction, TestDifferingGroupNames)
  *    2. Goal is sent to the action server.
  *    3. Error code of the result is not success and the planned trajectory is empty.
  */
-TEST_F(IntegrationTestSequenceAction, TestInvalidBlendRadius)
+TEST_F(IntegrationTestSequenceAction, TestNegativeBlendRadius)
 {
-  const auto test_data {test_data_.front()};
+  Sequence seq {data_loader_->getSequence("ComplexSequence")};
+  seq.setBlendRadii(0, -1.0);
 
-  // move the robot to start position with ptp
-  move_group_->setJointValueTarget(test_data.start_position);
-  move_group_->move();
-
-  // create request
   pilz_msgs::MoveGroupSequenceGoal seq_goal;
-  testutils::generateRequestMsgFromBlendTestData(robot_model_,
-                                                 test_data,
-                                                 "LIN",
-                                                 planning_group_,
-                                                 target_link_,
-                                                 seq_goal.request);
-  // set invalid blend radius
-  seq_goal.request.items.at(0).blend_radius = -1;
+  seq_goal.request = seq.toRequest();
 
   ac_.sendGoalAndWait(seq_goal);
+
   pilz_msgs::MoveGroupSequenceResultConstPtr res = ac_.getResult();
-  EXPECT_EQ(res->error_code.val, moveit_msgs::MoveItErrorCodes::INVALID_MOTION_PLAN) << "Execution of sequence did not fail as expected.";
-  EXPECT_EQ(res->planned_trajectory.joint_trajectory.points.size(), 0u) << "Planned trajectory is not empty.";
+  EXPECT_EQ(res->error_code.val, moveit_msgs::MoveItErrorCodes::INVALID_MOTION_PLAN) << "Incorrect error code";
+  EXPECT_EQ(res->planned_trajectory.joint_trajectory.points.size(), 0u) << "Planned trajectory not empty.";
 }
+
+/**
+ * @brief Tests that overlapping blend radii are detected.
+ *
+ * Test Sequence:
+ *    1. Generate request with overlapping blend radii.
+ *    2. Send goal for planning and execution.
+ *    3. Evaluate the result.
+ *
+ * Expected Results:
+ *    1. -
+ *    2. Goal is sent to the action server.
+ *    3. Command fails, result trajectory is empty.
+ */
+TEST_F(IntegrationTestSequenceAction, TestOverlappingBlendRadii)
+{
+  Sequence seq {data_loader_->getSequence("ComplexSequence")};
+  seq.setBlendRadii(0, 10*seq.getBlendRadius(0));
+
+  pilz_msgs::MoveGroupSequenceGoal seq_goal;
+  seq_goal.request = seq.toRequest();
+
+  ac_.sendGoalAndWait(seq_goal);
+
+  pilz_msgs::MoveGroupSequenceResultConstPtr res = ac_.getResult();
+  EXPECT_EQ(res->error_code.val, moveit_msgs::MoveItErrorCodes::INVALID_MOTION_PLAN) << "Incorrect error code";
+  EXPECT_EQ(res->planned_trajectory.joint_trajectory.points.size(), 0u) << "Planned trajectory not empty.";
+}
+
+/**
+ * @brief Tests that too large blend radii are detected.
+ *
+ * Test Sequence:
+ *    1. Generate request with too large blend radii.
+ *    2. Send goal for planning and execution.
+ *    2. Evaluate the result.
+ *
+ * Expected Results:
+ *    1. -
+ *    2. Goal is sent to the action server.
+ *    3. Command fails, result trajectory is empty.
+ */
+TEST_F(IntegrationTestSequenceAction, TestTooLargeBlendRadii)
+{
+  Sequence seq {data_loader_->getSequence("ComplexSequence")};
+  seq.erase(2, seq.size());
+  seq.setBlendRadii(0, 10*seq.getBlendRadius(seq.size()-2));
+
+  pilz_msgs::MoveGroupSequenceGoal seq_goal;
+  seq_goal.request = seq.toRequest();
+
+  ac_.sendGoalAndWait(seq_goal);
+
+  pilz_msgs::MoveGroupSequenceResultConstPtr res = ac_.getResult();
+  EXPECT_EQ(res->error_code.val, moveit_msgs::MoveItErrorCodes::FAILURE) << "Incorrect error code";
+  EXPECT_EQ(res->planned_trajectory.joint_trajectory.points.size(), 0u) << "Planned trajectory not empty.";
+}
+
 
 /**
  * @brief Tests that invalid blend data are detected.
@@ -278,6 +326,36 @@ TEST_F(IntegrationTestSequenceAction, TestInvalidBlendData)
 
 }
 
+/**
+ * @brief Tests that incorrect link_names are detected.
+ *
+ * Test Sequence:
+ *    1. Create sequence and send it via ActionClient.
+ *    2. Wait for successful completion of command.
+ *
+ * Expected Results:
+ *    1. -
+ *    2. ActionClient reports successful completion of command.
+ */
+TEST_F(IntegrationTestSequenceAction, TestInvalidLinkName)
+{
+  Sequence seq {data_loader_->getSequence("ComplexSequence")};
+
+  seq.setAllBlendRadiiToZero();
+
+  pilz_msgs::MotionSequenceRequest req {seq.toRequest()};
+  // Invalidate link name
+  req.items.at(1).req.goal_constraints.at(0).position_constraints.at(0).link_name = "InvalidLinkName";
+  req.items.at(1).req.goal_constraints.at(0).orientation_constraints.at(0).link_name = "InvalidLinkName";
+
+  pilz_msgs::MoveGroupSequenceGoal seq_goal;
+  seq_goal.request = req;
+
+  ac_.sendGoalAndWait(seq_goal);
+  pilz_msgs::MoveGroupSequenceResultConstPtr res = ac_.getResult();
+  EXPECT_NE(res->error_code.val, moveit_msgs::MoveItErrorCodes::SUCCESS) << "Incorrect error code.";
+  EXPECT_EQ(res->planned_trajectory.joint_trajectory.points.size(), 0u) << "Planned trajectory not empty.";
+}
 
 //*******************************************************
 //*** matcher for callback functions of action server ***
@@ -566,6 +644,45 @@ TEST_F(IntegrationTestSequenceAction, TestLinLinBlending)
     EXPECT_EQ(res->error_code.val, moveit_msgs::MoveItErrorCodes::SUCCESS) << "Execution of sequence failed.";
     EXPECT_NE(res->planned_trajectory.joint_trajectory.points.size(), 0u) << "Planned trajectory is empty.";
   }
+}
+
+/**
+ * @brief Tests the execution of a sequence with more than two commands.
+ *
+ * Test Sequence:
+ *    1. Create large sequence requests and sent it to  action server.
+ *    2. Evaluate the result.
+ *
+ * Expected Results:
+ *    1. Goal is sent to the action server.
+ *    2. Command succeeds, result trajectory is not empty.
+ */
+TEST_F(IntegrationTestSequenceAction, TestLargeRequest)
+{
+  Sequence seq {data_loader_->getSequence("ComplexSequence")};
+  pilz_msgs::MotionSequenceRequest req {seq.toRequest()};
+  // Create large request by making copies of the original sequence commands
+  // and adding them to the end of the original sequence.
+  size_t N {req.items.size()};
+  for(size_t i = 0; i<N; ++i)
+  {
+    pilz_msgs::MotionSequenceItem item {req.items.at(i)};
+    if (i == 0)
+    {
+      // Remove start state because only the first request
+      // is allowed to have a start state in a sequence.
+      item.req.start_state = moveit_msgs::RobotState();
+    }
+    req.items.push_back(item);
+  }
+
+  pilz_msgs::MoveGroupSequenceGoal seq_goal;
+  seq_goal.request = req;
+
+  ac_.sendGoalAndWait(seq_goal);
+  pilz_msgs::MoveGroupSequenceResultConstPtr res = ac_.getResult();
+  EXPECT_EQ(res->error_code.val, moveit_msgs::MoveItErrorCodes::SUCCESS) << "Incorrect error code.";
+  EXPECT_NE(res->planned_trajectory.joint_trajectory.points.size(), 0u) << "Planned trajectory empty.";
 }
 
 /**
