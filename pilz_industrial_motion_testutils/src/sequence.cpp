@@ -54,5 +54,25 @@ void Sequence::setAllBlendRadiiToZero()
   }
 }
 
+void Sequence::erase(const size_t start, const size_t end)
+{
+  const size_t orig_N {size()};
+  if (start > orig_N || end > orig_N)
+  {
+    std::string msg;
+    msg.append("Parameter start=").append(std::to_string(start));
+    msg.append(" and end=").append(std::to_string(end));
+    msg.append(" must not be greater then the number of #commands=");
+    msg.append(std::to_string(size()));
+    throw std::invalid_argument(msg);
+  }
+  cmds_.erase(cmds_.begin()+start, cmds_.begin()+end);
+  if (end == orig_N)
+  {
+    // Make sure last radius is set zero
+    cmds_.at(size()-1).second = 0.;
+  }
+}
+
 
 }
