@@ -203,7 +203,8 @@ with the following goal in a way, that the robot does not stop at the current go
 given `blend_radius`, it is allowed to travel towards the next goal already. When leaving a sphere around the current goal, the robot
 returns onto the trajectory he would have taken without blending.
 
-For details about the blend algorithm please refer to `/doc/MotionBlendAlgorithmDescription.pdf`.
+For details about the blend algorithm please refer to
+![doc/MotionBlendAlgorithmDescription.pdf](doc/MotionBlendAlgorithmDescription.pdf).
 
 ![blend figure](doc/figure/blend_radius.png)
 
