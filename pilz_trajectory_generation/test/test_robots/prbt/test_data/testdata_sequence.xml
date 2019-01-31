@@ -30,26 +30,26 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
     <pos name="P1">
       <group name="manipulator">
-          <xyzQuat link_name="prbt_tcp">0.2 0.0 0.8 0.0 0.0 0.0 1.0</xyzQuat>
+          <xyzQuat link_name="prbt_tcp">0.2 0.0 0.9 0.0 0.0 0.0 1.0</xyzQuat>
       </group>
     </pos>
 
     <pos name="P2">
       <group name="manipulator">
-          <xyzQuat link_name="prbt_tcp">0.4 0.2 0.7 0.0 0.0 0.0 1.0</xyzQuat>
+          <xyzQuat link_name="prbt_tcp">0.4 0.2 0.8 0.0 0.0 0.0 1.0</xyzQuat>
       </group>
     </pos>
 
     <pos name="P3">
       <group name="manipulator">
-          <xyzQuat link_name="prbt_tcp">0.2 0.4 0.6 0.0 0.0 0.0 1.0</xyzQuat>
+          <xyzQuat link_name="prbt_tcp">0.2 0.4 0.7 0.0 0.0 0.0 1.0</xyzQuat>
       </group>
     </pos>
 
 
     <pos name="P4">
       <group name="manipulator">
-          <xyzQuat link_name="prbt_tcp">0.2 0.2 0.7 0.0 0.0 0.0 1.0</xyzQuat>
+          <xyzQuat link_name="prbt_tcp">0.2 0.2 0.8 0.0 0.0 0.0 1.0</xyzQuat>
       </group>
     </pos>
 
@@ -62,7 +62,7 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
       <startPos>ZeroPose</startPos>
       <endPos>P1</endPos>
       <vel>1.0</vel>
-      <acc>0.6</acc>
+      <acc>0.4</acc>
     </ptp>
 
     <ptp name="Ptp2">
@@ -71,7 +71,7 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
       <startPos>P3</startPos>
       <endPos>P2</endPos>
       <vel>1.0</vel>
-      <acc>0.6</acc>
+      <acc>0.4</acc>
     </ptp>
 
     <ptp name="Ptp3">
@@ -80,7 +80,7 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
       <startPos>P2</startPos>
       <endPos>P3</endPos>
       <vel>1.0</vel>
-      <acc>0.6</acc>
+      <acc>0.4</acc>
     </ptp>
   </ptps>
 
@@ -91,7 +91,7 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
         <startPos>P2</startPos>
         <endPos>P3</endPos>
         <vel>0.1</vel>
-        <acc>0.6</acc>
+        <acc>0.2</acc>
     </lin>
 
     <lin name="lin2">
@@ -100,7 +100,7 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
         <startPos>P1</startPos>
         <endPos>P2</endPos>
         <vel>0.1</vel>
-        <acc>0.6</acc>
+        <acc>0.2</acc>
     </lin>
   </lins>
 
