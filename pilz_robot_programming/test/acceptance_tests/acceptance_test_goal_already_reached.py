@@ -32,6 +32,7 @@ def start_program():
     _test_repeat_ptp_pose(robot)
     _test_repeat_lin_pose(robot)
     _test_repeat_circ_pose(robot)
+    _test_repeat_ptp_in_sequence(robot)
 
 
 def _test_repeat_ptp_joint(robot):
@@ -138,6 +139,33 @@ def _test_repeat_circ_pose(robot):
 
     _askSuccess(_test_repeat_circ_pose.__name__, 'Failed to create path object for circle. '
                                                  'Circle : Plane for motion is not properly defined.')
+
+
+def _test_repeat_ptp_in_sequence(robot):
+    """Tests repeating a ptp joint motion in a sequence.
+
+        Test Sequence:
+          1. Perform the following commands in a command sequence:
+            - Move to start position.
+            - Move away from the singularity via ptp joint.
+            - Repeat the previous command.
+
+        Expected Results:
+          1. Robot performs the following movements without INVALID_GOAL or other error returned from controller:
+            - Moves to start position.
+            - Moves away from the singularity.
+    """
+    if _askPermission(_test_repeat_ptp_in_sequence.__name__) == 0:
+        return
+
+    seq = Sequence()
+    seq.append(Ptp(goal=[0, 0, 0, 0, 0, 0]), blend_radius=0)
+    seq.append(Ptp(goal=[0, -0.78, 0.78, 0, 1.56, 0]), blend_radius=0)
+    seq.append(Ptp(goal=[0, -0.78, 0.78, 0, 1.56, 0]), blend_radius=0)
+
+    robot.move(seq)
+
+    _askSuccess(_test_repeat_ptp_in_sequence.__name__, 'No INVALID_GOAL or other error should appear from controller.')
 
 
 if __name__ == "__main__":
