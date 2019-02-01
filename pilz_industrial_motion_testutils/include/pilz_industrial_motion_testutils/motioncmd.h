@@ -28,11 +28,11 @@ namespace pilz_industrial_motion_testutils
 /**
  * @brief Base class for commands storing all general information of a command.
  */
-class MotionCmd : public MPReqConvertible
+class MotionCmd : public MotionPlanRequestConvertible
 {
 public:
   MotionCmd()
-    : MPReqConvertible()
+    : MotionPlanRequestConvertible()
   {
   }
 

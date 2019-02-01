@@ -17,8 +17,6 @@
 #ifndef MOTIONPLANREQUESTCONVERTIBLE_H
 #define MOTIONPLANREQUESTCONVERTIBLE_H
 
-#include <memory>
-
 #include <moveit/robot_model/robot_model.h>
 #include <moveit/planning_interface/planning_interface.h>
 
@@ -29,14 +27,11 @@ namespace pilz_industrial_motion_testutils
  * @brief Interface class to express that a derived class can be converted
  * into a planning_interface::MotionPlanRequest.
  */
-class MPReqConvertible
+class MotionPlanRequestConvertible
 {
 public:
   virtual planning_interface::MotionPlanRequest toRequest() const = 0;
 };
-
-using MPReqConvertibleUPtr = std::unique_ptr<MPReqConvertible>;
-using MPReqConvertibleSPtr = std::shared_ptr<MPReqConvertible>;
 
 }
 
