@@ -43,7 +43,7 @@ public:
    * @brief Adds a command to the end of the sequence.
    * @param cmd The command which has to be added.
    */
-  void add(MotionCmdUPtr cmd, const double radius = 0.);
+  void add(MotionCmdUPtr cmd, const double blend_radius = 0.);
 
   /**
    * @brief Returns the number of commands.
@@ -54,7 +54,7 @@ public:
   const MotionCmd& getCmd(const size_t index_cmd) const;
 
   void setAllBlendRadiiToZero();
-  void setBlendRadii(const size_t index_cmd, const double radius);
+  void setBlendRadii(const size_t index_cmd, const double blend_radius);
   double getBlendRadius(const size_t index_cmd) const;
 
   /**
@@ -68,10 +68,10 @@ private:
   std::vector<std::pair<MotionCmdUPtr, double> > cmds_;
 };
 
-inline void Sequence::add(MotionCmdUPtr cmd, const double radius)
+inline void Sequence::add(MotionCmdUPtr cmd, const double blend_radius)
 {
   assert(cmd);
-  cmds_.emplace_back( std::move(cmd), radius );
+  cmds_.emplace_back( std::move(cmd), blend_radius );
 }
 
 inline size_t Sequence::size() const
@@ -94,9 +94,9 @@ inline double Sequence::getBlendRadius(const size_t index_cmd) const
   return cmds_.at(index_cmd).second;
 }
 
-inline void Sequence::setBlendRadii(const size_t index_cmd, const double radius)
+inline void Sequence::setBlendRadii(const size_t index_cmd, const double blend_radius)
 {
-  cmds_.at(index_cmd).second = radius;
+  cmds_.at(index_cmd).second = blend_radius;
 }
 
 }
