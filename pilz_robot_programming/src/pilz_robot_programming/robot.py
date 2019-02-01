@@ -365,16 +365,18 @@ class Robot(object):
                                     "Current installed version is " + __version__ + "!")
 
     def _claim_single_instance(self):
-        # check if an instance exists
-        self._check_single_instance()
-
-        # If no exception has been raised, the pid and create_time is stored (overwrites old one)
-        self._single_instance_flag = True
-        process = psutil.Process()
-        rospy.set_param(self._INSTANCE_PARAM, {self._PID_STRING: process.pid,
-                                               self._PROCESS_CREATE_TIME_STRING: process.create_time()})
+        # check if we are the single instance
+        if self._check_single_instance():
+            # If no other instance exists, the pid and create_time is stored (overwrites old one)
+            self._single_instance_flag = True
+            process = psutil.Process()
+            rospy.set_param(self._INSTANCE_PARAM, {self._PID_STRING: process.pid,
+                                                   self._PROCESS_CREATE_TIME_STRING: process.create_time()})
+        else:
+            raise RobotMultiInstancesError("Only one instance of Robot class can be created!")
 
     def _check_single_instance(self):
+        # return True if no other instance exists
         # If running the same program twice the second should kill the first, however the parameter server
         # has a small delay so we check twice for the single instance flag.
         if rospy.has_param(self._INSTANCE_PARAM):
@@ -390,7 +392,9 @@ class Robot(object):
 
                 if (process.create_time() == create_time):
                     rospy.logerr("An instance of Robot class already exists (pid=" + str(pid) + ").")
-                    raise RobotMultiInstancesError("Only one instance of Robot class can be created!")
+                    return False
+
+        return True
 
     def _establish_connections(self):
         # Create sequence_move_group client, only for manipulator
@@ -415,7 +419,7 @@ class Robot(object):
         # do not delete pid parameter if it has not been set or overwritten
         if self._single_instance_flag:
             rospy.logdebug("Delete single instance parameter from parameter server.")
-            rospy.delete_param(self._INSTANCE_PID)
+            rospy.delete_param(self._INSTANCE_PARAM)
 
     def __del__(self):
         rospy.logdebug("Dtor called")
