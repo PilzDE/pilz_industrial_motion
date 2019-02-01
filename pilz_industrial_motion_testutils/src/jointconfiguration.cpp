@@ -26,14 +26,14 @@ JointConfiguration::JointConfiguration()
 {}
 
 JointConfiguration::JointConfiguration(const std::string& group_name,
-                                                                    const std::vector<double>& config)
+                                       const std::vector<double>& config)
   : RobotConfiguration(group_name)
   , joints_(config)
 {}
 
 JointConfiguration::JointConfiguration(const std::string& group_name,
-                                                                    const std::vector<double>& config,
-                                                                    moveit::core::RobotModelConstPtr robot_model)
+                                       const std::vector<double>& config,
+                                       moveit::core::RobotModelConstPtr robot_model)
   : RobotConfiguration(group_name, robot_model)
   , joints_(config)
 {
