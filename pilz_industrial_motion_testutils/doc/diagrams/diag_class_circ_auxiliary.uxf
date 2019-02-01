@@ -32,7 +32,7 @@
       <w>470</w>
       <h>80</h>
     </coordinates>
-    <panel_attributes>template=ConfigTypee&gt; 
+    <panel_attributes>template=ConfigType&gt; 
 CircAuxiliary
 {abstract}
 --
