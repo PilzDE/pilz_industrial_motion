@@ -27,21 +27,18 @@ namespace pilz_industrial_motion_testutils
  * to move via circ command.
  */
 template<class ConfigType, class BuilderType>
-class Interim : public CircAuxiliary<ConfigType>
+class Interim : public CircAuxiliary<ConfigType, BuilderType>
 {
-public:
-  virtual moveit_msgs::Constraints toPathConstraints() const;
+private:
+  virtual std::string getConstraintName() const override;
 
 };
 
 template<class ConfigType, class BuilderType>
-inline moveit_msgs::Constraints Interim<ConfigType, BuilderType>::toPathConstraints() const
+std::string Interim<ConfigType, BuilderType>::getConstraintName() const
 {
-  return BuilderType().setConstraintName("interim")
-      .setConfiguration(CircAuxiliary<ConfigType>::getConfiguration())
-      .toPathConstraints();
+  return "interim";
 }
-
 
 }
 

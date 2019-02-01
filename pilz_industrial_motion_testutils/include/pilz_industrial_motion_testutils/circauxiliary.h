@@ -17,6 +17,8 @@
 #ifndef CIRCAUXILIARY_H
 #define CIRCAUXILIARY_H
 
+#include <string>
+
 #include <moveit_msgs/Constraints.h>
 
 namespace pilz_industrial_motion_testutils
@@ -26,32 +28,42 @@ namespace pilz_industrial_motion_testutils
  * @brief Base class to define an auxiliary point needed to specify
  * circ commands.
  */
-template<class AuxiliaryConfigType>
+template<class ConfigType, class BuilderType>
 class CircAuxiliary
 {
 public:
-  void setConfiguration(const AuxiliaryConfigType& auxiliary_config);
-  const AuxiliaryConfigType& getConfiguration() const;
+  void setConfiguration(const ConfigType& auxiliary_config);
+  const ConfigType& getConfiguration() const;
 
 public:
-  virtual moveit_msgs::Constraints toPathConstraints() const = 0;
+  moveit_msgs::Constraints toPathConstraints() const;
+
+private:
+  virtual std::string getConstraintName() const = 0;
 
 protected:
-  AuxiliaryConfigType auxiliary_config_;
+  ConfigType auxiliary_config_;
 
 };
 
-
-template< class AuxiliaryConfigType>
-void CircAuxiliary<AuxiliaryConfigType>::setConfiguration(const AuxiliaryConfigType& auxiliary_config)
+template<class ConfigType, class BuilderType>
+void CircAuxiliary<ConfigType, BuilderType>::setConfiguration(const ConfigType& auxiliary_config)
 {
   auxiliary_config_ = auxiliary_config;
 }
 
-template< class AuxiliaryConfigType>
-inline const AuxiliaryConfigType& CircAuxiliary<AuxiliaryConfigType>::getConfiguration() const
+template<class ConfigType, class BuilderType>
+inline const ConfigType& CircAuxiliary<ConfigType, BuilderType>::getConfiguration() const
 {
   return auxiliary_config_;
+}
+
+template<class ConfigType, class BuilderType>
+inline moveit_msgs::Constraints CircAuxiliary<ConfigType, BuilderType>::toPathConstraints() const
+{
+  return BuilderType().setConstraintName(getConstraintName())
+      .setConfiguration(getConfiguration())
+      .toPathConstraints();
 }
 
 }

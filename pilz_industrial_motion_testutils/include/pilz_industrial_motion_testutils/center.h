@@ -27,21 +27,18 @@ namespace pilz_industrial_motion_testutils
  * on which the robot is supposed to move via circ command.
  */
 template<class ConfigType, class BuilderType>
-class Center : public CircAuxiliary<ConfigType>
+class Center : public CircAuxiliary<ConfigType, BuilderType>
 {
-public:
-  virtual moveit_msgs::Constraints toPathConstraints() const;
+private:
+  virtual std::string getConstraintName() const override;
 
 };
 
 template<class ConfigType, class BuilderType>
-inline moveit_msgs::Constraints Center<ConfigType, BuilderType>::toPathConstraints() const
+std::string Center<ConfigType, BuilderType>::getConstraintName() const
 {
-  return BuilderType().setConstraintName("center")
-      .setConfiguration(CircAuxiliary<ConfigType>::getConfiguration())
-      .toPathConstraints();
+  return "center";
 }
-
 
 }
 
