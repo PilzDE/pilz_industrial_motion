@@ -1,0 +1,84 @@
+<!--
+Copyright (c) 2018 Pilz GmbH & Co. KG
+
+This program is free software: you can redistribute it and/or modify
+it under the terms of the GNU Lesser General Public License as published by
+the Free Software Foundation, either version 3 of the License, or
+(at your option) any later version.
+
+This program is distributed in the hope that it will be useful,
+but WITHOUT ANY WARRANTY; without even the implied warranty of
+MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+GNU Lesser General Public License for more details.
+
+You should have received a copy of the GNU Lesser General Public License
+along with this program.  If not, see <http://www.gnu.org/licenses/>.
+-->
+
+<testdata>
+
+  <poses>
+
+    <pos name="ZeroPose">
+        <group name="manipulator">
+            <joints>0.0 0.0 0.0 0.0 0.0 0.0</joints>
+        </group>
+        <group name="gripper">
+            <joints>0</joints>
+        </group>
+    </pos>
+
+    <pos name="P1">
+      <group name="manipulator">
+          <xyzQuat link_name="prbt_tcp">0.2 0.0 0.8 0.0 0.0 0.0 1.0</xyzQuat>
+      </group>
+    </pos>
+
+    <pos name="P2">
+      <group name="manipulator">
+          <xyzQuat link_name="prbt_tcp">0.4 0.2 0.7 0.0 0.0 0.0 1.0</xyzQuat>
+      </group>
+    </pos>
+
+    <pos name="P3">
+      <group name="manipulator">
+          <xyzQuat link_name="prbt_tcp">0.2 0.4 0.6 0.0 0.0 0.0 1.0</xyzQuat>
+      </group>
+    </pos>
+
+
+    <pos name="P4">
+      <group name="manipulator">
+          <xyzQuat link_name="prbt_tcp">0.2 0.2 0.7 0.0 0.0 0.0 1.0</xyzQuat>
+      </group>
+    </pos>
+
+  </poses>
+
+  <ptps>
+    <ptp name="Ptp1">
+      <planningGroup>manipulator</planningGroup>
+      <targetLink>prbt_tcp</targetLink>
+      <startPos>ZeroPose</startPos>
+      <endPos>P1</endPos>
+      <vel>1.0</vel>
+      <acc>0.6</acc>
+    </ptp>
+    <ptp name="Ptp2">
+      <planningGroup>manipulator</planningGroup>
+      <targetLink>prbt_tcp</targetLink>
+      <startPos>P1</startPos>
+      <endPos>P2</endPos>
+      <vel>1.0</vel>
+      <acc>0.6</acc>
+    </ptp>
+  </ptps>
+
+  <sequences>
+    <blend name="ComplexSequence">
+      <sequenceCmd name="Ptp1" type="ptp_joint_cart" blend_radius="0.0" />
+      <sequenceCmd name="Ptp2" type="ptp_cart_cart" blend_radius="0.0" />
+    </blend>
+  </sequences>
+
+</testdata>
