@@ -44,6 +44,11 @@ public:
 public:
   MotionCmdUPtr getCmd(const std::string& cmd_name) const override
   {
+    // We cannot create a derived class object and then copy
+    // it into the memory space of a base class object because this
+    // will cause "slicing". Therefore, we create a dervied class object
+    // first and then let a base class pointer point to the memory
+    // space of the derived class.
     std::unique_ptr<CmdType> cmd_ptr { new CmdType() };
     CmdType& cmd {*cmd_ptr};
     cmd = func_(cmd_name);
