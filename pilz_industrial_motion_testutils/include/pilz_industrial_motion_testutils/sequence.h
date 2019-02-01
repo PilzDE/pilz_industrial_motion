@@ -71,7 +71,7 @@ private:
 
 inline void Sequence::add(MotionCmdUPtr cmd, const double blend_radius)
 {
-  assert(cmd);
+  if (!cmd) {throw std::invalid_argument("Cmd must not be null");}
   cmds_.emplace_back( std::move(cmd), blend_radius );
 }
 
