@@ -29,16 +29,13 @@
 #include <pilz_industrial_motion_testutils/xml_testdata_loader.h>
 #include <pilz_industrial_motion_testutils/sequence.h>
 
-#include "pilz_trajectory_generation/trajectory_generator_ptp.h"
 #include "pilz_trajectory_generation/trajectory_generator_lin.h"
-#include "pilz_trajectory_generation/trajectory_generator_circ.h"
 #include "pilz_trajectory_generation/joint_limits_aggregator.h"
 #include "pilz_trajectory_generation/trajectory_blender_transition_window.h"
 #include "pilz_trajectory_generation/trajectory_blend_request.h"
 #include "pilz_trajectory_generation/trajectory_blend_response.h"
 #include "test_utils.h"
 
-const std::string BLEND_DATA_PREFIX("test_data/");
 const std::string PARAM_MODEL_NO_GRIPPER_NAME {"robot_description"};
 const std::string PARAM_MODEL_WITH_GRIPPER_NAME {"robot_description_pg70"};
 
@@ -51,7 +48,6 @@ const std::string JOINT_VELOCITY_TOLERANCE("joint_velocity_tolerance");
 const std::string JOINT_ACCELERATION_TOLERANCE("joint_acceleration_tolerance");
 const std::string OTHER_TOLERANCE("other_tolerance");
 const std::string SAMPLING_TIME("sampling_time");
-const std::string BLEND_DATASET_NUM("blend_dataset_num");
 const std::string TEST_DATA_FILE_NAME("testdata_file_name");
 
 using namespace pilz;
@@ -81,8 +77,7 @@ protected:
   // test parameters from parameter server
   std::string planning_group_, target_link_;
   double cartesian_velocity_tolerance_, cartesian_angular_velocity_tolerance_,
-  joint_velocity_tolerance_, joint_acceleration_tolerance_, other_tolerance_, sampling_time_;
-  std::vector<testutils::blend_test_data> test_data_;
+  joint_velocity_tolerance_, joint_acceleration_tolerance_, sampling_time_;
   LimitsContainer planner_limits_;
 
   std::string test_data_file_name_;
@@ -99,7 +94,6 @@ void TrajectoryBlenderTransitionWindowTest::SetUp()
   ASSERT_TRUE(ph_.getParam(CARTESIAN_ANGULAR_VELOCITY_TOLERANCE, cartesian_angular_velocity_tolerance_));
   ASSERT_TRUE(ph_.getParam(JOINT_VELOCITY_TOLERANCE, joint_velocity_tolerance_));
   ASSERT_TRUE(ph_.getParam(JOINT_ACCELERATION_TOLERANCE, joint_acceleration_tolerance_));
-  ASSERT_TRUE(ph_.getParam(OTHER_TOLERANCE, other_tolerance_));
   ASSERT_TRUE(ph_.getParam(SAMPLING_TIME, sampling_time_));
   ASSERT_TRUE(ph_.getParam(TEST_DATA_FILE_NAME, test_data_file_name_));
 
@@ -126,11 +120,6 @@ void TrajectoryBlenderTransitionWindowTest::SetUp()
   ASSERT_NE(nullptr, lin_generator_) << "failed to create LIN trajectory generator";
   blender_.reset(new TrajectoryBlenderTransitionWindow(planner_limits_));
   ASSERT_NE(nullptr, blender_) << "failed to create trajectory blender";
-
-  // get the test data set
-  int blend_dataset_num;
-  ASSERT_TRUE(ph_.getParam(BLEND_DATASET_NUM, blend_dataset_num));
-  ASSERT_TRUE(testutils::getBlendTestData(ph_, blend_dataset_num, BLEND_DATA_PREFIX, test_data_));
 }
 
 
@@ -165,19 +154,10 @@ INSTANTIATE_TEST_CASE_P(InstantiationName, TrajectoryBlenderTransitionWindowTest
  */
 TEST_P(TrajectoryBlenderTransitionWindowTest, invalidGroupName)
 {
-  auto test_data = test_data_.front();
-  // generate two lin trajectories from test dataset
-  planning_interface::MotionPlanResponse res_lin_1, res_lin_2;
-  double dis_lin_1, dis_lin_2;
-  ASSERT_TRUE(testutils::generateTrajFromBlendTestData(robot_model_,
-                                                       lin_,
-                                                       planning_group_,
-                                                       target_link_,
-                                                       test_data,
-                                                       sampling_time_, sampling_time_,
-                                                       res_lin_1, res_lin_2,
-                                                       dis_lin_1, dis_lin_2))
-      << "Failed to generate LIN trajectories from test data";
+  Sequence seq {data_loader_->getSequence("TestBlend")};
+
+  planning_interface::MotionPlanResponse res_lin_1 {generateLinTraj(seq, 0)};
+  planning_interface::MotionPlanResponse res_lin_2 {generateLinTraj(seq, 1)};
 
   // Generate blend trajectory
   pilz::TrajectoryBlendRequest blend_req;
@@ -189,7 +169,7 @@ TEST_P(TrajectoryBlenderTransitionWindowTest, invalidGroupName)
   blend_req.second_trajectory = res_lin_2.trajectory_;
 
   // select blend radius
-  blend_req.blend_radius = dis_lin_1 > dis_lin_2 ? 0.5*dis_lin_2 : 0.5*dis_lin_1;
+  blend_req.blend_radius = seq.getBlendRadius(0);
   EXPECT_FALSE(blender_->blend(blend_req, blend_res));
 }
 
@@ -206,19 +186,10 @@ TEST_P(TrajectoryBlenderTransitionWindowTest, invalidGroupName)
  */
 TEST_P(TrajectoryBlenderTransitionWindowTest, invalidTargetLink)
 {
-  auto test_data = test_data_.front();
-  // generate two lin trajectories from test dataset
-  planning_interface::MotionPlanResponse res_lin_1, res_lin_2;
-  double dis_lin_1, dis_lin_2;
-  ASSERT_TRUE(testutils::generateTrajFromBlendTestData(robot_model_,
-                                                       lin_,
-                                                       planning_group_,
-                                                       target_link_,
-                                                       test_data,
-                                                       sampling_time_, sampling_time_,
-                                                       res_lin_1, res_lin_2,
-                                                       dis_lin_1, dis_lin_2))
-      << "Failed to generate LIN trajectories from test data";
+  Sequence seq {data_loader_->getSequence("TestBlend")};
+
+  planning_interface::MotionPlanResponse res_lin_1 {generateLinTraj(seq, 0)};
+  planning_interface::MotionPlanResponse res_lin_2 {generateLinTraj(seq, 1)};
 
   // Generate blend trajectory
   pilz::TrajectoryBlendRequest blend_req;
@@ -230,7 +201,7 @@ TEST_P(TrajectoryBlenderTransitionWindowTest, invalidTargetLink)
   blend_req.second_trajectory = res_lin_2.trajectory_;
 
   // select blend radius
-  blend_req.blend_radius = dis_lin_1 > dis_lin_2 ? 0.5*dis_lin_2 : 0.5*dis_lin_1;
+  blend_req.blend_radius = seq.getBlendRadius(0);
   EXPECT_FALSE(blender_->blend(blend_req, blend_res));
 }
 
@@ -247,19 +218,10 @@ TEST_P(TrajectoryBlenderTransitionWindowTest, invalidTargetLink)
  */
 TEST_P(TrajectoryBlenderTransitionWindowTest, negativeRadius)
 {
-  auto test_data = test_data_.front();
-  // generate two lin trajectories from test dataset
-  planning_interface::MotionPlanResponse res_lin_1, res_lin_2;
-  double dis_lin_1, dis_lin_2;
-  ASSERT_TRUE(testutils::generateTrajFromBlendTestData(robot_model_,
-                                                       lin_generator_,
-                                                       planning_group_,
-                                                       target_link_,
-                                                       test_data,
-                                                       sampling_time_, sampling_time_,
-                                                       res_lin_1, res_lin_2,
-                                                       dis_lin_1, dis_lin_2))
-      << "Failed to generate LIN trajectories from test data";
+  Sequence seq {data_loader_->getSequence("TestBlend")};
+
+  planning_interface::MotionPlanResponse res_lin_1 {generateLinTraj(seq, 0)};
+  planning_interface::MotionPlanResponse res_lin_2 {generateLinTraj(seq, 1)};
 
   // Generate blend trajectory
   pilz::TrajectoryBlendRequest blend_req;
@@ -288,19 +250,10 @@ TEST_P(TrajectoryBlenderTransitionWindowTest, negativeRadius)
  */
 TEST_P(TrajectoryBlenderTransitionWindowTest, zeroRadius)
 {
-  auto test_data = test_data_.front();
-  // generate two lin trajectories from test dataset
-  planning_interface::MotionPlanResponse res_lin_1, res_lin_2;
-  double dis_lin_1, dis_lin_2;
-  ASSERT_TRUE(testutils::generateTrajFromBlendTestData(robot_model_,
-                                                       lin_generator_,
-                                                       planning_group_,
-                                                       target_link_,
-                                                       test_data,
-                                                       sampling_time_, sampling_time_,
-                                                       res_lin_1, res_lin_2,
-                                                       dis_lin_1, dis_lin_2))
-      << "Failed to generate LIN trajectories from test data";
+  Sequence seq {data_loader_->getSequence("TestBlend")};
+
+  planning_interface::MotionPlanResponse res_lin_1 {generateLinTraj(seq, 0)};
+  planning_interface::MotionPlanResponse res_lin_2 {generateLinTraj(seq, 1)};
 
   // Generate blend trajectory
   pilz::TrajectoryBlendRequest blend_req;
@@ -329,19 +282,11 @@ TEST_P(TrajectoryBlenderTransitionWindowTest, zeroRadius)
  */
 TEST_P(TrajectoryBlenderTransitionWindowTest, differentSamplingTimes)
 {
-  auto test_data = test_data_.front();
-  // generate two lin trajectories from test dataset
-  planning_interface::MotionPlanResponse res_lin_1, res_lin_2;
-  double dis_lin_1, dis_lin_2;
-  ASSERT_TRUE(testutils::generateTrajFromBlendTestData(robot_model_,
-                                                       lin_generator_,
-                                                       planning_group_,
-                                                       target_link_,
-                                                       test_data,
-                                                       sampling_time_, 2*sampling_time_,
-                                                       res_lin_1, res_lin_2,
-                                                       dis_lin_1, dis_lin_2))
-      << "Failed to generate LIN trajectories from test data";
+  Sequence seq {data_loader_->getSequence("TestBlend")};
+
+  planning_interface::MotionPlanResponse res_lin_1 {generateLinTraj(seq, 0)};
+  sampling_time_ *= 2;
+  planning_interface::MotionPlanResponse res_lin_2 {generateLinTraj(seq, 1)};
 
   // Generate blend trajectory
   pilz::TrajectoryBlendRequest blend_req;
@@ -351,7 +296,7 @@ TEST_P(TrajectoryBlenderTransitionWindowTest, differentSamplingTimes)
   blend_req.link_name = target_link_;
   blend_req.first_trajectory = res_lin_1.trajectory_;
   blend_req.second_trajectory = res_lin_2.trajectory_;
-  blend_req.blend_radius = dis_lin_1 > dis_lin_2 ? 0.5*dis_lin_2 : 0.5*dis_lin_1;
+  blend_req.blend_radius = seq.getBlendRadius(0);
   EXPECT_FALSE(blender_->blend(blend_req, blend_res));
 }
 
@@ -369,19 +314,10 @@ TEST_P(TrajectoryBlenderTransitionWindowTest, differentSamplingTimes)
  */
 TEST_P(TrajectoryBlenderTransitionWindowTest, nonUniformSamplingTime)
 {
-  auto test_data = test_data_.front();
-  // generate two lin trajectories from test dataset
-  planning_interface::MotionPlanResponse res_lin_1, res_lin_2;
-  double dis_lin_1, dis_lin_2;
-  ASSERT_TRUE(testutils::generateTrajFromBlendTestData(robot_model_,
-                                                       lin_generator_,
-                                                       planning_group_,
-                                                       target_link_,
-                                                       test_data,
-                                                       sampling_time_, sampling_time_,
-                                                       res_lin_1, res_lin_2,
-                                                       dis_lin_1, dis_lin_2))
-      << "Failed to generate LIN trajectories from test data";
+  Sequence seq {data_loader_->getSequence("TestBlend")};
+
+  planning_interface::MotionPlanResponse res_lin_1 {generateLinTraj(seq, 0)};
+  planning_interface::MotionPlanResponse res_lin_2 {generateLinTraj(seq, 1)};
 
   // Modify first time interval
   EXPECT_GT(res_lin_1.trajectory_->getWayPointCount(), 2u);
@@ -395,7 +331,7 @@ TEST_P(TrajectoryBlenderTransitionWindowTest, nonUniformSamplingTime)
   blend_req.link_name = target_link_;
   blend_req.first_trajectory = res_lin_1.trajectory_;
   blend_req.second_trajectory = res_lin_2.trajectory_;
-  blend_req.blend_radius = dis_lin_1 > dis_lin_2 ? 0.5*dis_lin_2 : 0.5*dis_lin_1;
+  blend_req.blend_radius = seq.getBlendRadius(0);
   EXPECT_FALSE(blender_->blend(blend_req, blend_res));
 }
 
@@ -414,19 +350,10 @@ TEST_P(TrajectoryBlenderTransitionWindowTest, nonUniformSamplingTime)
  */
 TEST_P(TrajectoryBlenderTransitionWindowTest, notIntersectingLinTrajectories)
 {
-  auto test_data = test_data_.front();
-  // generate two lin trajectories from test dataset
-  planning_interface::MotionPlanResponse res_lin_1, res_lin_2;
-  double dis_lin_1, dis_lin_2;
-  ASSERT_TRUE(testutils::generateTrajFromBlendTestData(robot_model_,
-                                                       lin_generator_,
-                                                       planning_group_,
-                                                       target_link_,
-                                                       test_data,
-                                                       sampling_time_, sampling_time_,
-                                                       res_lin_1, res_lin_2,
-                                                       dis_lin_1, dis_lin_2))
-      << "Failed to generate LIN trajectories from test data";
+  Sequence seq {data_loader_->getSequence("TestBlend")};
+
+  planning_interface::MotionPlanResponse res_lin_1 {generateLinTraj(seq, 0)};
+  planning_interface::MotionPlanResponse res_lin_2 {generateLinTraj(seq, 1)};
 
   // replace the second trajectory to make the two LIN trajectories timely not intersect
   res_lin_2.trajectory_ = res_lin_1.trajectory_;
@@ -440,7 +367,7 @@ TEST_P(TrajectoryBlenderTransitionWindowTest, notIntersectingLinTrajectories)
   blend_req.link_name = target_link_;
   blend_req.first_trajectory = res_lin_1.trajectory_;
   blend_req.second_trajectory = res_lin_2.trajectory_;
-  blend_req.blend_radius = dis_lin_1>dis_lin_2 ? 0.5*dis_lin_2 : 0.5*dis_lin_1;
+  blend_req.blend_radius = seq.getBlendRadius(0);
   EXPECT_FALSE(blender_->blend(blend_req, blend_res));
 }
 
@@ -459,19 +386,10 @@ TEST_P(TrajectoryBlenderTransitionWindowTest, notIntersectingLinTrajectories)
 
 TEST_P(TrajectoryBlenderTransitionWindowTest, testNonStationaryPoint)
 {
-  auto test_data = test_data_.front();
-  // generate two lin trajectories
-  planning_interface::MotionPlanResponse res_lin_1, res_lin_2;
-  double dis_lin_1, dis_lin_2;
-  ASSERT_TRUE(testutils::generateTrajFromBlendTestData(robot_model_,
-                                                       lin_generator_,
-                                                       planning_group_,
-                                                       target_link_,
-                                                       test_data,
-                                                       sampling_time_, sampling_time_,
-                                                       res_lin_1, res_lin_2,
-                                                       dis_lin_1, dis_lin_2))
-      << "Failed to generate LIN trajectories from test data";
+  Sequence seq {data_loader_->getSequence("TestBlend")};
+
+  planning_interface::MotionPlanResponse res_lin_1 {generateLinTraj(seq, 0)};
+  planning_interface::MotionPlanResponse res_lin_2 {generateLinTraj(seq, 1)};
 
   // blend two lin trajectories and check the result
   pilz::TrajectoryBlendRequest blend_req;
@@ -479,7 +397,7 @@ TEST_P(TrajectoryBlenderTransitionWindowTest, testNonStationaryPoint)
 
   blend_req.group_name = planning_group_;
   blend_req.link_name = target_link_;
-  blend_req.blend_radius = dis_lin_1 > dis_lin_2 ? 0.5*dis_lin_2 : 0.5*dis_lin_1;
+  blend_req.blend_radius = seq.getBlendRadius(0);
 
   blend_req.first_trajectory = res_lin_1.trajectory_;
   blend_req.second_trajectory = res_lin_2.trajectory_;
@@ -505,39 +423,27 @@ TEST_P(TrajectoryBlenderTransitionWindowTest, testNonStationaryPoint)
  */
 TEST_P(TrajectoryBlenderTransitionWindowTest, testLINLINBlendingTrajectoryInsideBlendRadius)
 {
-  // Use only subset of testdata
-  std::vector<testutils::blend_test_data> test_data_set;
-  test_data_set.push_back(test_data_[0]);
-  test_data_set.push_back(test_data_[1]);
+  Sequence seq {data_loader_->getSequence("TestBlend")};
 
-  for(auto const &test_data : test_data_set)
-  {
-    // generate two lin trajectories
-    planning_interface::MotionPlanResponse res_lin_1, res_lin_2;
-    double dis_lin_1, dis_lin_2;
-    ASSERT_TRUE(testutils::generateTrajFromBlendTestData(robot_model_,
-                                                         lin_generator_,
-                                                         planning_group_,
-                                                         target_link_,
-                                                         test_data,
-                                                         sampling_time_, sampling_time_,
-                                                         res_lin_1, res_lin_2,
-                                                         dis_lin_1, dis_lin_2))
-        << "Failed to generate LIN trajectories from test data";
+  planning_interface::MotionPlanResponse res_lin_1 {generateLinTraj(seq, 0)};
+  planning_interface::MotionPlanResponse res_lin_2 {generateLinTraj(seq, 1)};
 
-    // blend two lin trajectories and check the result
-    pilz::TrajectoryBlendRequest blend_req;
-    pilz::TrajectoryBlendResponse blend_res;
+  double lin1_distance;
+  lin1_distance = (res_lin_1.trajectory_->getFirstWayPoint().getFrameTransform(target_link_).translation()
+                   - res_lin_1.trajectory_->getLastWayPoint().getFrameTransform(target_link_).translation()).norm();
 
-    blend_req.group_name = planning_group_;
-    blend_req.link_name = target_link_;
-    blend_req.blend_radius = dis_lin_1 > dis_lin_2 ? 1.1*dis_lin_2 : 1.1*dis_lin_1;
+  // blend two lin trajectories and check the result
+  pilz::TrajectoryBlendRequest blend_req;
+  pilz::TrajectoryBlendResponse blend_res;
 
-    blend_req.first_trajectory = res_lin_1.trajectory_;
-    blend_req.second_trajectory = res_lin_2.trajectory_;
+  blend_req.group_name = planning_group_;
+  blend_req.link_name = target_link_;
+  blend_req.blend_radius = 1.1 * lin1_distance;
 
-    EXPECT_FALSE(blender_->blend(blend_req, blend_res));
-  }
+  blend_req.first_trajectory = res_lin_1.trajectory_;
+  blend_req.second_trajectory = res_lin_2.trajectory_;
+
+  EXPECT_FALSE(blender_->blend(blend_req, blend_res));
 }
 
 /**
@@ -607,23 +513,10 @@ TEST_P(TrajectoryBlenderTransitionWindowTest, testLINLINBlending)
  */
 TEST_P(TrajectoryBlenderTransitionWindowTest, testLINLINBlendingOverlappingTrajectories)
 {
-  auto test_data = test_data_.front();
+  Sequence seq {data_loader_->getSequence("TestBlendOverlap")};
 
-  // modify end position such that trajectories overlap
-  test_data.end_position = test_data.start_position;
-
-  // generate two lin trajectories from test dataset
-  planning_interface::MotionPlanResponse res_lin_1, res_lin_2;
-  double dis_lin_1, dis_lin_2;
-  ASSERT_TRUE(testutils::generateTrajFromBlendTestData(robot_model_,
-                                                       lin_,
-                                                       planning_group_,
-                                                       target_link_,
-                                                       test_data,
-                                                       sampling_time_, sampling_time_,
-                                                       res_lin_1, res_lin_2,
-                                                       dis_lin_1, dis_lin_2))
-      << "Failed to generate LIN trajectories from test data";
+  planning_interface::MotionPlanResponse res_lin_1 {generateLinTraj(seq, 0)};
+  planning_interface::MotionPlanResponse res_lin_2 {generateLinTraj(seq, 1)};
 
   // blend two lin trajectories and check the result
   pilz::TrajectoryBlendRequest blend_req;
@@ -633,7 +526,7 @@ TEST_P(TrajectoryBlenderTransitionWindowTest, testLINLINBlendingOverlappingTraje
   blend_req.link_name = target_link_;
   blend_req.first_trajectory = res_lin_1.trajectory_;
   blend_req.second_trajectory = res_lin_2.trajectory_;
-  blend_req.blend_radius = 0.5*dis_lin_1;
+  blend_req.blend_radius = seq.getBlendRadius(0);
   EXPECT_TRUE(blender_->blend(blend_req, blend_res));
 
   // check the blend result
@@ -671,19 +564,10 @@ TEST_P(TrajectoryBlenderTransitionWindowTest, testNonLinearBlending)
   const double SINE_SCALING_FACTOR {0.05};
   const double TIME_SCALING_FACTOR {10};
 
-  auto test_data = test_data_.front();
-  // generate two lin trajectories from test dataset
-  planning_interface::MotionPlanResponse res_lin_1, res_lin_2;
-  double dis_lin_1, dis_lin_2;
-  ASSERT_TRUE(testutils::generateTrajFromBlendTestData(robot_model_,
-                                                       lin_,
-                                                       planning_group_,
-                                                       target_link_,
-                                                       test_data,
-                                                       sampling_time_, sampling_time_,
-                                                       res_lin_1, res_lin_2,
-                                                       dis_lin_1, dis_lin_2))
-      << "Failed to generate LIN trajectories from test data";
+  Sequence seq {data_loader_->getSequence("TestBlend")};
+
+  planning_interface::MotionPlanResponse res_lin_1 {generateLinTraj(seq, 0)};
+  planning_interface::MotionPlanResponse res_lin_2 {generateLinTraj(seq, 1)};
 
   // prepare looping over trajectories
   std::vector<robot_trajectory::RobotTrajectoryPtr> lin_trajs {res_lin_1.trajectory_, res_lin_2.trajectory_};
@@ -766,7 +650,7 @@ TEST_P(TrajectoryBlenderTransitionWindowTest, testNonLinearBlending)
 
   blend_req.group_name = planning_group_;
   blend_req.link_name = target_link_;
-  blend_req.blend_radius = dis_lin_1 > dis_lin_2 ? 0.5*dis_lin_2 : 0.5*dis_lin_1;
+  blend_req.blend_radius = seq.getBlendRadius(0);
 
   blend_req.first_trajectory = sine_trajs[0];
   blend_req.second_trajectory = sine_trajs[1];
