@@ -2,6 +2,12 @@
 Changelog for package pilz_industrial_motion_testutils
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
+Forthcoming
+-----------
+* Add high level abstraction data classes to represent configuration of robot
+* Add high level abstraction data classes to represent different command types
+* Add functions to TestdataLoader returning the high level abstraction classes
+
 0.3.3 (2019-01-25)
 ------------------
 
