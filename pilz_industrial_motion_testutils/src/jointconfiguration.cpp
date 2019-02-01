@@ -14,6 +14,8 @@
  * limitations under the License.
  */
 
+#include <stdexcept>
+
 #include "pilz_industrial_motion_testutils/jointconfiguration.h"
 
 #include <moveit/kinematic_constraints/utils.h>
@@ -56,7 +58,7 @@ moveit_msgs::Constraints JointConfiguration::toGoalConstraintsWithoutModel() con
 
 moveit_msgs::Constraints JointConfiguration::toGoalConstraintsWithModel() const
 {
-  assert(robot_model_);
+  if (!robot_model_) {throw std::runtime_error("No robot model set");}
   robot_state::RobotState state(robot_model_);
   state.setToDefaultValues();
   state.setJointGroupPositions(group_name_, joints_);
@@ -78,7 +80,7 @@ moveit_msgs::RobotState JointConfiguration::toMoveitMsgsRobotStateWithoutModel()
 
 moveit_msgs::RobotState JointConfiguration::toMoveitMsgsRobotStateWithModel() const
 {
-  assert(robot_model_);
+  if (!robot_model_) {throw std::runtime_error("No robot model set");}
   robot_state::RobotState start_state(robot_model_);
   start_state.setToDefaultValues();
   start_state.setJointGroupPositions(group_name_, joints_);
