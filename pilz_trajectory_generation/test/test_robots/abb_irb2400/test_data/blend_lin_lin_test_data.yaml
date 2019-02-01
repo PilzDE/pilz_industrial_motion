@@ -1,0 +1,20 @@
+#
+# Copyright (c) 2018 Pilz GmbH & Co. KG
+#
+# This program is free software: you can redistribute it and/or modify
+# it under the terms of the GNU Lesser General Public License as published by
+# the Free Software Foundation, either version 3 of the License, or
+# (at your option) any later version.
+#
+# This program is distributed in the hope that it will be useful,
+# but WITHOUT ANY WARRANTY; without even the implied warranty of
+# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+# GNU Lesser General Public License for more details.
+#
+# You should have received a copy of the GNU Lesser General Public License
+# along with this program.  If not, see <http://www.gnu.org/licenses/>.
+
+blend_set_1:
+ start_position: [0.0, -0.388074, 0.542292, 0.0, 1.416578, 0.0]
+ mid_position: [0.244978, 0.0, 0.496077, 0.0, 1.082479, 0.244978]
+ end_position: [0.588002, 0.0, 0.794946, 0.0, 0.790927, 0.588002]
