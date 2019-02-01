@@ -28,6 +28,7 @@ test data provider/loader, and the relationship between them.
 ## Usage
 The usage of the TestDataLoader is as shown below.
 ![RobotConfigurations](diagrams/diag_seq_testdataloader_usage.png)
+
 The idea is that the TestdataLoader returns high level data abstraction classes
 which can then directly be used to generate/build the ROS messages needed
 for testing.
