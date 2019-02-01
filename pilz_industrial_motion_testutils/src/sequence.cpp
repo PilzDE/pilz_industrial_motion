@@ -16,6 +16,8 @@
 
 #include "pilz_industrial_motion_testutils/sequence.h"
 
+#include <algorithm>
+
 namespace pilz_industrial_motion_testutils
 {
 
@@ -44,14 +46,6 @@ pilz_msgs::MotionSequenceRequest Sequence::toRequest() const
     req.items.push_back(item);
   }
   return req;
-}
-
-void Sequence::setAllBlendRadiiToZero()
-{
-  for (auto& cmd : cmds_)
-  {
-    cmd.second = 0.0;
-  }
 }
 
 void Sequence::erase(const size_t start, const size_t end)

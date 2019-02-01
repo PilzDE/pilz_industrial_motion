@@ -65,7 +65,8 @@ public:
   pilz_msgs::MotionSequenceRequest toRequest() const;
 
 private:
-  std::vector<std::pair<MotionCmdUPtr, double> > cmds_;
+  using TCmdRadiiPair = std::pair<MotionCmdUPtr, double>;
+  std::vector<TCmdRadiiPair > cmds_;
 };
 
 inline void Sequence::add(MotionCmdUPtr cmd, const double blend_radius)
@@ -97,6 +98,11 @@ inline double Sequence::getBlendRadius(const size_t index_cmd) const
 inline void Sequence::setBlendRadii(const size_t index_cmd, const double blend_radius)
 {
   cmds_.at(index_cmd).second = blend_radius;
+}
+
+inline void Sequence::setAllBlendRadiiToZero()
+{
+  std::for_each(cmds_.begin(), cmds_.end(), [](TCmdRadiiPair &cmd){ cmd.second = 0.; });
 }
 
 }
