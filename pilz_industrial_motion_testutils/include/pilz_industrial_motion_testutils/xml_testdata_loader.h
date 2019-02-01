@@ -117,14 +117,14 @@ public:
   ~XmlTestdataLoader();
 
 public:
-  //! DEPRECATED
+  //! @deprecated Use function using higher level abstraction data class instead.
   virtual bool getJoints(const std::string &pos_name, const std::string &group_name,
                          std::vector<double> &dVec) const override;
 
   virtual JointConfiguration getJoints(const std::string &pos_name,
                                        const std::string &group_name) const override;
 
-  //! DEPRECATED
+  //! @deprecated Use function using higher level abstraction data class instead.
   virtual bool getPose(const std::string &pos_name, const std::string &group_name,
                        std::vector<double> &dVec) const override;
 
@@ -135,14 +135,14 @@ public:
   virtual PtpCart getPtpCart(const std::string& cmd_name) const override;
   virtual PtpJointCart getPtpJointCart(const std::string& cmd_name) const override;
 
-  //! DEPRECATED
+  //! @deprecated Use function using higher level abstraction data class instead.
   virtual bool getLin(const std::string& cmd_name, STestMotionCommand& cmd) const override;
 
   virtual LinJoint getLinJoint(const std::string& cmd_name) const override;
   virtual LinCart getLinCart(const std::string& cmd_name) const override;
 
 
-  //! DEPRECATED
+  //! @deprecated Use function using higher level abstraction data class instead.
   virtual bool getCirc(const std::string& cmd_name, STestMotionCommand& cmd) const override;
 
   virtual CircCenterCart getCircCartCenterCart(const std::string &cmd_name) const override;
@@ -153,7 +153,7 @@ public:
 
 private:
   /**
-   * DEPRECATED
+   * @deprecated Use function using higher level abstraction data class instead.
    *
    * @brief Use this function to search for a node (like an pos or cmd) with a given name.
    *
@@ -172,7 +172,7 @@ private:
                                                 const std::string &name) const;
 
   /**
-   * DEPRECATED
+   * @deprecated Use function using higher level abstraction data class instead.
    *
    * @brief Use this function to search for a cmd-node with a given name.
    *
@@ -201,7 +201,7 @@ private:
                                        const std::string &planning_group) const;
 
 private:
-  //! DEPRECATED
+  //! @deprecated Use function using higher level abstraction data class instead.
   //! @brief Converts string vector to double vector.
   inline static void strVec2doubleVec(std::vector<std::string> &strVec, std::vector<double> &dVec);
 

@@ -80,7 +80,7 @@ public:
   void setRobotModel(moveit::core::RobotModelConstPtr robot_model);
 
   /**
-   * DEPRECATED
+   * @deprecated Use function using higher level abstraction data class instead.
    *
    * @brief Returns the joint values for the given pos and group.
    *
@@ -92,7 +92,7 @@ public:
                                        const std::string &group_name) const = 0;
 
   /**
-   * DEPRECATED
+   * @deprecated Use function using higher level abstraction data class instead.
    *
    * @brief Returns the Cartesian Pose for the given pos and group.
    *
@@ -111,7 +111,7 @@ public:
   virtual PtpJointCart getPtpJointCart(const std::string& cmd_name) const = 0;
 
   /**
-   * DEPRECATED
+   * @deprecated Use function using higher level abstraction data class instead.
    *
    * @brief Get the LIN motion command structure according to the cmmand name
    * @param cmd_name
@@ -127,7 +127,7 @@ public:
   virtual LinCart getLinCart(const std::string& cmd_name) const = 0;
 
   /**
-   * DEPRECATED
+   * @deprecated Use function using higher level abstraction data class instead.
    *
    * @brief Returns the start-, end- and auxility-position, as well as
    * the velocity and acceleration of the circ command given by its name.
