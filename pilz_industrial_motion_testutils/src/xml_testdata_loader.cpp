@@ -291,9 +291,17 @@ CartesianConfiguration XmlTestdataLoader::getPose(const std::string &pos_name,
     throw TestDataLoaderReadingException("No cartesian node found.");
   }
 
+  const boost::property_tree::ptree& link_name_attr = xyzQuat_tree.get_child(LINK_NAME_PATH_STR, empty_tree_);
+  if (link_name_attr == empty_tree_)
+  {
+    throw TestDataLoaderReadingException("No link name found.");
+  }
+  std::string link_name {link_name_attr.data()};
+
   std::vector<std::string> strs;
   boost::split(strs,  xyzQuat_tree.data(), boost::is_any_of(" "));
-  return CartesianConfiguration(group_name, strVec2doubleVec(strs), robot_model_);
+  return CartesianConfiguration(group_name, link_name,
+                                strVec2doubleVec(strs), robot_model_);
 }
 
 PtpJoint XmlTestdataLoader::getPtpJoint(const std::string& cmd_name) const

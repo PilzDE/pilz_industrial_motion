@@ -261,7 +261,7 @@ private:
   const std::string NAME_PATH_STR {XML_ATTR_STR + ".name"};
   const std::string CMD_TYPE_PATH_STR {XML_ATTR_STR + ".type"};
   const std::string BLEND_RADIUS_PATH_STR {XML_ATTR_STR + ".blend_radius"};
-  const std::string LINK_NAME_PATH_STR {XML_ATTR_STR + ".linkName"};
+  const std::string LINK_NAME_PATH_STR {XML_ATTR_STR + ".link_name"};
 
 };
 
