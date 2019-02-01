@@ -25,15 +25,19 @@ CartesianConfiguration::CartesianConfiguration()
 {}
 
 CartesianConfiguration::CartesianConfiguration(const std::string& group_name,
+                                               const std::string &link_name,
                                                const std::vector<double>& config)
   : RobotConfiguration(group_name)
+  , link_name_(link_name)
   , pose_(toPose(config))
 {}
 
 CartesianConfiguration::CartesianConfiguration(const std::string& group_name,
+                                               const std::string& link_name,
                                                const std::vector<double>& config,
                                                moveit::core::RobotModelConstPtr robot_model)
   : RobotConfiguration(group_name, robot_model)
+  , link_name_(link_name)
   , pose_(toPose(config))
 {}
 

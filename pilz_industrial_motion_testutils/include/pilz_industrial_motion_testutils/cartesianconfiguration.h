@@ -44,9 +44,11 @@ public:
   CartesianConfiguration();
 
   CartesianConfiguration(const std::string& group_name,
+                         const std::string& link_name,
                          const std::vector<double>& config);
 
   CartesianConfiguration(const std::string& group_name,
+                         const std::string& link_name,
                          const std::vector<double>& config,
                          moveit::core::RobotModelConstPtr robot_model);
 
@@ -62,7 +64,7 @@ private:
   static geometry_msgs::PoseStamped toStampedPose(const geometry_msgs::Pose& pose);
 
 private:
-  std::string link_name_ {"prbt_tcp"};
+  std::string link_name_;
   geometry_msgs::Pose pose_;
 };
 
