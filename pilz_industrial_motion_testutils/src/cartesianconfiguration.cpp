@@ -65,10 +65,8 @@ moveit_msgs::RobotState CartesianConfiguration::toMoveitMsgsRobotState() const
     throw std::runtime_error("No robot model set");
   }
 
-  // set the joints as ik seed
   robot_state::RobotState rstate(robot_model_);
   rstate.setToDefaultValues();
-  //  rstate.setJointGroupPositions(cmd.planning_group, cmd.start_position);
   rstate.update();
 
   // set to Cartesian pose
