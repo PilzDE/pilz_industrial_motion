@@ -44,9 +44,6 @@ public:
   void setRobotModel(moveit::core::RobotModelConstPtr robot_model);
   void setGroupName(const std::string& group_name);
 
-  virtual moveit_msgs::Constraints toGoalConstraints() const override;
-  virtual moveit_msgs::RobotState toMoveitMsgsRobotState() const override;
-
 protected:
   std::string group_name_;
   moveit::core::RobotModelConstPtr robot_model_;
@@ -61,16 +58,6 @@ inline void RobotConfiguration::setRobotModel(moveit::core::RobotModelConstPtr r
 inline void RobotConfiguration::setGroupName(const std::string& group_name)
 {
   group_name_ = group_name;
-}
-
-inline moveit_msgs::Constraints RobotConfiguration::toGoalConstraints() const
-{
-  throw std::runtime_error("Function 'toConstraints()' not implemented");
-}
-
-inline moveit_msgs::RobotState RobotConfiguration::toMoveitMsgsRobotState() const
-{
-  throw std::runtime_error("Function 'toMoveitMsgsRobotState()' not implemented");
 }
 
 }
