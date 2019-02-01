@@ -1,19 +1,20 @@
-# Testdatenprovider
-- Sind kartesische Positionen zu speichern, so ist die kartesische Position und
- der dazugehörige Seed zu speichern.
-- Positionsangaben mithilfe von Achswerten sind gegenüber den kartesischen
-Positionsangaben zu bevorzugen.
-- Werden weitere Kennwerte benötigt so sind diese, insofern möglich,
-über Hilfsfunktionen zu berechnen. In anderen Worten, es sollen so
-wenig wie möglich Extrawerte abgespeichert werden.
-- Die Orientierung kann je nach Anwendungfall in Euler- oder
-Quaternion-Darstellung gespeichert werden. Ist beides möglich so ist die Euler-Darstellung zu bevorzugen, da sie leichter zu interpretieren ist.
-- In Zukunft sollen neue Testdaten (Positionen, etc.) so gewählt werden, dass
-sie auf allen bzw. möglichst vielen Testebenen genutzt werden können. Die neu
-abgelegten Testdaten sollen dem Team kommuniziert werden (z.B. im Daily) um
-nochmal im Team über die Güte der neuen Daten diskutieren zu können.
+# Test data provider/loader
 
-## Diagrams
+## General information
+- Use as little as possible test points (Reason: Reduces maintenance overhead).
+- Test points should be defined following the concept shown below.
+![TestDataConcept](../../pilz_trajectory_generation/test/test_robots/concept_testdata.png)
+- Test points can be defined in joint space or Cartesian space. However, one
+test point should not be defined in both spaces (data redundancy)
+- If a test point is defined in Cartesian space, then also state the
+corresponding seed.
+- Store preferably only valid test points and test commands. You can use the
+valid test points and test commands to create invalid test points or commands if
+needed (Reason: Reduces maintenance overhead).
+
+## Diagrams/ Data types
+- The following diagrams show the main classes which can be loaded from the
+test data provider/loader, and the relationship between them.
 
 ### Robot configurations
 ![RobotConfigurations](diagrams/diag_class_robot_configurations.png)
@@ -23,3 +24,10 @@ nochmal im Team über die Güte der neuen Daten diskutieren zu können.
 
 ### Circ auxiliary types
 ![AuxiliaryTypes](diagrams/diag_class_circ_auxiliary.png)
+
+## Usage
+The usage of the TestDataLoader is as shown below.
+![RobotConfigurations](diagrams/diag_seq_testdataloader_usage.png)
+The idea is that the TestdataLoader returns high level data abstraction classes
+which can then directly be used to generate/build the ROS messages needed
+for testing.
