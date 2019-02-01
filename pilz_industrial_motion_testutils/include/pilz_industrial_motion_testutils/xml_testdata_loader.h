@@ -121,14 +121,14 @@ public:
   virtual bool getJoints(const std::string &pos_name, const std::string &group_name,
                          std::vector<double> &dVec) const override;
 
-  virtual JointConfiguration getJoints(const std::string &pose_name,
+  virtual JointConfiguration getJoints(const std::string &pos_name,
                                        const std::string &group_name) const override;
 
   //! DEPRECATED
-  virtual bool getPose(const std::string &pose_name, const std::string &group_name,
+  virtual bool getPose(const std::string &pos_name, const std::string &group_name,
                        std::vector<double> &dVec) const override;
 
-  virtual CartesianConfiguration getPose(const std::string &pose_name,
+  virtual CartesianConfiguration getPose(const std::string &pos_name,
                                          const std::string &group_name) const override;
 
   virtual PtpJoint getPtpJoint(const std::string& cmd_name) const override;

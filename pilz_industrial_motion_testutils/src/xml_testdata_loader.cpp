@@ -128,7 +128,7 @@ const pt::ptree::value_type& XmlTestdataLoader::findNodeWithName(const boost::pr
   throw TestDataLoaderReadingException(msg);
 }
 
-bool XmlTestdataLoader::getJoints(const std::string &pose_name, const std::string &group_name,
+bool XmlTestdataLoader::getJoints(const std::string &pos_name, const std::string &group_name,
                                   std::vector<double> &dVec) const
 {
   // Search for node with given name.
@@ -139,10 +139,10 @@ bool XmlTestdataLoader::getJoints(const std::string &pose_name, const std::strin
     ROS_ERROR("No poses found.");
     return false;
   }
-  const pt::ptree::value_type& pose_node { findNodeWithName(poses_tree, pose_name, ok) };
+  const pt::ptree::value_type& pose_node { findNodeWithName(poses_tree, pos_name, ok) };
   if (!ok)
   {
-    ROS_ERROR_STREAM("Pos '" << pose_name << "' not found.");
+    ROS_ERROR_STREAM("Pos '" << pos_name << "' not found.");
     return false;
   }
 
@@ -174,7 +174,7 @@ bool XmlTestdataLoader::getJoints(const std::string &pose_name, const std::strin
   return true;
 }
 
-JointConfiguration XmlTestdataLoader::getJoints(const std::string &pose_name,
+JointConfiguration XmlTestdataLoader::getJoints(const std::string &pos_name,
                                                 const std::string &group_name) const
 {
   // Search for node with given name.
@@ -184,7 +184,7 @@ JointConfiguration XmlTestdataLoader::getJoints(const std::string &pose_name,
     throw TestDataLoaderReadingException("No poses found.");
   }
 
-  const auto& pose_node {findNodeWithName(poses_tree, pose_name)};
+  const auto& pose_node {findNodeWithName(poses_tree, pos_name)};
 
   // Search group node with given name.
   const auto& group_tree {pose_node.second};
@@ -207,7 +207,7 @@ JointConfiguration XmlTestdataLoader::getJoints(const std::string &pose_name,
   return JointConfiguration(group_name, strVec2doubleVec(strs), robot_model_);
 }
 
-bool XmlTestdataLoader::getPose(const std::string &pose_name, const std::string &group_name,
+bool XmlTestdataLoader::getPose(const std::string &pos_name, const std::string &group_name,
                                 std::vector<double> &dVec) const
 {
   // Search for node with given name.
@@ -218,10 +218,10 @@ bool XmlTestdataLoader::getPose(const std::string &pose_name, const std::string 
     ROS_ERROR("No poses found.");
     return false;
   }
-  const pt::ptree::value_type& pose_node { findNodeWithName(poses_tree, pose_name, ok) };
+  const pt::ptree::value_type& pose_node { findNodeWithName(poses_tree, pos_name, ok) };
   if (!ok)
   {
-    ROS_ERROR_STREAM("Pos '" << pose_name << "' not found.");
+    ROS_ERROR_STREAM("Pos '" << pos_name << "' not found.");
     return false;
   }
 
@@ -258,7 +258,7 @@ bool XmlTestdataLoader::getPose(const std::string &pose_name, const std::string 
   return true;
 }
 
-CartesianConfiguration XmlTestdataLoader::getPose(const std::string &pose_name,
+CartesianConfiguration XmlTestdataLoader::getPose(const std::string &pos_name,
                                                   const std::string &group_name) const
 {
   // Search for node with given name.
@@ -268,7 +268,7 @@ CartesianConfiguration XmlTestdataLoader::getPose(const std::string &pose_name,
     throw TestDataLoaderReadingException("No poses found.");
   }
 
-  const auto& pose_node {findNodeWithName(poses_tree, pose_name)};
+  const auto& pose_node {findNodeWithName(poses_tree, pos_name)};
 
   // Search group node with given name.
   const auto& group_tree = pose_node.second;
@@ -475,8 +475,8 @@ bool XmlTestdataLoader::getCmd(const std::string &path2cmd,
                                const std::string &cmd_name,
                                std::string &group_name,
                                std::string &target_link,
-                               std::string& start_pose_name,
-                               std::string& end_pose_name,
+                               std::string& start_pos_name,
+                               std::string& end_pos_name,
                                double &vel,
                                double &acc) const
 {
@@ -498,15 +498,15 @@ bool XmlTestdataLoader::getCmd(const std::string &path2cmd,
     return false;
   }
 
-  start_pose_name = cmd_node.second.get<std::string>(START_POS_STR, empty_str_);
-  if (start_pose_name.empty())
+  start_pos_name = cmd_node.second.get<std::string>(START_POS_STR, empty_str_);
+  if (start_pos_name.empty())
   {
     ROS_ERROR("No start pos found.");
     return false;
   }
 
-  end_pose_name = cmd_node.second.get<std::string>(END_POS_STR, empty_str_);
-  if (end_pose_name.empty())
+  end_pos_name = cmd_node.second.get<std::string>(END_POS_STR, empty_str_);
+  if (end_pos_name.empty())
   {
     ROS_ERROR("No end pos found.");
     return false;

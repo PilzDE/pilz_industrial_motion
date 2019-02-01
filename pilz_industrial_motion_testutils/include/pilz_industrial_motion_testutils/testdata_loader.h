@@ -88,7 +88,7 @@ public:
   virtual bool getJoints(const std::string &pos_name, const std::string &group_name,
                          std::vector<double> &dVec) const = 0;
 
-  virtual JointConfiguration getJoints(const std::string &pose_name,
+  virtual JointConfiguration getJoints(const std::string &pos_name,
                                        const std::string &group_name) const = 0;
 
   /**
@@ -100,7 +100,7 @@ public:
   virtual bool getPose(const std::string &pos_name, const std::string &group_name,
                        std::vector<double> &dVec) const = 0;
 
-  virtual CartesianConfiguration getPose(const std::string &pose_name,
+  virtual CartesianConfiguration getPose(const std::string &pos_name,
                                          const std::string &group_name) const = 0;
 
   /**
