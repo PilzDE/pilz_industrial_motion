@@ -43,6 +43,9 @@ public:
   planning_interface::MotionPlanRequest toRequest() const override;
 
 private:
+  virtual std::string getPlannerId() const override;
+
+private:
   AuxiliaryType auxiliary_;
 
 };
@@ -55,18 +58,16 @@ inline void Circ<StartType, AuxiliaryType, GoalType>::setAuxiliaryConfiguration(
 }
 
 template <class StartType, class AuxiliaryType, class GoalType>
+inline std::string Circ<StartType, AuxiliaryType, GoalType>::getPlannerId() const
+{
+  return "CIRC";
+}
+
+template <class StartType, class AuxiliaryType, class GoalType>
 inline planning_interface::MotionPlanRequest Circ<StartType, AuxiliaryType, GoalType>::toRequest() const
 {
-  planning_interface::MotionPlanRequest req;
-  req.planner_id = "CIRC";
-  req.group_name = this->planning_group_;
-
-  req.max_velocity_scaling_factor = this->vel_scale_;
-  req.max_acceleration_scaling_factor = this->acc_scale_;
-
-  req.start_state = this->start_.toMoveitMsgsRobotState();
+  planning_interface::MotionPlanRequest req {BaseCmd<StartType, GoalType>::toRequest()};
   req.path_constraints = auxiliary_.toPathConstraints();
-  req.goal_constraints.push_back(this->goal_.toGoalConstraints());
 
   return req;
 }

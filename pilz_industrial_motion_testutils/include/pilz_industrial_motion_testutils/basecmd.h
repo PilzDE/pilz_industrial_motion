@@ -33,12 +33,16 @@ public:
   {}
 
 public:
+  virtual planning_interface::MotionPlanRequest toRequest() const override;
 
   void setStartConfiguration(StartType start);
   void setGoalConfiguration(GoalType goal);
 
   StartType& getStartConfiguration();
   GoalType& getGoalConfiguration();
+
+private:
+  virtual std::string getPlannerId() const = 0;
 
 protected:
   GoalType goal_;
@@ -69,6 +73,22 @@ template <class StartType, class GoalType>
 inline GoalType& BaseCmd<StartType, GoalType>::getGoalConfiguration()
 {
   return goal_;
+}
+
+template <class StartType, class GoalType>
+planning_interface::MotionPlanRequest BaseCmd<StartType, GoalType>::toRequest() const
+{
+  planning_interface::MotionPlanRequest req;
+  req.planner_id = getPlannerId();
+  req.group_name = this->planning_group_;
+
+  req.max_velocity_scaling_factor = this->vel_scale_;
+  req.max_acceleration_scaling_factor = this->acc_scale_;
+
+  req.start_state = this->start_.toMoveitMsgsRobotState();
+  req.goal_constraints.push_back(this->goal_.toGoalConstraints());
+
+  return req;
 }
 
 }

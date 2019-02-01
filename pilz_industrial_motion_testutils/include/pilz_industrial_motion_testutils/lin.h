@@ -35,26 +35,16 @@ public:
     : BaseCmd<StartType, GoalType>()
   {}
 
-public:
-  planning_interface::MotionPlanRequest toRequest() const override;
+private:
+  virtual std::string getPlannerId() const override;
 
 };
 
 // +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
 template <class StartType, class GoalType>
-inline planning_interface::MotionPlanRequest Lin<StartType, GoalType>::toRequest() const
+inline std::string Lin<StartType, GoalType>::getPlannerId() const
 {
-  planning_interface::MotionPlanRequest req;
-  req.planner_id = "LIN";
-  req.group_name = this->planning_group_;
-
-  req.max_velocity_scaling_factor = this->vel_scale_;
-  req.max_acceleration_scaling_factor = this->acc_scale_;
-
-  req.start_state = this->start_.toMoveitMsgsRobotState();
-  req.goal_constraints.push_back(this->goal_.toGoalConstraints());
-
-  return req;
+  return "LIN";
 }
 
 }
