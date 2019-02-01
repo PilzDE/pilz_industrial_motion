@@ -243,8 +243,14 @@ add_rostest_gmock(integrationtest_sequence_action_capability_abb_irb2400
   test/integrationtest_sequence_action_capability_abb_irb2400.test
   test/integrationtest_sequence_action_capability.cpp
 )
-
 target_link_libraries(integrationtest_sequence_action_capability_abb_irb2400
+  ${catkin_LIBRARIES} ${PROJECT_NAME}_test)
+
+add_rostest_gmock(integrationtest_sequence_action_capability_frankaemika_panda
+  test/integrationtest_sequence_action_capability_frankaemika_panda.test
+  test/integrationtest_sequence_action_capability.cpp
+)
+target_link_libraries(integrationtest_sequence_action_capability_frankaemika_panda
   ${catkin_LIBRARIES} ${PROJECT_NAME}_test)
 
 add_rostest_gtest(integrationtest_sequence_service_capability
