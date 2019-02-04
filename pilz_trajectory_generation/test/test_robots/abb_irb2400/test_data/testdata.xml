@@ -84,7 +84,7 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
       <startPos>ZeroPose</startPos>
       <endPos>P1</endPos>
       <vel>1.0</vel>
-      <acc>0.4</acc>
+      <acc>0.3</acc>
     </ptp>
 
     <ptp name="Ptp2">
@@ -93,7 +93,7 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
       <startPos>P3</startPos>
       <endPos>P2</endPos>
       <vel>1.0</vel>
-      <acc>0.4</acc>
+      <acc>0.3</acc>
     </ptp>
 
     <ptp name="Ptp3">
@@ -102,7 +102,7 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
       <startPos>P2</startPos>
       <endPos>P3</endPos>
       <vel>1.0</vel>
-      <acc>0.4</acc>
+      <acc>0.3</acc>
     </ptp>
   </ptps>
 
@@ -122,7 +122,7 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
         <startPos>P2</startPos>
         <endPos>P3</endPos>
         <vel>0.1</vel>
-        <acc>0.2</acc>
+        <acc>0.1</acc>
     </lin>
 
     <lin name="lin2">
@@ -131,7 +131,7 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
         <startPos>P1</startPos>
         <endPos>P2</endPos>
         <vel>0.1</vel>
-        <acc>0.2</acc>
+        <acc>0.1</acc>
     </lin>
   </lins>
 
@@ -155,7 +155,7 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
       <intermediatePos>P2</intermediatePos>
       <endPos>P3</endPos>
       <vel>0.1</vel>
-      <acc>0.4</acc>
+      <acc>0.2</acc>
     </circ>
 
     <circ name="circ1_center_2">
@@ -165,7 +165,7 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
       <centerPos>P2</centerPos>
       <endPos>P1</endPos>
       <vel>0.1</vel>
-      <acc>0.4</acc>
+      <acc>0.2</acc>
     </circ>
   </circs>
 
