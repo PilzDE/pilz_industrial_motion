@@ -22,14 +22,16 @@ from rospkg import RosPack
 from pilz_industrial_motion_testutils.xml_testdata_loader import *
 from pilz_industrial_motion_testutils.robot_motion_observer import RobotMotionObserver
 from pilz_robot_programming.commands import *
+from pilz_robot_programming.robot import *
 
 _TEST_DATA_FILE_NAME = RosPack().get_path("pilz_industrial_motion_testutils") + "/test_data/testdata.xml"
 _GROUP_NAME = "manipulator"
+_API_VERSION = "1"
 
 
-class TestAPIProgramKill(unittest.TestCase):
+class TestAPIProgramTermination(unittest.TestCase):
     """
-    Test the API behaviour when the python program is killed.
+    Test the API behaviour when the python program is terminated.
     """
 
     _PTP_TEST_NAME = "PTPJointValid"
@@ -55,13 +57,13 @@ class TestAPIProgramKill(unittest.TestCase):
 
         return movecmd.split(" ") + ptp_goal
 
-    def test_stop_at_program_kill(self):
+    def test01_stop_at_program_interrupt(self):
         """
-        Test if robot movement is stopped when program is killed.
+        Test if robot movement is stopped when program is interrupted (Ctrl-c).
 
         Test Sequence:
             1. Request robot movement in a subprocess.
-            2. Send kill signal.
+            2. Send interrupt signal.
 
         Expected Results:
             1. -
@@ -75,7 +77,7 @@ class TestAPIProgramKill(unittest.TestCase):
         self.assertTrue(
             self.robot_motion_observer.wait_motion_start(wait_time_out=self._WAIT_TIME_FOR_MOTION_DETECTION_SEC))
 
-        # 2. Send kill signal
+        # 2. Send interrupt signal
         proc.send_signal(signal.SIGINT)
 
         # Wait until process has terminated.
@@ -83,8 +85,44 @@ class TestAPIProgramKill(unittest.TestCase):
 
         self.assertFalse(self.robot_motion_observer.is_robot_moving())
 
+    def test09_instantiation_after_program_kill(self):
+        """
+        Test if robot can be instantiated after a program was killed. In case of a failure, the robot can no longer be
+        instantiated and a robot movement may still be executed. So this should be the last test case.
+
+        Test Sequence:
+            1. Request robot movement in a subprocess.
+            2. Send kill signal and wait for termination of the subprocess.
+            3. Try to create an instance of Robot.
+
+        Expected Results:
+            1. -
+            2. -
+            3. No exception is thrown
+        """
+
+        # 1. Start robot movement
+        proc = subprocess.Popen(self._get_robot_move_command())
+
+        # Wait until movement is detected
+        self.assertTrue(
+            self.robot_motion_observer.wait_motion_start(wait_time_out=self._WAIT_TIME_FOR_MOTION_DETECTION_SEC))
+
+        # 2. Send kill signal
+        proc.send_signal(signal.SIGKILL)
+
+        # Wait until process has terminated.
+        proc.wait()
+
+        try:
+            r = Robot(_API_VERSION)
+        except RobotMultiInstancesError:
+            self.fail('Instantiation after program kill does throw exception.')
+        else:
+            del r
+
 
 if __name__ == '__main__':
     import rostest
-    rospy.init_node('test_api_program_kill')
-    rostest.rosrun('pilz_robot_programming', 'test_api_program_kill', TestAPIProgramKill)
+    rospy.init_node('test_api_program_termination')
+    rostest.rosrun('pilz_robot_programming', 'test_api_program_termination', TestAPIProgramTermination)
