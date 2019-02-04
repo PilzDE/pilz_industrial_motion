@@ -56,7 +56,6 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
   </include>
 
   <include file="$(find panda_moveit_config)/launch/moveit_rviz.launch">
-    <arg name="config" value="true"/>
   </include>
 
 </launch>
