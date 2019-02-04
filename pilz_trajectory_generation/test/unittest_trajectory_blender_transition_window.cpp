@@ -74,7 +74,7 @@ protected:
   robot_model::RobotModelConstPtr robot_model_ {
     robot_model_loader::RobotModelLoader(GetParam()).getModel()};
 
-  std::shared_ptr<TrajectoryGenerator> lin_generator_;
+  std::unique_ptr<TrajectoryGenerator> lin_generator_;
   std::unique_ptr<TrajectoryBlenderTransitionWindow> blender_;
 
   // test parameters from parameter server
@@ -144,7 +144,7 @@ std::vector<planning_interface::MotionPlanResponse> TrajectoryBlenderTransitionW
     {
       std::runtime_error("Failed to generate trajectory.");
     }
-    responses[index] = resp;
+    responses.at(index) = resp;
   }
   return responses;
 }
@@ -158,7 +158,7 @@ INSTANTIATE_TEST_CASE_P(InstantiationName, TrajectoryBlenderTransitionWindowTest
 
 /**
  * @brief  Tests the blending of two trajectories with an invalid group name.
- * The test sequence is repeated twice, using robot model with and without gripper
+ *
  * Test Sequence:
  *    1. Generate two linear trajectories.
  *    2. Try to generate blending trajectory with invalid group name.
@@ -167,29 +167,27 @@ INSTANTIATE_TEST_CASE_P(InstantiationName, TrajectoryBlenderTransitionWindowTest
  *    1. Two linear trajectories generated.
  *    2. Blending trajectory cannot be generated.
  */
-TEST_P(TrajectoryBlenderTransitionWindowTest, invalidGroupName)
+TEST_P(TrajectoryBlenderTransitionWindowTest, testInvalidGroupName)
 {
   Sequence seq {data_loader_->getSequence("TestBlend")};
 
   std::vector<planning_interface::MotionPlanResponse> res {generateLinTrajs(seq, 2)};
 
-  // Generate blend trajectory
   pilz::TrajectoryBlendRequest blend_req;
   pilz::TrajectoryBlendResponse blend_res;
 
   blend_req.group_name = "invalid_group_name";
   blend_req.link_name = target_link_;
-  blend_req.first_trajectory = res[0].trajectory_;
-  blend_req.second_trajectory = res[1].trajectory_;
+  blend_req.first_trajectory = res.at(0).trajectory_;
+  blend_req.second_trajectory = res.at(1).trajectory_;
 
-  // select blend radius
   blend_req.blend_radius = seq.getBlendRadius(0);
   EXPECT_FALSE(blender_->blend(blend_req, blend_res));
 }
 
 /**
  * @brief  Tests the blending of two trajectories with an invalid target link.
- * The test sequence is repeated twice, using robot model with and without gripper
+ *
  * Test Sequence:
  *    1. Generate two linear trajectories.
  *    2. Try to generate blending trajectory with invalid target link.
@@ -198,29 +196,27 @@ TEST_P(TrajectoryBlenderTransitionWindowTest, invalidGroupName)
  *    1. Two linear trajectories generated.
  *    2. Blending trajectory cannot be generated.
  */
-TEST_P(TrajectoryBlenderTransitionWindowTest, invalidTargetLink)
+TEST_P(TrajectoryBlenderTransitionWindowTest, testInvalidTargetLink)
 {
   Sequence seq {data_loader_->getSequence("TestBlend")};
 
   std::vector<planning_interface::MotionPlanResponse> res {generateLinTrajs(seq, 2)};
 
-  // Generate blend trajectory
   pilz::TrajectoryBlendRequest blend_req;
   pilz::TrajectoryBlendResponse blend_res;
 
   blend_req.group_name = planning_group_;
   blend_req.link_name = "invalid_target_link";
-  blend_req.first_trajectory = res[0].trajectory_;
-  blend_req.second_trajectory = res[1].trajectory_;
+  blend_req.first_trajectory = res.at(0).trajectory_;
+  blend_req.second_trajectory = res.at(1).trajectory_;
 
-  // select blend radius
   blend_req.blend_radius = seq.getBlendRadius(0);
   EXPECT_FALSE(blender_->blend(blend_req, blend_res));
 }
 
 /**
  * @brief  Tests the blending of two trajectories with a negative blending radius.
- * The test sequence is repeated twice, using robot model with and without gripper
+ *
  * Test Sequence:
  *    1. Generate two linear trajectories.
  *    2. Try to generate blending trajectory with negative blending radius.
@@ -229,29 +225,27 @@ TEST_P(TrajectoryBlenderTransitionWindowTest, invalidTargetLink)
  *    1. Two linear trajectories generated.
  *    2. Blending trajectory cannot be generated.
  */
-TEST_P(TrajectoryBlenderTransitionWindowTest, negativeRadius)
+TEST_P(TrajectoryBlenderTransitionWindowTest, testNegativeRadius)
 {
   Sequence seq {data_loader_->getSequence("TestBlend")};
 
   std::vector<planning_interface::MotionPlanResponse> res {generateLinTrajs(seq, 2)};
 
-  // Generate blend trajectory
   pilz::TrajectoryBlendRequest blend_req;
   pilz::TrajectoryBlendResponse blend_res;
 
   blend_req.group_name = planning_group_;
   blend_req.link_name = target_link_;
-  blend_req.first_trajectory = res[0].trajectory_;
-  blend_req.second_trajectory = res[1].trajectory_;
+  blend_req.first_trajectory = res.at(0).trajectory_;
+  blend_req.second_trajectory = res.at(1).trajectory_;
 
-  // select blend radius
   blend_req.blend_radius = -0.1;
   EXPECT_FALSE(blender_->blend(blend_req, blend_res));
 }
 
 /**
  * @brief  Tests the blending of two trajectories with zero blending radius.
- * The test sequence is repeated twice, using robot model with and without gripper
+ *
  * Test Sequence:
  *    1. Generate two linear trajectories.
  *    2. Try to generate blending trajectory with zero blending radius.
@@ -260,29 +254,27 @@ TEST_P(TrajectoryBlenderTransitionWindowTest, negativeRadius)
  *    1. Two linear trajectories generated.
  *    2. Blending trajectory cannot be generated.
  */
-TEST_P(TrajectoryBlenderTransitionWindowTest, zeroRadius)
+TEST_P(TrajectoryBlenderTransitionWindowTest, testZeroRadius)
 {
   Sequence seq {data_loader_->getSequence("TestBlend")};
 
   std::vector<planning_interface::MotionPlanResponse> res {generateLinTrajs(seq, 2)};
 
-  // Generate blend trajectory
   pilz::TrajectoryBlendRequest blend_req;
   pilz::TrajectoryBlendResponse blend_res;
 
   blend_req.group_name = planning_group_;
   blend_req.link_name = target_link_;
-  blend_req.first_trajectory = res[0].trajectory_;
-  blend_req.second_trajectory = res[1].trajectory_;
+  blend_req.first_trajectory = res.at(0).trajectory_;
+  blend_req.second_trajectory = res.at(1).trajectory_;
 
-  // select blend radius
-  blend_req.blend_radius = 0.0;
+  blend_req.blend_radius = 0.;
   EXPECT_FALSE(blender_->blend(blend_req, blend_res));
 }
 
 /**
  * @brief  Tests the blending of two trajectories with differenent sampling times.
- * The test sequence is repeated twice, using robot model with and without gripper
+ *
  * Test Sequence:
  *    1. Generate two linear trajectories with different sampling times.
  *    2. Try to generate blending trajectory.
@@ -291,7 +283,7 @@ TEST_P(TrajectoryBlenderTransitionWindowTest, zeroRadius)
  *    1. Two linear trajectories generated.
  *    2. Blending trajectory cannot be generated.
  */
-TEST_P(TrajectoryBlenderTransitionWindowTest, differentSamplingTimes)
+TEST_P(TrajectoryBlenderTransitionWindowTest, testDifferentSamplingTimes)
 {
   Sequence seq {data_loader_->getSequence("TestBlend")};
 
@@ -314,10 +306,9 @@ TEST_P(TrajectoryBlenderTransitionWindowTest, differentSamplingTimes)
     {
       std::runtime_error("Failed to generate trajectory.");
     }
-    responses[index] = resp;
+    responses.at(index) = resp;
   }
 
-  // Generate blend trajectory
   pilz::TrajectoryBlendRequest blend_req;
   pilz::TrajectoryBlendResponse blend_res;
 
@@ -330,9 +321,10 @@ TEST_P(TrajectoryBlenderTransitionWindowTest, differentSamplingTimes)
 }
 
 /**
- * @brief  Tests the blending of two trajectories with one trajectory having non-uniform sampling time (apart from the
- * last sample, which is ignored).
- * The test sequence is repeated twice, using robot model with and without gripper
+ * @brief  Tests the blending of two trajectories with one trajectory
+ * having non-uniform sampling time (apart from the last sample,
+ * which is ignored).
+ *
  * Test Sequence:
  *    1. Generate two linear trajectories and corrupt uniformity of sampling time.
  *    2. Try to generate blending trajectory.
@@ -341,7 +333,7 @@ TEST_P(TrajectoryBlenderTransitionWindowTest, differentSamplingTimes)
  *    1. Two linear trajectories generated.
  *    2. Blending trajectory cannot be generated.
  */
-TEST_P(TrajectoryBlenderTransitionWindowTest, nonUniformSamplingTime)
+TEST_P(TrajectoryBlenderTransitionWindowTest, testNonUniformSamplingTime)
 {
   Sequence seq {data_loader_->getSequence("TestBlend")};
 
@@ -351,61 +343,58 @@ TEST_P(TrajectoryBlenderTransitionWindowTest, nonUniformSamplingTime)
   EXPECT_GT(res[0].trajectory_->getWayPointCount(), 2u);
   res[0].trajectory_->setWayPointDurationFromPrevious(1, 2*sampling_time_);
 
-  // Generate blend trajectory
   pilz::TrajectoryBlendRequest blend_req;
   pilz::TrajectoryBlendResponse blend_res;
 
   blend_req.group_name = planning_group_;
   blend_req.link_name = target_link_;
-  blend_req.first_trajectory = res[0].trajectory_;
-  blend_req.second_trajectory = res[1].trajectory_;
+  blend_req.first_trajectory = res.at(0).trajectory_;
+  blend_req.second_trajectory = res.at(1).trajectory_;
   blend_req.blend_radius = seq.getBlendRadius(0);
   EXPECT_FALSE(blender_->blend(blend_req, blend_res));
 }
 
 /**
- * @brief  Tests the blending of two linear trajectories which do not intersect.
- * The test sequence is repeated twice, using robot model with and without gripper
+ * @brief  Tests the blending of two trajectories which do not intersect.
+ *
  * Test Sequence:
- *    1. Generate two linear trajectories from valid test data set
- *    2. Replace the second trajectory by the first one
+ *    1. Generate two trajectories from valid test data set.
+ *    2. Replace the second trajectory by the first one.
  *    2. Try to generate blending trajectory.
  *
  * Expected Results:
- *    1. Two linear trajectories generated.
- *    2. Two LIN do not intersect.
+ *    1. Two trajectories generated.
+ *    2. Two trajectories that do not intersect.
  *    2. Blending trajectory cannot be generated.
  */
-TEST_P(TrajectoryBlenderTransitionWindowTest, notIntersectingLinTrajectories)
+TEST_P(TrajectoryBlenderTransitionWindowTest, testNotIntersectingTrajectories)
 {
   Sequence seq {data_loader_->getSequence("TestBlend")};
 
   std::vector<planning_interface::MotionPlanResponse> res {generateLinTrajs(seq, 2)};
 
-  // try to blend the two LIN trajectories
-  // Generate blend trajectory
   pilz::TrajectoryBlendRequest blend_req;
   pilz::TrajectoryBlendResponse blend_res;
 
   blend_req.group_name = planning_group_;
   blend_req.link_name = target_link_;
-  blend_req.first_trajectory = res[0].trajectory_;
-  // replace the second trajectory to make the two LIN trajectories timely not intersect
-  blend_req.second_trajectory = res[0].trajectory_;
+  blend_req.first_trajectory = res.at(0).trajectory_;
+  // replace the second trajectory to make the two trajectories timely not intersect
+  blend_req.second_trajectory = res.at(0).trajectory_;
   blend_req.blend_radius = seq.getBlendRadius(0);
   EXPECT_FALSE(blender_->blend(blend_req, blend_res));
 }
 
 /**
- * @brief  Tests the blending of two cartesian linear trajectories with the
- * shared point (last point of first, first point of second trajectory) having a non-zero velocity
+ * @brief  Tests the blending of two cartesian trajectories with the
+ * shared point (last point of first, first point of second trajectory)
+ * having a non-zero velocity
  *
- * The test sequence is repeated twice, using robot model with and without gripper
  * Test Sequence:
- *    1. Generate two linear trajectories from the test data set.
+ *    1. Generate two trajectories from the test data set.
  *    2. Generate blending trajectory modify the shared point to have velocity.
  * Expected Results:
- *    1. Two linear trajectories generated.
+ *    1. Two trajectories generated.
  *    2. Blending trajectory cannot be generated.
  */
 TEST_P(TrajectoryBlenderTransitionWindowTest, testNonStationaryPoint)
@@ -414,7 +403,6 @@ TEST_P(TrajectoryBlenderTransitionWindowTest, testNonStationaryPoint)
 
   std::vector<planning_interface::MotionPlanResponse> res {generateLinTrajs(seq, 2)};
 
-  // blend two lin trajectories and check the result
   pilz::TrajectoryBlendRequest blend_req;
   pilz::TrajectoryBlendResponse blend_res;
 
@@ -422,8 +410,8 @@ TEST_P(TrajectoryBlenderTransitionWindowTest, testNonStationaryPoint)
   blend_req.link_name = target_link_;
   blend_req.blend_radius = seq.getBlendRadius(0);
 
-  blend_req.first_trajectory = res[0].trajectory_;
-  blend_req.second_trajectory = res[1].trajectory_;
+  blend_req.first_trajectory = res.at(0).trajectory_;
+  blend_req.second_trajectory = res.at(1).trajectory_;
 
   // Modify last waypoint of first trajectory and first point of second trajectory
   blend_req.first_trajectory->getLastWayPointPtr()->setVariableVelocity(0, 1.0);
@@ -433,18 +421,19 @@ TEST_P(TrajectoryBlenderTransitionWindowTest, testNonStationaryPoint)
 }
 
 /**
- * @brief  Tests the blending of two cartesian linear trajectories where one trajectory is completely within the
- *         sphere defined by the blend radius
- * The test sequence is repeated twice, using robot model with and without gripper
+ * @brief Tests the blending of two cartesian trajectories where one
+ * trajectory is completely within the sphere defined by the blend radius
+ *
  * Test Sequence:
- *    1. Generate two linear trajectories from the test data set.
- *    2. Generate blending trajectory with a blend_radius larger than the smaller trajectory.
+ *    1. Generate two trajectories from the test data set.
+ *    2. Generate blending trajectory with a blend_radius larger
+ *        than the smaller trajectory.
  *
  * Expected Results:
- *    1. Two linear trajectories generated.
+ *    1. Two trajectories generated.
  *    2. Blending trajectory cannot be generated.
  */
-TEST_P(TrajectoryBlenderTransitionWindowTest, testLINLINBlendingTrajectoryInsideBlendRadius)
+TEST_P(TrajectoryBlenderTransitionWindowTest, testTrajectoryInsideBlendRadius)
 {
   Sequence seq {data_loader_->getSequence("TestBlend")};
 
@@ -454,7 +443,6 @@ TEST_P(TrajectoryBlenderTransitionWindowTest, testLINLINBlendingTrajectoryInside
   lin1_distance = (res[0].trajectory_->getFirstWayPoint().getFrameTransform(target_link_).translation()
                    - res[0].trajectory_->getLastWayPoint().getFrameTransform(target_link_).translation()).norm();
 
-  // blend two lin trajectories and check the result
   pilz::TrajectoryBlendRequest blend_req;
   pilz::TrajectoryBlendResponse blend_res;
 
@@ -462,15 +450,15 @@ TEST_P(TrajectoryBlenderTransitionWindowTest, testLINLINBlendingTrajectoryInside
   blend_req.link_name = target_link_;
   blend_req.blend_radius = 1.1 * lin1_distance;
 
-  blend_req.first_trajectory = res[0].trajectory_;
-  blend_req.second_trajectory = res[1].trajectory_;
+  blend_req.first_trajectory = res.at(0).trajectory_;
+  blend_req.second_trajectory = res.at(1).trajectory_;
 
   EXPECT_FALSE(blender_->blend(blend_req, blend_res));
 }
 
 /**
  * @brief  Tests the blending of two cartesian linear trajectories using robot model
- * The test sequence is repeated twice, using robot model with and without gripper
+ *
  * Test Sequence:
  *    1. Generate two linear trajectories from the test data set.
  *    2. Generate blending trajectory.
@@ -485,13 +473,12 @@ TEST_P(TrajectoryBlenderTransitionWindowTest, testLINLINBlendingTrajectoryInside
  *    3. No bound is violated, the trajectories are continuous
  *        in joint and cartesian space.
  */
-TEST_P(TrajectoryBlenderTransitionWindowTest, testLINLINBlending)
+TEST_P(TrajectoryBlenderTransitionWindowTest, testLinLinBlending)
 {
   Sequence seq {data_loader_->getSequence("TestBlend")};
 
   std::vector<planning_interface::MotionPlanResponse> res {generateLinTrajs(seq, 2)};
 
-  // blend two lin trajectories and check the result
   pilz::TrajectoryBlendRequest blend_req;
   pilz::TrajectoryBlendResponse blend_res;
 
@@ -499,8 +486,8 @@ TEST_P(TrajectoryBlenderTransitionWindowTest, testLINLINBlending)
   blend_req.link_name = target_link_;
   blend_req.blend_radius = seq.getBlendRadius(0);
 
-  blend_req.first_trajectory = res[0].trajectory_;
-  blend_req.second_trajectory = res[1].trajectory_;
+  blend_req.first_trajectory = res.at(0).trajectory_;
+  blend_req.second_trajectory = res.at(1).trajectory_;
 
   EXPECT_TRUE(blender_->blend(blend_req, blend_res));
 
@@ -514,11 +501,13 @@ TEST_P(TrajectoryBlenderTransitionWindowTest, testLINLINBlending)
 }
 
 /**
- * @brief  Tests the blending of two cartesian linear trajectories which have an overlap in the blending sphere using
- * robot model. To be precise, the trajectories exactly lie on top of each other.
- * The test sequence is repeated twice, using robot model with and without gripper
+ * @brief  Tests the blending of two cartesian linear trajectories which have
+ * an overlap in the blending sphere using robot model. To be precise,
+ * the trajectories exactly lie on top of each other.
+ *
  * Test Sequence:
- *    1. Generate two linear trajectories from the test data set, such that the second one is the reversed first one.
+ *    1. Generate two linear trajectories from the test data set,
+ *        such that the second one is the reversed first one.
  *    2. Generate blending trajectory.
  *    3. Check blending trajectory:
  *      - for position, velocity, and acceleration bounds,
@@ -531,24 +520,22 @@ TEST_P(TrajectoryBlenderTransitionWindowTest, testLINLINBlending)
  *    3. No bound is violated, the trajectories are continuous
  *        in joint and cartesian space.
  */
-TEST_P(TrajectoryBlenderTransitionWindowTest, testLINLINBlendingOverlappingTrajectories)
+TEST_P(TrajectoryBlenderTransitionWindowTest, testOverlappingBlendTrajectories)
 {
   Sequence seq {data_loader_->getSequence("TestBlendOverlap")};
 
   std::vector<planning_interface::MotionPlanResponse> res {generateLinTrajs(seq, 2)};
 
-  // blend two lin trajectories and check the result
   pilz::TrajectoryBlendRequest blend_req;
   pilz::TrajectoryBlendResponse blend_res;
 
   blend_req.group_name = planning_group_;
   blend_req.link_name = target_link_;
-  blend_req.first_trajectory = res[0].trajectory_;
-  blend_req.second_trajectory = res[1].trajectory_;
+  blend_req.first_trajectory = res.at(0).trajectory_;
+  blend_req.second_trajectory = res.at(1).trajectory_;
   blend_req.blend_radius = seq.getBlendRadius(0);
   EXPECT_TRUE(blender_->blend(blend_req, blend_res));
 
-  // check the blend result
   EXPECT_TRUE(testutils::checkBlendResult(blend_req,
                                           blend_res,
                                           planner_limits_,
@@ -559,12 +546,15 @@ TEST_P(TrajectoryBlenderTransitionWindowTest, testLINLINBlendingOverlappingTraje
 }
 
 /**
- * @brief  Tests the blending of two cartesian trajectories which differ from a straight line.
- * The test sequence is repeated twice, using robot model with and without gripper
+ * @brief Tests the blending of two cartesian trajectories which differ
+ * from a straight line.
+ *
  * Test Sequence:
- *    1. Generate two linear trajectories from the test data set.
- *    2. Add scaled sine function to cartesian trajectories, such that start and end state remain unchanged; generate
- *       resulting joint trajectories using a time scaling in order to preserve joint velocity limits.
+ *    1. Generate two trajectories from the test data set.
+ *    2. Add scaled sine function to cartesian trajectories, such that
+ *        start and end state remain unchanged; generate resulting
+ *        joint trajectories using a time scaling in order to preserve
+ *        joint velocity limits.
  *    3. Generate blending trajectory.
  *    4. Check blending trajectory:
  *      - for position, velocity, and acceleration bounds,
@@ -572,7 +562,7 @@ TEST_P(TrajectoryBlenderTransitionWindowTest, testLINLINBlendingOverlappingTraje
  *      - for continuity in cartesian space.
  *
  * Expected Results:
- *    1. Two linear trajectories generated.
+ *    1. Two trajectories generated.
  *    2. Modified joint trajectories generated.
  *    3. Blending trajectory generated.
  *    4. No bound is violated, the trajectories are continuous
@@ -592,19 +582,19 @@ TEST_P(TrajectoryBlenderTransitionWindowTest, testNonLinearBlending)
 
   for (size_t traj_index = 0; traj_index < 2; ++traj_index)
   {
-    auto lin_traj = res[traj_index].trajectory_;
+    auto lin_traj {res.at(traj_index).trajectory_};
 
     CartesianTrajectory cart_traj;
     trajectory_msgs::JointTrajectory joint_traj;
-    double duration {lin_traj->getWayPointDurationFromStart(lin_traj->getWayPointCount())};
+    const double duration {lin_traj->getWayPointDurationFromStart(lin_traj->getWayPointCount())};
     // time from start zero does not work
-    double time_from_start_offset {TIME_SCALING_FACTOR*lin_traj->getWayPointDurations().back()};
+    const double time_from_start_offset {TIME_SCALING_FACTOR*lin_traj->getWayPointDurations().back()};
 
     // generate modified cartesian trajectory
     for (size_t i = 0; i < lin_traj->getWayPointCount(); ++i)
     {
       // transform time to interval [0, 4*pi]
-      double sine_arg { 4*M_PI*lin_traj->getWayPointDurationFromStart(i)/duration };
+      const double sine_arg { 4*M_PI*lin_traj->getWayPointDurationFromStart(i)/duration };
 
       // get pose
       CartesianTrajectoryPoint waypoint;
@@ -640,7 +630,7 @@ TEST_P(TrajectoryBlenderTransitionWindowTest, testNonLinearBlending)
         initial_joint_velocity[joint_name] = sine_trajs[traj_index-1]->getLastWayPoint().getVariableVelocity(joint_name);
       }
     }
-    // generate joint trajectory
+
     moveit_msgs::MoveItErrorCodes error_code;
     if (!generateJointTrajectory(robot_model_,
                                  planner_limits_.getJointLimitContainer(),
@@ -661,10 +651,9 @@ TEST_P(TrajectoryBlenderTransitionWindowTest, testNonLinearBlending)
 
     // convert trajectory_msgs::JointTrajectory to robot_trajectory::RobotTrajectory
     sine_trajs[traj_index] = std::make_shared<robot_trajectory::RobotTrajectory>(robot_model_, planning_group_);
-    sine_trajs[traj_index]->setRobotTrajectoryMsg(lin_traj->getFirstWayPoint(), joint_traj);
+    sine_trajs.at(traj_index)->setRobotTrajectoryMsg(lin_traj->getFirstWayPoint(), joint_traj);
   }
 
-  // blend the trajectories and check the result
   TrajectoryBlendRequest blend_req;
   TrajectoryBlendResponse blend_res;
 
@@ -672,8 +661,8 @@ TEST_P(TrajectoryBlenderTransitionWindowTest, testNonLinearBlending)
   blend_req.link_name = target_link_;
   blend_req.blend_radius = seq.getBlendRadius(0);
 
-  blend_req.first_trajectory = sine_trajs[0];
-  blend_req.second_trajectory = sine_trajs[1];
+  blend_req.first_trajectory = sine_trajs.at(0);
+  blend_req.second_trajectory = sine_trajs.at(1);
 
   EXPECT_TRUE(blender_->blend(blend_req, blend_res));
 
