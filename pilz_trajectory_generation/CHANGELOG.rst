@@ -2,8 +2,8 @@
 Changelog for package pilz_trajectory_generation
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
-Forthcoming
------------
+0.3.4 (2019-02-05)
+------------------
 * refactor determining the trajectory alignment in the blend implementation
 * extend and refactor unittest of blender_transition_window
 * add planning group check to blender_transition_window
