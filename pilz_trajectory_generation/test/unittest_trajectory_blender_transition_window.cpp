@@ -421,7 +421,7 @@ TEST_P(TrajectoryBlenderTransitionWindowTest, testNonStationaryPoint)
 }
 
 /**
- * @brief Tests the blending of two cartesian trajectories where one
+ * @brief Tests the blending of two cartesian trajectories where the first
  * trajectory is completely within the sphere defined by the blend radius
  *
  * Test Sequence:
@@ -433,7 +433,7 @@ TEST_P(TrajectoryBlenderTransitionWindowTest, testNonStationaryPoint)
  *    1. Two trajectories generated.
  *    2. Blending trajectory cannot be generated.
  */
-TEST_P(TrajectoryBlenderTransitionWindowTest, testTrajectoryInsideBlendRadius)
+TEST_P(TrajectoryBlenderTransitionWindowTest, testTraj1InsideBlendRadius)
 {
   Sequence seq {data_loader_->getSequence("TestBlend")};
 
@@ -449,6 +449,38 @@ TEST_P(TrajectoryBlenderTransitionWindowTest, testTrajectoryInsideBlendRadius)
   blend_req.group_name = planning_group_;
   blend_req.link_name = target_link_;
   blend_req.blend_radius = 1.1 * lin1_distance;
+
+  blend_req.first_trajectory = res.at(0).trajectory_;
+  blend_req.second_trajectory = res.at(1).trajectory_;
+
+  EXPECT_FALSE(blender_->blend(blend_req, blend_res));
+}
+
+/**
+ * @brief Tests the blending of two cartesian trajectories where the second
+ * trajectory is completely within the sphere defined by the blend radius
+ *
+ * Test Sequence:
+ *    1. Generate two trajectories from the test data set.
+ *    2. Generate blending trajectory with a blend_radius larger
+ *        than the smaller trajectory.
+ *
+ * Expected Results:
+ *    1. Two trajectories generated.
+ *    2. Blending trajectory cannot be generated.
+ */
+TEST_P(TrajectoryBlenderTransitionWindowTest, testTraj2InsideBlendRadius)
+{
+  Sequence seq {data_loader_->getSequence("NoIntersectionTraj2")};
+
+  std::vector<planning_interface::MotionPlanResponse> res {generateLinTrajs(seq, 2)};
+
+  pilz::TrajectoryBlendRequest blend_req;
+  pilz::TrajectoryBlendResponse blend_res;
+
+  blend_req.group_name = planning_group_;
+  blend_req.link_name = target_link_;
+  blend_req.blend_radius = seq.getBlendRadius(0);
 
   blend_req.first_trajectory = res.at(0).trajectory_;
   blend_req.second_trajectory = res.at(1).trajectory_;

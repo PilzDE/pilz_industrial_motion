@@ -111,6 +111,15 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
       <vel>0.1</vel>
       <acc>0.1</acc>
     </lin>
+
+    <lin name="lin4">
+        <planningGroup>manipulator</planningGroup>
+        <targetLink>prbt_tcp</targetLink>
+        <startPos>P2</startPos>
+        <endPos>P4</endPos>
+        <vel>0.1</vel>
+        <acc>0.2</acc>
+    </lin>
   </lins>
 
   <circs>
@@ -152,6 +161,10 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
     <blend name="TestBlendOverlap">
       <sequenceCmd name="lin2" type="lin_cart" blend_radius="0.149" />
       <sequenceCmd name="lin2_reversed" type="lin_cart" blend_radius="0" />
+    </blend>
+    <blend name="NoIntersectionTraj2">
+      <sequenceCmd name="lin2" type="lin_cart" blend_radius="0.21" />
+      <sequenceCmd name="lin4" type="lin_cart" blend_radius="0" />
     </blend>
   </sequences>
 
