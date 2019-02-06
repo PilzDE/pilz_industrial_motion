@@ -2,8 +2,8 @@
 Changelog for package pilz_trajectory_generation
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
-Forthcoming
------------
+0.3.5 (2019-02-06)
+------------------
 * Increase line coverage for blending to 100%
 
 0.3.4 (2019-02-05)
