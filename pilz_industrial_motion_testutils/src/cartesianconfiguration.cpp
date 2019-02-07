@@ -16,6 +16,7 @@
 
 #include "pilz_industrial_motion_testutils/cartesianconfiguration.h"
 
+#include <stdexcept>
 
 namespace pilz_industrial_motion_testutils
 {
@@ -39,7 +40,21 @@ CartesianConfiguration::CartesianConfiguration(const std::string& group_name,
   : RobotConfiguration(group_name, robot_model)
   , link_name_(link_name)
   , pose_(toPose(config))
-{}
+{
+  if (robot_model && (!robot_model_->hasLinkModel(link_name_)))
+  {
+    std::string msg {"Link \""};
+    msg.append(link_name).append("\" not known to robot model");
+    throw std::invalid_argument(msg);
+  }
+
+  if (robot_model && (!robot_state::RobotState(robot_model_).knowsFrameTransform(link_name_)))
+  {
+    std::string msg {"Tranform of \""};
+    msg.append(link_name).append("\" is unknown");
+    throw std::invalid_argument(msg);
+  }
+}
 
 geometry_msgs::Pose CartesianConfiguration::toPose(const std::vector<double>& pose)
 {
