@@ -15,6 +15,7 @@
  */
 
 #include <stdexcept>
+#include <algorithm>
 
 #include "pilz_industrial_motion_testutils/jointconfiguration.h"
 
@@ -78,18 +79,22 @@ moveit_msgs::RobotState JointConfiguration::toMoveitMsgsRobotStateWithoutModel()
   return robot_state;
 }
 
-moveit_msgs::RobotState JointConfiguration::toMoveitMsgsRobotStateWithModel() const
+robot_state::RobotState JointConfiguration::toRobotState() const
 {
   if (!robot_model_) {throw std::runtime_error("No robot model set");}
-  robot_state::RobotState start_state(robot_model_);
-  start_state.setToDefaultValues();
-  start_state.setJointGroupPositions(group_name_, joints_);
+  robot_state::RobotState robot_state(robot_model_);
+  robot_state.setToDefaultValues();
+  robot_state.setJointGroupPositions(group_name_, joints_);
+  return robot_state;
+}
 
+moveit_msgs::RobotState JointConfiguration::toMoveitMsgsRobotStateWithModel() const
+{
+  robot_state::RobotState start_state(toRobotState());
   moveit_msgs::RobotState robStateMsg;
   moveit::core::robotStateToRobotStateMsg(start_state, robStateMsg, false);
   return robStateMsg;
 }
-
 
 sensor_msgs::JointState JointConfiguration::toSensorMsg() const
 {
@@ -103,5 +108,32 @@ sensor_msgs::JointState JointConfiguration::toSensorMsg() const
   return state;
 }
 
+bool JointConfiguration::equalWith(const robot_state::RobotState& state,
+                                   const double epsilon) const
+{
+  if (state.getVariableCount() != size())
+  {   
+    ROS_WARN("Joint number differes.");
+    return false;
+  }
+
+  for(size_t i = 0; i < size(); ++i)
+  {
+    // PLEASE NOTE: This comparision only works for reasonably
+    // values. That means: Values are not to large, values are
+    // reasonably close by each other.
+    if (std::fabs(getJoint(i) - state.getVariablePosition(i)) > epsilon)
+    {
+      std::string msg {" Joints differ: "};
+      msg.append("Joint[").append(std::to_string(i)).append("]=").append(std::to_string(getJoint(i)));
+      msg.append(" != ");
+      msg.append("RobotState.Joint[").append(std::to_string(i)).append("]=").append(std::to_string(state.getVariablePosition(i)));
+      ROS_WARN_STREAM(msg);
+      return false;
+    }
+  }
+
+  return true;
+}
 
 }
