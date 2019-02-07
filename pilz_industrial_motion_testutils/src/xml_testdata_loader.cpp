@@ -314,28 +314,14 @@ PtpJoint XmlTestdataLoader::getPtpJoint(const std::string& cmd_name) const
     throw TestDataLoaderReadingException("Did not find \"" + cmd_name +  "\"");
   }
 
-  std::vector<double> start_position;
-  if(!getJoints(start_pos_name, planning_group, start_position))
-  {
-    throw TestDataLoaderReadingException("Did not find \"" + start_pos_name +  "\"");
-  }
-
-  std::vector<double> goal_position;
-  if(!getJoints(goal_pos_name, planning_group, goal_position))
-  {
-    throw TestDataLoaderReadingException("Did not find \"" + goal_pos_name +  "\"");
-  }
-
   PtpJoint cmd;
   cmd.setPlanningGroup(planning_group);
   cmd.setTargetLink(target_link);
   cmd.setVelocityScale(vel_scale);
   cmd.setAccelerationScale(acc_scale);
 
-  JointConfiguration start(planning_group, start_position, robot_model_);
-  JointConfiguration goal(planning_group, goal_position, robot_model_);
-  cmd.setStartConfiguration(start);
-  cmd.setGoalConfiguration(goal);
+  cmd.setStartConfiguration(getJoints(start_pos_name, planning_group));
+  cmd.setGoalConfiguration(getJoints(goal_pos_name, planning_group));
 
   return cmd;
 }
