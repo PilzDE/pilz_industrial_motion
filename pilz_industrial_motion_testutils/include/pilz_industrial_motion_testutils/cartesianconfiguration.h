@@ -17,7 +17,6 @@
 #ifndef CARTESIANCONFIGURATION_H
 #define CARTESIANCONFIGURATION_H
 
-#include <stdexcept>
 #include <vector>
 #include <sstream>
 
