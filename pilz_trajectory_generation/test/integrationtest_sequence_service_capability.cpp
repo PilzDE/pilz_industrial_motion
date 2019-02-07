@@ -43,8 +43,6 @@
 #include "motion_sequence_request_builder.h"
 
 // Parameters from parameter server
-const std::string PARAM_PLANNING_GROUP_NAME("planning_group");
-const std::string PARAM_TARGET_LINK_NAME("target_link");
 const std::string TEST_DATA_FILE_NAME("testdata_file_name");
 
 using namespace pilz_industrial_motion_testutils;
@@ -59,7 +57,6 @@ protected:
   ros::NodeHandle ph_ {"~"};
   ros::ServiceClient client_;
   robot_model::RobotModelPtr robot_model_;
-  std::string planning_group_, target_link_;
 
   std::string test_data_file_name_;
   TestdataLoaderUPtr data_loader_;
@@ -68,16 +65,11 @@ protected:
 void IntegrationTestSequenceService::SetUp()
 {
   // get necessary parameters
-  ASSERT_TRUE(ph_.getParam(PARAM_PLANNING_GROUP_NAME, planning_group_));
-  ASSERT_TRUE(ph_.getParam(PARAM_TARGET_LINK_NAME, target_link_));
   ASSERT_TRUE(ph_.getParam(TEST_DATA_FILE_NAME, test_data_file_name_));
 
-  // create robot model + check model
   robot_model_loader::RobotModelLoader model_loader;
   robot_model_ = model_loader.getModel();
-  testutils::checkRobotModel(robot_model_, planning_group_, target_link_);
 
-  // load the test data provider
   data_loader_.reset(new XmlTestdataLoader(test_data_file_name_, robot_model_));
   ASSERT_NE(nullptr, data_loader_) << "Failed to load test data by provider.";
 

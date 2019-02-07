@@ -49,8 +49,6 @@ static constexpr int WAIT_FOR_ACTION_SERVER_TIME_OUT {10}; //seconds
 const std::string SEQUENCE_ACTION_NAME("/sequence_move_group");
 
 // Parameters from parameter server
-const std::string PARAM_PLANNING_GROUP_NAME("planning_group");
-const std::string PARAM_TARGET_LINK_NAME("target_link");
 const std::string JOINT_POSITION_TOLERANCE("joint_position_tolerance");
 
 // events for callback tests
@@ -81,7 +79,6 @@ protected:
 
   robot_model_loader::RobotModelLoader model_loader_;
   robot_model::RobotModelPtr robot_model_;
-  std::string planning_group_, target_link_;
   double joint_position_tolerance_;
 
   std::string test_data_file_name_;
@@ -96,16 +93,11 @@ void IntegrationTestSequenceAction::SetUp()
   spinner_.start();
 
   // get necessary parameters
-  ASSERT_TRUE(ph_.getParam(PARAM_PLANNING_GROUP_NAME, planning_group_));
-  ASSERT_TRUE(ph_.getParam(PARAM_TARGET_LINK_NAME, target_link_));
   ASSERT_TRUE(ph_.getParam(JOINT_POSITION_TOLERANCE, joint_position_tolerance_));
   ASSERT_TRUE(ph_.getParam(TEST_DATA_FILE_NAME, test_data_file_name_));
 
-  // create robot model + check model
   robot_model_  = model_loader_.getModel();
-  testutils::checkRobotModel(robot_model_, planning_group_, target_link_);
 
-  // load the test data provider
   data_loader_.reset(new XmlTestdataLoader(test_data_file_name_, robot_model_));
   ASSERT_NE(nullptr, data_loader_) << "Failed to load test data by provider.";
 
@@ -116,7 +108,7 @@ void IntegrationTestSequenceAction::SetUp()
   start_config = data_loader_->getJoints("ZeroPose", "manipulator");
   robot_state::RobotState rState {start_config.toRobotState()};
 
-  move_group_ = std::make_shared<moveit::planning_interface::MoveGroupInterface>(planning_group_);
+  move_group_ = std::make_shared<moveit::planning_interface::MoveGroupInterface>(start_config.getGroupName());
   move_group_->setPlannerId("PTP");
   move_group_->setGoalTolerance(joint_position_tolerance_);
   move_group_->setJointValueTarget(rState);
