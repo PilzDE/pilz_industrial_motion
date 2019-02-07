@@ -36,8 +36,6 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
   <!-- run test -->
   <test pkg="pilz_trajectory_generation" test-name="integrationtest_sequence_action_capability_frankaemika_panda"
         type="integrationtest_sequence_action_capability_frankaemika_panda" time-limit="300.0">
-    <param name="planning_group" value="panda_arm" />
-    <param name="target_link" value="panda_link8" />
     <param name="joint_prefix" value="panda_joint" />
     <param name="joint_position_tolerance" value="0.01" />
     <param name="testdata_file_name"
