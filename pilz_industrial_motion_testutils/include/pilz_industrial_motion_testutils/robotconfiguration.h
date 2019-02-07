@@ -43,6 +43,7 @@ public:
 public:
   void setRobotModel(moveit::core::RobotModelConstPtr robot_model);
   void setGroupName(const std::string& group_name);
+  std::string getGroupName() const;
 
 protected:
   std::string group_name_;
@@ -58,6 +59,11 @@ inline void RobotConfiguration::setRobotModel(moveit::core::RobotModelConstPtr r
 inline void RobotConfiguration::setGroupName(const std::string& group_name)
 {
   group_name_ = group_name;
+}
+
+inline std::string RobotConfiguration::getGroupName() const
+{
+  return group_name_;
 }
 
 }
