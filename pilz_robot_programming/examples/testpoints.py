@@ -60,15 +60,7 @@ robot_configs['panda'] = {
 def start_program(robot_name):
     print("Executing " + __file__)
 
-    # PRBT
-    # test_sequence([0,0,0,0,0,0], 0.2, 0.1, "manipulator", "prbt_tcp", "prbt_base", from_euler(0, math.radians(180), math.radians(90)), Point(0.3, 0.0, 0.5))
     test_sequence(**robot_configs[robot_name])
-
-    # ABB
-    #test_sequence([0,0,0,0,0,0], 0.2, 0.2, "manipulator", "tool0", "base", from_euler(0, math.radians(180), 0), Point(0.6, 0.0, 1.2))
-
-    # FRANKA
-    # test_sequence([0.0, -0.785, 0.0, -2.356, 0.0, 1.571, 0.785], 0.2, 0.1, "panda_arm", "panda_link8", "panda_link0", Quaternion(0.924, -0.382, 0.000, 0.000), Point(0.2, 0.0, 0.8))
 
 def test_sequence(initJointPose, L, M, planning_group, target_link, reference_frame, default_or, P1_position):
     r = Robot(__REQUIRED_API_VERSION__)
@@ -106,7 +98,6 @@ def test_sequence(initJointPose, L, M, planning_group, target_link, reference_fr
 
     for radius in [0, 0.1]:
         r.move(Ptp(goal=initJointPose, planning_group=planning_group))
-        #r.move(Ptp(goal=[0,0,0,0,0,0], planning_group=planning_group))
 
         seq = Sequence()
         seq.append(ptp1, blend_radius=radius)
