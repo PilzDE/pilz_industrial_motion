@@ -39,9 +39,7 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
   <test pkg="pilz_trajectory_generation" test-name="integrationtest_sequence_service_capability" type="integrationtest_sequence_service_capability" time-limit="300.0">
     <param name="planning_group" value="manipulator" />
     <param name="target_link" value="prbt_flange" />
-    <param name="blend_dataset_num" value="1" />
     <param name="testdata_file_name" value="$(find pilz_trajectory_generation)/test/test_robots/prbt/test_data/testdata_sequence.xml" />
-    <rosparam command="load" file="$(find pilz_trajectory_generation)/test/test_robots/prbt/test_data/blend_lin_lin_test_data.yaml"  ns="test_data" />
   </test>
 
 </launch>
