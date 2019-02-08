@@ -42,17 +42,9 @@ public:
   }
 
 public:
-  MotionCmdUPtr getCmd(const std::string& cmd_name) const override
+  CmdVariant getCmd(const std::string& cmd_name) const override
   {
-    // We cannot create a derived class object and then copy
-    // it into the memory space of a base class object because this
-    // will cause "slicing". Therefore, we create a dervied class object
-    // first and then let a base class pointer point to the memory
-    // space of the derived class.
-    std::unique_ptr<CmdType> cmd_ptr { new CmdType() };
-    CmdType& cmd {*cmd_ptr};
-    cmd = func_(cmd_name);
-    return MotionCmdUPtr(std::move(cmd_ptr));
+    return CmdVariant(func_(cmd_name));
   }
 
 private:
@@ -733,11 +725,8 @@ Sequence XmlTestdataLoader::getSequence(const std::string &cmd_name) const
     // Get blend radius of blend cmd.
     double blend_radius {seq_cmd.second.get<double>(BLEND_RADIUS_PATH_STR, DEFAULT_BLEND_RADIUS)};
 
-    // Read current command from test data
-    MotionCmdUPtr curr_cmd {std::move(cmd_getter_funcs_.at(cmd_type)->getCmd(cmd_name))};
-
-    // Add command to sequence
-    seq.add(std::move(curr_cmd), blend_radius);
+    // Read current command from test data + Add command to sequence
+    seq.add(cmd_getter_funcs_.at(cmd_type)->getCmd(cmd_name), blend_radius);
   }
 
   return seq;
