@@ -57,6 +57,7 @@ const std::string GOAL_SUCCEEDED_EVENT = "GOAL_SUCCEEDED";
 const std::string SERVER_IDLE_EVENT = "SERVER_IDLE";
 
 const std::string TEST_DATA_FILE_NAME("testdata_file_name");
+const std::string GROUP_NAME("group_name");
 
 using namespace pilz_industrial_motion_testutils;
 
@@ -83,6 +84,7 @@ protected:
   double joint_position_tolerance_;
 
   std::string test_data_file_name_;
+  std::string group_name_;
   TestdataLoaderUPtr data_loader_;
 
   //! The configuration at which the robot stays at the beginning of each test.
@@ -96,6 +98,7 @@ void IntegrationTestSequenceAction::SetUp()
   // get necessary parameters
   ASSERT_TRUE(ph_.getParam(JOINT_POSITION_TOLERANCE, joint_position_tolerance_));
   ASSERT_TRUE(ph_.getParam(TEST_DATA_FILE_NAME, test_data_file_name_));
+  ph_.param<std::string>(GROUP_NAME, group_name_, "manipulator");
 
   robot_model_  = model_loader_.getModel();
 
@@ -106,7 +109,7 @@ void IntegrationTestSequenceAction::SetUp()
   ASSERT_TRUE(ac_.waitForServer(ros::Duration(WAIT_FOR_ACTION_SERVER_TIME_OUT))) << "Action server is not active.";
 
   // move to default position
-  start_config = data_loader_->getJoints("ZeroPose", "manipulator");
+  start_config = data_loader_->getJoints("ZeroPose", group_name_);
   robot_state::RobotState rState {start_config.toRobotState()};
 
   move_group_ = std::make_shared<moveit::planning_interface::MoveGroupInterface>(start_config.getGroupName());
