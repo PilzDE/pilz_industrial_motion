@@ -53,8 +53,6 @@ public:
   double getJoint(const size_t index) const;
   size_t size() const;
 
-  bool equalWith(const robot_state::RobotState& state, const double epsilon) const;
-
   moveit_msgs::Constraints toGoalConstraints() const override;
   moveit_msgs::RobotState toMoveitMsgsRobotState() const override;
 
