@@ -29,7 +29,7 @@ import tf
 import psutil
 
 from .move_control_request import _MoveControlState, MoveControlAction,_MoveControlStateMachine
-from .commands import _AbstractCmd, _DEFAULT_PLANNING_GROUP, _DEFAULT_TARGET_LINK
+from .commands import _AbstractCmd, _DEFAULT_PLANNING_GROUP, _DEFAULT_TARGET_LINK, _DEFAULT_BASE_LINK
 from .exceptions import *
 from geometry_msgs.msg import Quaternion, PoseStamped, Pose
 from std_msgs.msg import Header
@@ -157,7 +157,7 @@ class Robot(object):
             rospy.logerr(e.message)
             raise RobotCurrentStateError(e.message)
 
-    def get_current_pose(self, target_link=_DEFAULT_TARGET_LINK, base="prbt_base"):
+    def get_current_pose(self, target_link=_DEFAULT_TARGET_LINK, base=_DEFAULT_BASE_LINK):
         """Returns the current pose of target link in the reference frame.
         :param target_link: Name of the target_link, default value is "prbt_tcp".
         :param base: The target reference system of the pose, default ist "prbt_base".
