@@ -108,32 +108,4 @@ sensor_msgs::JointState JointConfiguration::toSensorMsg() const
   return state;
 }
 
-bool JointConfiguration::equalWith(const robot_state::RobotState& state,
-                                   const double epsilon) const
-{
-  if (state.getVariableCount() != size())
-  {   
-    ROS_WARN("Joint number differes.");
-    return false;
-  }
-
-  for(size_t i = 0; i < size(); ++i)
-  {
-    // PLEASE NOTE: This comparision only works for reasonably
-    // values. That means: Values are not to large, values are
-    // reasonably close by each other.
-    if (std::fabs(getJoint(i) - state.getVariablePosition(i)) > epsilon)
-    {
-      std::string msg {" Joints differ: "};
-      msg.append("Joint[").append(std::to_string(i)).append("]=").append(std::to_string(getJoint(i)));
-      msg.append(" != ");
-      msg.append("RobotState.Joint[").append(std::to_string(i)).append("]=").append(std::to_string(state.getVariablePosition(i)));
-      ROS_WARN_STREAM(msg);
-      return false;
-    }
-  }
-
-  return true;
-}
-
 }

@@ -38,6 +38,7 @@
 
 #include <pilz_industrial_motion_testutils/xml_testdata_loader.h>
 #include <pilz_industrial_motion_testutils/sequence.h>
+#include <pilz_industrial_motion_testutils/checks.h>
 
 #include "pilz_msgs/MoveGroupSequenceAction.h"
 #include "test_utils.h"
@@ -114,7 +115,7 @@ void IntegrationTestSequenceAction::SetUp()
   move_group_->setJointValueTarget(rState);
   move_group_->move();
 
-  ASSERT_TRUE(start_config.equalWith( *(move_group_->getCurrentState()), joint_position_tolerance_)) << "Joints differ";
+  ASSERT_TRUE(isAtExpectedPosition(*(move_group_->getCurrentState()), rState, joint_position_tolerance_));
 }
 
 /**
@@ -430,7 +431,7 @@ TEST_F(IntegrationTestSequenceAction, TestPlanOnlyFlag)
   EXPECT_EQ(res->error_code.val, moveit_msgs::MoveItErrorCodes::SUCCESS) << "Sequence execution failed.";
   EXPECT_NE(res->planned_trajectory.joint_trajectory.points.size(), 0u) << "Planned trajectory is empty.";
 
-  ASSERT_TRUE(start_config.equalWith( *(move_group_->getCurrentState()), joint_position_tolerance_) ) << "Robot did move although \"PlanOnly\" flag set.";
+  ASSERT_TRUE(isAtExpectedPosition(*(move_group_->getCurrentState()), start_config.toRobotState(), joint_position_tolerance_)) << "Robot did move although \"PlanOnly\" flag set.";
 }
 
 
@@ -464,7 +465,7 @@ TEST_F(IntegrationTestSequenceAction, TestIgnoreRobotStateForPlanOnly)
   EXPECT_EQ(res->error_code.val, moveit_msgs::MoveItErrorCodes::SUCCESS) << "Execution of sequence failed.";
   EXPECT_NE(res->planned_trajectory.joint_trajectory.points.size(), 0u) << "Planned trajectory is empty.";
 
-  ASSERT_TRUE(start_config.equalWith( *(move_group_->getCurrentState()), joint_position_tolerance_) ) << "Robot did move although \"PlanOnly\" flag set.";
+  ASSERT_TRUE(isAtExpectedPosition(*(move_group_->getCurrentState()), start_config.toRobotState(), joint_position_tolerance_)) << "Robot did move although \"PlanOnly\" flag set.";
 }
 
 /**
