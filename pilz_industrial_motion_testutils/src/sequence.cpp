@@ -17,9 +17,20 @@
 #include "pilz_industrial_motion_testutils/sequence.h"
 
 #include <algorithm>
+#include <boost/variant.hpp>
 
 namespace pilz_industrial_motion_testutils
 {
+
+class ToReqVisitor : public boost::static_visitor<planning_interface::MotionPlanRequest>
+{
+public:
+  template<typename T>
+  planning_interface::MotionPlanRequest operator()( T & cmd) const
+  {
+    return cmd.toRequest();
+  }
+};
 
 pilz_msgs::MotionSequenceRequest Sequence::toRequest() const
 {
@@ -29,7 +40,7 @@ pilz_msgs::MotionSequenceRequest Sequence::toRequest() const
   for (const auto& cmd : cmds_)
   {
     pilz_msgs::MotionSequenceItem item;
-    item.req = cmd.first->toRequest();
+    item.req = boost::apply_visitor( ToReqVisitor(), cmd.first);
 
     if (!first_cmd)
     {
