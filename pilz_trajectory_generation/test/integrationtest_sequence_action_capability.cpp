@@ -41,7 +41,6 @@
 #include <pilz_industrial_motion_testutils/checks.h>
 
 #include "pilz_msgs/MoveGroupSequenceAction.h"
-#include "test_utils.h"
 
 static constexpr int WAIT_FOR_RESULT_TIME_OUT {5}; //seconds
 static constexpr int TIME_BEFORE_CANCEL_GOAL {2}; //seconds
@@ -156,12 +155,11 @@ TEST_F(IntegrationTestSequenceAction, TestSendingOfEmptySequence)
 TEST_F(IntegrationTestSequenceAction, TestDifferingGroupNames)
 {
   Sequence seq {data_loader_->getSequence("ComplexSequence")};
+  MotionCmd& cmd {seq.getCmd(1)};
+  cmd.setPlanningGroup("WrongGroupName");
 
   pilz_msgs::MoveGroupSequenceGoal seq_goal;
   seq_goal.request = seq.toRequest();
-
-  // Manipulate the group for negative test
-  seq_goal.request.items.at(0).req.group_name = "WrongGroupName";
 
   ac_.sendGoalAndWait(seq_goal);
   pilz_msgs::MoveGroupSequenceResultConstPtr res = ac_.getResult();
@@ -295,16 +293,14 @@ TEST_F(IntegrationTestSequenceAction, TestInvalidCmd)
 TEST_F(IntegrationTestSequenceAction, TestInvalidLinkName)
 {
   Sequence seq {data_loader_->getSequence("ComplexSequence")};
-
   seq.setAllBlendRadiiToZero();
 
-  pilz_msgs::MotionSequenceRequest req {seq.toRequest()};
   // Invalidate link name
-  req.items.at(1).req.goal_constraints.at(0).position_constraints.at(0).link_name = "InvalidLinkName";
-  req.items.at(1).req.goal_constraints.at(0).orientation_constraints.at(0).link_name = "InvalidLinkName";
+  CircInterimCart& circ {seq.getCmd<CircInterimCart>(1)};
+  circ.getGoalConfiguration().setLinkName("InvalidLinkName");
 
   pilz_msgs::MoveGroupSequenceGoal seq_goal;
-  seq_goal.request = req;
+  seq_goal.request = seq.toRequest();
 
   ac_.sendGoalAndWait(seq_goal);
   pilz_msgs::MoveGroupSequenceResultConstPtr res = ac_.getResult();
