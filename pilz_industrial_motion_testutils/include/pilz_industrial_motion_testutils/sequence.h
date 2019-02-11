@@ -56,6 +56,13 @@ public:
   template<class T>
   const T& getCmd(const size_t index_cmd) const;
 
+  /**
+   * @brief Returns the specific command as base class reference.
+   * This function allows the user to operate on the sequence without
+   * having knowledge of the underlying specific command type.
+   */
+  MotionCmd &getCmd(const size_t index_cmd);
+
   void setAllBlendRadiiToZero();
   void setBlendRadii(const size_t index_cmd, const double blend_radius);
   double getBlendRadius(const size_t index_cmd) const;

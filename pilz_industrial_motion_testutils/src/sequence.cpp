@@ -22,6 +22,9 @@
 namespace pilz_industrial_motion_testutils
 {
 
+/**
+ * @brief Visitor transforming the stored command into a MotionPlanRequest.
+ */
 class ToReqVisitor : public boost::static_visitor<planning_interface::MotionPlanRequest>
 {
 public:
@@ -29,6 +32,19 @@ public:
   planning_interface::MotionPlanRequest operator()( T & cmd) const
   {
     return cmd.toRequest();
+  }
+};
+
+/**
+ * @brief Visitor returning not the specific command type but the base type.
+ */
+class ToBaseVisitor : public boost::static_visitor<MotionCmd& >
+{
+public:
+  template<typename T>
+  MotionCmd& operator()( T & cmd) const
+  {
+    return cmd;
   }
 };
 
@@ -79,5 +95,9 @@ void Sequence::erase(const size_t start, const size_t end)
   }
 }
 
+MotionCmd& Sequence::getCmd(const size_t index_cmd)
+{
+  return boost::apply_visitor( ToBaseVisitor(), cmds_.at(index_cmd).first);
+}
 
 }
