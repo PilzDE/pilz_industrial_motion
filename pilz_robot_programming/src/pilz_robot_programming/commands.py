@@ -232,7 +232,7 @@ class _BaseCmd(_AbstractCmd):
         if self._relative:
             self._goal = _pose_relative_to_absolute(current_pose, self._goal)
 
-        if self._reference_frame:
+        if not self._reference_frame == _DEFAULT_BASE_LINK:
             return _to_robot_reference(robot, self._reference_frame, self._goal)
 
         # in case of uninitialized orientation, set the goal orientation as current
