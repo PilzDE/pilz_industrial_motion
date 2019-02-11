@@ -37,7 +37,6 @@
 #include "pilz_msgs/GetMotionSequence.h"
 #include "pilz_msgs/MotionSequenceRequest.h"
 #include "pilz_trajectory_generation/capability_names.h"
-#include "test_utils.h"
 
 #include "motion_plan_request_builder.h"
 #include "motion_sequence_request_builder.h"
@@ -117,12 +116,11 @@ TEST_F(IntegrationTestSequenceService, TestSendingOfEmptySequence)
 TEST_F(IntegrationTestSequenceService, TestDifferingGroupNames)
 {
   Sequence seq {data_loader_->getSequence("ComplexSequence")};
-
-  pilz_msgs::MotionSequenceRequest req {seq.toRequest()};
-  req.items.at(0).req.group_name = "WrongGroupName";
+  MotionCmd& cmd {seq.getCmd(1)};
+  cmd.setPlanningGroup("WrongGroupName");
 
   pilz_msgs::GetMotionSequence srv;
-  srv.request.commands = req;
+  srv.request.commands = seq.toRequest();
 
   ASSERT_TRUE(client_.call(srv));
 
@@ -226,7 +224,11 @@ TEST_F(IntegrationTestSequenceService, TestSecondTrajInvalidStartState)
 {
   Sequence seq {data_loader_->getSequence("ComplexSequence")};
   pilz_msgs::MotionSequenceRequest req_list {seq.toRequest()};
-  req_list.items[1].req.start_state.joint_state = testutils::generateJointState({-1., 2., -3., 4., -5., 0.});
+
+  // Set start state
+  JointConfiguration config {"MyGroupName", {-1., 2., -3., 4., -5., 0.} };
+  config.setJointPrefix("prbt_joint_");
+  req_list.items[1].req.start_state.joint_state = config.toSensorMsg();
 
   pilz_msgs::GetMotionSequence srv;
   srv.request.commands = req_list;
@@ -253,11 +255,11 @@ TEST_F(IntegrationTestSequenceService, TestSecondTrajInvalidStartState)
 TEST_F(IntegrationTestSequenceService, TestFirstGoalNotReachable)
 {
   Sequence seq {data_loader_->getSequence("ComplexSequence")};
-  pilz_msgs::MotionSequenceRequest req_list {seq.toRequest()};
-  req_list.items[0].req.goal_constraints[0].position_constraints[0].constraint_region.primitive_poses[0].position.y = 27;
+  PtpJointCart& cmd {seq.getCmd<PtpJointCart>(0)};
+  cmd.getGoalConfiguration().getPose().position.y = 27;
 
   pilz_msgs::GetMotionSequence srv;
-  srv.request.commands = req_list;
+  srv.request.commands = seq.toRequest();
 
   ASSERT_TRUE(client_.call(srv));
 
@@ -280,16 +282,14 @@ TEST_F(IntegrationTestSequenceService, TestFirstGoalNotReachable)
 TEST_F(IntegrationTestSequenceService, TestInvalidLinkName)
 {
   Sequence seq {data_loader_->getSequence("ComplexSequence")};
-
   seq.setAllBlendRadiiToZero();
 
-  pilz_msgs::MotionSequenceRequest req {seq.toRequest()};
   // Invalidate link name
-  req.items.at(1).req.goal_constraints.at(0).position_constraints.at(0).link_name = "InvalidLinkName";
-  req.items.at(1).req.goal_constraints.at(0).orientation_constraints.at(0).link_name = "InvalidLinkName";
+  CircInterimCart& circ {seq.getCmd<CircInterimCart>(1)};
+  circ.getGoalConfiguration().setLinkName("InvalidLinkName");
 
   pilz_msgs::GetMotionSequence srv;
-  srv.request.commands = req;
+  srv.request.commands = seq.toRequest();
 
   ASSERT_TRUE(client_.call(srv));
 
