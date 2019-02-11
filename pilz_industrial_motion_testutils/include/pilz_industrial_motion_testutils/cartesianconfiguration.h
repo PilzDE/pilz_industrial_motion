@@ -58,8 +58,11 @@ public:
   virtual moveit_msgs::Constraints toGoalConstraints() const override;
   virtual moveit_msgs::RobotState toMoveitMsgsRobotState() const override;
 
+  void setLinkName(const std::string& link_name);
   const std::string& getLinkName() const;
+
   const geometry_msgs::Pose &getPose() const;
+  geometry_msgs::Pose &getPose();
 
   void setSeed(const JointConfiguration& config);
   const JointConfiguration& getSeed() const;
@@ -100,12 +103,22 @@ private:
 
 std::ostream& operator<<(std::ostream&, const CartesianConfiguration&);
 
+inline void CartesianConfiguration::setLinkName(const std::string& link_name)
+{
+  link_name_ = link_name;
+}
+
 inline const std::string& CartesianConfiguration::getLinkName() const
 {
   return link_name_;
 }
 
 inline const geometry_msgs::Pose& CartesianConfiguration::getPose() const
+{
+  return pose_;
+}
+
+inline geometry_msgs::Pose & CartesianConfiguration::getPose()
 {
   return pose_;
 }
