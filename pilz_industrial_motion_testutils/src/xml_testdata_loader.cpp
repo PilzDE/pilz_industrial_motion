@@ -302,7 +302,6 @@ PtpJoint XmlTestdataLoader::getPtpJoint(const std::string& cmd_name) const
 
   PtpJoint cmd;
   cmd.setPlanningGroup(planning_group);
-  cmd.setTargetLink(target_link);
   cmd.setVelocityScale(vel_scale);
   cmd.setAccelerationScale(acc_scale);
 
@@ -324,7 +323,6 @@ PtpJointCart XmlTestdataLoader::getPtpJointCart(const std::string& cmd_name) con
 
   PtpJointCart cmd;
   cmd.setPlanningGroup(planning_group);
-  cmd.setTargetLink(target_link);
   cmd.setVelocityScale(vel_scale);
   cmd.setAccelerationScale(acc_scale);
 
@@ -346,7 +344,6 @@ PtpCart XmlTestdataLoader::getPtpCart(const std::string& cmd_name) const
 
   PtpCart cmd;
   cmd.setPlanningGroup(planning_group);
-  cmd.setTargetLink(target_link);
   cmd.setVelocityScale(vel_scale);
   cmd.setAccelerationScale(acc_scale);
 
@@ -390,7 +387,6 @@ LinJoint XmlTestdataLoader::getLinJoint(const std::string& cmd_name) const
 
   LinJoint cmd;
   cmd.setPlanningGroup(planning_group);
-  cmd.setTargetLink(target_link);
   cmd.setVelocityScale(vel_scale);
   cmd.setAccelerationScale(acc_scale);
 
@@ -412,7 +408,6 @@ LinCart XmlTestdataLoader::getLinCart(const std::string& cmd_name) const
 
   LinCart cmd;
   cmd.setPlanningGroup(planning_group);
-  cmd.setTargetLink(target_link);
   cmd.setVelocityScale(vel_scale);
   cmd.setAccelerationScale(acc_scale);
 
@@ -434,7 +429,6 @@ LinJointCart XmlTestdataLoader::getLinJointCart(const std::string& cmd_name) con
 
   LinJointCart cmd;
   cmd.setPlanningGroup(planning_group);
-  cmd.setTargetLink(target_link);
   cmd.setVelocityScale(vel_scale);
   cmd.setAccelerationScale(acc_scale);
 
@@ -637,7 +631,6 @@ CircCenterCart XmlTestdataLoader::getCircCartCenterCart(const std::string &cmd_n
 
   CircCenterCart cmd;
   cmd.setPlanningGroup(planning_group);
-  cmd.setTargetLink(target_link);
   cmd.setVelocityScale(vel_scale);
   cmd.setAccelerationScale(acc_scale);
 
@@ -660,7 +653,6 @@ CircInterimCart XmlTestdataLoader::getCircCartInterimCart(const std::string &cmd
 
   CircInterimCart cmd;
   cmd.setPlanningGroup(planning_group);
-  cmd.setTargetLink(target_link);
   cmd.setVelocityScale(vel_scale);
   cmd.setAccelerationScale(acc_scale);
 
@@ -683,7 +675,6 @@ CircJointCenterCart XmlTestdataLoader::getCircJointCenterCart(const std::string 
 
   CircJointCenterCart cmd;
   cmd.setPlanningGroup(planning_group);
-  cmd.setTargetLink(target_link);
   cmd.setVelocityScale(vel_scale);
   cmd.setAccelerationScale(acc_scale);
 
