@@ -39,8 +39,6 @@ public:
 public:
   void setPlanningGroup(const std::string &planning_group);
 
-  void setTargetLink(const std::string &target_link);
-
   void setVelocityScale(double velocity_scale);
   void setAccelerationScale(double acceleration_scale);
 
@@ -55,11 +53,6 @@ protected:
 inline void MotionCmd::setPlanningGroup(const std::string &planning_group)
 {
   planning_group_ = planning_group;
-}
-
-inline void MotionCmd::setTargetLink(const std::string &target_link)
-{
-  target_link_ = target_link;
 }
 
 inline void MotionCmd::setVelocityScale(double velocity_scale)
