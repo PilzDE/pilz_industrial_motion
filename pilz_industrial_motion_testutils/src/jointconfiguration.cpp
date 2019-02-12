@@ -108,4 +108,21 @@ sensor_msgs::JointState JointConfiguration::toSensorMsg() const
   return state;
 }
 
+std::ostream& operator<< (std::ostream& os, const JointConfiguration& obj)
+{
+  const size_t N {obj.size()};
+  os << "JointConfiguration: [";
+  for(size_t i = 0; i<N; ++i)
+  {
+    os << obj.getJoint(i);
+    if (i != N-1 )
+    {
+      os << ", ";
+    }
+  }
+  os << "]";
+
+  return os;
+}
+
 }

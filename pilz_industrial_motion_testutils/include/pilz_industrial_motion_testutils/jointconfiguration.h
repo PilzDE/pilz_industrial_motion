@@ -77,6 +77,8 @@ private:
   std::string joint_prefix_ {};
 };
 
+std::ostream& operator<<(std::ostream&, const JointConfiguration&);
+
 inline JointConfiguration& JointConfiguration::setJointPrefix(const std::string& joint_prefix)
 {
   joint_prefix_ = joint_prefix;
@@ -115,6 +117,8 @@ inline size_t JointConfiguration::size() const
 {
   return joints_.size();
 }
+
+
 
 }
 
