@@ -25,6 +25,7 @@
 #include <chrono>
 
 #include <ros/ros.h>
+#include <ros/console.h>
 #include <moveit_msgs/Constraints.h>
 #include <moveit_msgs/JointConstraint.h>
 #include <moveit_msgs/GetMotionPlan.h>
@@ -119,6 +120,11 @@ void IntegrationTestSequenceAction::SetUp()
   move_group_->move();
 
   ASSERT_TRUE(isAtExpectedPosition(*(move_group_->getCurrentState()), rState, joint_position_tolerance_));
+
+  if (ros::console::set_logger_level("ros.moveit_kinematics.kdl", ros::console::levels::Debug))
+  {
+    ros::console::notifyLoggerLevelsChanged();
+  }
 }
 
 /**
