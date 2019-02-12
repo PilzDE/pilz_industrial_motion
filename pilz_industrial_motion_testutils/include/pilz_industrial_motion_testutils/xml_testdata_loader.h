@@ -169,7 +169,8 @@ private:
                                                 bool &ok) const;
 
   const pt::ptree::value_type &findNodeWithName(const boost::property_tree::ptree &tree,
-                                                const std::string &name) const;
+                                                const std::string &name,
+                                                const std::string &path = "") const;
 
   /**
    * @deprecated Use function using higher level abstraction data class instead.
@@ -262,6 +263,7 @@ private:
   const std::string CMD_TYPE_PATH_STR {XML_ATTR_STR + ".type"};
   const std::string BLEND_RADIUS_PATH_STR {XML_ATTR_STR + ".blend_radius"};
   const std::string LINK_NAME_PATH_STR {XML_ATTR_STR + ".link_name"};
+  const std::string GROUP_NAME_PATH_STR {XML_ATTR_STR + ".group_name"};
 
 };
 

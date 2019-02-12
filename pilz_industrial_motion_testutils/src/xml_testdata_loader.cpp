@@ -115,21 +115,23 @@ const pt::ptree::value_type& XmlTestdataLoader::findNodeWithName(const boost::pr
 }
 
 const pt::ptree::value_type& XmlTestdataLoader::findNodeWithName(const boost::property_tree::ptree &tree,
-                                                                 const std::string &name) const
+                                                                 const std::string &name, const std::string& path) const
 {
+  std::string path_str {path.empty()? NAME_PATH_STR : path};
+
   // Search for node with given name.
   for (const pt::ptree::value_type& val : tree)
   {
     // Ignore attributes which are always the first element of a tree.
     if (val.first == XML_ATTR_STR){ continue; }
 
-    const auto& node = val.second.get_child(NAME_PATH_STR, empty_tree_);
+    const auto& node = val.second.get_child(path_str, empty_tree_);
     if (node == empty_tree_) { break; }
     if (node.data() == name) { return val; }
   }
 
   std::string msg;
-  msg.append("Node \"").append(name).append("\" not found.");
+  msg.append("Node with ").append(path_str).append("=\"").append(name).append("\" not found.");
   throw TestDataLoaderReadingException(msg);
 }
 
@@ -188,27 +190,18 @@ JointConfiguration XmlTestdataLoader::getJoints(const std::string &pos_name,
   {
     throw TestDataLoaderReadingException("No poses found.");
   }
-
   const auto& pose_node {findNodeWithName(poses_tree, pos_name)};
 
-  // Search group node with given name.
-  const auto& group_tree {pose_node.second};
-  if (group_tree == empty_tree_)
+  // Search joints node with given group_name.
+  const auto& joints_tree {pose_node.second};
+  if (joints_tree == empty_tree_)
   {
-    throw TestDataLoaderReadingException("No groups found.");
+    throw TestDataLoaderReadingException("No joints found.");
   }
-
-  const auto& group_node {findNodeWithName(group_tree, group_name)};
-
-  // Read joint values
-  const auto& joint_tree {group_node.second.get_child(JOINT_STR, empty_tree_)};
-  if (joint_tree == empty_tree_)
-  {
-    throw TestDataLoaderReadingException("No joint node found.");
-  }
+  const auto& joint_node {findNodeWithName(joints_tree, group_name, GROUP_NAME_PATH_STR)};
 
   std::vector<std::string> strs;
-  boost::split(strs,  joint_tree.data(), boost::is_any_of(" "));
+  boost::split(strs,  joint_node.second.data(), boost::is_any_of(" "));
   return JointConfiguration(group_name, strVec2doubleVec(strs), robot_model_);
 }
 
