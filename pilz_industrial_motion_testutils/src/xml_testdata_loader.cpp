@@ -592,17 +592,120 @@ bool XmlTestdataLoader::getCirc(const std::string &cmd_name, STestMotionCommand 
   return true;
 }
 
-bool XmlTestdataLoader::getBlend(const std::string &cmd_name,
-                                 std::vector<SBlendCmd> &blend_cmds) const
+CartesianCenter XmlTestdataLoader::getCartesianCenter(const std::string &cmd_name,
+                                                      const std::string &planning_group) const
 {
-  // Find blend cmd with given name
-  bool ok {false};
-  const pt::ptree::value_type &blend_node { findCmd(cmd_name, BLENDS_PATH_STR, ok) };
-  if (!ok){ return false; }
+  const pt::ptree::value_type &cmd_node { findCmd(cmd_name, CIRCS_PATH_STR) };
+  std::string aux_pos_name;
+  try
+  {
+    aux_pos_name = cmd_node.second.get<std::string>(CENTER_POS_STR);
+  }
+  catch(...)
+  {
+    throw TestDataLoaderReadingException("Did not find center of circ");
+  }
 
-  // Loop over all blend cmds.
-  const auto& blend_cmd_tree = blend_node.second;
-  for (const pt::ptree::value_type& blend_cmd : blend_cmd_tree)
+  CartesianCenter aux;
+  aux.setConfiguration(getPose(aux_pos_name, planning_group));
+  return aux;
+}
+
+CartesianInterim XmlTestdataLoader::getCartesianInterim(const std::string &cmd_name,
+                                                        const std::string &planning_group) const
+{
+  const pt::ptree::value_type &cmd_node { findCmd(cmd_name, CIRCS_PATH_STR) };
+  std::string aux_pos_name;
+  try
+  {
+    aux_pos_name = cmd_node.second.get<std::string>(INTERMEDIATE_POS_STR);
+  }
+  catch(...)
+  {
+    throw TestDataLoaderReadingException("Did not find interim of circ");
+  }
+
+  CartesianInterim aux;
+  aux.setConfiguration(getPose(aux_pos_name, planning_group));
+  return aux;
+}
+
+CircCenterCart XmlTestdataLoader::getCircCartCenterCart(const std::string &cmd_name) const
+{
+  std::string start_pos_name, goal_pos_name, planning_group, target_link;
+  double vel_scale, acc_scale;
+  if(!getCmd(CIRCS_PATH_STR, cmd_name, planning_group, target_link,
+             start_pos_name, goal_pos_name, vel_scale, acc_scale))
+  {
+    throw TestDataLoaderReadingException("Did not \"" + cmd_name +  "\"");
+  }
+
+  CircCenterCart cmd;
+  cmd.setPlanningGroup(planning_group);
+  cmd.setTargetLink(target_link);
+  cmd.setVelocityScale(vel_scale);
+  cmd.setAccelerationScale(acc_scale);
+
+  cmd.setStartConfiguration(getPose(start_pos_name, planning_group));
+  cmd.setAuxiliaryConfiguration(getCartesianCenter(cmd_name, planning_group));
+  cmd.setGoalConfiguration(getPose(goal_pos_name, planning_group));
+
+  return cmd;
+}
+
+CircInterimCart XmlTestdataLoader::getCircCartInterimCart(const std::string &cmd_name) const
+{
+  std::string start_pos_name, goal_pos_name, planning_group, target_link;
+  double vel_scale, acc_scale;
+  if(!getCmd(CIRCS_PATH_STR, cmd_name, planning_group, target_link,
+             start_pos_name, goal_pos_name, vel_scale, acc_scale))
+  {
+    throw TestDataLoaderReadingException("Did not \"" + cmd_name +  "\"");
+  }
+
+  CircInterimCart cmd;
+  cmd.setPlanningGroup(planning_group);
+  cmd.setTargetLink(target_link);
+  cmd.setVelocityScale(vel_scale);
+  cmd.setAccelerationScale(acc_scale);
+
+  cmd.setStartConfiguration(getPose(start_pos_name, planning_group));
+  cmd.setAuxiliaryConfiguration(getCartesianInterim(cmd_name, planning_group));
+  cmd.setGoalConfiguration(getPose(goal_pos_name, planning_group));
+
+  return cmd;
+}
+
+CircJointCenterCart XmlTestdataLoader::getCircJointCenterCart(const std::string &cmd_name) const
+{
+  std::string start_pos_name, goal_pos_name, planning_group, target_link;
+  double vel_scale, acc_scale;
+  if(!getCmd(CIRCS_PATH_STR, cmd_name, planning_group, target_link,
+             start_pos_name, goal_pos_name, vel_scale, acc_scale))
+  {
+    throw TestDataLoaderReadingException("Did not \"" + cmd_name +  "\"");
+  }
+
+  CircJointCenterCart cmd;
+  cmd.setPlanningGroup(planning_group);
+  cmd.setTargetLink(target_link);
+  cmd.setVelocityScale(vel_scale);
+  cmd.setAccelerationScale(acc_scale);
+
+  cmd.setStartConfiguration(getJoints(start_pos_name, planning_group));
+  cmd.setAuxiliaryConfiguration(getCartesianCenter(cmd_name, planning_group));
+  cmd.setGoalConfiguration(getJoints(goal_pos_name, planning_group));
+
+  return cmd;
+}
+
+Sequence XmlTestdataLoader::getSequence(const std::string &cmd_name) const
+{
+  Sequence seq;
+
+  // Find sequence with given name and loop over all its cmds
+  const auto& sequence_cmd_tree {findCmd(cmd_name, SEQUENCE_PATH_STR).second};
+  for (const pt::ptree::value_type& seq_cmd : sequence_cmd_tree)
   {
     // Ignore attributes which are always the first element of a tree.
     if (seq_cmd.first == XML_ATTR_STR){ continue; }
@@ -611,26 +714,27 @@ bool XmlTestdataLoader::getBlend(const std::string &cmd_name,
     const boost::property_tree::ptree& cmd_name_attr = seq_cmd.second.get_child(NAME_PATH_STR, empty_tree_);
     if (cmd_name_attr == empty_tree_)
     {
-      ROS_ERROR("Did not find name of blend cmd.");
-      return false;
+      throw TestDataLoaderReadingException("Did not find name of sequence cmd");
     }
-    SBlendCmd blend_cmd_data;
-    blend_cmd_data.cmd_name = cmd_name_attr.data();
 
-    // Get type of blend cmd.
-    const boost::property_tree::ptree& type_name_attr = blend_cmd.second.get_child(CMD_TYPE_PATH_STR, empty_tree_);
+    std::string cmd_name {cmd_name_attr.data()};
+
+    // Get type of blend cmd
+    const boost::property_tree::ptree& type_name_attr {seq_cmd.second.get_child(CMD_TYPE_PATH_STR, empty_tree_)};
     if (type_name_attr == empty_tree_)
     {
-      ROS_ERROR_STREAM("Did not find type of blend cmd '" << blend_cmd_data.cmd_name << "'." );
-      return false;
+      throw TestDataLoaderReadingException("Did not find type of sequence cmd \"" + cmd_name +  "\"");
     }
-    blend_cmd_data.cmd_type = type_name_attr.data();
+    std::string cmd_type {type_name_attr.data()};
 
     // Get blend radius of blend cmd.
-    blend_cmd_data.blend_radius = blend_cmd.second.get<double>(BLEND_RADIUS_PATH_STR, DEFAULT_BLEND_RADIUS);
+    double blend_radius {seq_cmd.second.get<double>(BLEND_RADIUS_PATH_STR, DEFAULT_BLEND_RADIUS)};
 
-    // Add blend cmd to container.
-    blend_cmds.push_back(blend_cmd_data);
+    // Read current command from test data
+    MotionCmdUPtr curr_cmd {std::move(cmd_getter_funcs_.at(cmd_type)->getCmd(cmd_name))};
+
+    // Add command to sequence
+    seq.add(std::move(curr_cmd), blend_radius);
   }
 
   return seq;

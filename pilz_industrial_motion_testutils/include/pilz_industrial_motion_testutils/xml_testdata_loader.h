@@ -145,8 +145,11 @@ public:
   //! @deprecated Use function using higher level abstraction data class instead.
   virtual bool getCirc(const std::string& cmd_name, STestMotionCommand& cmd) const override;
 
-  virtual bool getBlend(const std::string &cmd_name,
-                        std::vector<SBlendCmd> &blend_cmds) const override;
+  virtual CircCenterCart getCircCartCenterCart(const std::string &cmd_name) const override;
+  virtual CircInterimCart getCircCartInterimCart(const std::string &cmd_name) const override;
+  virtual CircJointCenterCart getCircJointCenterCart(const std::string &cmd_name) const override;
+
+  virtual Sequence getSequence(const std::string &cmd_name) const override;
 
 private:
   /**

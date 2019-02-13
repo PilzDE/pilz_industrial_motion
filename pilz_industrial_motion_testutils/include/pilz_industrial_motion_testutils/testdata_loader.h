@@ -140,8 +140,14 @@ public:
   /**
    * @brief Returns the command with the specified name from the test data.
    */
-  virtual bool getBlend(const std::string &cmd_name,
-                        std::vector<SBlendCmd> &blend_cmds) const = 0;
+  virtual CircCenterCart getCircCartCenterCart(const std::string &cmd_name) const = 0;
+  virtual CircJointCenterCart getCircJointCenterCart(const std::string &cmd_name) const = 0;
+  virtual CircInterimCart getCircCartInterimCart(const std::string &cmd_name) const = 0;
+
+  /**
+   * @brief Returns the command with the specified name from the test data.
+   */
+  virtual Sequence getSequence(const std::string &cmd_name) const = 0;
 
 public:
   static geometry_msgs::Pose fromVecToMsg(const std::vector<double>& vec);
