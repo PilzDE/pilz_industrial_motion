@@ -29,6 +29,7 @@
 #include <moveit/kinematic_constraints/utils.h>
 
 #include "robotconfiguration.h"
+#include "jointconfiguration.h"
 
 namespace pilz_industrial_motion_testutils
 {
@@ -58,6 +59,11 @@ public:
   const std::string& getLinkName() const;
   const geometry_msgs::Pose &getPose() const;
 
+  void setSeed(const JointConfiguration& config);
+  const JointConfiguration& getSeed() const;
+  //! @brief States if a seed for the cartesian configuration is set.
+  bool hasSeed() const;
+
 private:
   static geometry_msgs::Pose toPose(const std::vector<double>& pose);
   static geometry_msgs::PoseStamped toStampedPose(const geometry_msgs::Pose& pose);
@@ -65,7 +71,11 @@ private:
 private:
   std::string link_name_;
   geometry_msgs::Pose pose_;
+  std::vector<JointConfiguration> seed_;
+
 };
+
+std::ostream& operator<<(std::ostream&, const CartesianConfiguration&);
 
 inline const std::string& CartesianConfiguration::getLinkName() const
 {
@@ -80,6 +90,22 @@ inline const geometry_msgs::Pose& CartesianConfiguration::getPose() const
 inline moveit_msgs::Constraints CartesianConfiguration::toGoalConstraints() const
 {
   return kinematic_constraints::constructGoalConstraints(link_name_, toStampedPose(pose_));
+}
+
+inline void CartesianConfiguration::setSeed(const JointConfiguration& config)
+{
+  seed_.clear();
+  seed_.emplace_back(config);
+}
+
+inline const JointConfiguration& CartesianConfiguration::getSeed() const
+{
+  return seed_.front();
+}
+
+inline bool CartesianConfiguration::hasSeed() const
+{
+  return !seed_.empty();
 }
 
 }
