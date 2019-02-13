@@ -117,7 +117,7 @@ const pt::ptree::value_type& XmlTestdataLoader::findNodeWithName(const boost::pr
 const pt::ptree::value_type& XmlTestdataLoader::findNodeWithName(const boost::property_tree::ptree &tree,
                                                                  const std::string &name, const std::string& path) const
 {
-  std::string path_str {path.empty()? NAME_PATH_STR : path};
+  std::string path_str {(path.empty()? NAME_PATH_STR : path)};
 
   // Search for node with given name.
   for (const pt::ptree::value_type& val : tree)
@@ -190,10 +190,13 @@ JointConfiguration XmlTestdataLoader::getJoints(const std::string &pos_name,
   {
     throw TestDataLoaderReadingException("No poses found.");
   }
-  const auto& pose_node {findNodeWithName(poses_tree, pos_name)};
+  return getJoints(findNodeWithName(poses_tree, pos_name).second, group_name);
+}
 
+JointConfiguration XmlTestdataLoader::getJoints(const boost::property_tree::ptree& joints_tree,
+                                                const std::string &group_name) const
+{
   // Search joints node with given group_name.
-  const auto& joints_tree {pose_node.second};
   if (joints_tree == empty_tree_)
   {
     throw TestDataLoaderReadingException("No joints found.");
@@ -259,42 +262,35 @@ bool XmlTestdataLoader::getPose(const std::string &pos_name, const std::string &
 CartesianConfiguration XmlTestdataLoader::getPose(const std::string &pos_name,
                                                   const std::string &group_name) const
 {
-  // Search for node with given name.
-  const auto& poses_tree = tree_.get_child(POSES_PATH_STR, empty_tree_);
-  if (poses_tree == empty_tree_)
+  const auto& all_poses_tree {tree_.get_child(POSES_PATH_STR, empty_tree_)};
+  if (all_poses_tree == empty_tree_)
   {
     throw TestDataLoaderReadingException("No poses found.");
   }
-
-  const auto& pose_node {findNodeWithName(poses_tree, pos_name)};
-
-  // Search group node with given name.
-  const auto& group_tree = pose_node.second;
-  if (group_tree == empty_tree_)
-  {
-    throw TestDataLoaderReadingException("No groups found.");
-  }
-
-  const auto& group_node {findNodeWithName(group_tree, group_name)};
-
-  // Read joint values
-  const auto& xyzQuat_tree {group_node.second.get_child(XYZ_QUAT_STR, empty_tree_)};
-  if (xyzQuat_tree == empty_tree_)
-  {
-    throw TestDataLoaderReadingException("No cartesian node found.");
-  }
-
-  const boost::property_tree::ptree& link_name_attr = xyzQuat_tree.get_child(LINK_NAME_PATH_STR, empty_tree_);
+  const auto& pose_tree {findNodeWithName(all_poses_tree, pos_name).second};
+  const auto& xyzQuat_tree {findNodeWithName(pose_tree, group_name, GROUP_NAME_PATH_STR).second};
+  const boost::property_tree::ptree& link_name_attr {xyzQuat_tree.get_child(LINK_NAME_PATH_STR, empty_tree_)};
   if (link_name_attr == empty_tree_)
   {
     throw TestDataLoaderReadingException("No link name found.");
   }
   std::string link_name {link_name_attr.data()};
 
-  std::vector<std::string> strs;
-  boost::split(strs,  xyzQuat_tree.data(), boost::is_any_of(" "));
-  return CartesianConfiguration(group_name, link_name,
-                                strVec2doubleVec(strs), robot_model_);
+  // Get rid of things like "\n", etc.
+  std::string data {xyzQuat_tree.data()};
+  boost::trim(data);
+
+  std::vector<std::string> posOri_str;
+  boost::split(posOri_str, data, boost::is_any_of(" "));
+  CartesianConfiguration cart_config { CartesianConfiguration(group_name, link_name,
+                                                              strVec2doubleVec(posOri_str), robot_model_)};
+
+  const auto& seeds_tree {xyzQuat_tree.get_child(SEED_STR, empty_tree_)};
+  if (seeds_tree != empty_tree_)
+  {
+    cart_config.setSeed(getJoints(seeds_tree, group_name));
+  }
+  return cart_config;
 }
 
 PtpJoint XmlTestdataLoader::getPtpJoint(const std::string& cmd_name) const

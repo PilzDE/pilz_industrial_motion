@@ -44,23 +44,18 @@ namespace pilz_industrial_motion_testutils
  *
  *  <poses>
  *    <pos name="MyTestPos1">
- *      <group name="manipulator">
- *        <joints>j1 j2 j3 j4 j5 j6</joints>
- *        <xyzQuat link_name="prbt_tcp">x y z wx wy wz w</xyzQuat>
- *      </group>
- *      <group name="gripper">
- *        <joints>j_gripper</joints>
- *      </group>
+ *      <joints group_name="manipulator">j1 j2 j3 j4 j5 j6</joints>
+ *      <xyzQuat group_name="manipulator" link_name="prbt_tcp">
+ *        x y z wx wy wz w
+ *        <seed><joints group_name="manipulator">s1 s2 s3 s4 s5 s6</joints></seed>
+ *      </xyzQuat>
+ *      <joints group_name="gripper">j_gripper</joints>
  *    </pos>
  *
  *    <pos name="MyTestPos2">
- *      <group name="manipulator">
- *        <joints>j1 j2 j3 j4 j5 j6</joints>
- *        <xyzQuat link_name="prbt_tcp">x y z wx wy wz w</xyzQuat>
- *      </group>
- *      <group name="gripper">
- *        <joints>j_gripper</joints>
- *      </group>
+ *      <joints group_name="manipulator">j1 j2 j3 j4 j5 j6</joints>
+ *      <xyzQuat group_name="manipulator" link_name="prbt_tcp">x y z wx wy wz w</xyzQuat>
+ *      <joints group_name="gripper">j_gripper</joints>
  *    </pos>
  *  </poses>
  *
@@ -202,6 +197,10 @@ private:
                                        const std::string &planning_group) const;
 
 private:
+  JointConfiguration getJoints(const boost::property_tree::ptree& joints_tree,
+                               const std::string &group_name) const;
+
+private:
   //! @deprecated Use function using higher level abstraction data class instead.
   //! @brief Converts string vector to double vector.
   inline static void strVec2doubleVec(std::vector<std::string> &strVec, std::vector<double> &dVec);
@@ -242,6 +241,7 @@ private:
   const std::string JOINT_STR {"joints"};
   const std::string XYZ_QUAT_STR {"xyzQuat"};
   const std::string XYZ_EULER_STR {"xyzEuler"};
+  const std::string SEED_STR {"seed"};
 
   const std::string PLANNING_GROUP_STR {"planningGroup"};
   const std::string TARGET_LINK_STR {"targetLink"};
