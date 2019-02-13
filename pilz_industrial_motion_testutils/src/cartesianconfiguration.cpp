@@ -86,6 +86,8 @@ moveit_msgs::RobotState CartesianConfiguration::toMoveitMsgsRobotState() const
 
   robot_state::RobotState rstate(robot_model_);
   rstate.setToDefaultValues();
+  if (hasSeed()){ rstate.setJointGroupPositions(group_name_, getSeed().getJoints()); }
+
   rstate.update();
 
   // set to Cartesian pose
@@ -103,6 +105,14 @@ moveit_msgs::RobotState CartesianConfiguration::toMoveitMsgsRobotState() const
   moveit_msgs::RobotState robot_state_msg;
   moveit::core::robotStateToRobotStateMsg(rstate, robot_state_msg, true);
   return robot_state_msg;
+}
+
+std::ostream& operator<< (std::ostream& os, const CartesianConfiguration& obj)
+{
+  os << "Group name: \"" << obj.getGroupName() << "\"";
+  os << " | link name: \"" << obj.getLinkName() << "\"";
+  os << "\n" << obj.getPose();
+  return os;
 }
 
 }
