@@ -631,7 +631,7 @@ TEST_P(TrajectoryBlenderTransitionWindowTest, testNonLinearBlending)
       // get pose
       CartesianTrajectoryPoint waypoint;
       geometry_msgs::Pose waypoint_pose;
-      Eigen::Affine3d eigen_pose {lin_traj->getWayPointPtr(i)->getFrameTransform(target_link_)};
+      Eigen::Isometry3d eigen_pose {lin_traj->getWayPointPtr(i)->getFrameTransform(target_link_)};
       tf::poseEigenToMsg(eigen_pose, waypoint_pose);
 
       // add scaled sine function

@@ -49,7 +49,7 @@ void MotionPlanRequestBuilder::setScalingFactor(double velocity_scale, double ac
   req_msg_.max_acceleration_scaling_factor = acc_scale;
 }
 
-void MotionPlanRequestBuilder::setGoalConstraint(const std::string &link, const Eigen::Affine3d &goal_pose)
+void MotionPlanRequestBuilder::setGoalConstraint(const std::string &link, const Eigen::Isometry3d &goal_pose)
 {
   geometry_msgs::PoseStamped pose;
   tf::poseEigenToMsg(goal_pose, pose.pose);
@@ -78,7 +78,7 @@ void MotionPlanRequestBuilder::setCIRCAuxiliaryConstraint(const std::string &con
     req_msg_.path_constraints.position_constraints.clear();
     moveit_msgs::PositionConstraint p_constraint;
     p_constraint.link_name = link_name;
-    Eigen::Affine3d aux_pose = aux_state.getFrameTransform(link_name);
+    Eigen::Isometry3d aux_pose = aux_state.getFrameTransform(link_name);
     geometry_msgs::Pose pose;
     tf::poseEigenToMsg(aux_pose, pose);
     p_constraint.constraint_region.primitive_poses.push_back(pose);

@@ -232,7 +232,7 @@ TEST_F(IntegrationTestCommandPlanning, PTPPoseGoal)
   robot_state::RobotState rstate(robot_model_);
   rstate.setJointGroupPositions(planning_group_,response.trajectory.joint_trajectory.points.back().positions);
   rstate.update();
-  Eigen::Affine3d tf = rstate.getFrameTransform(target_link_);
+  Eigen::Isometry3d tf = rstate.getFrameTransform(target_link_);
 
   geometry_msgs::Pose goal_pose;
   tf::poseEigenToMsg(tf, goal_pose);
@@ -243,7 +243,7 @@ TEST_F(IntegrationTestCommandPlanning, PTPPoseGoal)
   EXPECT_NEAR(tf(2,3), pose_vec[2], EPSILON);
 
 
-  Eigen::Affine3d expec_pose;
+  Eigen::Isometry3d expec_pose;
   tf::poseMsgToEigen(pose.pose, expec_pose);
 
   EXPECT_TRUE(Eigen::Quaterniond(tf.rotation()).isApprox(Eigen::Quaterniond(expec_pose.rotation()), EPSILON));
@@ -483,7 +483,7 @@ TEST_F(IntegrationTestCommandPlanning, CIRCJointGoal)
 
   // check all waypoints are on the circle and SLERP
   robot_state::RobotState waypoint_state(robot_model_);
-  Eigen::Affine3d waypoint_pose;
+  Eigen::Isometry3d waypoint_pose;
   double x_dist, y_dist, z_dist;
 
   x_dist = circ_cmd.aux_pose[0] - circ_cmd.start_pose[0];
@@ -503,7 +503,7 @@ TEST_F(IntegrationTestCommandPlanning, CIRCJointGoal)
     EXPECT_NEAR(actual_radius, expected_radius, pose_norm_tolerance_) << "Trajectory way point is not on the circle.";
 
     // Check orientation
-    Eigen::Affine3d start_pose, goal_pose;
+    Eigen::Isometry3d start_pose, goal_pose;
     tf::poseMsgToEigen(pilz_industrial_motion_testutils::TestdataLoader::fromVecToMsg(circ_cmd.start_pose), start_pose);
     tf::poseMsgToEigen(pilz_industrial_motion_testutils::TestdataLoader::fromVecToMsg(circ_cmd.goal_pose), goal_pose);
     EXPECT_TRUE( testutils::checkSLERP(start_pose, goal_pose, waypoint_pose, rot_axis_norm_tolerance_) );
@@ -572,7 +572,7 @@ TEST_F(IntegrationTestCommandPlanning, CIRCPoseGoal)
 
   // check all waypoints are on the cricle and SLERP
   robot_state::RobotState waypoint_state(robot_model_);
-  Eigen::Affine3d waypoint_pose;
+  Eigen::Isometry3d waypoint_pose;
   double x_dist, y_dist, z_dist;
 
   x_dist = circ_cmd.aux_pose[0] - circ_cmd.start_pose[0];
@@ -592,7 +592,7 @@ TEST_F(IntegrationTestCommandPlanning, CIRCPoseGoal)
     EXPECT_NEAR(actual_radius, expected_radius, pose_norm_tolerance_) << "Trajectory way point is not on the circle.";
 
     // Check orientation
-    Eigen::Affine3d start_pose, goal_pose;
+    Eigen::Isometry3d start_pose, goal_pose;
     tf::poseMsgToEigen(pilz_industrial_motion_testutils::TestdataLoader::fromVecToMsg(circ_cmd.start_pose), start_pose);
     tf::poseMsgToEigen(pilz_industrial_motion_testutils::TestdataLoader::fromVecToMsg(circ_cmd.goal_pose), goal_pose);
     EXPECT_TRUE(testutils::checkSLERP(start_pose,

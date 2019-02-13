@@ -282,7 +282,7 @@ TEST_P(TrajectoryGeneratorLINTest, cartesianTrapezoidProfile)
   // variables to find the way point at given time
   int waypoint_index;
   robot_state::RobotState waypoint_state(robot_model_);
-  Eigen::Affine3d waypoint_pose;
+  Eigen::Isometry3d waypoint_pose;
   Eigen::AngleAxisd waypoint_aa;
 
   // way point at 0.25s

@@ -71,7 +71,7 @@ public:
 
 private:
   /**
-   * @brief Transform a vector of position and quanterion (x, y, z, wx, wy, wz, w) to Eigen::Affine3d.
+   * @brief Transform a vector of position and quanterion (x, y, z, wx, wy, wz, w) to Eigen::Isometry3d.
    * @param pose
    * @return
    */

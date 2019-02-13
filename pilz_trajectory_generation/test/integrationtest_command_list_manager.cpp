@@ -473,7 +473,7 @@ TEST_P(IntegrationTestCommandListManager, blendingRadiusOverlapping)
 
   // calculate distance from first to second goal
   planning_interface::MotionPlanResponse res_overlap;
-  Eigen::Affine3d p1, p2;
+  Eigen::Isometry3d p1, p2;
   tf2::fromMsg(req.items[0].req.goal_constraints[0].position_constraints[0].constraint_region.primitive_poses[0], p1);
   tf2::fromMsg(req.items[1].req.goal_constraints[0].position_constraints[0].constraint_region.primitive_poses[0], p2);
   auto distance = (p2.translation()-p1.translation()).norm();

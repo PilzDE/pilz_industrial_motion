@@ -84,7 +84,7 @@ protected:
    * @param epsilon
    * @return
    */
-  bool tfNear(const Eigen::Affine3d& pose1, const Eigen::Affine3d& pose2, const double& epsilon);
+  bool tfNear(const Eigen::Isometry3d& pose1, const Eigen::Isometry3d& pose2, const double& epsilon);
 
 
 protected:
@@ -124,7 +124,7 @@ void TrajectoryFunctionsTestBase::SetUp()
   }
 }
 
-bool TrajectoryFunctionsTestBase::tfNear(const Eigen::Affine3d& pose1, const Eigen::Affine3d& pose2, const double& epsilon)
+bool TrajectoryFunctionsTestBase::tfNear(const Eigen::Isometry3d& pose1, const Eigen::Isometry3d& pose2, const double& epsilon)
 {
   for(std::size_t i=0; i<3; ++i)
     for(std::size_t j=0; j<4; ++j)
@@ -297,7 +297,7 @@ TEST_P(TrajectoryFunctionsTestFlangeAndGripper, testIKRobotState)
     // compute the pose from ik_solution
     rstate.setVariablePositions(ik_actual);
     rstate.update();
-    Eigen::Affine3d pose_actual = rstate.getFrameTransform(tcp_link_);
+    Eigen::Isometry3d pose_actual = rstate.getFrameTransform(tcp_link_);
 
     EXPECT_TRUE(tfNear(pose_expect,pose_actual,EPSILON));
 
@@ -452,7 +452,7 @@ TEST_P(TrajectoryFunctionsTestOnlyGripper, testComputePoseIKSelfCollisionForVali
   pose.position.z = 0.431;
   pose.orientation.y = 0.991562;
   pose.orientation.w = -0.1296328;
-  Eigen::Affine3d pose_expect;
+  Eigen::Isometry3d pose_expect;
   normalizeQuaternion(pose.orientation);
   tf::poseMsgToEigen(pose, pose_expect);
 
@@ -535,7 +535,7 @@ TEST_P(TrajectoryFunctionsTestFlangeAndGripper, testComputePoseIKSelfCollisionFo
 
   rstate.setJointGroupPositions(jmg, ik_goal);
 
-  Eigen::Affine3d pose_expect = rstate.getFrameTransform(tcp_link_);
+  Eigen::Isometry3d pose_expect = rstate.getFrameTransform(tcp_link_);
 
   // compute the ik with disabled collision check
   std::map<std::string, double> ik_actual;

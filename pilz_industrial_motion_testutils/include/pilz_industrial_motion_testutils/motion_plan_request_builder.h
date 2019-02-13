@@ -40,7 +40,7 @@ public:
   void setPlanningGroup(const std::string& group);
   void setStartState(const moveit::core::RobotState& start_state);
   void setScalingFactor(double velocity_scale, double acc_scale);
-  void setGoalConstraint(const std::string& link, const Eigen::Affine3d& goal_pose);
+  void setGoalConstraint(const std::string& link, const Eigen::Isometry3d& goal_pose);
   void setGoalConstraint(const std::string& link, const geometry_msgs::PoseStamped goal_pose);
   void setGoalConstraint(const std::string& group, const moveit::core::RobotState& goal_state);
   /**

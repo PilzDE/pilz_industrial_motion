@@ -190,11 +190,11 @@ void pilz::TrajectoryBlenderTransitionWindow::blendTrajectoryCartesian(const pil
   trajectory.link_name = req.link_name;
 
   // Pose on first trajectory
-  Eigen::Affine3d blend_sample_pose1
+  Eigen::Isometry3d blend_sample_pose1
       = req.first_trajectory->getWayPoint(first_interse_index).getFrameTransform(req.link_name);
 
   // Pose on second trajectory
-  Eigen::Affine3d blend_sample_pose2
+  Eigen::Isometry3d blend_sample_pose2
       = req.second_trajectory->getWayPoint(second_interse_index).getFrameTransform(req.link_name);
 
   // blend the trajectory
@@ -204,7 +204,7 @@ void pilz::TrajectoryBlenderTransitionWindow::blendTrajectoryCartesian(const pil
   blend_sample_pose2 = req.second_trajectory->getFirstWayPoint().getFrameTransform(req.link_name);
 
   // Pose on blending trajectory
-  Eigen::Affine3d  blend_sample_pose;
+  Eigen::Isometry3d  blend_sample_pose;
   for(std::size_t i = 0; i < blend_sample_num; ++i)
   {
     // if the first trajectory does not reach the last sample, update
@@ -249,7 +249,7 @@ bool pilz::TrajectoryBlenderTransitionWindow::searchIntersectionPoints(const pil
 
   // compute the position of the center of the blend sphere
   // (last point of the first trajectory, first point of the second trajectory)
-  Eigen::Affine3d circ_pose = req.first_trajectory->getLastWayPoint().getFrameTransform(req.link_name);
+  Eigen::Isometry3d circ_pose = req.first_trajectory->getLastWayPoint().getFrameTransform(req.link_name);
 
   // Searh for intersection points according to distance
   if(!linearSearchIntersectionPoint(req.link_name, circ_pose.translation(), req.blend_radius,

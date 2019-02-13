@@ -133,7 +133,7 @@ void TrajectoryGeneratorCIRCTest::checkCircResult(const planning_interface::Moti
   // check the trapezoid velocity profile
   int waypoint_index;
   robot_state::RobotState waypoint_state(res.trajectory_->getFirstWayPointPtr()->getRobotModel());
-  Eigen::Affine3d waypoint_pose;
+  Eigen::Isometry3d waypoint_pose;
   Eigen::AngleAxisd waypoint_aa;
   double radius = 0.3;
   double alpha = 0;
@@ -141,8 +141,8 @@ void TrajectoryGeneratorCIRCTest::checkCircResult(const planning_interface::Moti
   double angle_rot = 0.5*M_PI;
 
   // check all waypoints are on the cricle and SLERP
-  Eigen::Affine3d start_pose = res.trajectory_->getFirstWayPointPtr()->getFrameTransform(target_link_);
-  Eigen::Affine3d goal_pose = res.trajectory_->getLastWayPointPtr()->getFrameTransform(target_link_);
+  Eigen::Isometry3d start_pose = res.trajectory_->getFirstWayPointPtr()->getFrameTransform(target_link_);
+  Eigen::Isometry3d goal_pose = res.trajectory_->getLastWayPointPtr()->getFrameTransform(target_link_);
   for(std::size_t i = 0; i < res.trajectory_->getWayPointCount(); ++i )
   {
     waypoint_pose = res.trajectory_->getWayPointPtr(i)->getFrameTransform(target_link_);
