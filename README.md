@@ -17,14 +17,16 @@ The FTP is implemented by Pilz GmbH & Co. KG.
 Changes are merged into `melodic-devel` with every release or on demand.
 
 ## Package: pilz_trajectory_generation
-Provides the generators to create LIN, PTP and CIRC trajectories. It uses a plugin structure which allows to the
-definition of custom commands.
+Provides the generators to create LIN, PTP and CIRC trajectories. All of these commands can be combined and
+executed in sequence, with and without blending, using a dedicated MoveIt! capability.
+
+Custom commands can easily be defined and integrated due to the usage of a plugin structure.
 
 ## Package: pilz_extensions
 Minor extensions of existing packages needed for the trajectory_generation.
 
 ## Package: pilz\_robot\_programming
-pilz\_robot\_programming provides a python API for an intuitive programming of a MoveIt! enabled robot. For details please refer to the [ Pilz Robot Programming Documentation ](pilz_robot_programming/README.rst).
+pilz\_robot\_programming provides a python API for an intuitive programming of a MoveIt! enabled robot. For details please refer to the [ Pilz Robot Programming Documentation ](pilz_robot_programming/Readme.rst).
 
 ## Package: pilz_industrial_motion_testutils
 Contains helper classes and functions that are used by the tests
@@ -41,11 +43,11 @@ Contains helper classes and functions that are used by the tests
        alt="rosin_logo" height="60" >
 </a>
 
-Supported by ROSIN - ROS-Industrial Quality-Assured Robot Software Components.  
+Supported by ROSIN - ROS-Industrial Quality-Assured Robot Software Components.
 More information: <a href="http://rosin-project.eu">rosin-project.eu</a>
 
 <img src="http://rosin-project.eu/wp-content/uploads/rosin_eu_flag.jpg"
-     alt="eu_flag" height="45" align="left" >  
+     alt="eu_flag" height="45" align="left" >
 
-This project has received funding from the European Union’s Horizon 2020  
-research and innovation programme under grant agreement no. 732287. 
+This project has received funding from the European Union’s Horizon 2020
+research and innovation programme under grant agreement no. 732287.

@@ -21,9 +21,6 @@ Changelog for package pilz_msgs
 0.1.1 (2018-09-25)
 ------------------
 
-0.2.0 (2018-09-14)
-------------------
-
 0.1.0 (2018-09-14)
 ------------------
 * Added msg definition for blend request and response

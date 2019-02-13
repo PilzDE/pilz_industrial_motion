@@ -24,9 +24,7 @@ bool pilz::TrajectoryBlenderTransitionWindow::blend(const pilz::TrajectoryBlendR
                                          pilz::TrajectoryBlendResponse& res)
 {
   ROS_INFO("Start trajectory blending using transition window.");
-  // search for intersection points of the two trajectories with the blending sphere
-  // intersection points belongs to blend trajectory after blending
-  // blend the trajectory
+
   double sampling_time = 0.;
   if(!validateRequest(req, sampling_time, res.error_code))
   {
@@ -34,11 +32,13 @@ bool pilz::TrajectoryBlenderTransitionWindow::blend(const pilz::TrajectoryBlendR
     return false;
   }
 
+  // search for intersection points of the two trajectories with the blending sphere
+  // intersection points belongs to blend trajectory after blending
   std::size_t first_intersection_index;
   std::size_t second_intersection_index;
   if(!searchIntersectionPoints(req, first_intersection_index, second_intersection_index))
   {
-    ROS_ERROR("Trajectory blend request is not valid.");
+    ROS_ERROR("Blend radius to large.");
     res.error_code.val = moveit_msgs::MoveItErrorCodes::INVALID_MOTION_PLAN;
     return false;
   }
@@ -79,9 +79,11 @@ bool pilz::TrajectoryBlenderTransitionWindow::blend(const pilz::TrajectoryBlendR
                               error_code,
                               true))
   {
+    // LCOV_EXCL_START
     ROS_INFO("Failed to generate joint trajectory for blending trajectory.");
     res.error_code.val = error_code.val;
     return false;
+    // LCOV_EXCL_STOP
   }
 
   res.first_trajectory = std::shared_ptr<robot_trajectory::RobotTrajectory>(new robot_trajectory::RobotTrajectory(
@@ -98,11 +100,12 @@ bool pilz::TrajectoryBlenderTransitionWindow::blend(const pilz::TrajectoryBlendR
   // erase the points [first_intersection_index, back()] from the first trajectory
   for(size_t i = 0; i < first_intersection_index; ++i)
   {
-    res.first_trajectory->insertWayPoint(i,req.first_trajectory->getWayPoint(i), req.first_trajectory->getWayPointDurationFromPrevious(i));
+    res.first_trajectory->insertWayPoint(i, req.first_trajectory->getWayPoint(i),
+                                         req.first_trajectory->getWayPointDurationFromPrevious(i));
   }
 
   // append the blend trajectory
-  res.blend_trajectory->setRobotTrajectoryMsg(req.first_trajectory->getFirstWayPoint(), blend_joint_trajectory); // TODO: correct? unnecessary?
+  res.blend_trajectory->setRobotTrajectoryMsg(req.first_trajectory->getFirstWayPoint(), blend_joint_trajectory);
   // copy the points [second_intersection_index, len] from the second trajectory
   for(size_t i = second_intersection_index+1; i < req.second_trajectory->getWayPointCount(); ++i)
   {
@@ -123,19 +126,18 @@ bool pilz::TrajectoryBlenderTransitionWindow::validateRequest(const pilz::Trajec
                                                    moveit_msgs::MoveItErrorCodes &error_code) const
 {
   ROS_DEBUG("Validate the trajectory blend request.");
-  if(req.blend_radius <=0 )
+
+  // check planning group
+  if (!req.first_trajectory->getRobotModel()->hasJointModelGroup(req.group_name))
   {
-    ROS_ERROR("Blending radius must be positive");
-    error_code.val = moveit_msgs::MoveItErrorCodes::INVALID_MOTION_PLAN;
+    ROS_ERROR_STREAM("Unknown planning group: " << req.group_name);
+    error_code.val = moveit_msgs::MoveItErrorCodes::INVALID_GROUP_NAME;
     return false;
   }
 
-  // same uniform sampling time
-  if (!pilz::determineAndCheckSamplingTime(req.first_trajectory,
-                                           req.second_trajectory,
-                                           EPSILON,
-                                           sampling_time))
+  if(req.blend_radius <=0 )
   {
+    ROS_ERROR("Blending radius must be positive");
     error_code.val = moveit_msgs::MoveItErrorCodes::INVALID_MOTION_PLAN;
     return false;
   }
@@ -146,6 +148,20 @@ bool pilz::TrajectoryBlenderTransitionWindow::validateRequest(const pilz::Trajec
                               req.group_name,
                               EPSILON))
   {
+    ROS_ERROR_STREAM("During blending the last point (" << req.first_trajectory->getLastWayPoint()
+                     << " of the preceding and the first point of the succeding trajectory ("
+                     << req.second_trajectory->getFirstWayPoint() << " do not match");
+    error_code.val = moveit_msgs::MoveItErrorCodes::INVALID_MOTION_PLAN;
+    return false;
+  }
+
+  // same uniform sampling time
+  if (!pilz::determineAndCheckSamplingTime(req.first_trajectory,
+                                           req.second_trajectory,
+                                           EPSILON,
+                                           sampling_time))
+  {
+
     error_code.val = moveit_msgs::MoveItErrorCodes::INVALID_MOTION_PLAN;
     return false;
   }
@@ -155,19 +171,6 @@ bool pilz::TrajectoryBlenderTransitionWindow::validateRequest(const pilz::Trajec
      !pilz::isRobotStateStationary(req.second_trajectory->getFirstWayPointPtr(), req.group_name, EPSILON) )
   {
     ROS_ERROR("Intersection point of the blending trajectories has non-zero velocities/accelerations.");
-    error_code.val = moveit_msgs::MoveItErrorCodes::INVALID_MOTION_PLAN;
-    return false;
-  }
-
-  // trajectories should exceed the blending sphere
-  Eigen::Affine3d first_start = req.first_trajectory->getFirstWayPointPtr()->getFrameTransform(req.link_name);
-  Eigen::Affine3d first_end = req.first_trajectory->getLastWayPointPtr()->getFrameTransform(req.link_name);
-  Eigen::Affine3d second_end = req.second_trajectory->getLastWayPointPtr()->getFrameTransform(req.link_name);
-
-  if((first_end.translation() - first_start.translation()).norm() <= req.blend_radius ||
-     (first_end.translation() - second_end.translation()).norm() <= req.blend_radius )
-  {
-    ROS_ERROR("Blending radius is too large.");
     error_code.val = moveit_msgs::MoveItErrorCodes::INVALID_MOTION_PLAN;
     return false;
   }
@@ -273,11 +276,10 @@ void pilz::TrajectoryBlenderTransitionWindow::determineTrajectoryAlignment(const
                                                                 std::size_t second_interse_index,
                                                                 std::size_t &blend_align_index) const
 {
-  double tau_1 = (req.first_trajectory->getWayPointDurationFromStart(req.first_trajectory->getWayPointCount()) -
-                  req.first_trajectory->getWayPointDurationFromStart(first_interse_index));
-  double tau_2 = req.second_trajectory->getWayPointDurationFromStart(second_interse_index);
+  size_t way_point_count_1 = req.first_trajectory->getWayPointCount() - first_interse_index;
+  size_t way_point_count_2 = second_interse_index+1;
 
-  if(tau_1 > tau_2)
+  if(way_point_count_1 > way_point_count_2)
   {
     blend_align_index = req.first_trajectory->getWayPointCount() - second_interse_index -1;
   }

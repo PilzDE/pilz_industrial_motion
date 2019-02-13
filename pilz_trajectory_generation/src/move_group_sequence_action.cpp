@@ -71,16 +71,28 @@ void MoveGroupSequenceAction::initialize()
 void MoveGroupSequenceAction::executeSequenceCallback(const pilz_msgs::MoveGroupSequenceGoalConstPtr& goal)
 {
   setMoveState(move_group::PLANNING);
+
+  pilz_msgs::MoveGroupSequenceResult action_res;
+
+  // Handle empty requests
+  if(goal->request.items.empty())
+  {
+    ROS_WARN("Received empty request. That's ok but maybe not what you intended.");
+    setMoveState(move_group::IDLE);
+    action_res.error_code.val = moveit_msgs::MoveItErrorCodes::SUCCESS;
+    move_action_server_->setSucceeded(action_res, "Received empty request.");
+    return;
+  }
+
   // before we start planning, ensure that we have the latest robot state received...
   context_->planning_scene_monitor_->waitForCurrentRobotState(ros::Time::now());
   context_->planning_scene_monitor_->updateFrameTransforms();
 
-  pilz_msgs::MoveGroupSequenceResult action_res;
   if (goal->planning_options.plan_only || !context_->allow_trajectory_execution_)
   {
     if (!goal->planning_options.plan_only)
     {
-      ROS_WARN("Only plan will be calculated, although plan_only == false.");
+      ROS_WARN("Only plan will be calculated, although plan_only == false."); //LCOV_EXCL_LINE
     }
     executeMoveCallback_PlanOnly(goal, action_res);
   }
@@ -131,23 +143,21 @@ void MoveGroupSequenceAction::executeSequenceCallback_PlanAndExecute(const pilz_
 
   if (goal->planning_options.look_around && context_->plan_with_sensing_)
   {
-    //TODO: test the following code block with sensing
-//    opt.plan_callback_ = boost::bind(&plan_execution::PlanWithSensing::computePlan, context_->plan_with_sensing_.get(),
-//                                     _1, opt.plan_callback_, goal->planning_options.look_around_attempts,
-//                                     goal->planning_options.max_safe_execution_cost);
-//    context_->plan_with_sensing_->setBeforeLookCallback(boost::bind(&MoveGroupSequenceAction::startMoveLookCallback, this));
-
-    ROS_WARN("Plan with sensing not yet implemented/tested. This option is ignored.");
+    ROS_WARN("Plan with sensing not yet implemented/tested. This option is ignored."); //LCOV_EXCL_LINE
   }
 
   plan_execution::ExecutableMotionPlan plan;
   context_->plan_execution_->planAndExecute(plan, planning_scene_diff, opt);
 
   convertToMsg(plan.plan_components_, action_res.trajectory_start, action_res.planned_trajectory);
+
+  // LCOV_EXCL_START // Currently this does not seem to be utilized by the TrajectoryExecutionManager
   if (plan.executed_trajectory_)
   {
     plan.executed_trajectory_->getRobotTrajectoryMsg(action_res.executed_trajectory);
   }
+  // LCOV_EXCL_STOP
+
   action_res.error_code = plan.error_code_;
 }
 
@@ -169,11 +179,13 @@ void MoveGroupSequenceAction::executeMoveCallback_PlanOnly(const pilz_msgs::Move
   {
     sequence_manager_->solve(the_scene, goal->request, res);
   }
+  // LCOV_EXCL_START // Keep moveit up even if lower parts throw
   catch (std::exception& ex)
   {
     ROS_ERROR("Planning pipeline threw an exception: %s", ex.what());
     res.error_code_.val = moveit_msgs::MoveItErrorCodes::FAILURE;
   }
+  // LCOV_EXCL_STOP
 
   convertToMsg(res.trajectory_, action_res.trajectory_start, action_res.planned_trajectory);
   action_res.error_code = res.error_code_;
@@ -192,11 +204,14 @@ bool MoveGroupSequenceAction::planUsingSequenceManager(const pilz_msgs::MotionSe
   {
     solved = sequence_manager_->solve(plan.planning_scene_, req, res);
   }
+  // LCOV_EXCL_START // Keep moveit up even if lower parts throw
   catch (std::exception& ex)
   {
     ROS_ERROR("Planning pipeline threw an exception: %s", ex.what());
     res.error_code_.val = moveit_msgs::MoveItErrorCodes::FAILURE;
   }
+  // LCOV_EXCL_STOP
+
   if (res.trajectory_)
   {
     plan.plan_components_.resize(1);
@@ -210,11 +225,6 @@ bool MoveGroupSequenceAction::planUsingSequenceManager(const pilz_msgs::MotionSe
 void MoveGroupSequenceAction::startMoveExecutionCallback()
 {
   setMoveState(move_group::MONITOR);
-}
-
-void MoveGroupSequenceAction::startMoveLookCallback()
-{
-  setMoveState(move_group::LOOK);
 }
 
 void MoveGroupSequenceAction::preemptMoveCallback()

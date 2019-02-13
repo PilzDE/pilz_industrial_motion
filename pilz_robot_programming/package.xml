@@ -15,6 +15,7 @@
   <run_depend>rospy</run_depend>
   <run_depend>pilz_trajectory_generation</run_depend>
   <run_depend>pilz_msgs</run_depend>
+  <run_depend>python-psutil</run_depend>
 
   <buildtool_depend>catkin</buildtool_depend>
 

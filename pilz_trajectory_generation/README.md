@@ -10,7 +10,7 @@ please refer to the [MoveIt! website](http://moveit.ros.org/).
 # ROS API
 ## User Interface MoveGroup
 This package implements the `planning_interface::PlannerManager` interface of MoveIt!. By loading the corresponding
-planning pipeline (`command_planner_planning_pipeline.launch.xml` in `prbt_moveit_config` package), the trajectory
+planning pipeline (`pilz_command_planner_planning_pipeline.launch.xml` in `prbt_moveit_config` package), the trajectory
 generation functionalities can be accessed through the user interface (c++, python or rviz) provided by
 the `move_group` node, e.g. `/plan_kinematics_path` service and `/move_group` action. For detailed tutorials please
 refer to [MoveIt! Tutorials](http://docs.ros.org/indigo/api/moveit_tutorials/html/index.html).
@@ -203,7 +203,8 @@ with the following goal in a way, that the robot does not stop at the current go
 given `blend_radius`, it is allowed to travel towards the next goal already. When leaving a sphere around the current goal, the robot
 returns onto the trajectory he would have taken without blending.
 
-For details about the blend algorithm please refer to `/doc/MotionBlendAlgorithmDescription.pdf`.
+For details about the blend algorithm please refer to
+![doc/MotionBlendAlgorithmDescription.pdf](doc/MotionBlendAlgorithmDescription.pdf).
 
 ![blend figure](doc/figure/blend_radius.png)
 

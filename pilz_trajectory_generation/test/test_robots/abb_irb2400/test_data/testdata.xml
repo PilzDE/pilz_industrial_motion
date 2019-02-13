@@ -97,4 +97,15 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
   </lins>
 
+  <ptps>
+    <ptp name="FirstPtp">
+      <planningGroup>manipulator</planningGroup>
+      <targetLink>prbt_tcp</targetLink>
+      <startPos>ZeroPose</startPos>
+      <endPos>PTPJointValid</endPos>
+      <vel>1.0</vel>
+      <acc>1.0</acc>
+    </ptp>
+  </ptps>
+
 </testdata>

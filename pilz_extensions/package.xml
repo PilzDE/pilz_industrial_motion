@@ -7,7 +7,10 @@
   On the long run these extensions should become pull requests on the respective packages.
   </description>
 
-  <maintainer email="ros@pilz.de">Pilz GmbH and Co. KG</maintainer>
+  <maintainer email="a.gutenkunst@pilz.de">Alexander Gutenkunst</maintainer>
+  <maintainer email="c.henkel@pilz.de">Christian Henkel</maintainer>
+  <maintainer email="h.slusarek@pilz.de">Hagen Slusarek</maintainer>
+  <maintainer email="i.martini@pilz.de">Immanuel Martini</maintainer>
 
   <license>Apache 2.0</license>
 

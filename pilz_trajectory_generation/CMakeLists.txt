@@ -23,6 +23,7 @@ find_package(catkin REQUIRED COMPONENTS
   moveit_ros_move_group
   moveit_ros_planning_interface
   pilz_industrial_motion_testutils
+  pilz_testutils
 )
 
 
@@ -51,7 +52,7 @@ include_directories(
 
 ## Declare a C++ library
 add_library(${PROJECT_NAME}
-  src/command_planner.cpp
+  src/pilz_command_planner.cpp
   src/planning_context_loader.cpp
   src/joint_limits_validator.cpp
   src/joint_limits_aggregator.cpp
@@ -70,8 +71,8 @@ target_link_libraries(${PROJECT_NAME}
 #############
 ## Plugins ##
 #############
-add_library(command_planner
-            src/command_planner.cpp
+add_library(pilz_command_planner
+            src/pilz_command_planner.cpp
             src/planning_context_loader.cpp
             src/joint_limits_aggregator.cpp
             src/joint_limits_container.cpp
@@ -79,7 +80,7 @@ add_library(command_planner
             src/cartesian_limit.cpp
             src/cartesian_limits_aggregator.cpp
             )
-target_link_libraries(command_planner
+target_link_libraries(pilz_command_planner
                       ${catkin_LIBRARIES})
 
 add_library(planning_context_loader_ptp
@@ -150,14 +151,14 @@ add_dependencies(sequence_capability
 #############
 install(FILES
        plugins/sequence_capability_plugin_description.xml
-       plugins/command_planner_plugin_description.xml
+       plugins/pilz_command_planner_plugin_description.xml
        plugins/planning_context_plugin_description.xml
        DESTINATION ${CATKIN_PACKAGE_SHARE_DESTINATION}/plugins
        )
 
 ## Mark libraries for installation
 install(TARGETS
-   command_planner
+   pilz_command_planner
    planning_context_loader_ptp
    planning_context_loader_lin
    planning_context_loader_circ
@@ -223,7 +224,7 @@ add_dependencies(${PROJECT_NAME}_test
 #########################
 
 # Planning Integration tests
-add_rostest_gtest(integrationtest_sequence_action_capability
+add_rostest_gmock(integrationtest_sequence_action_capability
   test/integrationtest_sequence_action_capability.test
   test/integrationtest_sequence_action_capability.cpp
 )
@@ -231,7 +232,7 @@ add_rostest_gtest(integrationtest_sequence_action_capability
 target_link_libraries(integrationtest_sequence_action_capability
    ${catkin_LIBRARIES} ${PROJECT_NAME}_test)
 
-add_rostest_gtest(integrationtest_sequence_action_capability_with_gripper
+add_rostest_gmock(integrationtest_sequence_action_capability_with_gripper
   test/integrationtest_sequence_action_capability_with_gripper.test
   test/integrationtest_sequence_action_capability.cpp
 )
@@ -263,13 +264,11 @@ target_link_libraries(integrationtest_command_planning
 add_rostest(test/integrationtest_command_planning_with_gripper.test
   DEPENDENCIES integrationtest_command_planning )
 
-# Tests with other robots only for kinetic (for now)
+add_rostest(test/integrationtest_command_planning_abb_irb2400.test
+  DEPENDENCIES integrationtest_command_planning )
 
-#add_rostest(test/integrationtest_command_planning_abb_irb2400.test
-#  DEPENDENCIES integrationtest_command_planning )
-
-#add_rostest(test/integrationtest_command_planning_frankaemika_panda.test
-#  DEPENDENCIES integrationtest_command_planning )
+add_rostest(test/integrationtest_command_planning_frankaemika_panda.test
+  DEPENDENCIES integrationtest_command_planning )
 
 # Blending Integration tests
 add_rostest_gtest(integrationtest_command_list_manager
@@ -285,10 +284,10 @@ ${catkin_LIBRARIES} ${PROJECT_NAME}_test)
 ##################
 
   ## Add gtest based cpp test target and link libraries
-  catkin_add_gtest(unittest_command_planner_direct
-                   test/unittest_command_planner_direct.cpp
+  catkin_add_gtest(unittest_pilz_command_planner_direct
+                   test/unittest_pilz_command_planner_direct.cpp
                    src/planning_context_loader_ptp.cpp)
-  target_link_libraries(unittest_command_planner_direct
+  target_link_libraries(unittest_pilz_command_planner_direct
     ${PROJECT_NAME} ${catkin_LIBRARIES} ${PROJECT_NAME}_test)
 
   ## Add gtest based cpp test target and link libraries
@@ -354,12 +353,12 @@ ${catkin_LIBRARIES} ${PROJECT_NAME}_test)
     ${catkin_LIBRARIES} ${PROJECT_NAME}_test)
 
   # Command Planner Unit Test
-  add_rostest_gtest(unittest_command_planner
-    test/unittest_command_planner.test
-    test/unittest_command_planner.cpp
+  add_rostest_gtest(unittest_pilz_command_planner
+    test/unittest_pilz_command_planner.test
+    test/unittest_pilz_command_planner.cpp
   )
 
-  target_link_libraries(unittest_command_planner
+  target_link_libraries(unittest_pilz_command_planner
     ${catkin_LIBRARIES})
 
   # JointLimitsAggregator Unit Test

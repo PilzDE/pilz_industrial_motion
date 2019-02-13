@@ -67,8 +67,8 @@ bool CommandListManager::solve(const planning_scene::PlanningSceneConstPtr& plan
   if(req_list.items.empty())
   {
     res.trajectory_.reset(new robot_trajectory::RobotTrajectory(model_, 0));
-    res.error_code_.val = moveit_msgs::MoveItErrorCodes::INVALID_MOTION_PLAN;
-    return false;
+    res.error_code_.val = moveit_msgs::MoveItErrorCodes::SUCCESS;
+    return true;
   }
 
   if(!validateRequestList(req_list, res))
@@ -98,7 +98,7 @@ bool CommandListManager::solve(const planning_scene::PlanningSceneConstPtr& plan
   if(!validateBlendingRadiiDoNotOverlap(motion_plan_responses, radii, group_name))
   {
     res.trajectory_.reset(new robot_trajectory::RobotTrajectory(model_, 0));
-    res.error_code_.val = moveit_msgs::MoveItErrorCodes::FAILURE;
+    res.error_code_.val = moveit_msgs::MoveItErrorCodes::INVALID_MOTION_PLAN;
     return false;
   }
 
@@ -145,7 +145,7 @@ bool CommandListManager::validateRequestList(const pilz_msgs::MotionSequenceRequ
   {
     ROS_ERROR_STREAM("Cannot blend. All requests MUST be about the same group!");
     res.trajectory_.reset(new robot_trajectory::RobotTrajectory(model_, 0));
-    res.error_code_.val = moveit_msgs::MoveItErrorCodes::FAILURE;
+    res.error_code_.val = moveit_msgs::MoveItErrorCodes::INVALID_GROUP_NAME;
     return false;
   }
 
@@ -155,7 +155,7 @@ bool CommandListManager::validateRequestList(const pilz_msgs::MotionSequenceRequ
   {
     ROS_ERROR_STREAM("Cannot blend. All blending radii MUST be non negative!");
     res.trajectory_.reset(new robot_trajectory::RobotTrajectory(model_, 0));
-    res.error_code_.val = moveit_msgs::MoveItErrorCodes::FAILURE;
+    res.error_code_.val = moveit_msgs::MoveItErrorCodes::INVALID_MOTION_PLAN;
     return false;
   }
 
@@ -164,7 +164,7 @@ bool CommandListManager::validateRequestList(const pilz_msgs::MotionSequenceRequ
   {
     ROS_ERROR_STREAM("Cannot blend. The last blending radius must be zero!");
     res.trajectory_.reset(new robot_trajectory::RobotTrajectory(model_, 0));
-    res.error_code_.val = moveit_msgs::MoveItErrorCodes::FAILURE;
+    res.error_code_.val = moveit_msgs::MoveItErrorCodes::INVALID_MOTION_PLAN;
     return false;
   }
 
@@ -180,7 +180,7 @@ bool CommandListManager::validateRequestList(const pilz_msgs::MotionSequenceRequ
   {
     ROS_ERROR_STREAM("Cannot blend. Only the first request is allowed to have a start state!");
     res.trajectory_.reset(new robot_trajectory::RobotTrajectory(model_, 0));
-    res.error_code_.val = moveit_msgs::MoveItErrorCodes::START_STATE_VIOLATES_PATH_CONSTRAINTS;
+    res.error_code_.val = moveit_msgs::MoveItErrorCodes::INVALID_ROBOT_STATE;
     return false;
   }
 

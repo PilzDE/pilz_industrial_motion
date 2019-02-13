@@ -48,6 +48,10 @@ include_directories(
 ## Declare a C++ library
  add_library(${PROJECT_NAME}
    src/xml_testdata_loader.cpp
+   src/robotconfiguration.cpp
+   src/jointconfiguration.cpp
+   src/cartesianconfiguration.cpp
+   src/sequence.cpp
    src/motion_plan_request_builder.cpp
    src/motion_plan_request_director.cpp
 )
@@ -56,6 +60,9 @@ include_directories(
  target_link_libraries(${PROJECT_NAME}
    ${catkin_LIBRARIES}
 )
+
+add_dependencies(${PROJECT_NAME}
+            ${catkin_EXPORTED_TARGETS})
 
 #############
 ## Install ##

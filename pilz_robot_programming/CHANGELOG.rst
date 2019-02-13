@@ -2,6 +2,12 @@
 Changelog for package pilz_robot_programming
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
+Forthcoming
+-----------
+* enable Robot instantiation after a program got killed; add corresponding test
+* apply renaming command_planner -> pilz_command_planner
+* Contributors: Pilz GmbH and Co. KG
+
 0.4.0 (2018-12-18)
 ------------------
 * Release Python-API from kinetic version 0.3.1

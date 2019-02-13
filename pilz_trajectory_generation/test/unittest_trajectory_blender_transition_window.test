@@ -32,12 +32,9 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
     <param name="cartesian_angular_velocity_tolerance" value="1.0e-6" />
     <param name="joint_velocity_tolerance" value="1.0e-6" />
     <param name="joint_acceleration_tolerance" value="1.0e-2" />
-    <param name="other_tolerance" value="1.0e-6" />
     <param name="sampling_time" value="0.01" />
-    <param name="blend_dataset_num" value="8" />
+    <param name="testdata_file_name" value="$(find pilz_trajectory_generation)/test/test_robots/prbt/test_data/testdata_sequence.xml" />
     <rosparam command="load" file="$(find prbt_moveit_config)/config/joint_limits.yaml" />
-    <rosparam command="load" file="$(find pilz_trajectory_generation)/test/test_robots/prbt/test_data/blend_lin_lin_test_data.yaml"  ns="test_data" />
-    <rosparam command="load" file="$(find pilz_trajectory_generation)/test/test_robots/prbt/test_data/blend_lin_lin_negative_test_data.yaml"  ns="negative_test_data" />
   </test>
 
   <arg name="display_plots" default="false" />

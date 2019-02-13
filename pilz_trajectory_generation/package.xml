@@ -2,9 +2,12 @@
 <package>
   <name>pilz_trajectory_generation</name>
   <version>0.4.0</version>
-  <description>The pilz_trajectory_generation package</description>
+  <description>The pilz_trajectory_generation package containing the MoveIt! plugin pilz_command_planner.</description>
 
-  <maintainer email="ros@pilz.de">Pilz GmbH and Co. KG</maintainer>
+ <maintainer email="a.gutenkunst@pilz.de">Alexander Gutenkunst</maintainer>
+  <maintainer email="c.henkel@pilz.de">Christian Henkel</maintainer>
+  <maintainer email="h.slusarek@pilz.de">Hagen Slusarek</maintainer>
+  <maintainer email="i.martini@pilz.de">Immanuel Martini</maintainer>
 
   <license>LGPLv3</license>
 
@@ -53,14 +56,15 @@
   <test_depend>prbt_moveit_config</test_depend>
   <test_depend>prbt_support</test_depend>
   <test_depend>prbt_pg70_support</test_depend>
-  <!-- <test_depend>panda_moveit_config</test_depend> -->         <!-- only needed in kinetic -->
-  <!-- <test_depend>abb_irb2400_moveit_config</test_depend> -->   <!-- only needed in kinetic -->
+  <test_depend>panda_moveit_config</test_depend>
+  <test_depend>abb_irb2400_moveit_config</test_depend>
   <test_depend>code_coverage</test_depend>
+  <test_depend>pilz_testutils</test_depend>
 
 
   <!-- The export tag contains other, unspecified, tags -->
   <export>
-    <moveit_core plugin="${prefix}/plugins/command_planner_plugin_description.xml"/>
+    <moveit_core plugin="${prefix}/plugins/pilz_command_planner_plugin_description.xml"/>
     <moveit_ros_move_group plugin="${prefix}/plugins/sequence_capability_plugin_description.xml"/>
     <pilz_trajectory_generation plugin="${prefix}/plugins/planning_context_plugin_description.xml"/>
   </export>

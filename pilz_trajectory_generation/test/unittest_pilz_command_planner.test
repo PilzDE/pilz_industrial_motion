@@ -25,7 +25,7 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
   </include>
 
   <!-- run test -->
-  <test pkg="pilz_trajectory_generation" test-name="unittest_command_planner" type="unittest_command_planner">
+  <test pkg="pilz_trajectory_generation" test-name="unittest_pilz_command_planner" type="unittest_pilz_command_planner">
       <param name="planning_plugin" value="pilz::CommandPlanner"/>
   </test>
 </launch>

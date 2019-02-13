@@ -110,36 +110,20 @@ TEST_F(IntegrationTestCommandPlanning, PTPJointGoal)
 {
   ros::NodeHandle node_handle("~");
 
-  planning_interface::MotionPlanRequest req;
-
-  std::vector<double> joints;
-
-  // Generate start state
-  ASSERT_TRUE(test_data_->getJoints("ZeroPose",  planning_group_, joints));
-  sensor_msgs::JointState start_state = testutils::generateJointState(joints, joint_prefix_);
-  // The goal
-  ASSERT_TRUE(test_data_->getJoints("PTPJointValid",  planning_group_, joints));
-  moveit_msgs::Constraints gc = testutils::generateJointConstraint(joints, joint_prefix_);
-  req.goal_constraints.push_back(gc);
-
-  // Scaling factor
-  req.max_velocity_scaling_factor = 1.0;
-  req.max_acceleration_scaling_factor = 1.0;
+  auto ptp = test_data_->getPtpJoint("FirstPtp");
+  ptp.getStartConfiguration().setJointPrefix(joint_prefix_);
+  ptp.getGoalConfiguration().setJointPrefix(joint_prefix_);
 
   // Generate the service request
   moveit_msgs::GetMotionPlan srv;
+  moveit_msgs::MotionPlanRequest req = ptp.toRequest();
   srv.request.motion_plan_request = req;
-  srv.request.motion_plan_request.start_state.joint_state = start_state;
 
-  // select planner by parameter
-  srv.request.motion_plan_request.group_name = planning_group_;
-  srv.request.motion_plan_request.planner_id = "PTP";
-
-  ros::service::waitForService(PLAN_SERVICE_NAME, ros::Duration(10));
+  ASSERT_TRUE(ros::service::waitForService(PLAN_SERVICE_NAME, ros::Duration(testutils::DEFAULT_SERVICE_TIMEOUT)));
   ros::ServiceClient client = node_handle.serviceClient<moveit_msgs::GetMotionPlan>(PLAN_SERVICE_NAME);
 
   // Call the service client
-  client.call(srv);
+  ASSERT_TRUE(client.call(srv));
 
   // Obtain the response
   const moveit_msgs::MotionPlanResponse& response = srv.response.motion_plan_response;
@@ -163,7 +147,7 @@ TEST_F(IntegrationTestCommandPlanning, PTPJointGoal)
 
   for(size_t i = 0; i < num_joints_; ++i)
   {
-    EXPECT_NEAR(trajectory.points.back().positions.at(i), gc.joint_constraints.at(i).position, 10e-10);
+    EXPECT_NEAR(trajectory.points.back().positions.at(i), req.goal_constraints.back().joint_constraints.at(i).position, 10e-10);
     EXPECT_NEAR(trajectory.points.back().velocities.at(i), 0, 10e-10);
     // EXPECT_NEAR(trajectory.points.back().accelerations.at(i), 0, 10e-10); // TODO what is expected
   }
@@ -186,11 +170,6 @@ TEST_F(IntegrationTestCommandPlanning, PTPPoseGoal)
   ros::NodeHandle node_handle("~");
 
   planning_interface::MotionPlanRequest req;
-
-  // The start state
-  std::vector<double> joints;
-  ASSERT_TRUE(test_data_->getJoints("ZeroPose",  planning_group_, joints));
-  sensor_msgs::JointState start_state = testutils::generateJointState(joints, joint_prefix_);
 
   // Generate start state
   std::vector<double> pose_vec;
@@ -217,17 +196,17 @@ TEST_F(IntegrationTestCommandPlanning, PTPPoseGoal)
   // Generate the service request
   moveit_msgs::GetMotionPlan srv;
   srv.request.motion_plan_request = req;
-  srv.request.motion_plan_request.start_state.joint_state = start_state;
+  srv.request.motion_plan_request.start_state.joint_state = test_data_->getJoints("ZeroPose",  planning_group_).setJointPrefix(joint_prefix_).toSensorMsg();;
 
   // select planner by parameter
   srv.request.motion_plan_request.group_name = planning_group_;
   srv.request.motion_plan_request.planner_id = "PTP";
 
-  ros::service::waitForService(PLAN_SERVICE_NAME, ros::Duration(10));
+  ASSERT_TRUE(ros::service::waitForService(PLAN_SERVICE_NAME, ros::Duration(testutils::DEFAULT_SERVICE_TIMEOUT)));
   ros::ServiceClient client = node_handle.serviceClient<moveit_msgs::GetMotionPlan>(PLAN_SERVICE_NAME);
 
   // Call the service client
-  client.call(srv);
+  ASSERT_TRUE(client.call(srv));
 
   // Obtain the response
   const moveit_msgs::MotionPlanResponse& response = srv.response.motion_plan_response;
@@ -320,11 +299,11 @@ TEST_F(IntegrationTestCommandPlanning, LinJointGoal)
   moveit_msgs::GetMotionPlan srv;
   srv.request.motion_plan_request = req;
 
-  ros::service::waitForService(PLAN_SERVICE_NAME, ros::Duration(testutils::DEFAULT_SERVICE_TIMEOUT));
+  ASSERT_TRUE(ros::service::waitForService(PLAN_SERVICE_NAME, ros::Duration(testutils::DEFAULT_SERVICE_TIMEOUT)));
   ros::ServiceClient client = node_handle.serviceClient<moveit_msgs::GetMotionPlan>(PLAN_SERVICE_NAME);
 
   // Call the service client
-  client.call(srv);
+  ASSERT_TRUE(client.call(srv));
 
   // Obtain the response
   const moveit_msgs::MotionPlanResponse& response = srv.response.motion_plan_response;
@@ -371,7 +350,7 @@ TEST_F(IntegrationTestCommandPlanning, LinJointGoal)
  *  2. Goal position correponds with the given goal position.
  *  3. Trajectory is a straight line.
  */
-TEST_F(IntegrationTestCommandPlanning, LinPosGoal)
+TEST_F(IntegrationTestCommandPlanning, LinPoseGoal)
 {
   ros::NodeHandle node_handle("~");
 
@@ -384,8 +363,6 @@ TEST_F(IntegrationTestCommandPlanning, LinPosGoal)
   std::cout << "++++++++++" << std::endl;
 
   // The start state
-  std::vector<double> joints;
-  ASSERT_TRUE(test_data_->getJoints("ZeroPose",  planning_group_, joints));
   sensor_msgs::JointState start_state = testutils::generateJointState(lin_cmd.start_position, joint_prefix_);
 
   // The goal
@@ -410,11 +387,11 @@ TEST_F(IntegrationTestCommandPlanning, LinPosGoal)
   moveit_msgs::GetMotionPlan srv;
   srv.request.motion_plan_request = req;
 
-  ros::service::waitForService(PLAN_SERVICE_NAME, ros::Duration(testutils::DEFAULT_SERVICE_TIMEOUT));
+  ASSERT_TRUE(ros::service::waitForService(PLAN_SERVICE_NAME, ros::Duration(testutils::DEFAULT_SERVICE_TIMEOUT)));
   ros::ServiceClient client = node_handle.serviceClient<moveit_msgs::GetMotionPlan>(PLAN_SERVICE_NAME);
 
   // Call the service client
-  client.call(srv);
+  ASSERT_TRUE(client.call(srv));
 
   // Obtain the response
   const moveit_msgs::MotionPlanResponse& response = srv.response.motion_plan_response;
@@ -472,11 +449,11 @@ TEST_F(IntegrationTestCommandPlanning, CIRCJointGoal)
   moveit_msgs::GetMotionPlan srv;
   srv.request.motion_plan_request = req;
 
-  ros::service::waitForService(PLAN_SERVICE_NAME, ros::Duration(10));
+  ASSERT_TRUE(ros::service::waitForService(PLAN_SERVICE_NAME, ros::Duration(testutils::DEFAULT_SERVICE_TIMEOUT)));
   ros::ServiceClient client = node_handle.serviceClient<moveit_msgs::GetMotionPlan>(PLAN_SERVICE_NAME);
 
   // Call the service client
-  client.call(srv);
+  ASSERT_TRUE(client.call(srv));
 
   // Obtain the response
   const moveit_msgs::MotionPlanResponse& response = srv.response.motion_plan_response;
@@ -561,11 +538,11 @@ TEST_F(IntegrationTestCommandPlanning, CIRCPoseGoal)
   moveit_msgs::GetMotionPlan srv;
   srv.request.motion_plan_request = req;
 
-  ros::service::waitForService(PLAN_SERVICE_NAME, ros::Duration(10));
+  ASSERT_TRUE(ros::service::waitForService(PLAN_SERVICE_NAME, ros::Duration(testutils::DEFAULT_SERVICE_TIMEOUT)));
   ros::ServiceClient client = node_handle.serviceClient<moveit_msgs::GetMotionPlan>(PLAN_SERVICE_NAME);
 
   // Call the service client
-  client.call(srv);
+  ASSERT_TRUE(client.call(srv));
 
   // Obtain the response
   const moveit_msgs::MotionPlanResponse& response = srv.response.motion_plan_response;
@@ -631,5 +608,6 @@ int main(int argc, char **argv)
 {
   testing::InitGoogleTest(&argc, argv);
   ros::init(argc, argv, "integrationtest_command_planning");
+  ros::NodeHandle nh; // For output via ROS_ERROR etc during test
   return RUN_ALL_TESTS();
 }

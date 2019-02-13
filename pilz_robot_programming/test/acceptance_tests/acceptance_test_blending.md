@@ -24,8 +24,8 @@ and execute blended motions.
 
 ## Starting the blending acceptance tests
 - Bringup can: `sudo ip link set can0 up type can bitrate 1000000`
-- Run `roslaunch prbt_moveit_config moveit_planning_execution.launch sim:=False pipeline:=command_planner`
-- Run `rosrun pilz_trajectory_generation acceptance_test_blending.py`.
+- Run `roslaunch prbt_moveit_config moveit_planning_execution.launch sim:=False pipeline:=pilz_command_planner`
+- Run `rosrun pilz_robot_programming acceptance_test_blending.py`.
   - Please note: Each test must be confirmed before it is executed.
 Confirm by entering `y` or `n` to skip test.
   - Please note: At the end of each test the result must be checked.

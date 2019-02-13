@@ -39,43 +39,43 @@ def _test_ptp_pos(robot):
     """Tests a ptp motion.
 
         Test Sequence:
-          1. Move to start position.
+          1. Move to zero position
           2. Move away from the singularity.
-          3. Move to the upper "pick" position
 
         Expected Results:
-          1. Robot moves to start position.
+          1. Robot moves to zero position.
           2. Robot moves away from the singularity.
-          3. Robot moves to the upper "pick" position.
     """
     if _askPermission(_test_ptp_pos.__name__) == 0:
         return
     robot.move(Ptp(goal=[0, 0, 0, 0, 0, 0]))
     robot.move(Ptp(goal=[0, -0.78, 0.78, 0, 1.56, 0]))
-    robot.move(Ptp(goal=Pose(position=Point(-0.46, -0.21, 0.19), orientation=from_euler(0, -3.14, -0.25))))
 
     _askSuccess(_test_ptp_pos.__name__,
-                'The robot should have moved to [0,0,0,0,0,0], after that away from [0,0,0,0,0,0] and then to the upper'
-                + ' pick position.')
+                'The robot should have moved to [0,0,0,0,0,0] and after that away from [0,0,0,0,0,0].')
 
 
 def _test_lin_pos(robot):
     """Test a lin motion
 
         Test Sequence:
-          1. Move 15cm linear down.
-          2. Move 15cm linear up.
+          1. Move to start position using Ptp (upper "pick" position)
+          2. Move 15cm linear down.
+          3. Move 15cm linear up.
 
         Expected Results:
-          1. Robot moves 15cm linear down.
-          2. Robot moves 15cm linear up.
+          1. Robot moves to the upper "pick" position
+          2. Robot moves 15cm linear down.
+          3. Robot moves 15cm linear up.
     """
     if _askPermission(_test_lin_pos.__name__) == 0:
         return
+    robot.move(Ptp(goal=Pose(position=Point(-0.46, -0.21, 0.19), orientation=from_euler(0, -3.14, -0.25))))
     robot.move(Lin(goal=Pose(position=Point(0.0, 0.0, -0.15)), relative=True, vel_scale=PTP_VEL_PICK))
     robot.move(Lin(goal=Pose(position=Point(0.0, 0.0, 0.15)), relative=True, vel_scale=PTP_VEL_PICK))
 
-    _askSuccess(_test_lin_pos.__name__, 'The robot tcp should have moved linear 15cm down and then linear 15cm up.')
+    _askSuccess(_test_lin_pos.__name__, 'The robot should have moved to the upper pick position. Afterwards the tcp'
+                                        + ' should have moved linear 15cm down and then linear 15cm up.')
 
 
 def _test_seq_pos1(robot):
@@ -84,23 +84,23 @@ def _test_seq_pos1(robot):
 
         Test Sequence:
             1. Execute sequence (PTP-PTP-LIN-LIN-CIRC-CIRC-PTP) consisting of the following motions:
-                a. Move to start position.
+                a. Move to zero position.
                 b. Move to the upper "pick" position.
                 c. Move 15cm linear down.
                 d. Move 15cm linear up.
                 e. Move a quarter circle.
                 f. Move back the quarter circle.
-                g. Move back to start position.
+                g. Move back to zero position.
 
         Expected Results:
             1. Robot performes sequence of the following motions stopping in between them:
-                a. Robot moves to start position.
+                a. Robot moves to zero position.
                 b. Robot moves to the upper "pick" position.
                 c. Robot moves 15cm linear down.
                 d. Robot moves 15cm linear up.
                 e. Robot moves a quarter circle.
                 f. Robot moves back the quarter circle.
-                g. Robot moves back to start position.
+                g. Robot moves back to zero position.
     """
     if _askPermission(_test_seq_pos1.__name__) == 0:
         return
@@ -144,19 +144,19 @@ def _test_seq_pos2(robot):
 
         Test Sequence:
             1. Execute sequence (PTP-CIRC-LIN-LIN-PTP) consisting of the following motions:
-                a. Move away from the start position.
+                a. Move to specific start position.
                 b. Move a quarter circle arriving at the upper "pick" position.
                 c. Move 15cm linear down.
                 d. Move 15cm linear up.
-                e. Move back to start position.
+                e. Move back to zero position.
 
         Expected Results:
             1. Robot performes sequence of the following motions stopping in between them:
-                a. Robot moves away from the start position.
+                a. Robot moves to specific start position.
                 b. Robot moves a quarter circle arriving at the upper "pick" position.
                 c. Robot moves 15cm linear down.
                 d. Robot moves 15cm linear up.
-                e. Robot moves back to start position.
+                e. Robot moves back to zero position.
     """
     if _askPermission(_test_seq_pos2.__name__) == 0:
         return
@@ -186,7 +186,7 @@ def _test_seq_pos2(robot):
 
     robot.move(seq_l)
 
-    _askSuccess(_test_seq_pos2.__name__, 'The robot should have moved away from the start position and then a quarter'
+    _askSuccess(_test_seq_pos2.__name__, 'The robot should have moved to a start position and then a quarter'
                                          + ' circle arriving at the upper pick position. After that the robot tcp'
                                          + ' should have moved linear 15cm down and then linear 15cm up. In the end the'
                                          + ' robot should have moved back to [0,0,0,0,0,0].')
@@ -196,15 +196,19 @@ def _test_circ_pos(robot):
     """Test a circ motion
 
         Test Sequence:
-          1. Move half a circle.
-          2. Move half a circle back to origin.
+          1. Move to start position using Ptp (upper "pick" position)
+          2. Move half a circle.
+          3. Move half a circle back to origin.
 
         Expected Results:
-          1. Robot moves half a circle.
-          2. Robot moves half a circle back to origin.
+          1. Robot moves to start position.
+          2. Robot moves half a circle.
+          3. Robot moves half a circle back to origin.
     """
     if _askPermission(_test_circ_pos.__name__) == 0:
         return
+
+    robot.move(Ptp(goal=Pose(position=Point(-0.46, -0.21, 0.19), orientation=from_euler(0, -3.14, -0.25))))
 
     robot.move(Circ(goal=Pose(position=Point(-0.460, 0, 0.19),
                     orientation=from_euler(0, -3.14, -0.25)), vel_scale=PTP_VEL_PICK,
@@ -214,21 +218,25 @@ def _test_circ_pos(robot):
                     orientation=from_euler(0, -3.14, -0.25)), vel_scale=PTP_VEL_PICK,
                     interim=Point(-0.565, -0.105, 0.19)))
 
-    _askSuccess(_test_circ_pos.__name__, 'The robot should have moved in a half circle stop and move in half a circle'
-                                         + ' to its original position')
+    _askSuccess(_test_circ_pos.__name__, 'The robot should have moved to a start position and then two times half a'
+                                         + ' circle.')
 
 
 def _test_blend_pos(robot):
     """ Test a motion blending
 
         Test Sequence:
-            1. Generate square movement by blending 4 lin.
+          1. Move to start position using Ptp (upper "pick" position)
+          2. Generate square movement by blending 4 lin.
 
         Expected Results:
-            1. Robot moves in a square without intermediate stops.
+          1. Robot moves to start position.
+          2. Robot moves in a square without intermediate stops.
     """
     if _askPermission(_test_blend_pos.__name__) == 0:
         return
+
+    robot.move(Ptp(goal=Pose(position=Point(-0.46, -0.21, 0.19), orientation=from_euler(0, -3.14, -0.25))))
 
     seq_l = Sequence()
     seq_l.append(Lin(goal=Pose(position=Point(-0.460, 0, 0.19),
@@ -245,8 +253,8 @@ def _test_blend_pos(robot):
 
     robot.move(seq_l)
 
-    _askSuccess(_test_blend_pos.__name__, 'The robot should move in a square back to its original position. During the'
-                                         + ' motion the robot does not stop.')
+    _askSuccess(_test_blend_pos.__name__, 'The robot should moved to a start position and then in a square always retur'
+                                         + 'ning to the start position. During the motion the robot does not stop.')
 
 
 if __name__ == "__main__":

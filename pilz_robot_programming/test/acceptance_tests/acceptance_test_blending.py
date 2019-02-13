@@ -18,8 +18,10 @@ import rospy
 
 from geometry_msgs.msg import Pose, Point
 from pilz_robot_programming.robot import *
+from pilz_robot_programming.commands import *
 
 DEFAULT_PTP_VEL = 0.5
+DEFAULT_PTP_ACC = 0.5
 
 _REQUIRED_API_VERSION = "1"
 
@@ -61,11 +63,11 @@ def start_program():
 def _testSeqWithJointPoses(robot):
     if (_askPermission(_testSeqWithJointPoses.__name__) == 0):
         return
-    robot.move(Ptp(joint_state=[0, 0.007, -1.816, 0, 1.8236, 0], vel_scale=DEFAULT_PTP_VEL))
+    robot.move(Ptp(goal=[0, 0.007, -1.816, 0, 1.8236, 0], vel_scale=DEFAULT_PTP_VEL))
 
     seq = Sequence()
-    seq.append(Lin(joint_state=[0.52, 0.52, -1.1, 0, 1.56, 0], vel_scale=0.3), blend_radius=0.15)
-    seq.append(Lin(joint_state=[0.52, 0.698, -1.74, 0.349, 1.56, 0.78], vel_scale=0.3), blend_radius=0)
+    seq.append(Lin(goal=[0.52, 0.52, -1.1, 0, 1.56, 0], vel_scale=0.15), blend_radius=0.15)
+    seq.append(Lin(goal=[0.52, 0.698, -1.74, 0.349, 1.56, 0.78], vel_scale=0.15), blend_radius=0)
     robot.move(seq)
 
     _askSuccess(_testSeqWithJointPoses.__name__, 'Did the robot perform a lin-lin blending?.')
@@ -86,15 +88,17 @@ def _testUnreachableFirstPose(robot):
     if (_askPermission(_testUnreachableFirstPose.__name__) == 0):
         return
     # Move to initial position
-    robot.move(Ptp(joint_state=[0, 0.007, -1.816, 0, 1.8236, 0], vel_scale=DEFAULT_PTP_VEL))
+    robot.move(Ptp(goal=[0, 0.007, -1.816, 0, 1.8236, 0], vel_scale=DEFAULT_PTP_VEL))
 
     seq1 = Sequence()
     seq1.append(Lin(goal=Pose(position=Point(0.25, 0.6, 0.65)), vel_scale=0.1, acc_scale=0.1), blend_radius=0.3)
     seq1.append(Lin(goal=Pose(position=Point(-0.1, 0.5, 0.65)),vel_scale=0.1, acc_scale=0.1), blend_radius=0)
-
-    robot.move(seq1)
-
-    _askSuccess(_testUnreachableFirstPose.__name__, 'There should be an error message stating that computation of inverse kinematic failed.')
+    try:
+        robot.move(seq1)
+    except RobotMoveFailed:
+        _askSuccess(_testUnreachableFirstPose.__name__, 'There should be an error message stating that computation of inverse kinematic failed.')
+        return
+    print("Test failed!")
 
 # Tries to blend lin motions with non-zero blend radius for the last lin motion.
 #
@@ -113,15 +117,18 @@ def _testLastRadiNonZero(robot):
         return
 
     # Move to start position (Left corner close to robot base)
-    robot.move(Ptp(joint_state=[0, 0.007, -1.816, 0, 1.8236, 0], vel_scale=DEFAULT_PTP_VEL))
+    robot.move(Ptp(goal=[0, 0.007, -1.816, 0, 1.8236, 0], vel_scale=DEFAULT_PTP_VEL))
     robot.move(Ptp(goal=Pose(position=Point(0.15, 0.25, 0.65)), vel_scale=DEFAULT_PTP_VEL))
 
     seq = Sequence()
     _addRectangleLin(seq, r1=0.2, r2=0.12, r3=0.2, r4=0.01)
-    robot.move(seq)
 
-    _askSuccess(_testLastRadiNonZero.__name__, 'Robot should have performed no motion blending (only two PTP\'s).\nHowever, there should be an error stating that the last radi is not zero.')
-
+    try:
+        robot.move(seq)
+    except RobotMoveFailed:
+        _askSuccess(_testLastRadiNonZero.__name__, 'Robot should have performed no motion blending (only two PTP\'s).\nHowever, there should be an error stating that the last radi is not zero.')
+        return
+    print("Test failed!")
 # Tries to blend lin motions using overlapping blend radii.
 #
 # Test Sequence:
@@ -139,14 +146,18 @@ def _testOverlappingRadi(robot):
         return
 
     # Move to start position (Left corner close to robot base)
-    robot.move(Ptp(joint_state=[0, 0.007, -1.816, 0, 1.8236, 0], vel_scale=DEFAULT_PTP_VEL))
+    robot.move(Ptp(goal=[0, 0.007, -1.816, 0, 1.8236, 0], vel_scale=DEFAULT_PTP_VEL))
     robot.move(Ptp(goal=Pose(position=Point(0.15, 0.25, 0.65)), vel_scale=DEFAULT_PTP_VEL))
 
     seq = Sequence()
     _addRectangleLin(seq, r1=0.2, r2=100, r3=0.2, r4=0)
-    robot.move(seq)
 
-    _askSuccess(_testOverlappingRadi.__name__, 'Robot should have performed no motion blending (only two PTP\'s).\nHowever, there should be an error stating that two blending radi are overlapping.')
+    try:
+        robot.move(seq)
+    except RobotMoveFailed:
+        _askSuccess(_testOverlappingRadi.__name__, 'Robot should have performed no motion blending (only two PTP\'s).\nHowever, there should be an error stating that two blending radi are overlapping.')
+        return
+    print("Test failed!")
 
 # Tests the blending of a "large" number of lin motions.
 #
@@ -197,8 +208,12 @@ def _testEmptySequence(robot):
 def _testNegBlendRadius(robot):
     if (_askPermission(_testNegBlendRadius.__name__) == 0):
         return
-    _linLinBlend(robot, 0, r=-0.3)
-    _askSuccess(_testNegBlendRadius.__name__, 'Robot should only execute ptp but no lin blending.\nThere should be an error stating that a negative blending radius was used.')
+    try:
+        _linLinBlend(robot, 0, r=-0.3)
+    except RobotMoveFailed:
+        _askSuccess(_testNegBlendRadius.__name__, 'Robot should only execute ptp but no lin blending.\nThere should be an error stating that a negative blending radius was used.')
+        return
+    print("Test failed!")
 
 # Tries to blend two lin motions using an out of scale blend radius.
 #
@@ -215,9 +230,12 @@ def _testNegBlendRadius(robot):
 def _testTooLargeBlendRadius(robot):
     if (_askPermission(_testTooLargeBlendRadius.__name__) == 0):
         return
-    _linLinBlend(robot, 0, r=100)
-    _askSuccess(_testTooLargeBlendRadius.__name__, 'Robot should only execute ptp but no lin blending.\nThere should be an error stating that a too large blending radius was used.')
-
+    try:
+        _linLinBlend(robot, 0, r=100)
+    except RobotMoveFailed:
+        _askSuccess(_testTooLargeBlendRadius.__name__, 'Robot should only execute ptp but no lin blending.\nThere should be an error stating that a too large blending radius was used.')
+        return
+    print("Test failed!")
 # Tests the blending of two lin motions. Both lin goals have the same orientation.
 #
 # Test Sequence:
@@ -237,7 +255,7 @@ def _testLinLinBlendWithoutOriChange(robot):
     _linLinBlend(robot, 0)
     _askSuccess(_testLinLinBlendWithoutOriChange.__name__)
 
-# Tests the blending of two lin motions. 
+# Tests the blending of two lin motions.
 # Both lin goals have different orientations (difference in euler angle C).
 #
 # Test Sequence:
@@ -277,11 +295,11 @@ def _testLinLinBlendWithOriChange(robot):
 def _testOriChangeInABC(robot):
     if (_askPermission(_testOriChangeInABC.__name__) == 0):
         return
-    robot.move(Ptp(joint_state=[0, 0.007, -1.816, 0, 1.8236, 0], vel_scale=DEFAULT_PTP_VEL))
+    robot.move(Ptp(goal=[0, 0.007, -1.816, 0, 1.8236, 0], vel_scale=DEFAULT_PTP_VEL))
     robot.move(Ptp(goal=Pose(position=Point(0.15, 0.25, 0.75), orientation=from_euler(0,0,0)), vel_scale=DEFAULT_PTP_VEL))
-    
+
     seq = Sequence()
-    seq.append(Lin(goal=Pose(position=Point(0.5, 0, 0.4), orientation=from_euler(1,0.7,0.8)), vel_scale=0.25, acc_scale=0.1), blend_radius=0.3)
+    seq.append(Lin(goal=Pose(position=Point(0.5, 0.25, 0.4), orientation=from_euler(1.2,0.8,-3)), vel_scale=0.25, acc_scale=0.1), blend_radius=0.3)
     seq.append(Lin(goal=Pose(position=Point(0.5, 0, 0.75), orientation=from_euler(0,0,0)), vel_scale=0.25, acc_scale=0.1), blend_radius=0)
     robot.move(seq)
 
@@ -296,14 +314,14 @@ def _emptySequence(robot):
 # along a rectangle. The robot moves along the rectangle for serveral rounds.
 def _rectangleLinLoop(robot):
     # Move to start position (Left corner close to robot base)
-    robot.move(Ptp(joint_state=[0, 0.007, -1.816, 0, 1.8236, 0], vel_scale=DEFAULT_PTP_VEL))
+    robot.move(Ptp(goal=[0, 0.007, -1.816, 0, 1.8236, 0], vel_scale=DEFAULT_PTP_VEL))
     robot.move(Ptp(goal=Pose(position=Point(0.15, 0.25, 0.68)), vel_scale=DEFAULT_PTP_VEL))
 
     seq = Sequence()
     for n in range(1, 3):
         _addRectangleLin(seq, r1=0.2, r2=0.12, r3=0.2, r4=0.12)
         _addRectangleLin(seq, r1=0.2, r2=0.12, r3=0.2, r4=0.12)
-    
+
     _addRectangleLin(seq, r1=0.2, r2=0.12, r3=0.2, r4=0)
     robot.move(seq)
 
@@ -311,18 +329,18 @@ def _rectangleLinLoop(robot):
 # blending radi.
 def _addRectangleLin(seq, r1, r2, r3, r4):
     #Left corner away from robot base
-    seq.append(Lin(goal=Pose(position=Point(0.5, 0.25, 0.68)), vel_scale=0.1, acc_scale=0.1), blend_radius=r1)
+    seq.append(Lin(goal=Pose(position=Point(0.5, 0.25, 0.68)), vel_scale=0.1, acc_scale=0.07), blend_radius=r1)
     #Right corner away from robot base
-    seq.append(Lin(goal=Pose(position=Point(0.5, -0.25, 0.68)), vel_scale=0.1, acc_scale=0.1), blend_radius=r2)
+    seq.append(Lin(goal=Pose(position=Point(0.5, -0.25, 0.68)), vel_scale=0.1, acc_scale=0.07), blend_radius=r2)
     #Right corner close to robot base
-    seq.append(Lin(goal=Pose(position=Point(0.15, -0.25, 0.68)), vel_scale=0.1, acc_scale=0.1), blend_radius=r3)
+    seq.append(Lin(goal=Pose(position=Point(0.15, -0.25, 0.68)), vel_scale=0.1, acc_scale=0.07), blend_radius=r3)
     #Left corner close to robot base
-    seq.append(Lin(goal=Pose(position=Point(0.15, 0.25, 0.68)), vel_scale=0.1, acc_scale=0.1), blend_radius=r4)
+    seq.append(Lin(goal=Pose(position=Point(0.15, 0.25, 0.68)), vel_scale=0.1, acc_scale=0.07), blend_radius=r4)
 
 # Blends two Lin's with the given orientation change and blending radius.
 def _linLinBlend(robot, z_ori_change, r=0.3):
     # Move to initial position
-    robot.move(Ptp(joint_state=[0, 0.007, -1.816, 0, 1.8236, 0], vel_scale=DEFAULT_PTP_VEL))
+    robot.move(Ptp(goal=[0, 0.007, -1.816, 0, 1.8236, 0], vel_scale=DEFAULT_PTP_VEL))
 
     seq1 = Sequence()
     seq1.append(Lin(goal=Pose(position=Point(0.25, 0.5, 0.65), orientation=from_euler(0,0,0)), vel_scale=0.1, acc_scale=0.1), blend_radius=r)
@@ -339,13 +357,13 @@ def _askPermission(test_name):
     print('\n\nStart ' + test_name + '\n')
     return 1
 
-# Asks the user if the test was successful and (if given) displays 
+# Asks the user if the test was successful and (if given) displays
 # a hint regarding the assessment of a successful test.
 def _askSuccess(test_name, question=None):
     if (question != None):
         print('\nTest ' + test_name + 'successful?')
         print('Hint: \n' + question)
-        
+
     s = raw_input('Test ' + test_name + 'successful [(y)es, (n)o]?: ')
     if(s == "n"):
         print('\nTest ' + test_name + 'failed!\n___TEST-END___\n')

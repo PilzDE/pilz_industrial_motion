@@ -8,11 +8,16 @@ notifications:
   email:
     on_failure: always
     recipients:
-      - ros@pilz.de
+      - a.gutenkunst@pilz.de
+      - c.henkel@pilz.de
+      - h.slusarek@pilz.de
+      - i.martini@pilz.de
 env:
+  global:
+    - AFTER_SCRIPT='apt list --installed | grep "^ros-"'
   matrix:
-    - ROS_DISTRO="melodic" ROS_REPO=ros
-    - ROS_DISTRO="melodic" ROS_REPO=ros-shadow-fixed
+    - ROS_DISTRO="melodic" ROS_REPO=ros CATKIN_LINT=true
+    - ROS_DISTRO="melodic" ROS_REPO=ros-shadow-fixed CATKIN_LINT=true
 install:
   - git clone --depth=1 https://github.com/ros-industrial/industrial_ci.git .industrial_ci
 script:
