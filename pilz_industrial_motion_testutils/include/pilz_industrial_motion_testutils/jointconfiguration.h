@@ -51,6 +51,8 @@ public:
 
   void setJoint(const size_t index, const double value);
   double getJoint(const size_t index) const;
+  const std::vector<double> getJoints() const;
+
   size_t size() const;
 
   moveit_msgs::Constraints toGoalConstraints() const override;
@@ -111,6 +113,11 @@ inline void JointConfiguration::setJoint(const size_t index, const double value)
 inline double JointConfiguration::getJoint(const size_t index) const
 {
   return joints_.at(index);
+}
+
+inline const std::vector<double> JointConfiguration::getJoints() const
+{
+  return joints_;
 }
 
 inline size_t JointConfiguration::size() const
