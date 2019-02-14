@@ -32,6 +32,7 @@ typedef Ptp<JointConfiguration, CartesianConfiguration> PtpJointCart;
 typedef Ptp<CartesianConfiguration, CartesianConfiguration> PtpCart;
 
 typedef Lin<JointConfiguration, JointConfiguration> LinJoint;
+typedef Lin<JointConfiguration, CartesianConfiguration> LinJointCart;
 typedef Lin<CartesianConfiguration, CartesianConfiguration> LinCart;
 
 typedef Circ<CartesianConfiguration, CartesianCenter, CartesianConfiguration> CircCenterCart;
