@@ -135,6 +135,7 @@ public:
 
   virtual LinJoint getLinJoint(const std::string& cmd_name) const override;
   virtual LinCart getLinCart(const std::string& cmd_name) const override;
+  virtual LinJointCart getLinJointCart(const std::string& cmd_name) const override;
 
 
   //! @deprecated Use function using higher level abstraction data class instead.
@@ -165,6 +166,7 @@ private:
 
   const pt::ptree::value_type &findNodeWithName(const boost::property_tree::ptree &tree,
                                                 const std::string &name,
+                                                const std::string &key,
                                                 const std::string &path = "") const;
 
   /**
@@ -183,7 +185,8 @@ private:
                                        const std::string &cmd_type, bool &ok) const;
 
   const pt::ptree::value_type &findCmd(const std::string &cmd_name,
-                                       const std::string &cmd_type) const;
+                                       const std::string& cmd_path,
+                                       const std::string &cmd_key) const;
 
   bool getCmd(const std::string &path2cmd, const std::string &cmd_name,
               std::string &group_name, std::string &target_link,
@@ -239,9 +242,15 @@ private:
 
   const std::string XML_ATTR_STR {"<xmlattr>"};
   const std::string JOINT_STR {"joints"};
+  const std::string POSE_STR {"pos"};
   const std::string XYZ_QUAT_STR {"xyzQuat"};
   const std::string XYZ_EULER_STR {"xyzEuler"};
   const std::string SEED_STR {"seed"};
+
+  const std::string PTP_STR {"ptp"};
+  const std::string LIN_STR {"lin"};
+  const std::string CIRC_STR {"circ"};
+  const std::string BLEND_STR {"blend"};
 
   const std::string PLANNING_GROUP_STR {"planningGroup"};
   const std::string TARGET_LINK_STR {"targetLink"};
@@ -254,9 +263,9 @@ private:
 
 
   const std::string POSES_PATH_STR {"testdata.poses"};
-  const std::string PTPS_PATH_STR {"testdata.ptps"};
-  const std::string LINS_PATH_STR {"testdata.lins"};
-  const std::string CIRCS_PATH_STR {"testdata.circs"};
+  const std::string PTPS_PATH_STR {"testdata." + PTP_STR + "s"};
+  const std::string LINS_PATH_STR {"testdata."  + LIN_STR + "s"};
+  const std::string CIRCS_PATH_STR {"testdata."  + CIRC_STR + "s"};
   const std::string SEQUENCE_PATH_STR {"testdata.sequences"};
 
   const std::string NAME_PATH_STR {XML_ATTR_STR + ".name"};
