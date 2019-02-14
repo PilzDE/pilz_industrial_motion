@@ -38,6 +38,8 @@ public:
 
 public:
   void setAuxiliaryConfiguration(AuxiliaryType auxiliary);
+  AuxiliaryType& getAuxiliaryConfiguration();
+  const AuxiliaryType& getAuxiliaryConfiguration() const;
 
 public:
   planning_interface::MotionPlanRequest toRequest() const override;
@@ -70,6 +72,18 @@ inline planning_interface::MotionPlanRequest Circ<StartType, AuxiliaryType, Goal
   req.path_constraints = auxiliary_.toPathConstraints();
 
   return req;
+}
+
+template <class StartType, class AuxiliaryType, class GoalType>
+inline AuxiliaryType& Circ<StartType, AuxiliaryType, GoalType>::getAuxiliaryConfiguration()
+{
+  return auxiliary_;
+}
+
+template <class StartType, class AuxiliaryType, class GoalType>
+inline const AuxiliaryType& Circ<StartType, AuxiliaryType, GoalType>::getAuxiliaryConfiguration() const
+{
+  return auxiliary_;
 }
 
 }
