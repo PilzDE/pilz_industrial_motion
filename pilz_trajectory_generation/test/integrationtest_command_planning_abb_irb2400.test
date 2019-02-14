@@ -39,7 +39,6 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
     <param name="target_link" value="tool0" />
     <param name="pose_norm_tolerance" value="1.0e-10" />
     <param name="rot_axis_norm_tolerance" value="1.0e-5" />
-    <param name="joint_prefix" value="joint_" />
   </test>
 
 </launch>
