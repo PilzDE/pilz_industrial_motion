@@ -20,6 +20,8 @@
 #include <vector>
 #include <sstream>
 
+#include <boost/optional.hpp>
+
 #include <eigen_conversions/eigen_msg.h>
 #include <geometry_msgs/Pose.h>
 #include <geometry_msgs/PoseStamped.h>
@@ -64,6 +66,12 @@ public:
   //! @brief States if a seed for the cartesian configuration is set.
   bool hasSeed() const;
 
+  void setPoseTolerance(const double tol);
+  const boost::optional<double> getPoseTolerance() const;
+
+  void setAngleTolerance(const double tol);
+  const boost::optional<double> getAngleTolerance() const;
+
 private:
   static geometry_msgs::Pose toPose(const std::vector<double>& pose);
   static geometry_msgs::PoseStamped toStampedPose(const geometry_msgs::Pose& pose);
@@ -71,6 +79,19 @@ private:
 private:
   std::string link_name_;
   geometry_msgs::Pose pose_;
+
+  //! @brief The dimensions of the sphere associated with the target region
+  //! of the position constraint.
+  boost::optional<double> tolerance_pose_ {boost::none};
+
+  //! @brief The value to assign to the absolute tolerances of the
+  //! orientation constraint.
+  boost::optional<double> tolerance_angle_ {boost::none};
+
+  // A vector is used here (although only one value is stored)
+  // because it allows to also store the information if a
+  // value was set or not. Furthermore, in contrast to smart pointers
+  // a vector allows to use the default assignment and copy operators.
   std::vector<JointConfiguration> seed_;
 
 };
@@ -89,7 +110,15 @@ inline const geometry_msgs::Pose& CartesianConfiguration::getPose() const
 
 inline moveit_msgs::Constraints CartesianConfiguration::toGoalConstraints() const
 {
-  return kinematic_constraints::constructGoalConstraints(link_name_, toStampedPose(pose_));
+  if (!tolerance_pose_ || !tolerance_angle_)
+  {
+    return kinematic_constraints::constructGoalConstraints(link_name_, toStampedPose(pose_));
+  }
+  else
+  {
+    return kinematic_constraints::constructGoalConstraints(link_name_, toStampedPose(pose_),
+                                                           tolerance_pose_.value(), tolerance_angle_.value());
+  }
 }
 
 inline void CartesianConfiguration::setSeed(const JointConfiguration& config)
@@ -106,6 +135,26 @@ inline const JointConfiguration& CartesianConfiguration::getSeed() const
 inline bool CartesianConfiguration::hasSeed() const
 {
   return !seed_.empty();
+}
+
+inline void CartesianConfiguration::setPoseTolerance(const double tol)
+{
+  tolerance_pose_ = tol;
+}
+
+inline const boost::optional<double> CartesianConfiguration::getPoseTolerance() const
+{
+  return tolerance_pose_;
+}
+
+inline void CartesianConfiguration::setAngleTolerance(const double tol)
+{
+  tolerance_angle_ = tol;
+}
+
+inline const boost::optional<double> CartesianConfiguration::getAngleTolerance() const
+{
+  return tolerance_angle_;
 }
 
 }
