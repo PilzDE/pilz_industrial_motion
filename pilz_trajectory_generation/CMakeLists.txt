@@ -260,6 +260,12 @@ add_rostest_gtest(integrationtest_sequence_service_capability
 target_link_libraries(integrationtest_sequence_service_capability
   ${catkin_LIBRARIES} ${PROJECT_NAME}_test)
 
+add_rostest(test/integrationtest_sequence_service_capability_frankaemika_panda.test
+  DEPENDENCIES integrationtest_sequence_service_capability )
+
+add_rostest(test/integrationtest_sequence_service_capability_abb_irb2400.test
+  DEPENDENCIES integrationtest_sequence_service_capability )
+
 add_rostest_gtest(integrationtest_sequence_service_capability_with_gripper
   test/integrationtest_sequence_service_capability_with_gripper.test
   test/integrationtest_sequence_service_capability.cpp
