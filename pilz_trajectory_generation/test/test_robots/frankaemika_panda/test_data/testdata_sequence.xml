@@ -24,22 +24,23 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
     </pos>
 
     <pos name="P1">
-      <joints group_name="panda_arm">0.675563 -0.516596 -0.647210 -2.571306 -0.3559277 2.116679 0.284819</joints>
-      <xyzQuat group_name="panda_arm" link_name="panda_link8">0.2 0.0 0.8 0.924138 -0.3820 0.0 0.0</xyzQuat>
+      <joints group_name="panda_arm">0.000301 -0.753474 -0.000103 -1.716177 0.0 0.962703 0.784219</joints>
+      <xyzQuat group_name="panda_arm" link_name="panda_link8">0.2 0.4 0.8 0.924138 -0.382057 0.0 0.0</xyzQuat>
     </pos>
 
     <pos name="P2">
-      <joints group_name="panda_arm">0.8502454683036405 -0.2864611301271418 -0.3049332259091676 -1.6667326724321274 -0.086291228289398 1.3934696572784573 1.3258092325703066</joints>
-      <xyzQuat group_name="panda_arm" link_name="panda_link8">0.4 0.2 0.7 0.924138 -0.3820 0.0 0.0</xyzQuat>
+      <joints group_name="panda_arm">-0.061035 -0.301221 0.410282 -1.665777 0.120602 1.389535 1.138547</joints>
+      <xyzQuat group_name="panda_arm" link_name="panda_link8">0.4 0.2 0.7 0.924138 -0.382057 0.0 0.0</xyzQuat>
     </pos>
 
     <pos name="P3">
-      <joints group_name="panda_arm">1.1090131271556118 -0.348903744652594 -0.0015285782161985062 -2.006665832407118 -0.0005244894069491857 1.6577624868603338 1.891665117108405</joints>
-      <xyzQuat group_name="panda_arm" link_name="panda_link8">0.2 0.4 0.6 0.924138 -0.3820 0.0 0.0</xyzQuat>
+      <joints group_name="panda_arm">0.0875228 -0.540765 0.770139 -1.990062 0.366596 1.582282 1.560837</joints>
+      <xyzQuat group_name="panda_arm" link_name="panda_link8">0.2 0.4 0.6 0.924138 -0.382057 0.0 0.0</xyzQuat>
     </pos>
 
     <pos name="P4">
-      <xyzQuat group_name="panda_arm" link_name="panda_link8">0.2 0.2 0.7 0.924138 -0.3820 0.0 0.0</xyzQuat>
+      <joints group_name="panda_arm">0.164988 -0.805223 0.304894 -2.020563 0.230321 1.247100 1.238191</joints>
+      <xyzQuat group_name="panda_arm" link_name="panda_link8">0.2 0.2 0.7 0.924138 -0.382057 0.0 0.0</xyzQuat>
     </pos>
 
   </poses>
@@ -129,7 +130,7 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
       <centerPos>P2</centerPos>
       <endPos>P1</endPos>
       <vel>0.1</vel>
-      <acc>0.2</acc>
+      <acc>0.15</acc>
     </circ>
   </circs>
 
