@@ -109,7 +109,7 @@ void IntegrationTestCommandPlanning::SetUp()
 TEST_F(IntegrationTestCommandPlanning, PtpJoint)
 {
   ros::NodeHandle node_handle("~");
-  auto ptp {test_data_->getPtpJoint("FirstPtp")};
+  auto ptp {test_data_->getPtpJoint("Ptp1")};
 
   moveit_msgs::GetMotionPlan srv;
   moveit_msgs::MotionPlanRequest req = ptp.toRequest();
@@ -221,7 +221,7 @@ TEST_F(IntegrationTestCommandPlanning, PtpJointCart)
  */
 TEST_F(IntegrationTestCommandPlanning, LinJoint)
 {
-  planning_interface::MotionPlanRequest req {test_data_->getLinJoint("LINCmd1").toRequest()};
+  planning_interface::MotionPlanRequest req {test_data_->getLinJoint("lin2").toRequest()};
 
   std::cout << "++++++++++" << std::endl;
   std::cout << "+ Step 1 +" << std::endl;
@@ -279,7 +279,7 @@ TEST_F(IntegrationTestCommandPlanning, LinJoint)
 TEST_F(IntegrationTestCommandPlanning, LinJointCart)
 {
   ros::NodeHandle node_handle("~");
-  planning_interface::MotionPlanRequest req {test_data_->getLinJointCart("LINCmd1").toRequest()};
+  planning_interface::MotionPlanRequest req {test_data_->getLinJointCart("lin2").toRequest()};
 
   std::cout << "++++++++++" << std::endl;
   std::cout << "+ Step 1 +" << std::endl;
@@ -335,7 +335,7 @@ TEST_F(IntegrationTestCommandPlanning, CircJointCenterCart)
 {
   ros::NodeHandle node_handle("~");
 
-  CircJointCenterCart circ {test_data_->getCircJointCenterCart("ValidCIRCCmd2")};
+  CircJointCenterCart circ {test_data_->getCircJointCenterCart("circ1_center_2")};
   circ.getAuxiliaryConfiguration().getConfiguration().clearOrientation();
 
   moveit_msgs::MotionPlanRequest req {circ.toRequest()};
@@ -378,7 +378,7 @@ TEST_F(IntegrationTestCommandPlanning, CircJointCenterCart)
 
   const geometry_msgs::Pose& aux_pose {circ.getAuxiliaryConfiguration().getConfiguration().getPose()};
 
-  CircCenterCart circ_cart {test_data_->getCircCartCenterCart("ValidCIRCCmd2")};
+  CircCenterCart circ_cart {test_data_->getCircCartCenterCart("circ1_center_2")};
   const geometry_msgs::Pose& start_pose {circ_cart.getStartConfiguration().getPose()};
   const geometry_msgs::Pose& goal_pose {circ_cart.getGoalConfiguration().getPose()};
 
@@ -422,7 +422,7 @@ TEST_F(IntegrationTestCommandPlanning, CircCartCenterCart)
 {
   ros::NodeHandle node_handle("~");
 
-  CircCenterCart circ {test_data_->getCircCartCenterCart("ValidCIRCCmd2")};
+  CircCenterCart circ {test_data_->getCircCartCenterCart("circ1_center_2")};
   moveit_msgs::MotionPlanRequest req {circ.toRequest()};
   moveit_msgs::GetMotionPlan srv;
   srv.request.motion_plan_request = req;
