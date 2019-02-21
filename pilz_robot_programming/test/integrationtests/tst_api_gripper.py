@@ -22,7 +22,7 @@ from pilz_robot_programming.commands import *
 from pilz_industrial_motion_testutils.integration_test_utils import *
 from pilz_industrial_motion_testutils.robot_motion_observer import RobotMotionObserver
 
-_TEST_DATA_FILE_NAME = RosPack().get_path("pilz_industrial_motion_testutils") + "/test_data/testdata.xml"
+_TEST_DATA_FILE_NAME = RosPack().get_path("pilz_industrial_motion_testutils") + "/test_data/testdata_deprecated.xml"
 API_VERSION = "1"
 
 
