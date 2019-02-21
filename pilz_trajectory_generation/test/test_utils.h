@@ -197,7 +197,13 @@ bool isGoalReached(const trajectory_msgs::JointTrajectory& trajectory,
 bool isGoalReached(const robot_model::RobotModelConstPtr& robot_model,
                    const trajectory_msgs::JointTrajectory& trajectory,
                    const planning_interface::MotionPlanRequest &req,
-                   const double matrix_norm_tolerance);
+                   const double pos_tolerance,
+                   const double orientation_tolerance);
+
+bool isGoalReached(const moveit::core::RobotModelConstPtr &robot_model,
+                   const trajectory_msgs::JointTrajectory &trajectory,
+                   const planning_interface::MotionPlanRequest &req,
+                   const double tolerance);
 
 /**
  * @brief Check that given trajectory is straight line.

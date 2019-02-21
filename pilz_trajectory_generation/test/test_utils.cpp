@@ -99,11 +99,11 @@ bool testutils::isGoalReached(const trajectory_msgs::JointTrajectory &trajectory
   return true;
 }
 
-
 bool testutils::isGoalReached(const moveit::core::RobotModelConstPtr &robot_model,
                               const trajectory_msgs::JointTrajectory &trajectory,
                               const planning_interface::MotionPlanRequest &req,
-                              const double matrix_norm_tolerance)
+                              const double pos_tolerance,
+                              const double orientation_tolerance)
 {
   std::string link_name;
   Eigen::Affine3d goal_pose_expect;
@@ -127,19 +127,43 @@ bool testutils::isGoalReached(const moveit::core::RobotModelConstPtr &robot_mode
               << link_name << std::endl;
   }
 
-  // compare the poses
-  if(!goal_pose_actual.isApprox(goal_pose_expect, matrix_norm_tolerance))
+  auto actual_rotation {goal_pose_actual.rotation()};
+  auto expected_rotation {goal_pose_expect.rotation()};
+  auto rot_diff {actual_rotation-expected_rotation};
+  if (rot_diff.norm() > orientation_tolerance)
   {
-    std::cout << "### expected goal pose ### \n"
-              << goal_pose_expect.matrix() << std::endl
-              << "### actual goal pose ### \n"
-              << goal_pose_actual.matrix() << std::endl;
+    std::cout << "\nOrientation difference = " << rot_diff.norm()
+              << " (eps=" << orientation_tolerance << ")"
+              << "\n### Expected goal orientation: ### \n"
+              << expected_rotation << std::endl
+              << "### Actual goal orientation ### \n"
+              << actual_rotation << std::endl;
     return false;
   }
-  else
+
+  auto actual_position {goal_pose_actual.translation()};
+  auto expected_position {goal_pose_expect.translation()};
+  auto pos_diff {actual_rotation-expected_rotation};
+  if (pos_diff.norm() > pos_tolerance)
   {
-    return true;
+    std::cout << "\nPosition difference = " << pos_diff.norm()
+              << " (eps=" << pos_tolerance << ")"
+              << "\n### Expected goal position: ### \n"
+              << expected_position << std::endl
+              << "### Actual goal position ### \n"
+              << actual_position << std::endl;
+    return false;
   }
+
+  return true;
+}
+
+bool testutils::isGoalReached(const moveit::core::RobotModelConstPtr &robot_model,
+                              const trajectory_msgs::JointTrajectory &trajectory,
+                              const planning_interface::MotionPlanRequest &req,
+                              const double tolerance)
+{
+  return isGoalReached(robot_model,  trajectory, req, tolerance, tolerance);
 }
 
 bool testutils::checkCartesianLinearity(const moveit::core::RobotModelConstPtr &robot_model,
@@ -425,10 +449,10 @@ bool testutils::checkJointTrajectory(const trajectory_msgs::JointTrajectory &tra
   {
     if(trajectory->getWayPointDurationFromPrevious(i) <= 0.0)
     {
-       return ::testing::AssertionFailure() << "Waypoint " << (i) << " has "
-                                            << trajectory->getWayPointDurationFromPrevious(i)
-                                            << " time between itself and its predecessor."
-                                            << " Total points in trajectory: " << trajectory->getWayPointCount() << ".";
+      return ::testing::AssertionFailure() << "Waypoint " << (i) << " has "
+                                           << trajectory->getWayPointDurationFromPrevious(i)
+                                           << " time between itself and its predecessor."
+                                           << " Total points in trajectory: " << trajectory->getWayPointCount() << ".";
     }
   }
 
@@ -1084,22 +1108,22 @@ bool testutils::checkBlendResult(const pilz::TrajectoryBlendRequest& blend_req,
   // ++++++++++++++++++++++++
   // + Visualize the result +
   // ++++++++++++++++++++++++
-//  ros::NodeHandle nh;
-//  ros::Publisher pub = nh.advertise<moveit_msgs::DisplayTrajectory>("my_planned_path", 1);
-//  ros::Duration duration(1.0);
-//  duration.sleep();
+  //  ros::NodeHandle nh;
+  //  ros::Publisher pub = nh.advertise<moveit_msgs::DisplayTrajectory>("my_planned_path", 1);
+  //  ros::Duration duration(1.0);
+  //  duration.sleep();
 
-//  // visualize the joint trajectory
-//  moveit_msgs::DisplayTrajectory displayTrajectory;
-//  moveit_msgs::RobotTrajectory res_first_traj_msg, res_blend_traj_msg, res_second_traj_msg;
-//  blend_res.first_trajectory->getRobotTrajectoryMsg(res_first_traj_msg);
-//  blend_res.blend_trajectory->getRobotTrajectoryMsg(res_blend_traj_msg);
-//  blend_res.second_trajectory->getRobotTrajectoryMsg(res_second_traj_msg);
-//  displayTrajectory.trajectory.push_back(res_first_traj_msg);
-//  displayTrajectory.trajectory.push_back(res_blend_traj_msg);
-//  displayTrajectory.trajectory.push_back(res_second_traj_msg);
+  //  // visualize the joint trajectory
+  //  moveit_msgs::DisplayTrajectory displayTrajectory;
+  //  moveit_msgs::RobotTrajectory res_first_traj_msg, res_blend_traj_msg, res_second_traj_msg;
+  //  blend_res.first_trajectory->getRobotTrajectoryMsg(res_first_traj_msg);
+  //  blend_res.blend_trajectory->getRobotTrajectoryMsg(res_blend_traj_msg);
+  //  blend_res.second_trajectory->getRobotTrajectoryMsg(res_second_traj_msg);
+  //  displayTrajectory.trajectory.push_back(res_first_traj_msg);
+  //  displayTrajectory.trajectory.push_back(res_blend_traj_msg);
+  //  displayTrajectory.trajectory.push_back(res_second_traj_msg);
 
-//  pub.publish(displayTrajectory);
+  //  pub.publish(displayTrajectory);
 
   return true;
 }
@@ -1149,10 +1173,10 @@ void testutils::generateRequestMsgFromBlendTestData(const moveit::core::RobotMod
   // select a proper blending radius
   // estimate a proper blend radius
   double dis_1 = (start_state.getFrameTransform(link_name).translation()
-           - goal_state_1.getFrameTransform(link_name).translation()).norm();
+                  - goal_state_1.getFrameTransform(link_name).translation()).norm();
 
   double dis_2 = (goal_state_1.getFrameTransform(link_name).translation()
-           - goal_state_2.getFrameTransform(link_name).translation()).norm();
+                  - goal_state_2.getFrameTransform(link_name).translation()).norm();
 
   double blend_radius = 0.5*std::min(dis_1,dis_2);
 
