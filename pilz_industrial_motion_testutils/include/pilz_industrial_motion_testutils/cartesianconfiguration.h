@@ -93,11 +93,8 @@ private:
   //! orientation constraint.
   boost::optional<double> tolerance_angle_ {boost::none};
 
-  // A vector is used here (although only one value is stored)
-  // because it allows to also store the information if a
-  // value was set or not. Furthermore, in contrast to smart pointers
-  // a vector allows to use the default assignment and copy operators.
-  std::vector<JointConfiguration> seed_;
+  //! @brief The seed for computing the IK solution of the cartesian configuration.
+  boost::optional<JointConfiguration> seed_ {boost::none};
 
 };
 
@@ -138,18 +135,17 @@ inline moveit_msgs::Constraints CartesianConfiguration::toGoalConstraints() cons
 
 inline void CartesianConfiguration::setSeed(const JointConfiguration& config)
 {
-  seed_.clear();
-  seed_.emplace_back(config);
+  seed_ = config;
 }
 
 inline const JointConfiguration& CartesianConfiguration::getSeed() const
 {
-  return seed_.front();
+  return seed_.value();
 }
 
 inline bool CartesianConfiguration::hasSeed() const
 {
-  return !seed_.empty();
+  return seed_.is_initialized();
 }
 
 inline void CartesianConfiguration::setPoseTolerance(const double tol)
