@@ -46,7 +46,7 @@ const std::string PLAN_SERVICE_NAME = "/plan_kinematic_path";
 // Parameters from parameter server
 const std::string PARAM_PLANNING_GROUP_NAME("planning_group");
 const std::string POSE_TRANSFORM_MATRIX_NORM_TOLERANCE("pose_norm_tolerance");
-const std::string ROTATION_AXIS_NORM_TOLERANCE("rot_axis_norm_tolerance");
+const std::string ORIENTATION_NORM_TOLERANCE("orientation_norm_tolerance");
 const std::string PARAM_TARGET_LINK_NAME("target_link");
 const std::string TEST_DATA_FILE_NAME("testdata_file_name");
 
@@ -68,7 +68,7 @@ protected:
 
   robot_model::RobotModelPtr robot_model_;
 
-  double pose_norm_tolerance_, rot_axis_norm_tolerance_;
+  double pose_norm_tolerance_, orientation_norm_tolerance_;
   std::string planning_group_, target_link_, test_data_file_name_;
 
   std::unique_ptr<pilz_industrial_motion_testutils::TestdataLoader> test_data_;
@@ -86,7 +86,7 @@ void IntegrationTestCommandPlanning::SetUp()
   ASSERT_TRUE(ph_.getParam(PARAM_PLANNING_GROUP_NAME, planning_group_));
   ASSERT_TRUE(ph_.getParam(POSE_TRANSFORM_MATRIX_NORM_TOLERANCE, pose_norm_tolerance_));
   ASSERT_TRUE(ph_.getParam(PARAM_TARGET_LINK_NAME, target_link_));
-  ASSERT_TRUE(ph_.getParam(ROTATION_AXIS_NORM_TOLERANCE, rot_axis_norm_tolerance_));
+  ASSERT_TRUE(ph_.getParam(ORIENTATION_NORM_TOLERANCE, orientation_norm_tolerance_));
   ASSERT_TRUE(ph_.getParam(TEST_DATA_FILE_NAME, test_data_file_name_));
 
   // load the test data provider
@@ -246,7 +246,8 @@ TEST_F(IntegrationTestCommandPlanning, LinJoint)
   ASSERT_TRUE(testutils::isGoalReached(robot_model_,
                                        response.trajectory.joint_trajectory,
                                        req,
-                                       pose_norm_tolerance_)) << "Goal not reached.";
+                                       pose_norm_tolerance_,
+                                       orientation_norm_tolerance_)) << "Goal not reached.";
 
   std::cout << "++++++++++" << std::endl;
   std::cout << "+ Step 3 +" << std::endl;
@@ -257,7 +258,7 @@ TEST_F(IntegrationTestCommandPlanning, LinJoint)
                 response.trajectory.joint_trajectory,
                 req,
                 pose_norm_tolerance_,
-                rot_axis_norm_tolerance_)) << "Trajectory violates cartesian linearity.";
+                orientation_norm_tolerance_)) << "Trajectory violates cartesian linearity.";
 }
 
 /**
@@ -302,7 +303,8 @@ TEST_F(IntegrationTestCommandPlanning, LinJointCart)
   ASSERT_TRUE(testutils::isGoalReached(robot_model_,
                                        response.trajectory.joint_trajectory,
                                        req,
-                                       pose_norm_tolerance_)) << "Goal not reached.";
+                                       pose_norm_tolerance_,
+                                       orientation_norm_tolerance_)) << "Goal not reached.";
 
   std::cout << "++++++++++" << std::endl;
   std::cout << "+ Step 3 +" << std::endl;
@@ -313,7 +315,7 @@ TEST_F(IntegrationTestCommandPlanning, LinJointCart)
                 response.trajectory.joint_trajectory,
                 req,
                 pose_norm_tolerance_,
-                rot_axis_norm_tolerance_)) << "Trajectory violates cartesian linearity.";
+                orientation_norm_tolerance_)) << "Trajectory violates cartesian linearity.";
 
 }
 
@@ -366,7 +368,8 @@ TEST_F(IntegrationTestCommandPlanning, CircJointCenterCart)
   ASSERT_TRUE(testutils::isGoalReached(robot_model_,
                                        response.trajectory.joint_trajectory,
                                        req,
-                                       pose_norm_tolerance_)) << "Goal not reached.";
+                                       pose_norm_tolerance_,
+                                       orientation_norm_tolerance_)) << "Goal not reached.";
 
   // check all waypoints are on the circle and SLERP
   robot_state::RobotState waypoint_state(robot_model_);
@@ -399,7 +402,7 @@ TEST_F(IntegrationTestCommandPlanning, CircJointCenterCart)
     Eigen::Affine3d start_pose_aff3d, goal_pose_aff3d;
     tf::poseMsgToEigen(start_pose, start_pose_aff3d);
     tf::poseMsgToEigen(goal_pose, goal_pose_aff3d);
-    EXPECT_TRUE( testutils::checkSLERP(start_pose_aff3d, goal_pose_aff3d, waypoint_pose, rot_axis_norm_tolerance_) );
+    EXPECT_TRUE( testutils::checkSLERP(start_pose_aff3d, goal_pose_aff3d, waypoint_pose, orientation_norm_tolerance_) );
   }
 }
 
@@ -449,7 +452,8 @@ TEST_F(IntegrationTestCommandPlanning, CircCartCenterCart)
   ASSERT_TRUE(testutils::isGoalReached(robot_model_,
                                        response.trajectory.joint_trajectory,
                                        req,
-                                       pose_norm_tolerance_)) << "Goal not reached.";
+                                       pose_norm_tolerance_,
+                                       orientation_norm_tolerance_)) << "Goal not reached.";
 
   // check all waypoints are on the cricle and SLERP
   robot_state::RobotState waypoint_state(robot_model_);
@@ -483,7 +487,7 @@ TEST_F(IntegrationTestCommandPlanning, CircCartCenterCart)
     EXPECT_TRUE(testutils::checkSLERP(start_pose_aff3d,
                                       goal_pose_aff3d,
                                       waypoint_pose,
-                                      rot_axis_norm_tolerance_));
+                                      orientation_norm_tolerance_));
   }
 
 }
