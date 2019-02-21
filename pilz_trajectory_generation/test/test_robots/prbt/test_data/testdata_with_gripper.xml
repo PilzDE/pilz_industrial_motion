@@ -18,121 +18,61 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 <testdata>
 
   <poses>
-
     <pos name="ZeroPose">
-        <group name="manipulator">
-            <joints>0.0 0.0 0.0 0.0 0.0 0.0</joints>
-        </group>
-        <group name="gripper">
-            <joints>0</joints>
-        </group>
+      <joints group_name="manipulator">0.0 0.0 0.0 0.0 0.0 0.0</joints>
     </pos>
 
-    <pos name="PTPJointValid">
-        <group name="manipulator">
-            <joints>0.0 0.785398 0.785398 0.0 1.570796 0.0</joints>
-        </group>
-        <group name="gripper">
-            <joints>0</joints>
-        </group>
+    <pos name="P1">
+      <joints group_name="manipulator">0.0 0.005583 -1.323096 0.0 -1.812912 -2.356194</joints>
+      <xyzQuat group_name="manipulator" link_name="prbt_tcp">0.3 0.0 0.5 0.707106 0.707106 0.0 0.0</xyzQuat>
     </pos>
 
-    <pos name="PTPPose">
-        <group name="manipulator">
-            <xyzQuat link_name="prbt_tcp">0.45 -0.1 0.62 0.0 0.0 0.0 1.</xyzQuat>
-        </group>
-        <group name="gripper">
-            <joints>0</joints>
-        </group>
+    <pos name="P2">
+      <joints group_name="manipulator">0.380506 0.752267 -0.595009 0.0 -1.794315 -1.975688</joints>
+      <xyzQuat group_name="manipulator" link_name="prbt_tcp">0.5 0.2 0.4 0.707106 0.707106 0.0 0.0</xyzQuat>
     </pos>
 
-    <pos name="LINPose1">
-        <group name="manipulator">
-            <joints>0.0 -0.0107868 -1.726650 0.0 1.715863 2.356194</joints>
-        </group>
-        <group name="gripper">
-            <joints>0</joints>
-        </group>
-    </pos>
-
-    <pos name="LINPose2">
-        <group name="manipulator">
-            <joints>1.570796 -0.010786 -1.726650 0.0 1.715863 0.785398</joints>
-        </group>
-        <group name="gripper">
-            <joints>0</joints>
-        </group>
-    </pos>
-
-    <pos name="CIRCStart">
-        <group name="manipulator">
-            <joints>0.0 -0.0107868 -1.726650 0.0 1.715863 2.356194</joints>
-            <xyzQuat link_name="prbt_tcp">0.3 0.0 0.75 0.0 0.0 0.0 1.0</xyzQuat>
-        </group>
-        <group name="gripper">
-            <joints>0</joints>
-        </group>
-    </pos>
-
-    <pos name="CIRCCenter">
-        <group name="manipulator">
-            <xyzQuat link_name="prbt_tcp">0.0 0.0 0.75 0.0 0.0 0.0 1.0</xyzQuat>
-        </group>
-        <group name="gripper">
-            <joints>0</joints>
-        </group>
-    </pos>
-
-    <pos name="CIRCGoal">
-        <group name="manipulator">
-            <joints>1.570796 -0.010786 -1.726650 0.0 1.715863 0.785398</joints>
-            <xyzQuat link_name="prbt_tcp">0.0 0.3 0.75 0.0 0.0 0 1.0</xyzQuat>
-        </group>
-        <group name="gripper">
-            <joints>0</joints>
-        </group>
+    <pos name="P3">
+      <joints group_name="manipulator">0.927295 0.607232 -1.173008 0.0 -1.361351 -1.428899</joints>
+      <xyzQuat group_name="manipulator" link_name="prbt_tcp">0.3 0.4 0.3 0.707106 0.707106 0.0 0.0
+      </xyzQuat>
     </pos>
 
   </poses>
 
-  <circs>
-
-    <circ name="ValidCIRCCmd2">
-      <!-- valid circ cmd-->
-      <planningGroup>manipulator</planningGroup>
-      <targetLink>prbt_tcp</targetLink>
-      <startPos>CIRCStart</startPos>
-      <centerPos>CIRCCenter</centerPos>
-      <endPos>CIRCGoal</endPos>
-      <vel>0.1</vel>
-      <acc>0.1</acc>
-    </circ>
-
-  </circs>
-
-
-  <lins>
-
-    <lin name="LINCmd1">
-      <planningGroup>manipulator</planningGroup>
-      <targetLink>prbt_tcp</targetLink>
-      <startPos>LINPose1</startPos>
-      <endPos>LINPose2</endPos>
-      <vel>0.1</vel>
-      <acc>0.1</acc>
-    </lin>
-
-  </lins>
-
   <ptps>
-    <ptp name="FirstPtp">
+    <ptp name="Ptp1">
       <planningGroup>manipulator</planningGroup>
       <targetLink>prbt_tcp</targetLink>
       <startPos>ZeroPose</startPos>
-      <endPos>PTPJointValid</endPos>
+      <endPos>P1</endPos>
       <vel>1.0</vel>
-      <acc>1.0</acc>
+      <acc>0.4</acc>
     </ptp>
+
   </ptps>
+
+  <lins>
+    <lin name="lin2">
+        <planningGroup>manipulator</planningGroup>
+        <targetLink>prbt_tcp</targetLink>
+        <startPos>P1</startPos>
+        <endPos>P2</endPos>
+        <vel>0.1</vel>
+        <acc>0.2</acc>
+    </lin>
+  </lins>
+
+  <circs>
+    <circ name="circ1_center_2">
+      <planningGroup>manipulator</planningGroup>
+      <targetLink>prbt_tcp</targetLink>
+      <startPos>P3</startPos>
+      <centerPos>P2</centerPos>
+      <endPos>P1</endPos>
+      <vel>0.1</vel>
+      <acc>0.2</acc>
+    </circ>
+  </circs>
 
 </testdata>
