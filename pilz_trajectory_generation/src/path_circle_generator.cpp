@@ -41,15 +41,14 @@ std::unique_ptr<KDL::Path> PathCircleGenerator::circleFromCenter(
   KDL::RotationalInterpolation* rot_interpo = new KDL::RotationalInterpolation_SingleAxis();
   try
   {
-    KDL::Path* circ = new KDL::Path_Circle(start_pose,
+    return std::unique_ptr<KDL::Path>(new KDL::Path_Circle(start_pose,
                                            center_point,
                                            goal_pose.p,
                                            goal_pose.M,
                                            alpha,
                                            rot_interpo,
                                            eqradius,
-                                           true /* take ownership of RotationalInterpolation */);
-    return std::unique_ptr<KDL::Path>(circ);
+                                           true /* take ownership of RotationalInterpolation */));
   }
   catch(KDL::Error_MotionPlanning &)
   {
@@ -93,15 +92,14 @@ std::unique_ptr<KDL::Path> PathCircleGenerator::circleFromInterim(
   KDL::RotationalInterpolation* rot_interpo = new KDL::RotationalInterpolation_SingleAxis();
   try
   {
-    KDL::Path_Circle* circ = new KDL::Path_Circle(start_pose,
+    return std::unique_ptr<KDL::Path>(new KDL::Path_Circle(start_pose,
                                                   center_point,
                                                   interim_point,
                                                   goal_pose.M,
                                                   alpha,
                                                   rot_interpo,
                                                   eqradius,
-                                                  true /* take ownership of RotationalInterpolation */);
-    return std::unique_ptr<KDL::Path>(circ);
+                                                  true /* take ownership of RotationalInterpolation */));
   }
   catch(KDL::Error_MotionPlanning &)
   {
