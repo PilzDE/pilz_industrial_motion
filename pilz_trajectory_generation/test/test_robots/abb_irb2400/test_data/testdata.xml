@@ -66,7 +66,7 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
       <startPos>ZeroPose</startPos>
       <endPos>PTPJointValid</endPos>
       <vel>1.0</vel>
-      <acc>1.0</acc>
+      <acc>0.3</acc>
     </ptp>
 
     <ptp name="Ptp1">
@@ -75,7 +75,7 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
       <startPos>ZeroPose</startPos>
       <endPos>P1</endPos>
       <vel>1.0</vel>
-      <acc>1.0</acc>
+      <acc>0.3</acc>
     </ptp>
 
     <ptp name="Ptp2">
