@@ -539,8 +539,7 @@ TEST_P(TrajectoryBlenderTransitionWindowTest, testLinLinBlending)
  * the trajectories exactly lie on top of each other.
  *
  * Test Sequence:
- *    1. Generate two linear trajectories from the test data set,
- *        such that the second one is the reversed first one.
+ *    1. Generate two linear trajectories from the test data set. Set goal of second traj to start of first traj.
  *    2. Generate blending trajectory.
  *    3. Check blending trajectory:
  *      - for position, velocity, and acceleration bounds,
@@ -555,7 +554,9 @@ TEST_P(TrajectoryBlenderTransitionWindowTest, testLinLinBlending)
  */
 TEST_P(TrajectoryBlenderTransitionWindowTest, testOverlappingBlendTrajectories)
 {
-  Sequence seq {data_loader_->getSequence("TestBlendOverlap")};
+  Sequence seq {data_loader_->getSequence("TestBlend")};
+  // Set goal of second traj to start of first traj.
+  seq.getCmd<LinCart>(1).setGoalConfiguration(seq.getCmd<LinCart>(0).getStartConfiguration());
 
   std::vector<planning_interface::MotionPlanResponse> res {generateLinTrajs(seq, 2)};
 
