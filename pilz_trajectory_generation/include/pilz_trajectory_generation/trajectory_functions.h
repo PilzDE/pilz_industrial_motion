@@ -55,7 +55,6 @@ bool computePoseIK(const robot_model::RobotModelConstPtr& robot_model,
                    const std::map<std::string, double>& seed,
                    std::map<std::string, double>& solution,
                    bool check_self_collision = true,
-                   int max_attempt = 10,
                    const double timeout = 0.1);
 
 bool computePoseIK(const robot_model::RobotModelConstPtr& robot_model,
@@ -66,7 +65,6 @@ bool computePoseIK(const robot_model::RobotModelConstPtr& robot_model,
                    const std::map<std::string, double>& seed,
                    std::map<std::string, double>& solution,
                    bool check_self_collision = true,
-                   int max_attempt = 10,
                    const double timeout = 0.1);
 
 /**
