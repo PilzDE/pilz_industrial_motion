@@ -2,6 +2,10 @@
 Changelog for package pilz_robot_programming
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
+Forthcoming
+-----------
+* Minor fixes
+
 0.3.5 (2019-02-06)
 ------------------
 
