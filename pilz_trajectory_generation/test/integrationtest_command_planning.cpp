@@ -336,7 +336,6 @@ TEST_F(IntegrationTestCommandPlanning, CircJointCenterCart)
   ros::NodeHandle node_handle("~");
 
   CircJointCenterCart circ {test_data_->getCircJointCenterCart("circ1_center_2")};
-  circ.getAuxiliaryConfiguration().getConfiguration().clearOrientation();
 
   moveit_msgs::MotionPlanRequest req {circ.toRequest()};
 
