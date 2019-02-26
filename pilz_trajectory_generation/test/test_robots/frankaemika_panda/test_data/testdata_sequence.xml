@@ -143,7 +143,7 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
       <sequenceCmd name="lin2"            type="lin_cart"           blend_radius="0.1" />
       <sequenceCmd name="Ptp3"            type="ptp_cart_cart"      blend_radius="0.0" />
     </blend>
-    <blend name="TestBlend">
+    <blend name="SimpleSequence">
       <sequenceCmd name="lin2" type="lin_cart" blend_radius="0.149" />
       <sequenceCmd name="lin3" type="lin_cart" blend_radius="0" />
     </blend>
