@@ -77,7 +77,6 @@ protected:
   ros::NodeHandle ph_ {"~"};
   actionlib::SimpleActionClient<pilz_msgs::MoveGroupSequenceAction> ac_{ph_, SEQUENCE_ACTION_NAME, true};
   std::shared_ptr<moveit::planning_interface::MoveGroupInterface> move_group_;
-  ros::AsyncSpinner spinner_ {1};
 
   robot_model_loader::RobotModelLoader model_loader_;
   robot_model::RobotModelPtr robot_model_;
@@ -93,8 +92,6 @@ protected:
 
 void IntegrationTestSequenceAction::SetUp()
 {
-  spinner_.start();
-
   // get necessary parameters
   ASSERT_TRUE(ph_.getParam(JOINT_POSITION_TOLERANCE, joint_position_tolerance_));
   ASSERT_TRUE(ph_.getParam(TEST_DATA_FILE_NAME, test_data_file_name_));
@@ -636,6 +633,9 @@ int main(int argc, char **argv)
 {
   ros::init(argc, argv, "integrationtest_sequence_action_capability");
   ros::NodeHandle nh();
+
+  ros::AsyncSpinner spinner_ {1};
+  spinner_.start();
 
   testing::InitGoogleTest(&argc, argv);
   return RUN_ALL_TESTS();
