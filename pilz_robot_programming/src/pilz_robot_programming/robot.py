@@ -29,12 +29,15 @@ import tf
 import psutil
 
 from .move_control_request import _MoveControlState, MoveControlAction,_MoveControlStateMachine
-from .commands import _AbstractCmd, _DEFAULT_PLANNING_GROUP, _DEFAULT_TARGET_LINK
+from .commands import _AbstractCmd, _DEFAULT_PLANNING_GROUP, _DEFAULT_TARGET_LINK, _DEFAULT_BASE_LINK
 from .exceptions import *
 from geometry_msgs.msg import Quaternion, PoseStamped, Pose
 from std_msgs.msg import Header
 
 __version__ = '1.0.0'
+
+# Due to bug in actionlib we have to take care about validity of transitions when cancelling
+_VALID_GOAL_STATUS_FOR_CANCEL = [GoalStatus.PENDING, GoalStatus.ACTIVE]
 
 
 class Robot(object):
@@ -157,7 +160,7 @@ class Robot(object):
             rospy.logerr(e.message)
             raise RobotCurrentStateError(e.message)
 
-    def get_current_pose(self, target_link=_DEFAULT_TARGET_LINK, base="prbt_base"):
+    def get_current_pose(self, target_link=_DEFAULT_TARGET_LINK, base=_DEFAULT_BASE_LINK):
         """Returns the current pose of target link in the reference frame.
         :param target_link: Name of the target_link, default value is "prbt_tcp".
         :param base: The target reference system of the pose, default ist "prbt_base".
@@ -237,7 +240,11 @@ class Robot(object):
         """
         rospy.loginfo("Stop called.")
         self._move_ctrl_sm.switch(MoveControlAction.STOP)
-        self._cancel_on_all_clients()
+
+        with self._move_ctrl_sm: # wait, if _execute is just starting a send_goal()
+            actionclient_state = self._sequence_client.get_state()
+            if actionclient_state in _VALID_GOAL_STATUS_FOR_CANCEL:
+                self._sequence_client.cancel_goal()
 
     def pause(self):
         """The pause function allows the user to stop the currently running robot motion command. The :py:meth:`move`
@@ -250,8 +257,10 @@ class Robot(object):
         rospy.loginfo("Pause called.")
         self._move_ctrl_sm.switch(MoveControlAction.PAUSE)
 
-        # Ensure that all running commands are cancelled/stopped
-        self._cancel_on_all_clients()
+        with self._move_ctrl_sm: # wait, if _execute is just starting a send_goal()
+            actionclient_state = self._sequence_client.get_state()
+            if actionclient_state in _VALID_GOAL_STATUS_FOR_CANCEL:
+                self._sequence_client.cancel_goal()
 
     def resume(self):
         """The function resumes a paused robot motion. If the motion command is not paused or no motion command is active,
@@ -326,9 +335,6 @@ class Robot(object):
         if actionclient_state != GoalStatus.LOST: # is the client currently tracking a goal?
             self._sequence_client.cancel_goal()
             self._sequence_client.wait_for_result(timeout = rospy.Duration(2.))
-
-    def _cancel_on_all_clients(self):
-        self._sequence_client.cancel_goal()
 
     def _pause_service_callback(self, request):
         self.pause()

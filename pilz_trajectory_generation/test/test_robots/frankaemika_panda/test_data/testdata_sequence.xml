@@ -20,85 +20,90 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
   <poses>
 
     <pos name="ZeroPose">
-      <joints group_name="manipulator">0.0 0.0 0.0 0.0 0.0 0.0</joints>
+      <joints group_name="panda_arm">0.0 -0.785 0.0 -2.356 0.0 1.571 0.785</joints>
     </pos>
 
     <pos name="P1">
-      <joints group_name="manipulator">0.0 -0.016763 -1.673499 0.0 -1.484857 1.570796</joints>
-      <xyzQuat group_name="manipulator" link_name="prbt_tcp">0.3 0.0 0.5 0.707106 0.707106 0.0 0.0</xyzQuat>
+      <joints group_name="panda_arm">-0.022096 -0.753529 0.007612 -1.716165 0.0063464 0.962660 0.771123</joints>
+      <xyzQuat group_name="panda_arm" link_name="panda_link8">0.2 0 0.8 0.924138 -0.382057 0.0 0.0
+        <seed><joints group_name="panda_arm">-0.022096 -0.753529 0.007612 -1.716165 0.0063464 0.962660 0.771123</joints></seed>
+      </xyzQuat>
     </pos>
 
     <pos name="P2">
-      <joints group_name="manipulator">0.380506 0.731299 -0.960008 0.0 -1.450284 1.951302</joints>
-      <xyzQuat group_name="manipulator" link_name="prbt_tcp">0.5 0.2 0.4 0.707106 0.707106 0.0 0.0</xyzQuat>
+      <joints group_name="panda_arm">-0.061035 -0.301221 0.410282 -1.665777 0.120602 1.389535 1.138547</joints>
+      <xyzQuat group_name="panda_arm" link_name="panda_link8">0.4 0.2 0.7 0.924138 -0.382057 0.0 0.0
+        <seed><joints group_name="panda_arm">-0.061035 -0.301221 0.410282 -1.665777 0.120602 1.389535 1.138547</joints></seed>
+      </xyzQuat>
     </pos>
 
     <pos name="P3">
-      <joints group_name="manipulator">0.927295 0.708913 -1.343015 0.0 -1.089664 2.498091</joints>
-      <xyzQuat group_name="manipulator" link_name="prbt_tcp">0.3 0.4 0.3 0.707106 0.707106 0.0 0.0
-        <!--Seed needed because there seem to be two possible joint solutions-->
-        <seed><joints group_name="manipulator">0.927295 0.708913 -1.343015 0.0 -1.089664 2.498091</joints></seed>
+      <joints group_name="panda_arm">0.0875228 -0.540765 0.770139 -1.990062 0.366596 1.582282 1.560837</joints>
+      <xyzQuat group_name="panda_arm" link_name="panda_link8">0.2 0.4 0.6 0.924138 -0.382057 0.0 0.0
+        <seed><joints group_name="panda_arm">0.0875228 -0.540765 0.770139 -1.990062 0.366596 1.582282 1.560837</joints></seed>
       </xyzQuat>
     </pos>
 
     <pos name="P4">
-      <joints group_name="manipulator">0.588002 0.221990 -1.742660 0.0 -1.176941 2.158798</joints>
-      <xyzQuat group_name="manipulator" link_name="prbt_tcp">0.3 0.2 0.4 0.707106 0.707106 0.0 0.0</xyzQuat>
+      <joints group_name="panda_arm">0.164988 -0.805223 0.304894 -2.020563 0.230321 1.247100 1.238191</joints>
+      <xyzQuat group_name="panda_arm" link_name="panda_link8">0.2 0.2 0.7 0.924138 -0.382057 0.0 0.0
+        <seed><joints group_name="panda_arm">0.164988 -0.805223 0.304894 -2.020563 0.230321 1.247100 1.238191</joints></seed>
+      </xyzQuat>
     </pos>
 
   </poses>
 
   <ptps>
     <ptp name="Ptp1">
-      <planningGroup>manipulator</planningGroup>
-      <targetLink>prbt_tcp</targetLink>
+      <planningGroup>panda_arm</planningGroup>
+      <targetLink>panda_link8</targetLink>
       <startPos>ZeroPose</startPos>
       <endPos>P1</endPos>
       <vel>1.0</vel>
-      <acc>0.4</acc>
+      <acc>0.3</acc>
     </ptp>
 
     <ptp name="Ptp2">
-      <planningGroup>manipulator</planningGroup>
-      <targetLink>prbt_tcp</targetLink>
+      <planningGroup>panda_arm</planningGroup>
+      <targetLink>panda_link8</targetLink>
       <startPos>P3</startPos>
       <endPos>P2</endPos>
       <vel>1.0</vel>
-      <acc>0.4</acc>
+      <acc>0.3</acc>
     </ptp>
 
     <ptp name="Ptp3">
-      <planningGroup>manipulator</planningGroup>
-      <targetLink>prbt_tcp</targetLink>
+      <planningGroup>panda_arm</planningGroup>
+      <targetLink>panda_link8</targetLink>
       <startPos>P2</startPos>
       <endPos>P3</endPos>
       <vel>1.0</vel>
-      <acc>0.4</acc>
+      <acc>0.3</acc>
     </ptp>
   </ptps>
 
   <lins>
     <lin name="lin3">
-        <planningGroup>manipulator</planningGroup>
-        <targetLink>prbt_tcp</targetLink>
+        <planningGroup>panda_arm</planningGroup>
+        <targetLink>panda_link8</targetLink>
         <startPos>P2</startPos>
         <endPos>P3</endPos>
         <vel>0.1</vel>
-        <acc>0.2</acc>
+        <acc>0.1</acc>
     </lin>
 
     <lin name="lin2">
-        <planningGroup>manipulator</planningGroup>
-        <targetLink>prbt_tcp</targetLink>
+        <planningGroup>panda_arm</planningGroup>
+        <targetLink>panda_link8</targetLink>
         <startPos>P1</startPos>
         <endPos>P2</endPos>
         <vel>0.1</vel>
-        <acc>0.2</acc>
+        <acc>0.1</acc>
     </lin>
 
     <lin name="lin2_reversed">
-      <planningGroup>manipulator</planningGroup>
-      <targetLink>prbt_tcp</targetLink>
+      <planningGroup>panda_arm</planningGroup>
+      <targetLink>panda_link8</targetLink>
       <startPos>P2</startPos>
       <endPos>P1</endPos>
       <vel>0.1</vel>
@@ -106,34 +111,34 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
     </lin>
 
     <lin name="lin4">
-        <planningGroup>manipulator</planningGroup>
-        <targetLink>prbt_tcp</targetLink>
+        <planningGroup>panda_arm</planningGroup>
+        <targetLink>panda_link8</targetLink>
         <startPos>P2</startPos>
         <endPos>P4</endPos>
         <vel>0.1</vel>
-        <acc>0.2</acc>
+        <acc>0.1</acc>
     </lin>
   </lins>
 
   <circs>
     <circ name="circ3_interim">
-      <planningGroup>manipulator</planningGroup>
-      <targetLink>prbt_tcp</targetLink>
+      <planningGroup>panda_arm</planningGroup>
+      <targetLink>panda_link8</targetLink>
       <startPos>P1</startPos>
       <intermediatePos>P2</intermediatePos>
       <endPos>P3</endPos>
       <vel>0.1</vel>
-      <acc>0.4</acc>
+      <acc>0.2</acc>
     </circ>
 
     <circ name="circ1_center_2">
-      <planningGroup>manipulator</planningGroup>
-      <targetLink>prbt_tcp</targetLink>
+      <planningGroup>panda_arm</planningGroup>
+      <targetLink>panda_link8</targetLink>
       <startPos>P3</startPos>
       <centerPos>P2</centerPos>
       <endPos>P1</endPos>
       <vel>0.1</vel>
-      <acc>0.2</acc>
+      <acc>0.15</acc>
     </circ>
   </circs>
 

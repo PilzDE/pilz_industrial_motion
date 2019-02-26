@@ -17,15 +17,6 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 <launch>
 
-  <node pkg="rosbag" type="record" name="rosbag_log"
-        args="record rosout -o $(find pilz_robot_programming)/test_api_program_termination_log"/>
-
-  <arg name="debug" default="false"/>
-  <arg name="gripper" default=""/>
-  <arg name="coverage" default="false"/>
-  <arg name="pythontest_launch_prefix" value="$(eval 'python-coverage run -p' if arg('coverage') else '')"/>
-
-  <!-- Start MoveIt Configuration -->
   <node name="joint_state_publisher" pkg="joint_state_publisher" type="joint_state_publisher">
     <param name="/use_gui" value="false"/>
     <rosparam param="/source_list">[/move_group/fake_controller_joint_states]</rosparam>
@@ -33,19 +24,18 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
   <node name="robot_state_publisher" pkg="robot_state_publisher" type="robot_state_publisher" respawn="true" output="screen" />
 
-  <include file="$(find prbt_moveit_config)/launch/move_group.launch">
+  <arg name="debug" default="false"/>
+  <include file="$(find pilz_trajectory_generation)/test/test_robots/abb_irb2400/launch/move_group.launch">
     <arg name="allow_trajectory_execution" value="true"/>
     <arg name="fake_execution" value="true"/>
     <arg name="info" value="true"/>
     <arg name="debug" value="$(arg debug)"/>
-    <arg name="gripper" value="$(arg gripper)"/>
-    <arg name="capabilities" value="pilz_trajectory_generation/MoveGroupSequenceAction
-                                    pilz_trajectory_generation/MoveGroupSequenceService"/>
   </include>
 
-  <!-- test node -->
-  <test test-name="test_api_program_kill" pkg="pilz_robot_programming"
-    type="tst_api_program_kill.py" time-limit="25"
-    launch-prefix="$(arg pythontest_launch_prefix)" />
+  <!-- run test -->
+  <test pkg="pilz_trajectory_generation" test-name="integrationtest_sequence_service_capability_abb_irb2400"
+        type="integrationtest_sequence_service_capability" time-limit="300.0">
+    <param name="testdata_file_name" value="$(find pilz_trajectory_generation)/test/test_robots/abb_irb2400/test_data/testdata.xml" />
+  </test>
 
 </launch>

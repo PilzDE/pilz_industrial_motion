@@ -49,10 +49,18 @@ public:
 public:
   JointConfiguration& setJointPrefix(const std::string& joint_prefix);
 
+  void setJoint(const size_t index, const double value);
+  double getJoint(const size_t index) const;
+  const std::vector<double> getJoints() const;
+
+  size_t size() const;
+
   moveit_msgs::Constraints toGoalConstraints() const override;
   moveit_msgs::RobotState toMoveitMsgsRobotState() const override;
 
   sensor_msgs::JointState toSensorMsg() const;
+
+  robot_state::RobotState toRobotState() const;
 
 private:
   moveit_msgs::RobotState toMoveitMsgsRobotStateWithoutModel() const;
@@ -70,6 +78,8 @@ private:
   std::vector<double> joints_;
   std::string joint_prefix_ {};
 };
+
+std::ostream& operator<<(std::ostream&, const JointConfiguration&);
 
 inline JointConfiguration& JointConfiguration::setJointPrefix(const std::string& joint_prefix)
 {
@@ -94,6 +104,28 @@ inline moveit_msgs::RobotState JointConfiguration::toMoveitMsgsRobotState() cons
   return robot_model_? toMoveitMsgsRobotStateWithModel() :
                        toMoveitMsgsRobotStateWithoutModel();
 }
+
+inline void JointConfiguration::setJoint(const size_t index, const double value)
+{
+  joints_.at(index) = value;
+}
+
+inline double JointConfiguration::getJoint(const size_t index) const
+{
+  return joints_.at(index);
+}
+
+inline const std::vector<double> JointConfiguration::getJoints() const
+{
+  return joints_;
+}
+
+inline size_t JointConfiguration::size() const
+{
+  return joints_.size();
+}
+
+
 
 }
 

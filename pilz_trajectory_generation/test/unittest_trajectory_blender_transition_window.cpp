@@ -28,6 +28,7 @@
 
 #include <pilz_industrial_motion_testutils/xml_testdata_loader.h>
 #include <pilz_industrial_motion_testutils/sequence.h>
+#include <pilz_industrial_motion_testutils/command_types_typedef.h>
 
 #include "pilz_trajectory_generation/trajectory_generator_lin.h"
 #include "pilz_trajectory_generation/joint_limits_aggregator.h"
@@ -132,7 +133,7 @@ std::vector<planning_interface::MotionPlanResponse> TrajectoryBlenderTransitionW
 
   for (size_t index=0; index < num_cmds; ++index)
   {
-    planning_interface::MotionPlanRequest req {seq.getCmd(index).toRequest()};
+    planning_interface::MotionPlanRequest req {seq.getCmd<LinCart>(index).toRequest()};
     // Set start state of request to end state of previous trajectory (except for first)
     if (index > 0)
     {
@@ -293,7 +294,7 @@ TEST_P(TrajectoryBlenderTransitionWindowTest, testDifferentSamplingTimes)
 
   for (size_t index=0; index < num_cmds; ++index)
   {
-    planning_interface::MotionPlanRequest req {seq.getCmd(index).toRequest()};
+    planning_interface::MotionPlanRequest req {seq.getCmd<LinCart>(index).toRequest()};
     // Set start state of request to end state of previous trajectory (except for first)
     if (index > 0)
     {

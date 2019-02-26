@@ -43,15 +43,25 @@ public:
    * @brief Adds a command to the end of the sequence.
    * @param cmd The command which has to be added.
    */
-  void add(MotionCmdUPtr cmd, const double blend_radius = 0.);
+  void add(const CmdVariant &cmd, const double blend_radius = 0.);
 
   /**
    * @brief Returns the number of commands.
    */
   size_t size() const;
 
-  MotionCmd& getCmd(const size_t index_cmd);
-  const MotionCmd& getCmd(const size_t index_cmd) const;
+  template<class T>
+  T& getCmd(const size_t index_cmd);
+
+  template<class T>
+  const T& getCmd(const size_t index_cmd) const;
+
+  /**
+   * @brief Returns the specific command as base class reference.
+   * This function allows the user to operate on the sequence without
+   * having knowledge of the underlying specific command type.
+   */
+  MotionCmd &getCmd(const size_t index_cmd);
 
   void setAllBlendRadiiToZero();
   void setBlendRadii(const size_t index_cmd, const double blend_radius);
@@ -65,14 +75,13 @@ public:
   pilz_msgs::MotionSequenceRequest toRequest() const;
 
 private:
-  using TCmdRadiiPair = std::pair<MotionCmdUPtr, double>;
+  using TCmdRadiiPair = std::pair<CmdVariant, double>;
   std::vector<TCmdRadiiPair > cmds_;
 };
 
-inline void Sequence::add(MotionCmdUPtr cmd, const double blend_radius)
+inline void Sequence::add(const CmdVariant& cmd, const double blend_radius)
 {
-  if (!cmd) {throw std::invalid_argument("Cmd must not be null");}
-  cmds_.emplace_back( std::move(cmd), blend_radius );
+  cmds_.emplace_back( cmd, blend_radius );
 }
 
 inline size_t Sequence::size() const
@@ -80,14 +89,16 @@ inline size_t Sequence::size() const
   return cmds_.size();
 }
 
-inline MotionCmd& Sequence::getCmd(const size_t index_cmd)
+template<class T>
+inline T &Sequence::getCmd(const size_t index_cmd)
 {
-  return *(cmds_.at(index_cmd).first);
+  return boost::get<T>(cmds_.at(index_cmd).first);
 }
 
-inline const MotionCmd& Sequence::getCmd(const size_t index_cmd) const
+template<class T>
+inline const T& Sequence::getCmd(const size_t index_cmd) const
 {
-  return *(cmds_.at(index_cmd).first);
+  return boost::get<T>(cmds_.at(index_cmd).first);
 }
 
 inline double Sequence::getBlendRadius(const size_t index_cmd) const

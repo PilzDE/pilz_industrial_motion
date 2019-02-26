@@ -37,15 +37,8 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
   <!-- run test -->
   <test pkg="pilz_trajectory_generation" test-name="integrationtest_sequence_action_capability" type="integrationtest_sequence_action_capability" time-limit="300.0">
-    <param name="planning_group" value="manipulator" />
-    <param name="target_link" value="prbt_flange" />
     <param name="joint_position_tolerance" value="0.01" />
-    <param name="blend_dataset_num" value="1" />
     <param name="testdata_file_name" value="$(find pilz_trajectory_generation)/test/test_robots/prbt/test_data/testdata_sequence.xml" />
-    <rosparam command="load" file="$(find pilz_trajectory_generation)/test/test_robots/prbt/test_data/blend_lin_lin_test_data.yaml"  ns="test_data" />
-    <param name="blend_ne_dataset_num" value="1" />
-    <rosparam command="load" file="$(find pilz_trajectory_generation)/test/test_robots/prbt/test_data/blend_lin_lin_negative_test_data.yaml"  ns="ne_test_data" />
-
   </test>
 
 </launch>

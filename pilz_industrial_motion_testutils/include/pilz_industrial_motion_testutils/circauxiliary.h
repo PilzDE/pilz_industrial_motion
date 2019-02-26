@@ -33,6 +33,7 @@ class CircAuxiliary
 {
 public:
   void setConfiguration(const ConfigType& auxiliary_config);
+  ConfigType& getConfiguration();
   const ConfigType& getConfiguration() const;
 
 public:
@@ -50,6 +51,12 @@ template<class ConfigType, class BuilderType>
 void CircAuxiliary<ConfigType, BuilderType>::setConfiguration(const ConfigType& auxiliary_config)
 {
   auxiliary_config_ = auxiliary_config;
+}
+
+template<class ConfigType, class BuilderType>
+inline ConfigType& CircAuxiliary<ConfigType, BuilderType>::getConfiguration()
+{
+  return auxiliary_config_;
 }
 
 template<class ConfigType, class BuilderType>

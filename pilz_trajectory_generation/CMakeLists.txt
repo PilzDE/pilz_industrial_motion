@@ -239,12 +239,32 @@ add_rostest_gmock(integrationtest_sequence_action_capability_with_gripper
 target_link_libraries(integrationtest_sequence_action_capability_with_gripper
    ${catkin_LIBRARIES} ${PROJECT_NAME}_test)
 
+add_rostest_gmock(integrationtest_sequence_action_capability_abb_irb2400
+  test/integrationtest_sequence_action_capability_abb_irb2400.test
+  test/integrationtest_sequence_action_capability.cpp
+)
+target_link_libraries(integrationtest_sequence_action_capability_abb_irb2400
+  ${catkin_LIBRARIES} ${PROJECT_NAME}_test)
+
+add_rostest_gmock(integrationtest_sequence_action_capability_frankaemika_panda
+  test/integrationtest_sequence_action_capability_frankaemika_panda.test
+  test/integrationtest_sequence_action_capability.cpp
+)
+target_link_libraries(integrationtest_sequence_action_capability_frankaemika_panda
+  ${catkin_LIBRARIES} ${PROJECT_NAME}_test)
+
 add_rostest_gtest(integrationtest_sequence_service_capability
   test/integrationtest_sequence_service_capability.test
   test/integrationtest_sequence_service_capability.cpp
 )
 target_link_libraries(integrationtest_sequence_service_capability
   ${catkin_LIBRARIES} ${PROJECT_NAME}_test)
+
+add_rostest(test/integrationtest_sequence_service_capability_frankaemika_panda.test
+  DEPENDENCIES integrationtest_sequence_service_capability )
+
+add_rostest(test/integrationtest_sequence_service_capability_abb_irb2400.test
+  DEPENDENCIES integrationtest_sequence_service_capability )
 
 add_rostest_gtest(integrationtest_sequence_service_capability_with_gripper
   test/integrationtest_sequence_service_capability_with_gripper.test

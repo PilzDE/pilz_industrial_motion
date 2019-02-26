@@ -17,9 +17,10 @@
 #ifndef CARTESIANCONFIGURATION_H
 #define CARTESIANCONFIGURATION_H
 
-#include <stdexcept>
 #include <vector>
 #include <sstream>
+
+#include <boost/optional.hpp>
 
 #include <eigen_conversions/eigen_msg.h>
 #include <geometry_msgs/Pose.h>
@@ -30,6 +31,7 @@
 #include <moveit/kinematic_constraints/utils.h>
 
 #include "robotconfiguration.h"
+#include "jointconfiguration.h"
 
 namespace pilz_industrial_motion_testutils
 {
@@ -56,8 +58,22 @@ public:
   virtual moveit_msgs::Constraints toGoalConstraints() const override;
   virtual moveit_msgs::RobotState toMoveitMsgsRobotState() const override;
 
+  void setLinkName(const std::string& link_name);
   const std::string& getLinkName() const;
+
   const geometry_msgs::Pose &getPose() const;
+  geometry_msgs::Pose &getPose();
+
+  void setSeed(const JointConfiguration& config);
+  const JointConfiguration& getSeed() const;
+  //! @brief States if a seed for the cartesian configuration is set.
+  bool hasSeed() const;
+
+  void setPoseTolerance(const double tol);
+  const boost::optional<double> getPoseTolerance() const;
+
+  void setAngleTolerance(const double tol);
+  const boost::optional<double> getAngleTolerance() const;
 
 private:
   static geometry_msgs::Pose toPose(const std::vector<double>& pose);
@@ -66,7 +82,26 @@ private:
 private:
   std::string link_name_;
   geometry_msgs::Pose pose_;
+
+  //! @brief The dimensions of the sphere associated with the target region
+  //! of the position constraint.
+  boost::optional<double> tolerance_pose_ {boost::none};
+
+  //! @brief The value to assign to the absolute tolerances of the
+  //! orientation constraint.
+  boost::optional<double> tolerance_angle_ {boost::none};
+
+  //! @brief The seed for computing the IK solution of the cartesian configuration.
+  boost::optional<JointConfiguration> seed_ {boost::none};
+
 };
+
+std::ostream& operator<<(std::ostream&, const CartesianConfiguration&);
+
+inline void CartesianConfiguration::setLinkName(const std::string& link_name)
+{
+  link_name_ = link_name;
+}
 
 inline const std::string& CartesianConfiguration::getLinkName() const
 {
@@ -78,9 +113,57 @@ inline const geometry_msgs::Pose& CartesianConfiguration::getPose() const
   return pose_;
 }
 
+inline geometry_msgs::Pose & CartesianConfiguration::getPose()
+{
+  return pose_;
+}
+
 inline moveit_msgs::Constraints CartesianConfiguration::toGoalConstraints() const
 {
-  return kinematic_constraints::constructGoalConstraints(link_name_, toStampedPose(pose_));
+  if (!tolerance_pose_ || !tolerance_angle_)
+  {
+    return kinematic_constraints::constructGoalConstraints(link_name_, toStampedPose(pose_));
+  }
+  else
+  {
+    return kinematic_constraints::constructGoalConstraints(link_name_, toStampedPose(pose_),
+                                                           tolerance_pose_.value(), tolerance_angle_.value());
+  }
+}
+
+inline void CartesianConfiguration::setSeed(const JointConfiguration& config)
+{
+  seed_ = config;
+}
+
+inline const JointConfiguration& CartesianConfiguration::getSeed() const
+{
+  return seed_.value();
+}
+
+inline bool CartesianConfiguration::hasSeed() const
+{
+  return seed_.is_initialized();
+}
+
+inline void CartesianConfiguration::setPoseTolerance(const double tol)
+{
+  tolerance_pose_ = tol;
+}
+
+inline const boost::optional<double> CartesianConfiguration::getPoseTolerance() const
+{
+  return tolerance_pose_;
+}
+
+inline void CartesianConfiguration::setAngleTolerance(const double tol)
+{
+  tolerance_angle_ = tol;
+}
+
+inline const boost::optional<double> CartesianConfiguration::getAngleTolerance() const
+{
+  return tolerance_angle_;
 }
 
 }

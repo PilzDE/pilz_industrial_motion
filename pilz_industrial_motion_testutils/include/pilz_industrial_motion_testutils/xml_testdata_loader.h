@@ -44,23 +44,18 @@ namespace pilz_industrial_motion_testutils
  *
  *  <poses>
  *    <pos name="MyTestPos1">
- *      <group name="manipulator">
- *        <joints>j1 j2 j3 j4 j5 j6</joints>
- *        <xyzQuat link_name="prbt_tcp">x y z wx wy wz w</xyzQuat>
- *      </group>
- *      <group name="gripper">
- *        <joints>j_gripper</joints>
- *      </group>
+ *      <joints group_name="manipulator">j1 j2 j3 j4 j5 j6</joints>
+ *      <xyzQuat group_name="manipulator" link_name="prbt_tcp">
+ *        x y z wx wy wz w
+ *        <seed><joints group_name="manipulator">s1 s2 s3 s4 s5 s6</joints></seed>
+ *      </xyzQuat>
+ *      <joints group_name="gripper">j_gripper</joints>
  *    </pos>
  *
  *    <pos name="MyTestPos2">
- *      <group name="manipulator">
- *        <joints>j1 j2 j3 j4 j5 j6</joints>
- *        <xyzQuat link_name="prbt_tcp">x y z wx wy wz w</xyzQuat>
- *      </group>
- *      <group name="gripper">
- *        <joints>j_gripper</joints>
- *      </group>
+ *      <joints group_name="manipulator">j1 j2 j3 j4 j5 j6</joints>
+ *      <xyzQuat group_name="manipulator" link_name="prbt_tcp">x y z wx wy wz w</xyzQuat>
+ *      <joints group_name="gripper">j_gripper</joints>
  *    </pos>
  *  </poses>
  *
@@ -140,6 +135,7 @@ public:
 
   virtual LinJoint getLinJoint(const std::string& cmd_name) const override;
   virtual LinCart getLinCart(const std::string& cmd_name) const override;
+  virtual LinJointCart getLinJointCart(const std::string& cmd_name) const override;
 
 
   //! @deprecated Use function using higher level abstraction data class instead.
@@ -169,7 +165,9 @@ private:
                                                 bool &ok) const;
 
   const pt::ptree::value_type &findNodeWithName(const boost::property_tree::ptree &tree,
-                                                const std::string &name) const;
+                                                const std::string &name,
+                                                const std::string &key,
+                                                const std::string &path = "") const;
 
   /**
    * @deprecated Use function using higher level abstraction data class instead.
@@ -187,7 +185,8 @@ private:
                                        const std::string &cmd_type, bool &ok) const;
 
   const pt::ptree::value_type &findCmd(const std::string &cmd_name,
-                                       const std::string &cmd_type) const;
+                                       const std::string& cmd_path,
+                                       const std::string &cmd_key) const;
 
   bool getCmd(const std::string &path2cmd, const std::string &cmd_name,
               std::string &group_name, std::string &target_link,
@@ -199,6 +198,10 @@ private:
 
   CartesianInterim getCartesianInterim(const std::string &cmd_name,
                                        const std::string &planning_group) const;
+
+private:
+  JointConfiguration getJoints(const boost::property_tree::ptree& joints_tree,
+                               const std::string &group_name) const;
 
 private:
   //! @deprecated Use function using higher level abstraction data class instead.
@@ -216,7 +219,7 @@ private:
   class AbstractCmdGetterAdapter
   {
   public:
-    virtual MotionCmdUPtr getCmd(const std::string& /*cmd_name*/) const = 0;
+    virtual CmdVariant getCmd(const std::string& /*cmd_name*/) const = 0;
   };
 
 private:
@@ -239,8 +242,15 @@ private:
 
   const std::string XML_ATTR_STR {"<xmlattr>"};
   const std::string JOINT_STR {"joints"};
+  const std::string POSE_STR {"pos"};
   const std::string XYZ_QUAT_STR {"xyzQuat"};
   const std::string XYZ_EULER_STR {"xyzEuler"};
+  const std::string SEED_STR {"seed"};
+
+  const std::string PTP_STR {"ptp"};
+  const std::string LIN_STR {"lin"};
+  const std::string CIRC_STR {"circ"};
+  const std::string BLEND_STR {"blend"};
 
   const std::string PLANNING_GROUP_STR {"planningGroup"};
   const std::string TARGET_LINK_STR {"targetLink"};
@@ -253,15 +263,16 @@ private:
 
 
   const std::string POSES_PATH_STR {"testdata.poses"};
-  const std::string PTPS_PATH_STR {"testdata.ptps"};
-  const std::string LINS_PATH_STR {"testdata.lins"};
-  const std::string CIRCS_PATH_STR {"testdata.circs"};
+  const std::string PTPS_PATH_STR {"testdata." + PTP_STR + "s"};
+  const std::string LINS_PATH_STR {"testdata."  + LIN_STR + "s"};
+  const std::string CIRCS_PATH_STR {"testdata."  + CIRC_STR + "s"};
   const std::string SEQUENCE_PATH_STR {"testdata.sequences"};
 
   const std::string NAME_PATH_STR {XML_ATTR_STR + ".name"};
   const std::string CMD_TYPE_PATH_STR {XML_ATTR_STR + ".type"};
   const std::string BLEND_RADIUS_PATH_STR {XML_ATTR_STR + ".blend_radius"};
   const std::string LINK_NAME_PATH_STR {XML_ATTR_STR + ".link_name"};
+  const std::string GROUP_NAME_PATH_STR {XML_ATTR_STR + ".group_name"};
 
 };
 

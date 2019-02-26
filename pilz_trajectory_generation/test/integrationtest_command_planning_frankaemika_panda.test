@@ -34,11 +34,11 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
   <!-- run test -->
   <test pkg="pilz_trajectory_generation" test-name="integrationtest_command_planning_frankaemika_panda" type="integrationtest_command_planning">
-    <param name="testdata_file_name" value="$(find pilz_trajectory_generation)/test/test_robots/frankaemika_panda/test_data/testdata.xml" />
+    <param name="testdata_file_name" value="$(find pilz_trajectory_generation)/test/test_robots/frankaemika_panda/test_data/testdata_sequence.xml" />
     <param name="planning_group" value="panda_arm" />
     <param name="target_link" value="panda_link8" />
     <param name="pose_norm_tolerance" value="1.0e-5" />
-    <param name="rot_axis_norm_tolerance" value="1.0e-5" />
+    <param name="orientation_norm_tolerance" value="1.0e-5" />
     <param name="joint_prefix" value="panda_joint" />
   </test>
 

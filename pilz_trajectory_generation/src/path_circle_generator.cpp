@@ -30,7 +30,7 @@ std::unique_ptr<KDL::Path> PathCircleGenerator::circleFromCenter(
   double b = (goal_pose.p - center_point).Norm();
   double c = (start_pose.p - goal_pose.p).Norm();
 
-  if(fabs(a-b) > max_radius_diff_)
+  if(fabs(a-b) > MAX_RADIUS_DIFF)
   {
     throw Error_MotionPlanning_CenterPointDifferentRadius();
   }
@@ -41,15 +41,14 @@ std::unique_ptr<KDL::Path> PathCircleGenerator::circleFromCenter(
   KDL::RotationalInterpolation* rot_interpo = new KDL::RotationalInterpolation_SingleAxis();
   try
   {
-    KDL::Path* circ = new KDL::Path_Circle(start_pose,
+    return std::unique_ptr<KDL::Path>(new KDL::Path_Circle(start_pose,
                                            center_point,
                                            goal_pose.p,
                                            goal_pose.M,
                                            alpha,
                                            rot_interpo,
                                            eqradius,
-                                           true /* take ownership of RotationalInterpolation */);
-    return std::unique_ptr<KDL::Path>(circ);
+                                           true /* take ownership of RotationalInterpolation */));
   }
   catch(KDL::Error_MotionPlanning &)
   {
@@ -71,9 +70,13 @@ std::unique_ptr<KDL::Path> PathCircleGenerator::circleFromInterim(
   const KDL::Vector u = goal_pose.p - start_pose.p;
   const KDL::Vector v = goal_pose.p - interim_point;
   // triangle normal
-  const KDL::Vector w = t*u;
+  const KDL::Vector w = t*u; // cross product
 
   // circle center
+  if (w.Norm() < MAX_COLINEAR_NORM)
+  {
+    throw KDL::Error_MotionPlanning_Circle_No_Plane();
+  }
   const KDL::Vector center_point = start_pose.p + (u*dot(t,t)*dot(u,v) - t*dot(u,u)*dot(t,v))* 0.5/pow(w.Norm(),2);
 
   // compute the rotation angle
@@ -93,15 +96,14 @@ std::unique_ptr<KDL::Path> PathCircleGenerator::circleFromInterim(
   KDL::RotationalInterpolation* rot_interpo = new KDL::RotationalInterpolation_SingleAxis();
   try
   {
-    KDL::Path_Circle* circ = new KDL::Path_Circle(start_pose,
+    return std::unique_ptr<KDL::Path>(new KDL::Path_Circle(start_pose,
                                                   center_point,
                                                   interim_point,
                                                   goal_pose.M,
                                                   alpha,
                                                   rot_interpo,
                                                   eqradius,
-                                                  true /* take ownership of RotationalInterpolation */);
-    return std::unique_ptr<KDL::Path>(circ);
+                                                  true /* take ownership of RotationalInterpolation */));
   }
   catch(KDL::Error_MotionPlanning &)
   {

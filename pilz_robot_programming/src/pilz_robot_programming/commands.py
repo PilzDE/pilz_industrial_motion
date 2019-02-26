@@ -54,6 +54,7 @@ _AXIS_SEQUENCE = "rzyz"
 _DEFAULT_PLANNING_GROUP = "manipulator"
 _DEFAULT_TARGET_LINK = "prbt_tcp"
 _DEFAULT_GRIPPER_PLANNING_GROUP = "gripper"
+_DEFAULT_BASE_LINK = "prbt_base"
 
 
 class _AbstractCmd(object):
@@ -131,7 +132,7 @@ class _BaseCmd(_AbstractCmd):
     """Base class for all single commands (gripper command excluded)."""
     def __init__(self, goal=None, planning_group=_DEFAULT_PLANNING_GROUP, target_link=_DEFAULT_TARGET_LINK,
                  vel_scale=_DEFAULT_VEL_SCALE, acc_scale=_DEFAULT_ACC_SCALE, relative=False,
-                 reference_frame=None):
+                 reference_frame=_DEFAULT_BASE_LINK):
         _AbstractCmd.__init__(self)
 
         # Needs to be set by derived classes
@@ -226,12 +227,12 @@ class _BaseCmd(_AbstractCmd):
 
     def _get_goal_pose(self, robot):
         """Determines the goal pose for the given command."""
-        current_pose = robot.get_current_pose(base=self._reference_frame if self._reference_frame else "prbt_base")
+        current_pose = robot.get_current_pose(target_link=self._target_link, base=self._reference_frame)
 
         if self._relative:
             self._goal = _pose_relative_to_absolute(current_pose, self._goal)
 
-        if self._reference_frame:
+        if not self._reference_frame == _DEFAULT_BASE_LINK:
             return _to_robot_reference(robot, self._reference_frame, self._goal)
 
         # in case of uninitialized orientation, set the goal orientation as current
@@ -324,7 +325,7 @@ class Ptp(_BaseCmd):
                  vel_scale=_MAX_VEL_SCALE,
                  acc_scale=None,
                  relative=False,
-                 reference_frame=None):
+                 reference_frame=_DEFAULT_BASE_LINK):
 
         acc_scale_final = acc_scale if acc_scale is not None else Ptp._calc_acc_scale(vel_scale)
 
@@ -421,7 +422,7 @@ class Lin(_BaseCmd):
                  vel_scale=_DEFAULT_VEL_SCALE,
                  acc_scale=None,
                  relative=False,
-                 reference_frame=None):
+                 reference_frame=_DEFAULT_BASE_LINK):
 
         acc_scale_final = acc_scale if acc_scale is not None else Lin._calc_acc_scale(vel_scale)
 
@@ -510,7 +511,7 @@ class Circ(_BaseCmd):
                  target_link=_DEFAULT_TARGET_LINK,
                  vel_scale=_DEFAULT_VEL_SCALE,
                  acc_scale=None,
-                 reference_frame=None):
+                 reference_frame=_DEFAULT_BASE_LINK):
 
         acc_scale_final = acc_scale if acc_scale is not None else Circ._calc_acc_scale(vel_scale)
 

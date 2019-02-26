@@ -78,18 +78,22 @@ moveit_msgs::RobotState JointConfiguration::toMoveitMsgsRobotStateWithoutModel()
   return robot_state;
 }
 
-moveit_msgs::RobotState JointConfiguration::toMoveitMsgsRobotStateWithModel() const
+robot_state::RobotState JointConfiguration::toRobotState() const
 {
   if (!robot_model_) {throw std::runtime_error("No robot model set");}
-  robot_state::RobotState start_state(robot_model_);
-  start_state.setToDefaultValues();
-  start_state.setJointGroupPositions(group_name_, joints_);
+  robot_state::RobotState robot_state(robot_model_);
+  robot_state.setToDefaultValues();
+  robot_state.setJointGroupPositions(group_name_, joints_);
+  return robot_state;
+}
 
+moveit_msgs::RobotState JointConfiguration::toMoveitMsgsRobotStateWithModel() const
+{
+  robot_state::RobotState start_state(toRobotState());
   moveit_msgs::RobotState robStateMsg;
   moveit::core::robotStateToRobotStateMsg(start_state, robStateMsg, false);
   return robStateMsg;
 }
-
 
 sensor_msgs::JointState JointConfiguration::toSensorMsg() const
 {
@@ -103,5 +107,21 @@ sensor_msgs::JointState JointConfiguration::toSensorMsg() const
   return state;
 }
 
+std::ostream& operator<< (std::ostream& os, const JointConfiguration& obj)
+{
+  const size_t N {obj.size()};
+  os << "JointConfiguration: [";
+  for(size_t i = 0; i<N; ++i)
+  {
+    os << obj.getJoint(i);
+    if (i != N-1 )
+    {
+      os << ", ";
+    }
+  }
+  os << "]";
+
+  return os;
+}
 
 }

@@ -17,6 +17,8 @@
 #ifndef COMMAND_TYPES_TYPEDEF_H
 #define COMMAND_TYPES_TYPEDEF_H
 
+#include <boost/variant.hpp>
+
 #include "ptp.h"
 #include "lin.h"
 #include "circ.h"
@@ -32,6 +34,7 @@ typedef Ptp<JointConfiguration, CartesianConfiguration> PtpJointCart;
 typedef Ptp<CartesianConfiguration, CartesianConfiguration> PtpCart;
 
 typedef Lin<JointConfiguration, JointConfiguration> LinJoint;
+typedef Lin<JointConfiguration, CartesianConfiguration> LinJointCart;
 typedef Lin<CartesianConfiguration, CartesianConfiguration> LinCart;
 
 typedef Circ<CartesianConfiguration, CartesianCenter, CartesianConfiguration> CircCenterCart;
@@ -39,6 +42,12 @@ typedef Circ<CartesianConfiguration, CartesianInterim, CartesianConfiguration> C
 
 typedef Circ<JointConfiguration, CartesianCenter, JointConfiguration> CircJointCenterCart;
 typedef Circ<JointConfiguration, CartesianInterim, JointConfiguration> CircJointInterimCart;
+
+typedef boost::variant<
+PtpJoint, PtpJointCart, PtpCart,
+LinJoint, LinCart,
+CircCenterCart, CircInterimCart,
+CircJointCenterCart, CircJointInterimCart > CmdVariant;
 
 }
 

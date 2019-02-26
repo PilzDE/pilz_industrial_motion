@@ -39,7 +39,10 @@ public:
   void setGoalConfiguration(GoalType goal);
 
   StartType& getStartConfiguration();
+  const StartType& getStartConfiguration() const;
+
   GoalType& getGoalConfiguration();
+  const GoalType& getGoalConfiguration() const;
 
 private:
   virtual std::string getPlannerId() const = 0;
@@ -70,7 +73,19 @@ inline StartType& BaseCmd<StartType, GoalType>::getStartConfiguration()
 }
 
 template <class StartType, class GoalType>
+inline const StartType& BaseCmd<StartType, GoalType>::getStartConfiguration() const
+{
+  return start_;
+}
+
+template <class StartType, class GoalType>
 inline GoalType& BaseCmd<StartType, GoalType>::getGoalConfiguration()
+{
+  return goal_;
+}
+
+template <class StartType, class GoalType>
+inline const GoalType& BaseCmd<StartType, GoalType>::getGoalConfiguration() const
 {
   return goal_;
 }

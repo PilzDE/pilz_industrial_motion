@@ -35,11 +35,11 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
   <!-- run test -->
   <test pkg="pilz_trajectory_generation" test-name="integrationtest_command_planning" type="integrationtest_command_planning">
-    <param name="testdata_file_name" value="$(find pilz_trajectory_generation)/test/test_robots/prbt/test_data/testdata.xml" />
+    <param name="testdata_file_name" value="$(find pilz_trajectory_generation)/test/test_robots/prbt/test_data/testdata_sequence.xml" />
     <param name="planning_group" value="manipulator" />
     <param name="target_link" value="prbt_flange" />
     <param name="pose_norm_tolerance" value="1.0e-5" />
-    <param name="rot_axis_norm_tolerance" value="1.0e-5" />
+    <param name="orientation_norm_tolerance" value="1.0e-5" />
   </test>
 
 </launch>

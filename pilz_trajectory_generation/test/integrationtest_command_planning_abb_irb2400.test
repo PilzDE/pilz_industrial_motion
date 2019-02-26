@@ -37,9 +37,8 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
     <param name="testdata_file_name" value="$(find pilz_trajectory_generation)/test/test_robots/abb_irb2400/test_data/testdata.xml" />
     <param name="planning_group" value="manipulator" />
     <param name="target_link" value="tool0" />
-    <param name="pose_norm_tolerance" value="1.0e-10" />
-    <param name="rot_axis_norm_tolerance" value="1.0e-5" />
-    <param name="joint_prefix" value="joint_" />
+    <param name="pose_norm_tolerance" value="1.0e-5" />
+    <param name="orientation_norm_tolerance" value="1.0e-5" />
   </test>
 
 </launch>

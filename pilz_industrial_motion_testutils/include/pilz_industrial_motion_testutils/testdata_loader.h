@@ -125,6 +125,7 @@ public:
    */
   virtual LinJoint getLinJoint(const std::string& cmd_name) const = 0;
   virtual LinCart getLinCart(const std::string& cmd_name) const = 0;
+  virtual LinJointCart getLinJointCart(const std::string& cmd_name) const = 0;
 
   /**
    * @deprecated Use function using higher level abstraction data class instead.

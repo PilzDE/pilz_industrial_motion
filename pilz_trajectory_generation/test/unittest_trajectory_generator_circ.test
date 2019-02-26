@@ -29,7 +29,7 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
   <!-- run test -->
   <test pkg="pilz_trajectory_generation" test-name="unittest_trajectory_generator_circ"
   type="unittest_trajectory_generator_circ" >
-    <param name="testdata_file_name" value="$(find pilz_trajectory_generation)/test/test_robots/prbt/test_data/testdata.xml" />
+    <param name="testdata_file_name" value="$(find pilz_trajectory_generation)/test/test_robots/prbt/test_data/testdata_deprecated.xml" />
     <param name="planning_group" value="manipulator" />
     <param name="target_link" value="prbt_tcp" />
     <param name="cartesian_position_tolerance" value="1.0e-3" />
