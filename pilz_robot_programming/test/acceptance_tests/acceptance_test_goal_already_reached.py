@@ -133,9 +133,12 @@ def _test_repeat_circ_pose(robot):
                     orientation=from_euler(0, -3.14, -0.25)), vel_scale=PTP_VEL_PICK,
                     interim=Point(-0.355, -0.105, 0.19)))
 
-    robot.move(Circ(goal=Pose(position=Point(-0.460, 0, 0.19),
-                    orientation=from_euler(0, -3.14, -0.25)), vel_scale=PTP_VEL_PICK,
-                    interim=Point(-0.355, -0.105, 0.19)))
+    try:
+      robot.move(Circ(goal=Pose(position=Point(-0.460, 0, 0.19),
+                      orientation=from_euler(0, -3.14, -0.25)), vel_scale=PTP_VEL_PICK,
+                      interim=Point(-0.355, -0.105, 0.19)))
+    except RobotMoveFailed:
+      pass
 
     _askSuccess(_test_repeat_circ_pose.__name__, 'Failed to create path object for circle. '
                                                  'Circle : Plane for motion is not properly defined.')
