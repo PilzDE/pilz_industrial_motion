@@ -15,7 +15,6 @@
  */
 
 #include <stdexcept>
-#include <algorithm>
 
 #include "pilz_industrial_motion_testutils/jointconfiguration.h"
 
