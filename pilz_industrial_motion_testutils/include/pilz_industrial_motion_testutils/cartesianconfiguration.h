@@ -75,8 +75,6 @@ public:
   void setAngleTolerance(const double tol);
   const boost::optional<double> getAngleTolerance() const;
 
-  void clearOrientation();
-
 private:
   static geometry_msgs::Pose toPose(const std::vector<double>& pose);
   static geometry_msgs::PoseStamped toStampedPose(const geometry_msgs::Pose& pose);
@@ -166,14 +164,6 @@ inline void CartesianConfiguration::setAngleTolerance(const double tol)
 inline const boost::optional<double> CartesianConfiguration::getAngleTolerance() const
 {
   return tolerance_angle_;
-}
-
-inline void CartesianConfiguration::clearOrientation()
-{
-  pose_.orientation.x = 0.;
-  pose_.orientation.y = 0.;
-  pose_.orientation.z = 0.;
-  pose_.orientation.w = 0.;
 }
 
 }
