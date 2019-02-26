@@ -239,19 +239,21 @@ add_rostest_gmock(integrationtest_sequence_action_capability_with_gripper
 target_link_libraries(integrationtest_sequence_action_capability_with_gripper
    ${catkin_LIBRARIES} ${PROJECT_NAME}_test)
 
-add_rostest_gmock(integrationtest_sequence_action_capability_abb_irb2400
-  test/integrationtest_sequence_action_capability_abb_irb2400.test
-  test/integrationtest_sequence_action_capability.cpp
-)
-target_link_libraries(integrationtest_sequence_action_capability_abb_irb2400
-  ${catkin_LIBRARIES} ${PROJECT_NAME}_test)
+# Tests with other robots only for kinetic (for now)
 
-add_rostest_gmock(integrationtest_sequence_action_capability_frankaemika_panda
-  test/integrationtest_sequence_action_capability_frankaemika_panda.test
-  test/integrationtest_sequence_action_capability.cpp
-)
-target_link_libraries(integrationtest_sequence_action_capability_frankaemika_panda
-  ${catkin_LIBRARIES} ${PROJECT_NAME}_test)
+#add_rostest_gmock(integrationtest_sequence_action_capability_abb_irb2400
+#  test/integrationtest_sequence_action_capability_abb_irb2400.test
+#  test/integrationtest_sequence_action_capability.cpp
+#)
+#target_link_libraries(integrationtest_sequence_action_capability_abb_irb2400
+#  ${catkin_LIBRARIES} ${PROJECT_NAME}_test)
+
+#add_rostest_gmock(integrationtest_sequence_action_capability_frankaemika_panda
+#  test/integrationtest_sequence_action_capability_frankaemika_panda.test
+#  test/integrationtest_sequence_action_capability.cpp
+#)
+#target_link_libraries(integrationtest_sequence_action_capability_frankaemika_panda
+#  ${catkin_LIBRARIES} ${PROJECT_NAME}_test)
 
 add_rostest_gtest(integrationtest_sequence_service_capability
   test/integrationtest_sequence_service_capability.test
@@ -260,11 +262,13 @@ add_rostest_gtest(integrationtest_sequence_service_capability
 target_link_libraries(integrationtest_sequence_service_capability
   ${catkin_LIBRARIES} ${PROJECT_NAME}_test)
 
-add_rostest(test/integrationtest_sequence_service_capability_frankaemika_panda.test
-  DEPENDENCIES integrationtest_sequence_service_capability )
+# Tests with other robots only for kinetic (for now)
 
-add_rostest(test/integrationtest_sequence_service_capability_abb_irb2400.test
-  DEPENDENCIES integrationtest_sequence_service_capability )
+#add_rostest(test/integrationtest_sequence_service_capability_frankaemika_panda.test
+#  DEPENDENCIES integrationtest_sequence_service_capability )
+
+#add_rostest(test/integrationtest_sequence_service_capability_abb_irb2400.test
+#  DEPENDENCIES integrationtest_sequence_service_capability )
 
 add_rostest_gtest(integrationtest_sequence_service_capability_with_gripper
   test/integrationtest_sequence_service_capability_with_gripper.test
@@ -284,11 +288,13 @@ target_link_libraries(integrationtest_command_planning
 add_rostest(test/integrationtest_command_planning_with_gripper.test
   DEPENDENCIES integrationtest_command_planning )
 
-add_rostest(test/integrationtest_command_planning_abb_irb2400.test
-  DEPENDENCIES integrationtest_command_planning )
+# Tests with other robots only for kinetic (for now)
 
-add_rostest(test/integrationtest_command_planning_frankaemika_panda.test
-  DEPENDENCIES integrationtest_command_planning )
+#add_rostest(test/integrationtest_command_planning_abb_irb2400.test
+#  DEPENDENCIES integrationtest_command_planning )
+
+#add_rostest(test/integrationtest_command_planning_frankaemika_panda.test
+#  DEPENDENCIES integrationtest_command_planning )
 
 # Blending Integration tests
 add_rostest_gtest(integrationtest_command_list_manager
