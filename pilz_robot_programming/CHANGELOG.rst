@@ -2,8 +2,8 @@
 Changelog for package pilz_robot_programming
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
-Forthcoming
------------
+0.4.1 (2019-02-27)
+------------------
 * Minor fixes
 * Contributors: Pilz GmbH and Co. KG
 

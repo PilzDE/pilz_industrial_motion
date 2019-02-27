@@ -2,8 +2,8 @@
 Changelog for package pilz_trajectory_generation
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
-Forthcoming
------------
+0.4.1 (2019-02-27)
+------------------
 * refactor the testdataloader
 * adapt to new RobotState API: remove #attempts
 * Contributors: Pilz GmbH and Co. KG
