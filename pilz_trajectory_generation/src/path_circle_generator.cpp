@@ -105,10 +105,12 @@ std::unique_ptr<KDL::Path> PathCircleGenerator::circleFromInterim(
                                                   eqradius,
                                                   true /* take ownership of RotationalInterpolation */));
   }
-  catch(KDL::Error_MotionPlanning &)
+  catch(KDL::Error_MotionPlanning &) // LCOV_EXCL_START // The cases where KDL would throw are already handled above,
+                                                        // we keep these lines to be safe
   {
     delete rot_interpo; // in case we could not construct the Path object, avoid a memory leak
     throw; // and pass the exception on to the caller
+    // LCOV_EXCL_STOP
   }
 }
 
