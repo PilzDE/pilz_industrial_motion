@@ -61,6 +61,7 @@ bool pilz::computePoseIK(const moveit::core::RobotModelConstPtr &robot_model,
   if(rstate.setFromIK(robot_model->getJointModelGroup(group_name),
                       pose,
                       link_name,
+                      0,
                       timeout,
                       ik_constraint_function))
   {
