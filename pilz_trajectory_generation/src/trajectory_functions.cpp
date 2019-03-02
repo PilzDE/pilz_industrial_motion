@@ -27,6 +27,7 @@ bool pilz::computePoseIK(const moveit::core::RobotModelConstPtr &robot_model,
                          const std::map<std::string, double> &seed,
                          std::map<std::string, double> &solution,
                          bool check_self_collision,
+                         int max_attempt,
                          const double timeout)
 {
   if(!robot_model->hasJointModelGroup(group_name))
@@ -61,6 +62,7 @@ bool pilz::computePoseIK(const moveit::core::RobotModelConstPtr &robot_model,
   if(rstate.setFromIK(robot_model->getJointModelGroup(group_name),
                       pose,
                       link_name,
+                      max_attempt,
                       timeout,
                       ik_constraint_function))
   {
@@ -89,6 +91,7 @@ bool pilz::computePoseIK(const moveit::core::RobotModelConstPtr &robot_model,
                          const std::map<std::string, double> &seed,
                          std::map<std::string, double> &solution,
                          bool check_self_collision,
+                         int max_attempt,
                          const double timeout)
 {
   Eigen::Isometry3d pose_eigen;
@@ -101,6 +104,7 @@ bool pilz::computePoseIK(const moveit::core::RobotModelConstPtr &robot_model,
                        seed,
                        solution,
                        check_self_collision,
+                       max_attempt,
                        timeout);
 }
 
