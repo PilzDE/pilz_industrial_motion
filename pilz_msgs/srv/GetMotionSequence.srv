@@ -19,4 +19,4 @@ MotionSequenceRequest commands
 ---
 
 # contain the whole trajectory of all commands
-moveit_msgs/MotionPlanResponse plan_response
+moveit_msgs/MotionPlanResponse[] plan_response

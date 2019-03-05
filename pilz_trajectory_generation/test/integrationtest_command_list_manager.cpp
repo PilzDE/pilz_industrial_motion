@@ -39,6 +39,7 @@ const std::string PARAM_PLANNING_GROUP_NAME("planning_group");
 const std::string PARAM_TARGET_LINK_NAME("target_link");
 
 using testutils::hasStrictlyIncreasingTime;
+using namespace pilz_trajectory_generation;
 
 class IntegrationTestCommandListManager : public testing::TestWithParam<std::string>
 {
@@ -126,22 +127,52 @@ void IntegrationTestCommandListManager::SetUp()
 
 // Instantiate the test cases for robot model with and without gripper
 INSTANTIATE_TEST_CASE_P(InstantiationName, IntegrationTestCommandListManager, ::testing::Values(
-                          PARAM_MODEL_NO_GRIPPER_NAME,
-                          PARAM_MODEL_WITH_GRIPPER_NAME
+                          PARAM_MODEL_NO_GRIPPER_NAME
+                          , PARAM_MODEL_WITH_GRIPPER_NAME
                           ));
 
 /**
- * @brief Integration test for the concatenation of motion commands
- * Sends a sequence request.
- *,
-                                                                                     std::make_pair<>(req_lin3_, 0)});
- *  - Test Sequence:
+ * @brief Checks that each derived MoveItErrorCodeException contains the correct
+ * error code.
+ *
+ */
+TEST_P(IntegrationTestCommandListManager, TestExceptionErrorCodeMapping)
+{
+  NegativeBlendRadiusException nbr_ex("");
+  EXPECT_EQ(nbr_ex.getErrorCode(), moveit_msgs::MoveItErrorCodes::INVALID_MOTION_PLAN);
+
+  LastBlendRadiusNotZeroException lbrnz_ex("");
+  EXPECT_EQ(lbrnz_ex.getErrorCode(), moveit_msgs::MoveItErrorCodes::INVALID_MOTION_PLAN);
+
+  StartStateSetException sss_ex("");
+  EXPECT_EQ(sss_ex.getErrorCode(), moveit_msgs::MoveItErrorCodes::INVALID_ROBOT_STATE);
+
+  OverlappingBlendRadiiException obr_ex("");
+  EXPECT_EQ(obr_ex.getErrorCode(), moveit_msgs::MoveItErrorCodes::FAILURE);
+
+  PlanningPipelineException pp_ex("");
+  EXPECT_EQ(pp_ex.getErrorCode(), moveit_msgs::MoveItErrorCodes::FAILURE);
+
+  MultipleEndeffectorException me_ex("");
+  EXPECT_EQ(me_ex.getErrorCode(), moveit_msgs::MoveItErrorCodes::FAILURE);
+
+  EndeffectorWithoutLinksException ewl_ex("");
+  EXPECT_EQ(ewl_ex.getErrorCode(), moveit_msgs::MoveItErrorCodes::FAILURE);
+
+  NoSolverException ns_ex("");
+  EXPECT_EQ(ns_ex.getErrorCode(), moveit_msgs::MoveItErrorCodes::FAILURE);
+}
+
+/**
+ * @brief Tests the concatenation of three motion commands.
+ *
+ * Test Sequence:
  *    1. Generate request with three trajectories and zero blend radius.
  *    2. Generate request with first trajectory and zero blend radius.
  *    3. Generate request with second trajectory and zero blend radius.
  *    4. Generate request with third trajectory and zero blend radius.
  *
- *  - Expected Results:
+ * Expected Results:
  *    1. Generation of concatenated trajectory is successful.
  *       All time steps of resulting trajectory are strictly positive
  *    2. Generation of concatenated trajectory is successful.
@@ -158,71 +189,64 @@ TEST_P(IntegrationTestCommandListManager, concatThreeSegments)
   pilz_msgs::MotionSequenceRequest req = seq_request_builder.build({std::make_pair<>(req_lin1_, 0),
                                                                                      std::make_pair<>(req_lin2_, 0),
                                                                                      std::make_pair<>(req_lin3_, 0)});
-  planning_interface::MotionPlanResponse res1_2_3;
-  ASSERT_TRUE(manager_->solve(scene_, req, res1_2_3));
-  EXPECT_EQ(moveit_msgs::MoveItErrorCodes::SUCCESS, res1_2_3.error_code_.val);
-  EXPECT_GT(res1_2_3.trajectory_->getWayPointCount(), 0u);
-
-  // Check for strictly positively increasing time steps
-  EXPECT_TRUE(hasStrictlyIncreasingTime(res1_2_3.trajectory_));
+  RobotTrajVec_t res123_vec {manager_->solve(scene_, req)};
+  EXPECT_EQ(res123_vec.size(), 1);
+  EXPECT_GT(res123_vec.front()->getWayPointCount(), 0u);
+  EXPECT_TRUE(hasStrictlyIncreasingTime(res123_vec.front())) << "Time steps not strictly positively increasing";
 
   ROS_INFO("step 2: only first segment");
   req = seq_request_builder.build({std::make_pair<>(req_lin1_, 0)});
-  planning_interface::MotionPlanResponse res1;
-  ASSERT_TRUE(manager_->solve(scene_, req, res1));
-  EXPECT_EQ(moveit_msgs::MoveItErrorCodes::SUCCESS, res1.error_code_.val);
-  EXPECT_GT(res1.trajectory_->getWayPointCount(), 0u);
-  EXPECT_EQ(res1.trajectory_->getFirstWayPoint().getVariableCount(),
-            req.items[0].req.start_state.joint_state.name.size());
 
+  RobotTrajVec_t res1_vec {manager_->solve(scene_, req)};
+  EXPECT_EQ(res1_vec.size(), 1);
+  EXPECT_GT(res1_vec.front()->getWayPointCount(), 0u);
+  EXPECT_EQ(res1_vec.front()->getFirstWayPoint().getVariableCount(),
+            req.items[0].req.start_state.joint_state.name.size());
 
   ROS_INFO("step 3: only second segment");
   // Create duplicate of req_lin2_ with start state
   MotionPlanRequestBuilder builder_2(req_lin2_);
-  builder_2.setJointStartState(res1.trajectory_->getLastWayPoint());
+  builder_2.setJointStartState(res1_vec.front()->getLastWayPoint());
 
   moveit_msgs::MotionPlanRequest req2 = builder_2.createLin();
   req = seq_request_builder.build({std::make_pair<>(req2, 0)});
-  planning_interface::MotionPlanResponse res2;
-  ASSERT_TRUE(manager_->solve(scene_, req, res2));
-  EXPECT_EQ(moveit_msgs::MoveItErrorCodes::SUCCESS, res2.error_code_.val);
-  EXPECT_GT(res2.trajectory_->getWayPointCount(), 0u);
-  EXPECT_EQ(res2.trajectory_->getFirstWayPoint().getVariableCount(),
+  RobotTrajVec_t res2_vec {manager_->solve(scene_, req)};
+  EXPECT_EQ(res2_vec.size(), 1);
+  EXPECT_GT(res2_vec.front()->getWayPointCount(), 0u);
+  EXPECT_EQ(res2_vec.front()->getFirstWayPoint().getVariableCount(),
             req.items[0].req.start_state.joint_state.name.size());
 
 
   ROS_INFO("step 4: only third segment");
   // Create duplicate of req_lin3_ with start state
   MotionPlanRequestBuilder builder_3(req_lin3_);
-  builder_3.setJointStartState(res2.trajectory_->getLastWayPoint());
+  builder_3.setJointStartState(res2_vec.front()->getLastWayPoint());
 
   moveit_msgs::MotionPlanRequest req3 = builder_3.createLin();
   req = seq_request_builder.build({std::make_pair<>(req3, 0)});
-  planning_interface::MotionPlanResponse res3;
-  ASSERT_TRUE(manager_->solve(scene_, req, res3));
-  EXPECT_EQ(moveit_msgs::MoveItErrorCodes::SUCCESS, res3.error_code_.val);
-  EXPECT_GT(res3.trajectory_->getWayPointCount(), 0u);
-  EXPECT_EQ(res3.trajectory_->getFirstWayPoint().getVariableCount(),
+  RobotTrajVec_t res3_vec {manager_->solve(scene_, req)};
+  EXPECT_EQ(res3_vec.size(), 1);
+  EXPECT_GT(res3_vec.front()->getWayPointCount(), 0u);
+  EXPECT_EQ(res3_vec.front()->getFirstWayPoint().getVariableCount(),
             req.items[0].req.start_state.joint_state.name.size());
 
 
   // durations for the different segments
-  auto t1_2_3 = res1_2_3.trajectory_->getWayPointDurationFromStart(res1_2_3.trajectory_->getWayPointCount()-1);
-  auto t1     = res1.trajectory_->getWayPointDurationFromStart(res1_2_3.trajectory_->getWayPointCount()-1);
-  auto t2     = res2.trajectory_->getWayPointDurationFromStart(res1_2_3.trajectory_->getWayPointCount()-1);
-  auto t3     = res3.trajectory_->getWayPointDurationFromStart(res1_2_3.trajectory_->getWayPointCount()-1);
+  auto t1_2_3 = res123_vec.front()->getWayPointDurationFromStart(res123_vec.front()->getWayPointCount()-1);
+  auto t1     = res1_vec.front()->getWayPointDurationFromStart(res123_vec.front()->getWayPointCount()-1);
+  auto t2     = res2_vec.front()->getWayPointDurationFromStart(res123_vec.front()->getWayPointCount()-1);
+  auto t3     = res3_vec.front()->getWayPointDurationFromStart(res123_vec.front()->getWayPointCount()-1);
   ROS_DEBUG_STREAM("total time: "<< t1_2_3 << " t1:" << t1 << " t2:" << t2 << " t3:" << t3);
   EXPECT_LT(fabs((t1_2_3-t1-t2-t3)), 0.4);
 }
 
 /**
- * @brief Integration test for the concatenation of two ptp commands
- * Sends a pilz_msgs::MotionSequenceRequest request.
+ * @brief Tests the concatenation of two ptp commands
  *
- *  - Test Sequence:
+ * Test Sequence:
  *    1. Generate request with two PTP trajectories and zero blend radius.
  *
- *  - Expected Results:
+ * Expected Results:
  *    1. Generation of concatenated trajectory is successful.
  *       All time steps of resulting trajectory are strictly positive.
  */
@@ -232,21 +256,19 @@ TEST_P(IntegrationTestCommandListManager, concatTwoPtpSegments)
   pilz_msgs::MotionSequenceRequest req = seq_request_builder.build({ {req_ptp1_, 0},
                                                                      {req_ptp2_, 0} });
 
-  planning_interface::MotionPlanResponse res;
-  ASSERT_TRUE(manager_->solve(scene_, req, res));
-  EXPECT_EQ(moveit_msgs::MoveItErrorCodes::SUCCESS, res.error_code_.val);
-  EXPECT_GT(res.trajectory_->getWayPointCount(), 0u);
-  EXPECT_TRUE(hasStrictlyIncreasingTime(res.trajectory_));
+  RobotTrajVec_t res_vec {manager_->solve(scene_, req)};
+  EXPECT_EQ(res_vec.size(), 1);
+  EXPECT_GT(res_vec.front()->getWayPointCount(), 0u);
+  EXPECT_TRUE(hasStrictlyIncreasingTime(res_vec.front()));
 }
 
 /**
- * @brief Integration test for the concatenation of ptp and a lin command
- * Sends a pilz_msgs::MotionSequenceRequest request.
+ * @brief Tests the concatenation of ptp and a lin command
  *
- *  - Test Sequence:
+ * Test Sequence:
  *    1. Generate request with PTP and LIN trajectory and zero blend radius.
  *
- *  - Expected Results:
+ * Expected Results:
  *    1. Generation of concatenated trajectory is successful.
  *       All time steps of resulting trajectory are strictly positive.
  */
@@ -256,21 +278,19 @@ TEST_P(IntegrationTestCommandListManager, concatPtpAndLinSegments)
   pilz_msgs::MotionSequenceRequest req = seq_request_builder.build({ {req_ptp1_, 0},
                                                                      {req_lin2_, 0} });
 
-  planning_interface::MotionPlanResponse res;
-  ASSERT_TRUE(manager_->solve(scene_, req, res));
-  EXPECT_EQ(moveit_msgs::MoveItErrorCodes::SUCCESS, res.error_code_.val);
-  EXPECT_GT(res.trajectory_->getWayPointCount(), 0u);
-  EXPECT_TRUE(hasStrictlyIncreasingTime(res.trajectory_));
+  RobotTrajVec_t res_vec {manager_->solve(scene_, req)};
+  EXPECT_EQ(res_vec.size(), 1);
+  EXPECT_GT(res_vec.front()->getWayPointCount(), 0u);
+  EXPECT_TRUE(hasStrictlyIncreasingTime(res_vec.front()));
 }
 
 /**
- * @brief Integration test for the concatenation of a lin and a ptp command
- * Sends a pilz_msgs::MotionSequenceRequest request.
+ * @brief Tests the concatenation of a lin and a ptp command
  *
- *  - Test Sequence:
+ * Test Sequence:
  *    1. Generate request with LIN and PTP trajectory and zero blend radius.
  *
- *  - Expected Results:
+ * Expected Results:
  *    1. Generation of concatenated trajectory is successful.
  *       All time steps of resulting trajectory are strictly positive.
  */
@@ -280,17 +300,14 @@ TEST_P(IntegrationTestCommandListManager, concatLinAndPtpSegments)
   pilz_msgs::MotionSequenceRequest req = seq_request_builder.build({ {req_lin1_, 0},
                                                                      {req_ptp2_, 0} });
 
-  planning_interface::MotionPlanResponse res;
-  ASSERT_TRUE(manager_->solve(scene_, req, res));
-  EXPECT_EQ(moveit_msgs::MoveItErrorCodes::SUCCESS, res.error_code_.val);
-  EXPECT_GT(res.trajectory_->getWayPointCount(), 0u);
-  EXPECT_TRUE(hasStrictlyIncreasingTime(res.trajectory_));
+  RobotTrajVec_t res_vec {manager_->solve(scene_, req)};
+  EXPECT_EQ(res_vec.size(), 1);
+  EXPECT_GT(res_vec.front()->getWayPointCount(), 0u);
+  EXPECT_TRUE(hasStrictlyIncreasingTime(res_vec.front()));
 }
 
 /**
- * @brief Integration test for the blending of motion commands
- * Sends a blending request. Checks if response is obtained and
- * outputs the trajectory for debugging purposes.
+ * @brief Tests the blending of motion commands
  *
  *  - Test Sequence:
  *    1. Generate request with two trajectories and request blending.
@@ -301,10 +318,10 @@ TEST_P(IntegrationTestCommandListManager, concatLinAndPtpSegments)
 TEST_P(IntegrationTestCommandListManager, blendTwoSegments)
 {
   planning_interface::MotionPlanResponse res;
-  ASSERT_TRUE(manager_->solve(scene_, blend_command_lin_lin_, res));
-  EXPECT_EQ(moveit_msgs::MoveItErrorCodes::SUCCESS, res.error_code_.val);
-  EXPECT_GT(res.trajectory_->getWayPointCount(), 0u);
-  EXPECT_EQ(res.trajectory_->getFirstWayPoint().getVariableCount(),
+  RobotTrajVec_t res_vec {manager_->solve(scene_, blend_command_lin_lin_)};
+  EXPECT_EQ(res_vec.size(), 1);
+  EXPECT_GT(res_vec.front()->getWayPointCount(), 0u);
+  EXPECT_EQ(res_vec.front()->getFirstWayPoint().getVariableCount(),
             blend_command_lin_lin_.items[0].req.start_state.joint_state.name.size());
 
 
@@ -314,9 +331,9 @@ TEST_P(IntegrationTestCommandListManager, blendTwoSegments)
   duration.sleep();
 
   moveit_msgs::DisplayTrajectory displayTrajectory;
-  moveit_msgs::MotionPlanResponse msg;
-  res.getMessage(msg); // convert response to message
-  displayTrajectory.trajectory.push_back(msg.trajectory);
+  moveit_msgs::RobotTrajectory rob_traj_msg;
+  res_vec.front()->getRobotTrajectoryMsg(rob_traj_msg);
+  displayTrajectory.trajectory.push_back(rob_traj_msg);
   pub.publish(displayTrajectory);
 }
 
@@ -325,173 +342,145 @@ TEST_P(IntegrationTestCommandListManager, blendTwoSegments)
 // ------------------
 
 /**
- * @brief
- * Sends an empty blending request. Checks if response is obtained.
+ * @brief Tests sending an empty blending request.
  *
- *  - Test Sequence:
+ * Test Sequence:
  *    1. Generate empty request and request blending.
  *
- *  - Expected Results:
- *    1. blending is successful, result trajectory is empty
+ * Expected Results:
+ *    1. blending is successful, result trajectory container is empty
  */
 TEST_P(IntegrationTestCommandListManager, emptyList)
 {
   pilz_msgs::MotionSequenceRequest empty_list;
-  planning_interface::MotionPlanResponse res;
-  ASSERT_TRUE(manager_->solve(scene_, empty_list, res));
-  EXPECT_EQ(moveit_msgs::MoveItErrorCodes::SUCCESS, res.error_code_.val);
-  EXPECT_EQ(0u, res.trajectory_->getWayPointCount());
+  RobotTrajVec_t res_vec {manager_->solve(scene_, empty_list)};
+  EXPECT_TRUE(res_vec.empty());
 }
 
 /**
- * @brief
- * Sends a blending request. Checks if response is obtained and
- * has the correct error code set.
+ * @brief Checks that exception is thrown if first goal is not reachable.
  *
- *  - Test Sequence:
+ * Test Sequence:
  *    1. Generate request with first goal out of workspace.
  *
- *  - Expected Results:
- *    1. blending fails, result trajectory is empty
+ * Expected Results:
+ *    1. Exception is thrown.
  */
 TEST_P(IntegrationTestCommandListManager, firstGoalNotReachable)
 {
   pilz_msgs::MotionSequenceRequest req = blend_command_lin_lin_;
   req.items[0].req.goal_constraints[0].position_constraints[0].constraint_region.primitive_poses[0].position.y = 27;
-  planning_interface::MotionPlanResponse res;
-  ASSERT_FALSE(manager_->solve(scene_, req, res));
-  EXPECT_EQ(moveit_msgs::MoveItErrorCodes::NO_IK_SOLUTION, res.error_code_.val);
-  EXPECT_EQ(0u, res.trajectory_->getWayPointCount());
+  EXPECT_THROW(manager_->solve(scene_, req), PlanningPipelineException);
 }
 
 /**
- * @brief
- * Sends a blending request. Checks if response is obtained and
- * has the correct error code set.
+ * @brief Checks that exception is thrown if second goal has a start state.
  *
- *  - Test Sequence:
+ * Test Sequence:
  *    1. Generate request, second goal has an invalid start state set.
  *
- *  - Expected Results:
- *    1. blending fails, result trajectory is empty
+ * Expected Results:
+ *    1. Exception is thrown.
  */
 TEST_P(IntegrationTestCommandListManager, startStateNotFirstGoal)
 {
   pilz_msgs::MotionSequenceRequest req = blend_command_lin_lin_;
   req.items[1].req.start_state.joint_state = testutils::generateJointState({-1., 2., -3., 4., -5., 0.});
-  planning_interface::MotionPlanResponse res;
-  ASSERT_FALSE(manager_->solve(scene_, req, res));
-  EXPECT_EQ(moveit_msgs::MoveItErrorCodes::INVALID_ROBOT_STATE, res.error_code_.val);
-  EXPECT_EQ(0u, res.trajectory_->getWayPointCount());
+  EXPECT_THROW(manager_->solve(scene_, req), StartStateSetException);
 }
 
 /**
- * @brief
- * Sends a blending request with negative blend_radius. Checks if response is obtained and
- * has the correct error code set.
+ * @brief Checks that exception is thrown in case of blending request with
+ * negative blend_radius.
  *
- *  - Test Sequence:
- *    1. Generate request, first goal has negative blend_radius
+ *  Test Sequence:
+ *    1. Generate request, first goal has negative blend_radius.
  *
- *  - Expected Results:
- *    1. blending fails, result trajectory is empty
+ *  Expected Results:
+ *    1. Exception is thrown.
  */
 TEST_P(IntegrationTestCommandListManager, blendingRadiusNegative)
 {
   pilz_msgs::MotionSequenceRequest req = blend_command_lin_lin_;
   req.items[0].blend_radius = -0.3;
-  planning_interface::MotionPlanResponse res;
-  ASSERT_FALSE(manager_->solve(scene_, req, res));
-  EXPECT_EQ(moveit_msgs::MoveItErrorCodes::INVALID_MOTION_PLAN, res.error_code_.val);
-  EXPECT_EQ(0u, res.trajectory_->getWayPointCount());
+  EXPECT_THROW(manager_->solve(scene_, req), NegativeBlendRadiusException);
 }
 
 /**
- * @brief
- * Sends a blending request with negative blend_radius. Checks if response is obtained and
- * has the correct error code set.
+ * @brief Checks that exception is thrown if last blend radius is not zero.
  *
- *  - Test Sequence:
- *    1. Generate request, second goal has non-zero blend_radius
  *
- *  - Expected Results:
- *    1. blending fails, result trajectory is empty
+ * Test Sequence:
+ *    1. Generate request, second goal has non-zero blend_radius.
+ *
+ * Expected Results:
+ *    1. Exception is thrown.
  */
 TEST_P(IntegrationTestCommandListManager, lastBlendingRadiusNonZero)
 {
   pilz_msgs::MotionSequenceRequest req = blend_command_lin_lin_;
   req.items[1].blend_radius = 0.03;
-  planning_interface::MotionPlanResponse res;
-  ASSERT_FALSE(manager_->solve(scene_, req, res));
-  EXPECT_EQ(moveit_msgs::MoveItErrorCodes::INVALID_MOTION_PLAN, res.error_code_.val);
-  EXPECT_EQ(0u, res.trajectory_->getWayPointCount());
+  EXPECT_THROW(manager_->solve(scene_, req), LastBlendRadiusNotZeroException);
 }
 
 /**
- * @brief
- * Sends a blending request with huge blending radius.
- * Checks if response is obtained and has the correct error code set.
+ * @brief Checks that exception is thrown if blend radius is greater than the
+ * segment.
  *
- *  - Test Sequence:
- *    1. Generate request with huge blending radius, so that trajectories are completely inside
+ * Test Sequence:
+ *    1. Generate request with huge blending radius, so that trajectories are
+ *       completely inside
  *
- *  - Expected Results:
- *    2. blending fails, result trajectory is empty
+ * Expected Results:
+ *    2. Exception is thrown.
  */
 TEST_P(IntegrationTestCommandListManager, blendRadiusGreaterThanSegment)
 {
   pilz_msgs::MotionSequenceRequest req = blend_command_lin_lin_;
   req.items[0].blend_radius = 42.;
-  planning_interface::MotionPlanResponse res;
-  ASSERT_FALSE(manager_->solve(scene_, req, res));
-  EXPECT_EQ(moveit_msgs::MoveItErrorCodes::FAILURE, res.error_code_.val);
-  EXPECT_EQ(0u, res.trajectory_->getWayPointCount());
+  EXPECT_THROW(manager_->solve(scene_, req), BlendingFailedException);
 }
 
 
 /**
- * @brief
- * Sends a blending request. Checks if response is obtained and
- * has the correct error code set.
+ * @brief Checks that exception is thrown if two consecutive blend radii
+ * overlap.
  *
- *  - Test Sequence:
+ * Test Sequence:
  *    1. Generate request with three trajectories
  *    2. Increase second blend radius, so that the radii overlap
  *
- *  - Expected Results:
+ * Expected Results:
  *    1. blending succeeds, result trajectory is not empty
- *    2. blending fails, result trajectory is empty
+ *    2. Exception is thrown.
  */
 TEST_P(IntegrationTestCommandListManager, blendingRadiusOverlapping)
 {
   pilz_msgs::MotionSequenceRequest req = blend_command_list_lin_lin_lin_;
 
-  planning_interface::MotionPlanResponse res_valid;
-  ASSERT_TRUE(manager_->solve(scene_, req, res_valid));
-  EXPECT_EQ(moveit_msgs::MoveItErrorCodes::SUCCESS, res_valid.error_code_.val);
-  EXPECT_GT(res_valid.trajectory_->getWayPointCount(), 0u);
+  RobotTrajVec_t res_valid_vec {manager_->solve(scene_, req)};
+  EXPECT_EQ(res_valid_vec.size(), 1);
+  EXPECT_GT(res_valid_vec.front()->getWayPointCount(), 0u);
 
   // calculate distance from first to second goal
-  planning_interface::MotionPlanResponse res_overlap;
   Eigen::Affine3d p1, p2;
   tf2::fromMsg(req.items[0].req.goal_constraints[0].position_constraints[0].constraint_region.primitive_poses[0], p1);
   tf2::fromMsg(req.items[1].req.goal_constraints[0].position_constraints[0].constraint_region.primitive_poses[0], p2);
   auto distance = (p2.translation()-p1.translation()).norm();
   req.items[1].blend_radius = distance - req.items[0].blend_radius + 0.01; // overlapping radii
-  ASSERT_FALSE(manager_->solve(scene_, req, res_overlap));
-  EXPECT_EQ(moveit_msgs::MoveItErrorCodes::INVALID_MOTION_PLAN, res_overlap.error_code_.val);
-  EXPECT_EQ(0u, res_overlap.trajectory_->getWayPointCount());
+
+  EXPECT_THROW(manager_->solve(scene_, req), OverlappingBlendRadiiException);
 }
 
 /**
  * @brief
  * Stress test: Planning time for a large number of blending requests
  *
- *  - Test Sequence:
+ * Test Sequence:
  *    1. Generate request with three trajectories and measure planning time
  *    2. Generate request with repeated path along the three points
  *
- *  - Expected Results:
+ * Expected Results:
  *    1. blending succeeds, result trajectory is not empty
  *    2. blending succeeds, planning time should be approx N times single planning time
  *       and time from start should be approx. N times single plan
@@ -501,12 +490,9 @@ TEST_P(IntegrationTestCommandListManager, largeRequest)
   const int n = 30;
   pilz_msgs::MotionSequenceRequest req = blend_command_list_lin_lin_lin_;
 
-  planning_interface::MotionPlanResponse res_single;
-  ros::Time begin1 = ros::Time::now();
-  ASSERT_TRUE(manager_->solve(scene_, req, res_single));
-  ros::Duration duration1 = ros::Time::now() - begin1;
-  EXPECT_EQ(moveit_msgs::MoveItErrorCodes::SUCCESS, res_single.error_code_.val);
-  EXPECT_GT(res_single.trajectory_->getWayPointCount(), 0u);
+  RobotTrajVec_t res_single_vec {manager_->solve(scene_, req)};
+  EXPECT_EQ(res_single_vec.size(), 1);
+  EXPECT_GT(res_single_vec.front()->getWayPointCount(), 0u);
 
   // construct request
   req.items.back().blend_radius = 0.01;
@@ -521,20 +507,14 @@ TEST_P(IntegrationTestCommandListManager, largeRequest)
   }
   req.items.back().blend_radius = 0.0;
 
-  planning_interface::MotionPlanResponse res_n;
-  ros::Time beginn = ros::Time::now();
-  ASSERT_TRUE(manager_->solve(scene_, req, res_n));
-  ros::Duration durationn = ros::Time::now() - beginn;
-  EXPECT_EQ(moveit_msgs::MoveItErrorCodes::SUCCESS, res_n.error_code_.val);
-  EXPECT_GT(res_n.trajectory_->getWayPointCount(), 0u);
+  RobotTrajVec_t res_n_vec {manager_->solve(scene_, req)};
+  EXPECT_EQ(res_n_vec.size(), 1);
+  EXPECT_GT(res_n_vec.front()->getWayPointCount(), 0u);
 
-  // 0.5*duration1 <= durationn / n <= duration1
-  // This assert is influenced by the pc computing power, not stable in build farm slave.
-  // EXPECT_LE(durationn.toSec(), duration1.toSec()*n);
-  double trajectory_time_1 = res_single.trajectory_->getWayPointDurationFromStart(
-        res_single.trajectory_->getWayPointCount()-1);
-  double trajectory_time_n = res_n.trajectory_->getWayPointDurationFromStart(
-        res_n.trajectory_->getWayPointCount()-1);
+  double trajectory_time_1 = res_single_vec.front()->getWayPointDurationFromStart(
+        res_single_vec.front()->getWayPointCount()-1);
+  double trajectory_time_n = res_n_vec.front()->getWayPointDurationFromStart(
+        res_n_vec.front()->getWayPointCount()-1);
   EXPECT_LE(trajectory_time_n, trajectory_time_1*n);
   EXPECT_GE(trajectory_time_n, trajectory_time_1 * n * 0.5);
 }
