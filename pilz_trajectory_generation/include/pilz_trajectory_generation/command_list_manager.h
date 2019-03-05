@@ -17,14 +17,29 @@
 #ifndef COMMAND_LIST_MANAGER_H
 #define COMMAND_LIST_MANAGER_H
 
+#include <boost/optional.hpp>
+
 #include <moveit/planning_interface/planning_interface.h>
 #include <moveit_msgs/MotionPlanResponse.h>
 
 #include "pilz_msgs/MotionSequenceRequest.h"
 #include "pilz_trajectory_generation/trajectory_blender.h"
-#include <pilz_trajectory_generation/trajectory_appender.h>
+#include "pilz_trajectory_generation/plan_components_builder.h"
+#include "pilz_trajectory_generation/trajectory_generation_exceptions.h"
 
-namespace pilz_trajectory_generation {
+namespace pilz_trajectory_generation
+{
+
+using RobotTrajVec_t = std::vector<robot_trajectory::RobotTrajectoryPtr>;
+
+CREATE_MOVEIT_ERROR_CODE_EXCEPTION(NegativeBlendRadiusException, moveit_msgs::MoveItErrorCodes::INVALID_MOTION_PLAN);
+CREATE_MOVEIT_ERROR_CODE_EXCEPTION(LastBlendRadiusNotZeroException, moveit_msgs::MoveItErrorCodes::INVALID_MOTION_PLAN);
+CREATE_MOVEIT_ERROR_CODE_EXCEPTION(StartStateSetException, moveit_msgs::MoveItErrorCodes::INVALID_ROBOT_STATE);
+CREATE_MOVEIT_ERROR_CODE_EXCEPTION(OverlappingBlendRadiiException, moveit_msgs::MoveItErrorCodes::FAILURE);
+CREATE_MOVEIT_ERROR_CODE_EXCEPTION(PlanningPipelineException, moveit_msgs::MoveItErrorCodes::FAILURE);
+CREATE_MOVEIT_ERROR_CODE_EXCEPTION(MultipleEndeffectorException, moveit_msgs::MoveItErrorCodes::FAILURE);
+CREATE_MOVEIT_ERROR_CODE_EXCEPTION(EndeffectorWithoutLinksException, moveit_msgs::MoveItErrorCodes::FAILURE);
+CREATE_MOVEIT_ERROR_CODE_EXCEPTION(NoSolverException, moveit_msgs::MoveItErrorCodes::FAILURE);
 
 /**
  * @brief The CommandListManager class
@@ -32,93 +47,99 @@ namespace pilz_trajectory_generation {
  * The trajectory generated from the motion commands are blended with each other within a blend radius given
  * within the MotionSequenceRequest.
  */
-class CommandListManager {
-
+class CommandListManager
+{
 public:
-
   /**
    * @brief CommandListManager
    * @param model The robot model
    */
   CommandListManager(const ros::NodeHandle& nh, const robot_model::RobotModelConstPtr& model);
 
+  // TODO: Update documentation
   /**
-   * @brief Returns a full trajectory consistenting of planned trajectory blended with each other in the given blend_radius
-   * @param planning_scene The current planning scene
+   * @brief Returns a full trajectory consistenting of planned trajectory
+   * blended with each other in the given blend_radius.
+   *
+   * @param planning_scene The current planning scene.
    * @param req_list List of motion requests. Contains PTP, LIN and CIRC commands.
    *        A request is valid if:
    *        - All request are about the same group
    *        - All blending radii are non negative
    *        - The blending radius of the last request is 0
    *        - Only the first request has a start state
-   * @param[out] res The resulting trajectory
-   * @return True if the generation was successful, false otherwise
+
+   * @return The resulting trajectories.
    */
-  bool solve(const planning_scene::PlanningSceneConstPtr& planning_scene,
-             const pilz_msgs::MotionSequenceRequest& req_list,
-             planning_interface::MotionPlanResponse &res);
+  RobotTrajVec_t solve(const planning_scene::PlanningSceneConstPtr& planning_scene,
+                       const pilz_msgs::MotionSequenceRequest& req_list);
+
+private:
+  using MotionResponseCont = std::vector<planning_interface::MotionPlanResponse>;
+  using RobotState_OptRef = boost::optional<const robot_state::RobotState& >;
+  using RadiiCont = std::vector<double>;
 
 private:
   /**
-   * @brief Validate if the request list fullfills the conditions noted
-   *        under pilz_trajectory_generation::CommandListManager::solve
-   * @param req_list The request
-   * @param res The response used to set the error code on validation error
-   * @return True if all conditions hold, false otherwise
+   * @brief Validates that two consecutive blending radii do not overlap.
+   *
+   * @param motion_plan_responses Container of responses from the trajectory generator.
+   * @param radii Container with the blending radii
    */
-  bool validateRequestList(const pilz_msgs::MotionSequenceRequest &req_list, planning_interface::MotionPlanResponse& res);
+  void validateBlendingRadiiDoNotOverlap(const MotionResponseCont& resp_cont,
+                                         const RadiiCont &radii);
 
   /**
-   * @brief Validates that two consecutive blending radii do not overlap
-   * @param motion_plan_responses List of responses from the trajectory generator. Contains the trajectories.
-   * @param radii List with the blending radii
-   * @param group_name The group to consider
-   * @return True if there is no overlap, false otherwise
-   */
-  bool validateBlendingRadiiDoNotOverlap(
-      const std::vector<planning_interface::MotionPlanResponse>& motion_plan_responses,
-      const std::vector<double>& radii,
-      const std::string& group_name);
-
-  /**
-   * @brief solveRequests
+   * @brief Solve each sequence item individually.
+   *
    * @param planning_scene The planning_scene
    * @param req_list The motion plan request list
-   * @param res The response used to set the error code on validation error
-   * @param motion_plan_responses Essentially constains the generated trajectories
-   * @param radii List of blending radii
-   * @return True if trajectories for all request could be generated
+   *
+   * @return Constains the generated trajectories.
    */
-  bool solveRequests(const planning_scene::PlanningSceneConstPtr& planning_scene,
-                     const pilz_msgs::MotionSequenceRequest &req_list,
-                     planning_interface::MotionPlanResponse &res,
-                     std::vector<planning_interface::MotionPlanResponse>& motion_plan_responses,
-                     std::vector<double>& radii);
-
-  /**
-   * @brief Merges all given trajectories together into one trajectory.
-   *
-   * Function principle:
-   * Two given consecutive trajectories are blended together if blend radii != 0.
-   * Two given consecutive trajectories are simply put behind one another (if blend radii == 0).
-   *
-   * @param motion_plan_responses Contains the generated trajectories
-   * @param radii List of blending radii
-   * @param result_trajectory The final trajectory created from the given trajectories
-   * @param res The response used to set the error code on validation error
-   *
-   * @return True if trajectory generation succeeded, false otherwise. On false the res will contain the error code.
-   */
-  bool generateTrajectory(const std::vector<planning_interface::MotionPlanResponse> &motion_plan_responses,
-                          const std::vector<double> &radii,
-                          robot_trajectory::RobotTrajectoryPtr& result_trajectory,
-                          planning_interface::MotionPlanResponse &res);
+  MotionResponseCont solveSequenceItems(const planning_scene::PlanningSceneConstPtr& planning_scene,
+                                        const pilz_msgs::MotionSequenceRequest &req_list);
 
   /**
    * @brief The the name of the to frame (link) of the given group
    * @return name as string
    */
-  const std::string& getTipFrame(const std::string& group_name);
+  const std::string& getTipFrame(const std::string& group_name) const;
+
+  /**
+   * @return TRUE if the blending radii of specified trajectories overlap,
+   * otherwise FALSE. The functions returns FALSE if both trajectories are from
+   * different groups.
+   */
+  bool checkRadiiForOverlap(const robot_trajectory::RobotTrajectory& traj_A,
+                            const double radii_A,
+                            const robot_trajectory::RobotTrajectory& traj_B,
+                            const double radii_B) const;
+
+private:
+  /**
+   * @brief Returns the last RobotState of the specified group which can
+   * be found in the specified vector.
+   */
+  static RobotState_OptRef getPreviousEndState(const MotionResponseCont &motion_plan_responses,
+                                               const std::string &group_name);
+
+  /**
+   * @brief Set start state to end state of previous calculated trajectory
+   * from group.
+   */
+  static void setStartState(const MotionResponseCont &motion_plan_responses,
+                            const std::string &group_name,
+                            moveit_msgs::RobotState& start_state);
+
+
+  static RadiiCont getRadii(const pilz_msgs::MotionSequenceRequest &req_list);
+
+  /**
+   * @brief Validate if the request list fullfills the conditions noted
+   *        under pilz_trajectory_generation::CommandListManager::solve
+   */
+  static void validateRequestList(const pilz_msgs::MotionSequenceRequest &req_list);
 
 private:
   /// Node handle
@@ -127,11 +148,7 @@ private:
   /// Robot model
   moveit::core::RobotModelConstPtr model_;
 
-  /// TrajectoryAppender
-  TrajectoryAppender appender_;
-
-  /// TrajectoryBlender
-  std::unique_ptr<pilz::TrajectoryBlender> blender_;
+  PlanComponentsBuilder plan_comp_builder_;
 };
 
 }

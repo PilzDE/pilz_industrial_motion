@@ -40,6 +40,7 @@
 
 #include "pilz_trajectory_generation/capability_names.h"
 #include "pilz_trajectory_generation/command_list_manager.h"
+#include "pilz_trajectory_generation/trajectory_generation_exceptions.h"
 
 namespace pilz_trajectory_generation
 {
@@ -54,40 +55,49 @@ MoveGroupSequenceService::~MoveGroupSequenceService()
 
 void MoveGroupSequenceService::initialize()
 {
-  sequence_manager_.reset(new pilz_trajectory_generation::CommandListManager(ros::NodeHandle("~"),
-                                                                          context_->planning_scene_monitor_->getRobotModel()));
+  command_list_manager_.reset(new pilz_trajectory_generation::CommandListManager(ros::NodeHandle("~"),
+                                                                             context_->planning_scene_monitor_->getRobotModel()));
 
   sequence_service_ = root_node_handle_.advertiseService(SEQUENCE_SERVICE_NAME,
                                                          &MoveGroupSequenceService::plan,
                                                          this);
 }
 
-
-
-
 bool MoveGroupSequenceService::plan(pilz_msgs::GetMotionSequence::Request& req,
-                                 pilz_msgs::GetMotionSequence::Response& res)
+                                    pilz_msgs::GetMotionSequence::Response& res)
 {
   // TODO: Do we lock on the correct scene? Does the lock belong to the scene used for planning?
   planning_scene_monitor::LockedPlanningSceneRO ps(context_->planning_scene_monitor_);
 
   // If 'FALSE' then no response will be sent to the caller.
-  bool sentResponseToCaller  {true};
-  try
+  RobotTrajVec_t traj_vec;
+  try { traj_vec = command_list_manager_->solve(ps, req.commands); }
+  catch(const MoveItErrorCodeException& ex)
   {
-    planning_interface::MotionPlanResponse mp_res;
-    sequence_manager_->solve(ps, req.commands, mp_res);
-    mp_res.getMessage(res.plan_response);
+    ROS_ERROR_STREAM("Planner threw an exception (error code: "
+                     << ex.getErrorCode() << "): " << ex.what());
+    return false;
   }
   // LCOV_EXCL_START // Keep moveit up even if lower parts throw
-  catch (...)
+  catch (const std::exception& ex)
   {
-    ROS_ERROR("Planner threw an exception.");
-    sentResponseToCaller = false;
+    ROS_ERROR_STREAM("Planner threw an exception: " << ex.what());
+    return false;
   }
   // LCOV_EXCL_STOP
 
-  return sentResponseToCaller;
+  res.plan_response.resize(traj_vec.size());
+  for (RobotTrajVec_t::size_type i = 0; i < traj_vec.size(); ++i)
+  {
+    res.plan_response.at(i).group_name = traj_vec.at(i)->getGroupName();
+    res.plan_response.at(i).error_code.val = moveit_msgs::MoveItErrorCodes::SUCCESS;
+    // TODO HSL: Calculate correct planning time
+    //res.plan_response.at(i).planning_time = ???
+    move_group::MoveGroupCapability::convertToMsg(traj_vec.at(i),
+                                                  res.plan_response.at(i).trajectory_start,
+                                                  res.plan_response.at(i).trajectory);
+  }
+  return true;
 }
 
 }
