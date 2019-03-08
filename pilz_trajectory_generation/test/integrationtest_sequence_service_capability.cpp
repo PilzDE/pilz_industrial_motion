@@ -335,7 +335,7 @@ TEST_F(IntegrationTestSequenceService, TestLargeRequest)
   ASSERT_TRUE(client_.call(srv));
 
   const moveit_msgs::MotionPlanResponse& response {srv.response.plan_response};
-  ASSERT_EQ(moveit_msgs::MoveItErrorCodes::SUCCESS, response.error_code.val) << "Incorrect error code." << req;
+  EXPECT_EQ(moveit_msgs::MoveItErrorCodes::SUCCESS, response.error_code.val) << "Incorrect error code.";
   EXPECT_GT(response.trajectory.joint_trajectory.points.size(), 0u) << "Trajectory should contain points.";
 }
 
