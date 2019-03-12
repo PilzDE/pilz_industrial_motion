@@ -1201,3 +1201,91 @@ void testutils::checkRobotModel(const moveit::core::RobotModelConstPtr &robot_mo
   ASSERT_TRUE(robot_state::RobotState(robot_model).knowsFrameTransform(link_name)) << "Transform of "
                                                                                    << link_name << " is unknown";
 }
+
+
+::testing::AssertionResult testutils::hasTrapezoidVelocity(std::vector<double> accelerations, const double similiarity_tolerance) {
+
+  // Check that acceleration is monotonously decreasing
+  if(!std::is_sorted(accelerations.begin(), accelerations.end(), [](double a, double b){
+    return !(std::abs(a - b) < 1e-6 || a < b); // true -> a is ordered before b -> list is not sorted
+  }))
+  {
+    return ::testing::AssertionFailure() << "Cannot be a trapezoid since acceleration is not monotonously decreasing!";
+  }
+
+  // Check accelerations
+  double first_acc = accelerations.front();
+  auto it_last_acc = std::find_if(accelerations.begin(), accelerations.end(),
+                                            [first_acc, similiarity_tolerance](double el){
+                                              return (std::abs(el - first_acc) > similiarity_tolerance);
+                                            })-1;
+
+  auto it_last_intermediate = std::find_if(it_last_acc+1, accelerations.end(),
+                                           [similiarity_tolerance](double el){
+                                            return (el < similiarity_tolerance);
+                                          })-1;
+
+  // Check that there are 1 or 2 intermediate points
+  auto n_intermediate_1 = std::distance(it_last_acc, it_last_intermediate);
+
+  if(n_intermediate_1 != 1 && n_intermediate_1 != 2){
+
+    return ::testing::AssertionFailure() << "Expected 1 or 2 intermediate points between acceleration and constant velocity phase but found: " << n_intermediate_1;
+  }
+
+  // Const phase (vel == 0)
+  auto it_first_const = it_last_intermediate+1;
+  auto it_last_const = std::find_if(it_first_const, accelerations.end(),
+                                          [similiarity_tolerance](double el){
+                                            return (std::abs(el) > similiarity_tolerance);
+                                          })-1;
+  // This test makes sense only if the generated traj is such that:
+  if(std::distance(it_first_const, it_last_const) < 3)
+  {
+    return ::testing::AssertionFailure() << "Exptected the have at least 3 points during the phase of constant velocity.";
+  }
+
+  // Deceleration
+  double deceleration = accelerations.back();
+  auto it_first_dec = std::find_if(it_last_const+1, accelerations.end(),
+                                        [deceleration, similiarity_tolerance](double el){
+                                          return (std::abs(el - deceleration) > similiarity_tolerance);
+                                        })+1;
+
+  // Points between const and deceleration (again 1 or 2)
+  auto n_intermediate_2 = std::distance(it_last_const, it_first_dec);
+  if(n_intermediate_2 != 1 && n_intermediate_2 != 2){
+    return ::testing::AssertionFailure() << "Expected 1 or 2 intermediate points between constant velocity and deceleration phase but found: " << n_intermediate_2;
+  }
+
+  std::stringstream debug_stream;
+  for(auto it = accelerations.begin(); it != it_last_acc+1; it++)
+  {
+    debug_stream << *it << "(Acc)" << std::endl;
+  }
+
+  for(auto it = it_last_acc+1; it != it_last_intermediate+1; it++)
+  {
+    debug_stream << *it << "(Inter1)" << std::endl;
+  }
+
+  for(auto it = it_first_const; it != it_last_const+1; it++)
+  {
+    debug_stream << *it << "(Const)" << std::endl;
+  }
+
+  for(auto it = it_last_const+1; it != it_first_dec; it++)
+  {
+    debug_stream << *it << "(Inter2)" << std::endl;
+  }
+
+  for(auto it = it_first_dec; it != accelerations.end(); it++)
+  {
+    debug_stream << *it << "(Dec)" << std::endl;
+  }
+
+  //ROS_ERROR_STREAM(debug_stream.str());
+
+  return ::testing::AssertionSuccess();
+}
+
