@@ -494,6 +494,11 @@ void generateRequestMsgFromBlendTestData(const moveit::core::RobotModelConstPtr 
 void checkRobotModel(const moveit::core::RobotModelConstPtr &robot_model,
                      const std::string& group_name,
                      const std::string& link_name);
+/**
+ * @brief Check that a given vector of accelerations represents a trapezoid
+ * velocity profile
+ */
+::testing::AssertionResult hasTrapezoidVelocity(std::vector<double> accelerations, const double similiarity_tolerance);
 }
 
 #endif // TEST_UTILS_H
