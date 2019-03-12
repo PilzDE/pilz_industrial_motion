@@ -46,8 +46,8 @@ protected:
   std::string planning_group_;
   //! Link to which all cartesian poses refer to.
   std::string target_link_;
-  double vel_scale_;
-  double acc_scale_;
+  double vel_scale_ {1.0};
+  double acc_scale_ {1.0};
 };
 
 inline void MotionCmd::setPlanningGroup(const std::string &planning_group)
