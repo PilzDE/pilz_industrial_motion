@@ -2,6 +2,10 @@
 Changelog for package pilz_industrial_motion_testutils
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
+Forthcoming
+-----------
+* Add getter for CircJointInterimCart in XMLTestdataLoader
+
 0.4.1 (2019-02-27)
 ------------------
 
