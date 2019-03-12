@@ -144,6 +144,7 @@ public:
   virtual CircCenterCart getCircCartCenterCart(const std::string &cmd_name) const override;
   virtual CircInterimCart getCircCartInterimCart(const std::string &cmd_name) const override;
   virtual CircJointCenterCart getCircJointCenterCart(const std::string &cmd_name) const override;
+  virtual CircJointInterimCart getCircJointInterimCart(const std::string &cmd_name) const override;
 
   virtual Sequence getSequence(const std::string &cmd_name) const override;
 
