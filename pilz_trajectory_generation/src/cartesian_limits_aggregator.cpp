@@ -64,6 +64,7 @@ pilz::CartesianLimit pilz::CartesianLimitsAggregator::getAggregatedLimits(const 
   }
 
   // rotational acceleration + deceleration deprecated
+  // LCOV_EXCL_START
   if(nh.hasParam(param_prefix + param_max_rot_acc)
      || nh.hasParam(param_prefix + param_max_rot_dec))
   {
@@ -71,6 +72,7 @@ pilz::CartesianLimit pilz::CartesianLimitsAggregator::getAggregatedLimits(const 
                     << "these parameters are deprecated and are automatically calculated from"
                     << "translational to rotational ratio.");
   }
+  // LCOV_EXCL_STOP
 
   return cartesian_limit;
 
