@@ -2,6 +2,9 @@
 Changelog for package pilz_industrial_motion
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
+Forthcoming
+-----------
+
 0.4.1 (2019-02-27)
 ------------------
 
