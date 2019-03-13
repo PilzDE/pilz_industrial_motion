@@ -76,7 +76,8 @@ bool MoveGroupSequenceService::plan(pilz_msgs::GetMotionSequence::Request& req,
   {
     ROS_ERROR_STREAM("Planner threw an exception (error code: "
                      << ex.getErrorCode() << "): " << ex.what());
-    return false;
+    res.error_code.val = ex.getErrorCode();
+    return true;
   }
   // LCOV_EXCL_START // Keep moveit up even if lower parts throw
   catch (const std::exception& ex)
@@ -86,17 +87,19 @@ bool MoveGroupSequenceService::plan(pilz_msgs::GetMotionSequence::Request& req,
   }
   // LCOV_EXCL_STOP
 
-  res.plan_response.resize(traj_vec.size());
+  res.trajectory_start.resize(traj_vec.size());
+  res.planned_trajectory.resize(traj_vec.size());
   for (RobotTrajVec_t::size_type i = 0; i < traj_vec.size(); ++i)
   {
-    res.plan_response.at(i).group_name = traj_vec.at(i)->getGroupName();
-    res.plan_response.at(i).error_code.val = moveit_msgs::MoveItErrorCodes::SUCCESS;
-    // TODO HSL: Calculate correct planning time
-    //res.plan_response.at(i).planning_time = ???
     move_group::MoveGroupCapability::convertToMsg(traj_vec.at(i),
-                                                  res.plan_response.at(i).trajectory_start,
-                                                  res.plan_response.at(i).trajectory);
+                                                  res.trajectory_start.at(i),
+                                                  res.planned_trajectory.at(i));
   }
+  res.error_code.val = moveit_msgs::MoveItErrorCodes::SUCCESS;
+
+  // TODO HSL: Calculate planning time correctly.
+  //res.planning_time = res.planning_time_;
+
   return true;
 }
 
