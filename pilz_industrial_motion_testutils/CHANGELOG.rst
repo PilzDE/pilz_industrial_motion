@@ -2,6 +2,11 @@
 Changelog for package pilz_industrial_motion_testutils
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
+Forthcoming
+-----------
+* update package dependencies
+* Add missing intialization
+
 0.3.6 (2019-02-26)
 ------------------
 

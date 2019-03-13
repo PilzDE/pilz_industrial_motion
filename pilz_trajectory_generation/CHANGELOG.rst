@@ -2,6 +2,10 @@
 Changelog for package pilz_trajectory_generation
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
+Forthcoming
+-----------
+* update dependencies of trajectory_generation
+
 0.3.6 (2019-02-26)
 ------------------
 * refactor the testdataloader
