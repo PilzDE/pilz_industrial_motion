@@ -35,7 +35,7 @@ using RobotTrajVec_t = std::vector<robot_trajectory::RobotTrajectoryPtr>;
 CREATE_MOVEIT_ERROR_CODE_EXCEPTION(NegativeBlendRadiusException, moveit_msgs::MoveItErrorCodes::INVALID_MOTION_PLAN);
 CREATE_MOVEIT_ERROR_CODE_EXCEPTION(LastBlendRadiusNotZeroException, moveit_msgs::MoveItErrorCodes::INVALID_MOTION_PLAN);
 CREATE_MOVEIT_ERROR_CODE_EXCEPTION(StartStateSetException, moveit_msgs::MoveItErrorCodes::INVALID_ROBOT_STATE);
-CREATE_MOVEIT_ERROR_CODE_EXCEPTION(OverlappingBlendRadiiException, moveit_msgs::MoveItErrorCodes::FAILURE);
+CREATE_MOVEIT_ERROR_CODE_EXCEPTION(OverlappingBlendRadiiException, moveit_msgs::MoveItErrorCodes::INVALID_MOTION_PLAN);
 CREATE_MOVEIT_ERROR_CODE_EXCEPTION(PlanningPipelineException, moveit_msgs::MoveItErrorCodes::FAILURE);
 CREATE_MOVEIT_ERROR_CODE_EXCEPTION(MultipleEndeffectorException, moveit_msgs::MoveItErrorCodes::FAILURE);
 CREATE_MOVEIT_ERROR_CODE_EXCEPTION(EndeffectorWithoutLinksException, moveit_msgs::MoveItErrorCodes::FAILURE);

@@ -148,7 +148,7 @@ TEST_P(IntegrationTestCommandListManager, TestExceptionErrorCodeMapping)
   EXPECT_EQ(sss_ex.getErrorCode(), moveit_msgs::MoveItErrorCodes::INVALID_ROBOT_STATE);
 
   OverlappingBlendRadiiException obr_ex("");
-  EXPECT_EQ(obr_ex.getErrorCode(), moveit_msgs::MoveItErrorCodes::FAILURE);
+  EXPECT_EQ(obr_ex.getErrorCode(), moveit_msgs::MoveItErrorCodes::INVALID_MOTION_PLAN);
 
   PlanningPipelineException pp_ex("");
   EXPECT_EQ(pp_ex.getErrorCode(), moveit_msgs::MoveItErrorCodes::FAILURE);
