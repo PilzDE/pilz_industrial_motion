@@ -44,6 +44,7 @@
 
   <run_depend>pilz_msgs</run_depend>
   <run_depend>tf2</run_depend>
+  <run_depend>eigen_conversions</run_depend>
   <run_depend>tf2_geometry_msgs</run_depend>
   <run_depend>message_runtime</run_depend>
   <run_depend>moveit_ros_planning_interface</run_depend>
