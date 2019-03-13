@@ -39,7 +39,7 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
     <param name="planning_group" value="manipulator" />
     <param name="target_link" value="prbt_flange" />
     <param name="pose_norm_tolerance" value="1.0e-5" />
-    <param name="orientation_norm_tolerance" value="1.0e-5" />
+    <param name="orientation_norm_tolerance" value="1.0e-3" />
   </test>
 
 </launch>
