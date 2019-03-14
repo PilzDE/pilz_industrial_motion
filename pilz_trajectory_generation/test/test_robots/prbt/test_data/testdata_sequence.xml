@@ -126,6 +126,17 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
       <acc>0.2</acc>
     </circ>
 
+    <!-- Differs from circ3_interim since it move over angle larger than 180° -->
+    <circ name="circ2_interim_3">
+      <planningGroup>manipulator</planningGroup>
+      <targetLink>prbt_tcp</targetLink>
+      <startPos>P1</startPos>
+      <intermediatePos>P3</intermediatePos>
+      <endPos>P2</endPos>
+      <vel>0.1</vel>
+      <acc>0.2</acc>
+    </circ>
+
     <circ name="circ1_center_2">
       <planningGroup>manipulator</planningGroup>
       <targetLink>prbt_tcp</targetLink>

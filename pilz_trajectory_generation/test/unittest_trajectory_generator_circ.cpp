@@ -572,12 +572,32 @@ TEST_P(TrajectoryGeneratorCIRCTest, CenterPointPoseGoalFrameIdBothConstraints)
 
 /**
  * @brief test the circ planner with interim point with joint goal
+ *        where the circular angle is below 180°
  */
-TEST_P(TrajectoryGeneratorCIRCTest, InterimPointJointGoal)
+TEST_P(TrajectoryGeneratorCIRCTest, InterimPointJointGoalSmallTurn)
 {
   SKIP_IF_GRIPPER
 
   auto circ {tdp_->getCircJointInterimCart("circ3_interim")};
+
+  moveit_msgs::MotionPlanRequest req = circ.toRequest();
+
+  // empty path constraint
+  planning_interface::MotionPlanResponse res;
+  ASSERT_TRUE(circ_->generate(req,res));
+  EXPECT_EQ(res.error_code_.val, moveit_msgs::MoveItErrorCodes::SUCCESS);
+  checkCircResult(req, res);
+}
+
+/**
+ * @brief test the circ planner with interim point with joint goal
+ *        where the circular angle is above 180°
+ */
+TEST_P(TrajectoryGeneratorCIRCTest, InterimPointJointGoalBigTurn)
+{
+  SKIP_IF_GRIPPER
+
+  auto circ {tdp_->getCircJointInterimCart("circ2_interim_3")};
 
   moveit_msgs::MotionPlanRequest req = circ.toRequest();
 
