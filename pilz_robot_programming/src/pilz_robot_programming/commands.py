@@ -59,7 +59,8 @@ _DEFAULT_BASE_LINK = "prbt_base"
 
 class _AbstractCmd(object):
     """Base class for all commands."""
-    def __init__(self):
+    def __init__(self, **kwargs):
+        super(_AbstractCmd, self).__init__()
         # set robot state as empty diff in planning scene to start with current planning scene
         self._planning_options = PlanningOptions()
         self._planning_options.planning_scene_diff.robot_state.is_diff = True
@@ -132,8 +133,8 @@ class _BaseCmd(_AbstractCmd):
     """Base class for all single commands."""
     def __init__(self, goal=None, planning_group=_DEFAULT_PLANNING_GROUP, target_link=_DEFAULT_TARGET_LINK,
                  vel_scale=_DEFAULT_VEL_SCALE, acc_scale=_DEFAULT_ACC_SCALE, relative=False,
-                 reference_frame=_DEFAULT_BASE_LINK):
-        _AbstractCmd.__init__(self)
+                 reference_frame=_DEFAULT_BASE_LINK, **kwargs):
+        super(_BaseCmd, self).__init__()
 
         # Needs to be set by derived classes
         self._planner_id = None
@@ -325,13 +326,14 @@ class Ptp(_BaseCmd):
                  vel_scale=_MAX_VEL_SCALE,
                  acc_scale=None,
                  relative=False,
-                 reference_frame=_DEFAULT_BASE_LINK):
-
+                 reference_frame=_DEFAULT_BASE_LINK, 
+                 **kwargs):
+      
         acc_scale_final = acc_scale if acc_scale is not None else Ptp._calc_acc_scale(vel_scale)
-
-        _BaseCmd.__init__(self, goal=goal, planning_group=planning_group, target_link=target_link,
-                          vel_scale=vel_scale, acc_scale=acc_scale_final, relative=relative,
-                          reference_frame=reference_frame)
+        
+        super(Ptp, self).__init__(goal=goal, planning_group=planning_group, target_link=target_link,
+                                  vel_scale=vel_scale, acc_scale=acc_scale_final, relative=relative,
+                                  reference_frame=reference_frame)
 
         self._planner_id = "PTP"
 
@@ -422,13 +424,14 @@ class Lin(_BaseCmd):
                  vel_scale=_DEFAULT_VEL_SCALE,
                  acc_scale=None,
                  relative=False,
-                 reference_frame=_DEFAULT_BASE_LINK):
+                 reference_frame=_DEFAULT_BASE_LINK,
+                 **kwargs):
 
         acc_scale_final = acc_scale if acc_scale is not None else Lin._calc_acc_scale(vel_scale)
 
-        _BaseCmd.__init__(self, goal=goal, planning_group=planning_group, target_link=target_link,
-                          vel_scale=vel_scale, acc_scale=acc_scale_final, relative=relative,
-                          reference_frame=reference_frame)
+        super(Lin, self).__init__(goal=goal, planning_group=planning_group, target_link=target_link,
+                                  vel_scale=vel_scale, acc_scale=acc_scale_final, relative=relative,
+                                  reference_frame=reference_frame)
 
         self._planner_id = "LIN"
 
@@ -511,13 +514,14 @@ class Circ(_BaseCmd):
                  target_link=_DEFAULT_TARGET_LINK,
                  vel_scale=_DEFAULT_VEL_SCALE,
                  acc_scale=None,
-                 reference_frame=_DEFAULT_BASE_LINK):
+                 reference_frame=_DEFAULT_BASE_LINK,
+                 **kwargs):
 
         acc_scale_final = acc_scale if acc_scale is not None else Circ._calc_acc_scale(vel_scale)
 
-        _BaseCmd.__init__(self, goal=goal, planning_group=planning_group, target_link=target_link,
-                          vel_scale=vel_scale, acc_scale=acc_scale_final, relative=False,
-                          reference_frame=reference_frame)
+       super(Circ, self).__init__(goal=goal, planning_group=planning_group, target_link=target_link,
+                                  vel_scale=vel_scale, acc_scale=acc_scale_final, relative=False,
+                                  reference_frame=reference_frame)
 
         self._planner_id = "CIRC"
         self._interim = interim
@@ -592,8 +596,8 @@ class Sequence(_AbstractCmd):
      :note: Currently, blending is only supported for :py:class:`Lin` commands.
 
     """
-    def __init__(self):
-        _AbstractCmd.__init__(self)
+    def __init__(self, **kwargs):
+        super(Sequence, self).__init__()
         # List of tuples containing commands and blend radii
         self.items = []
 
@@ -662,9 +666,9 @@ class Gripper(_BaseCmd):
 
             allowed axis velocity = vel_scale * maximal axis velocity
     """
-    def __init__(self, goal, vel_scale=_DEFAULT_VEL_SCALE):
-        _BaseCmd.__init__(self, goal=goal, planning_group=_DEFAULT_GRIPPER_PLANNING_GROUP,
-                          vel_scale=vel_scale, relative=False)
+    def __init__(self, goal, vel_scale=_DEFAULT_VEL_SCALE, **kwargs):
+        super(Gripper, self).__init__(goal=goal, planning_group=_DEFAULT_GRIPPER_PLANNING_GROUP,
+                                      vel_scale=vel_scale, relative=False)
 
     def __str__(self):
         out_str = _AbstractCmd.__str__(self)
