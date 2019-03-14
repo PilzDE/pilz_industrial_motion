@@ -69,7 +69,7 @@ bool MoveGroupSequenceService::plan(pilz_msgs::GetMotionSequence::Request& req,
   // TODO: Do we lock on the correct scene? Does the lock belong to the scene used for planning?
   planning_scene_monitor::LockedPlanningSceneRO ps(context_->planning_scene_monitor_);
 
-  // If 'FALSE' then no response will be sent to the caller.
+  ros::Time planning_start = ros::Time::now();
   RobotTrajVec_t traj_vec;
   try { traj_vec = command_list_manager_->solve(ps, req.commands); }
   catch(const MoveItErrorCodeException& ex)
@@ -83,6 +83,7 @@ bool MoveGroupSequenceService::plan(pilz_msgs::GetMotionSequence::Request& req,
   catch (const std::exception& ex)
   {
     ROS_ERROR_STREAM("Planner threw an exception: " << ex.what());
+    // If 'FALSE' then no response will be sent to the caller.
     return false;
   }
   // LCOV_EXCL_STOP
@@ -96,10 +97,7 @@ bool MoveGroupSequenceService::plan(pilz_msgs::GetMotionSequence::Request& req,
                                                   res.planned_trajectory.at(i));
   }
   res.error_code.val = moveit_msgs::MoveItErrorCodes::SUCCESS;
-
-  // TODO HSL: Calculate planning time correctly.
-  //res.planning_time = res.planning_time_;
-
+  res.planning_time = (ros::Time::now() - planning_start).toSec();
   return true;
 }
 

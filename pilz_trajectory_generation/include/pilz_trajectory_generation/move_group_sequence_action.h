@@ -52,7 +52,7 @@ private:
   void executeSequenceCallback_PlanAndExecute(const pilz_msgs::MoveGroupSequenceGoalConstPtr& goal,
                                               pilz_msgs::MoveGroupSequenceResult& action_res);
   void executeMoveCallback_PlanOnly(const pilz_msgs::MoveGroupSequenceGoalConstPtr& goal,
-                                    pilz_msgs::MoveGroupSequenceResult& action_res);
+                                    pilz_msgs::MoveGroupSequenceResult& res);
   void startMoveExecutionCallback();
   void startMoveLookCallback();
   void preemptMoveCallback();

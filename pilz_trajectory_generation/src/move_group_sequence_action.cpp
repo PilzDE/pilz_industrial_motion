@@ -38,6 +38,8 @@
 
 #include "pilz_trajectory_generation/move_group_sequence_action.h"
 
+#include <time.h>
+
 #include <moveit/planning_pipeline/planning_pipeline.h>
 #include <moveit/plan_execution/plan_execution.h>
 #include <moveit/plan_execution/plan_with_sensing.h>
@@ -165,7 +167,7 @@ void MoveGroupSequenceAction::convertToMsg(const ExecutableTrajs& trajs,
 }
 
 void MoveGroupSequenceAction::executeMoveCallback_PlanOnly(const pilz_msgs::MoveGroupSequenceGoalConstPtr& goal,
-                                                           pilz_msgs::MoveGroupSequenceResult& action_res)
+                                                           pilz_msgs::MoveGroupSequenceResult& res)
 {
   ROS_INFO("Planning request received for MoveGroupSequenceAction action.");
 
@@ -177,6 +179,7 @@ void MoveGroupSequenceAction::executeMoveCallback_PlanOnly(const pilz_msgs::Move
         static_cast<const planning_scene::PlanningSceneConstPtr&>(lscene) :
         lscene->diff(goal->planning_options.planning_scene_diff);
 
+  ros::Time planning_start = ros::Time::now();
   RobotTrajVec_t traj_vec;
   try
   {
@@ -185,30 +188,28 @@ void MoveGroupSequenceAction::executeMoveCallback_PlanOnly(const pilz_msgs::Move
   catch(const MoveItErrorCodeException& ex)
   {
     ROS_ERROR("Planning pipeline threw an exception: %s", ex.what());
-    action_res.error_code.val = ex.getErrorCode();
+    res.error_code.val = ex.getErrorCode();
     return;
   }
   // LCOV_EXCL_START // Keep moveit up even if lower parts throw
   catch (const std::exception& ex)
   {
     ROS_ERROR("Planning pipeline threw an exception: %s", ex.what());
-    action_res.error_code.val = moveit_msgs::MoveItErrorCodes::FAILURE;
+    res.error_code.val = moveit_msgs::MoveItErrorCodes::FAILURE;
     return;
   }
   // LCOV_EXCL_STOP
 
-  action_res.trajectory_start.resize(traj_vec.size());
-  action_res.planned_trajectory.resize(traj_vec.size());
+  res.trajectory_start.resize(traj_vec.size());
+  res.planned_trajectory.resize(traj_vec.size());
   for(RobotTrajVec_t::size_type i = 0; i < traj_vec.size(); ++i)
   {
     move_group::MoveGroupCapability::convertToMsg(traj_vec.at(i),
-                                                  action_res.trajectory_start.at(i),
-                                                  action_res.planned_trajectory.at(i));
+                                                  res.trajectory_start.at(i),
+                                                  res.planned_trajectory.at(i));
   }
-  action_res.error_code.val = moveit_msgs::MoveItErrorCodes::SUCCESS;
-
-  // TODO HSL: Calculate planning time correctly.
-  //action_res.planning_time = res.planning_time_;
+  res.error_code.val = moveit_msgs::MoveItErrorCodes::SUCCESS;
+  res.planning_time = (ros::Time::now() - planning_start).toSec();
 }
 
 bool MoveGroupSequenceAction::planUsingSequenceManager(const pilz_msgs::MotionSequenceRequest& req,
