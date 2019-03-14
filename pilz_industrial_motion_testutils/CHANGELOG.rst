@@ -7,6 +7,7 @@ Forthcoming
 * update package dependencies
 * Add missing intialization
 * Add getter for CircJointInterimCart in XMLTestdataLoader
+* Allow gripper commands in sequence command
 
 0.4.1 (2019-02-27)
 ------------------
