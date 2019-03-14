@@ -32,9 +32,7 @@ namespace pilz_trajectory_generation
 {
 
 static const std::string PARAM_NAMESPACE_LIMTS = "robot_description_planning";
-static const double point_identity_threshold=10e-5;
 
-//CTOR
 CommandListManager::CommandListManager(const ros::NodeHandle &nh, const moveit::core::RobotModelConstPtr &model):
   nh_(nh),
   model_(model)
@@ -129,7 +127,7 @@ bool CommandListManager::checkRadiiForOverlap(const robot_trajectory::RobotTraje
 }
 
 void CommandListManager::validateBlendingRadiiDoNotOverlap(const MotionResponseCont &resp_cont,
-                                                           const RadiiCont &radii)
+                                                           const RadiiCont &radii) const
 {
   if(resp_cont.empty()) { return; }
   if(resp_cont.size() < 3) { return; }
@@ -184,7 +182,7 @@ CommandListManager::RadiiCont CommandListManager::getRadii(const pilz_msgs::Moti
 
 CommandListManager::MotionResponseCont CommandListManager::solveSequenceItems(
     const planning_scene::PlanningSceneConstPtr& planning_scene,
-    const pilz_msgs::MotionSequenceRequest &req_list)
+    const pilz_msgs::MotionSequenceRequest &req_list) const
 {
   MotionResponseCont motion_plan_responses;
   planning_pipeline::PlanningPipelinePtr planning_pipeline(new planning_pipeline::PlanningPipeline(model_, nh_));

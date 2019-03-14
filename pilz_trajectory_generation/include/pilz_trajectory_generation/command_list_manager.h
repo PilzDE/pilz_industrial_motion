@@ -32,6 +32,7 @@ namespace pilz_trajectory_generation
 
 using RobotTrajVec_t = std::vector<robot_trajectory::RobotTrajectoryPtr>;
 
+// List of exceptions which can be thrown by the CommandListManager class.
 CREATE_MOVEIT_ERROR_CODE_EXCEPTION(NegativeBlendRadiusException, moveit_msgs::MoveItErrorCodes::INVALID_MOTION_PLAN);
 CREATE_MOVEIT_ERROR_CODE_EXCEPTION(LastBlendRadiusNotZeroException, moveit_msgs::MoveItErrorCodes::INVALID_MOTION_PLAN);
 CREATE_MOVEIT_ERROR_CODE_EXCEPTION(StartStateSetException, moveit_msgs::MoveItErrorCodes::INVALID_ROBOT_STATE);
@@ -42,34 +43,36 @@ CREATE_MOVEIT_ERROR_CODE_EXCEPTION(EndeffectorWithoutLinksException, moveit_msgs
 CREATE_MOVEIT_ERROR_CODE_EXCEPTION(NoSolverException, moveit_msgs::MoveItErrorCodes::FAILURE);
 
 /**
- * @brief The CommandListManager class
- * This class can create a smooth trajectory from a given list of motion commands.
- * The trajectory generated from the motion commands are blended with each other within a blend radius given
- * within the MotionSequenceRequest.
+ * @brief This class orchestrates the planning of single commands and
+ * command lists.
  */
 class CommandListManager
 {
 public:
-  /**
-   * @brief CommandListManager
-   * @param model The robot model
-   */
   CommandListManager(const ros::NodeHandle& nh, const robot_model::RobotModelConstPtr& model);
 
-  // TODO: Update documentation
   /**
-   * @brief Returns a full trajectory consistenting of planned trajectory
-   * blended with each other in the given blend_radius.
+   * @brief Generates trajectories for the specified list of motion commands.
    *
-   * @param planning_scene The current planning scene.
-   * @param req_list List of motion requests. Contains PTP, LIN and CIRC commands.
-   *        A request is valid if:
-   *        - All request are about the same group
-   *        - All blending radii are non negative
-   *        - The blending radius of the last request is 0
-   *        - Only the first request has a start state
-
-   * @return The resulting trajectories.
+   * The folloing rules apply:
+   * - If two consecutive trajectories are from the same group, they are
+   * simply attached to each other, given that the blend_radius is zero.
+   * - If two consecutive trajectories are from the same group, they are
+   * blended together, given that the blend_radius is GREATER than zero.
+   * - If two consecutive trajectories are from a different groups, then
+   * the second trajectory is added as new element to the result container.
+   * All following trajectories are then attached to the new trajectory
+   * element (until all requests are processed or until the next group change).
+   *
+   * @param planning_scene The planning scene to be used for trajectory generation.
+   * @param req_list List of motion requests containing: PTP, LIN, CIRC
+   * and/or gripper commands.
+   * Please note: A request is only valid if:
+   *    - All blending radii are non negative.
+   *    - The blending radius of the last request is 0.
+   *    - Only the first request has a start state.
+   *
+   * @return Contains the calculated/generated trajectories.
    */
   RobotTrajVec_t solve(const planning_scene::PlanningSceneConstPtr& planning_scene,
                        const pilz_msgs::MotionSequenceRequest& req_list);
@@ -83,26 +86,25 @@ private:
   /**
    * @brief Validates that two consecutive blending radii do not overlap.
    *
-   * @param motion_plan_responses Container of responses from the trajectory generator.
-   * @param radii Container with the blending radii
+   * @param motion_plan_responses Container of calculated/generated trajectories.
+   * @param radii Container stating the blend radii.
    */
   void validateBlendingRadiiDoNotOverlap(const MotionResponseCont& resp_cont,
-                                         const RadiiCont &radii);
+                                         const RadiiCont &radii) const;
 
   /**
    * @brief Solve each sequence item individually.
    *
-   * @param planning_scene The planning_scene
-   * @param req_list The motion plan request list
+   * @param planning_scene The planning_scene to be used for trajectory generation.
+   * @param req_list Container of requests for calculation/generation.
    *
-   * @return Constains the generated trajectories.
+   * @return Container of generated trajectories.
    */
   MotionResponseCont solveSequenceItems(const planning_scene::PlanningSceneConstPtr& planning_scene,
-                                        const pilz_msgs::MotionSequenceRequest &req_list);
+                                        const pilz_msgs::MotionSequenceRequest &req_list) const;
 
   /**
-   * @brief The the name of the to frame (link) of the given group
-   * @return name as string
+   * @return The name of the tip frame (link) of the specified group.
    */
   const std::string& getTipFrame(const std::string& group_name) const;
 
@@ -118,7 +120,7 @@ private:
 
 private:
   /**
-   * @brief Returns the last RobotState of the specified group which can
+   * @return The last RobotState of the specified group which can
    * be found in the specified vector.
    */
   static RobotState_OptRef getPreviousEndState(const MotionResponseCont &motion_plan_responses,
@@ -133,21 +135,26 @@ private:
                             moveit_msgs::RobotState& start_state);
 
 
+  /**
+   * @return Container of radii extracted from the specified request list.
+   */
   static RadiiCont getRadii(const pilz_msgs::MotionSequenceRequest &req_list);
 
   /**
-   * @brief Validate if the request list fullfills the conditions noted
-   *        under pilz_trajectory_generation::CommandListManager::solve
+   * @brief Validates if the request list fullfills the conditions noted
+   * under pilz_trajectory_generation::CommandListManager::solve.
    */
   static void validateRequestList(const pilz_msgs::MotionSequenceRequest &req_list);
 
 private:
-  /// Node handle
+  //! Node handle
   ros::NodeHandle nh_;
 
-  /// Robot model
+  //! Robot model
   moveit::core::RobotModelConstPtr model_;
 
+  //! @brief Builder to construct the container containing the final
+  //! trajectories.
   PlanComponentsBuilder plan_comp_builder_;
 };
 
