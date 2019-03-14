@@ -1,12 +1,12 @@
 <?xml version="1.0" encoding="UTF-8"?><diagram program="umlet" version="13.3">
-  <zoom_level>4</zoom_level>
+  <zoom_level>7</zoom_level>
   <element>
     <id>UMLClass</id>
     <coordinates>
-      <x>352</x>
-      <y>216</y>
-      <w>324</w>
-      <h>76</h>
+      <x>287</x>
+      <y>273</y>
+      <w>567</w>
+      <h>133</h>
     </coordinates>
     <panel_attributes>PlanningContextLoader
 --
@@ -23,10 +23,10 @@
   <element>
     <id>UMLGeneric</id>
     <coordinates>
-      <x>188</x>
-      <y>360</y>
-      <w>148</w>
-      <h>40</h>
+      <x>0</x>
+      <y>525</y>
+      <w>259</w>
+      <h>70</h>
     </coordinates>
     <panel_attributes>symbol=component
 PlanningContextLoaderPTP
@@ -39,10 +39,10 @@ PlanningContextLoaderPTP
   <element>
     <id>UMLGeneric</id>
     <coordinates>
-      <x>444</x>
-      <y>360</y>
-      <w>148</w>
-      <h>40</h>
+      <x>448</x>
+      <y>525</y>
+      <w>259</w>
+      <h>70</h>
     </coordinates>
     <panel_attributes>symbol=component
 PlanningContextLoaderLIN
@@ -55,10 +55,10 @@ PlanningContextLoaderLIN
   <element>
     <id>Relation</id>
     <coordinates>
-      <x>256</x>
-      <y>260</y>
-      <w>104</w>
-      <h>108</h>
+      <x>119</x>
+      <y>350</y>
+      <w>182</w>
+      <h>189</h>
     </coordinates>
     <panel_attributes>lt=&lt;&lt;-</panel_attributes>
     <additional_attributes>240.0;10.0;10.0;10.0;10.0;250.0</additional_attributes>
@@ -66,10 +66,10 @@ PlanningContextLoaderLIN
   <element>
     <id>Relation</id>
     <coordinates>
-      <x>512</x>
-      <y>288</y>
-      <w>12</w>
-      <h>80</h>
+      <x>567</x>
+      <y>399</y>
+      <w>21</w>
+      <h>140</h>
     </coordinates>
     <panel_attributes>lt=&lt;&lt;-</panel_attributes>
     <additional_attributes>10.0;10.0;10.0;180.0</additional_attributes>
@@ -77,10 +77,10 @@ PlanningContextLoaderLIN
   <element>
     <id>UMLGeneric</id>
     <coordinates>
-      <x>208</x>
-      <y>492</y>
-      <w>76</w>
-      <h>20</h>
+      <x>35</x>
+      <y>756</y>
+      <w>133</w>
+      <h>35</h>
     </coordinates>
     <panel_attributes>PlanningContextPTP
 --
@@ -90,10 +90,10 @@ PlanningContextLoaderLIN
   <element>
     <id>UMLGeneric</id>
     <coordinates>
-      <x>480</x>
-      <y>488</y>
-      <w>72</w>
-      <h>20</h>
+      <x>511</x>
+      <y>749</y>
+      <w>126</w>
+      <h>35</h>
     </coordinates>
     <panel_attributes>PlanningContextLIN
 --
@@ -103,10 +103,10 @@ PlanningContextLoaderLIN
   <element>
     <id>UMLClass</id>
     <coordinates>
-      <x>908</x>
-      <y>412</y>
-      <w>68</w>
-      <h>72</h>
+      <x>1260</x>
+      <y>616</y>
+      <w>119</w>
+      <h>126</h>
     </coordinates>
     <panel_attributes>template=T
 PlanningContextBase
@@ -117,10 +117,10 @@ PlanningContextBase
   <element>
     <id>Text</id>
     <coordinates>
-      <x>200</x>
-      <y>408</y>
-      <w>100</w>
-      <h>8</h>
+      <x>21</x>
+      <y>609</y>
+      <w>175</w>
+      <h>14</h>
     </coordinates>
     <panel_attributes>&lt;&lt;bind&gt;&gt;&lt;T-&gt;TrajectoryGeneratorPTP&gt;</panel_attributes>
     <additional_attributes/>
@@ -128,10 +128,10 @@ PlanningContextBase
   <element>
     <id>Relation</id>
     <coordinates>
-      <x>264</x>
-      <y>428</y>
-      <w>652</w>
-      <h>72</h>
+      <x>133</x>
+      <y>644</y>
+      <w>1141</w>
+      <h>126</h>
     </coordinates>
     <panel_attributes>lt=&lt;&lt;-</panel_attributes>
     <additional_attributes>1610.0;10.0;10.0;10.0;10.0;160.0</additional_attributes>
@@ -139,10 +139,10 @@ PlanningContextBase
   <element>
     <id>Relation</id>
     <coordinates>
-      <x>532</x>
-      <y>444</y>
-      <w>384</w>
-      <h>52</h>
+      <x>602</x>
+      <y>672</y>
+      <w>672</w>
+      <h>91</h>
     </coordinates>
     <panel_attributes>lt=&lt;&lt;-</panel_attributes>
     <additional_attributes>940.0;10.0;10.0;10.0;10.0;110.0</additional_attributes>
@@ -150,10 +150,10 @@ PlanningContextBase
   <element>
     <id>Text</id>
     <coordinates>
-      <x>468</x>
-      <y>408</y>
-      <w>100</w>
-      <h>8</h>
+      <x>490</x>
+      <y>609</y>
+      <w>175</w>
+      <h>14</h>
     </coordinates>
     <panel_attributes>&lt;&lt;bind&gt;&gt;&lt;T-&gt;TrajectoryGeneratorLIN&gt;</panel_attributes>
     <additional_attributes/>
@@ -161,10 +161,10 @@ PlanningContextBase
   <element>
     <id>UMLGeneric</id>
     <coordinates>
-      <x>480</x>
-      <y>632</y>
-      <w>72</w>
-      <h>20</h>
+      <x>511</x>
+      <y>1001</y>
+      <w>126</w>
+      <h>35</h>
     </coordinates>
     <panel_attributes>TrajectoryGeneratorLIN
 --
@@ -174,10 +174,10 @@ PlanningContextBase
   <element>
     <id>Relation</id>
     <coordinates>
-      <x>244</x>
-      <y>396</y>
-      <w>12</w>
-      <h>104</h>
+      <x>98</x>
+      <y>588</y>
+      <w>21</w>
+      <h>182</h>
     </coordinates>
     <panel_attributes>lt=&lt;..</panel_attributes>
     <additional_attributes>10.0;240.0;10.0;10.0</additional_attributes>
@@ -185,10 +185,10 @@ PlanningContextBase
   <element>
     <id>UMLGeneric</id>
     <coordinates>
-      <x>208</x>
-      <y>632</y>
-      <w>72</w>
-      <h>20</h>
+      <x>35</x>
+      <y>1001</y>
+      <w>126</w>
+      <h>35</h>
     </coordinates>
     <panel_attributes>TrajectoryGeneratorPTP
 --
@@ -198,10 +198,10 @@ PlanningContextBase
   <element>
     <id>UMLGeneric</id>
     <coordinates>
-      <x>860</x>
-      <y>552</y>
-      <w>176</w>
-      <h>56</h>
+      <x>1176</x>
+      <y>861</y>
+      <w>308</w>
+      <h>98</h>
     </coordinates>
     <panel_attributes>TrajectoryGenerator
 --
@@ -214,10 +214,10 @@ generate(request, response, sampling_time)
   <element>
     <id>Relation</id>
     <coordinates>
-      <x>512</x>
-      <y>396</y>
-      <w>12</w>
-      <h>100</h>
+      <x>567</x>
+      <y>588</y>
+      <w>21</w>
+      <h>175</h>
     </coordinates>
     <panel_attributes>lt=&lt;..</panel_attributes>
     <additional_attributes>10.0;230.0;10.0;10.0</additional_attributes>
@@ -225,10 +225,10 @@ generate(request, response, sampling_time)
   <element>
     <id>Relation</id>
     <coordinates>
-      <x>512</x>
-      <y>504</y>
-      <w>12</w>
-      <h>136</h>
+      <x>567</x>
+      <y>777</y>
+      <w>21</w>
+      <h>238</h>
     </coordinates>
     <panel_attributes>lt=&lt;&lt;&lt;&lt;-
 m1=1</panel_attributes>
@@ -237,10 +237,10 @@ m1=1</panel_attributes>
   <element>
     <id>Relation</id>
     <coordinates>
-      <x>244</x>
-      <y>508</y>
-      <w>12</w>
-      <h>132</h>
+      <x>98</x>
+      <y>784</y>
+      <w>21</w>
+      <h>231</h>
     </coordinates>
     <panel_attributes>lt=&lt;&lt;&lt;&lt;-
 m1=1</panel_attributes>
@@ -249,10 +249,10 @@ m1=1</panel_attributes>
   <element>
     <id>Relation</id>
     <coordinates>
-      <x>532</x>
-      <y>576</y>
-      <w>336</w>
-      <h>64</h>
+      <x>602</x>
+      <y>903</y>
+      <w>588</w>
+      <h>112</h>
     </coordinates>
     <panel_attributes>lt=&lt;&lt;-</panel_attributes>
     <additional_attributes>820.0;10.0;10.0;10.0;10.0;140.0</additional_attributes>
@@ -260,10 +260,10 @@ m1=1</panel_attributes>
   <element>
     <id>Relation</id>
     <coordinates>
-      <x>260</x>
-      <y>560</y>
-      <w>608</w>
-      <h>80</h>
+      <x>126</x>
+      <y>875</y>
+      <w>1064</w>
+      <h>140</h>
     </coordinates>
     <panel_attributes>lt=&lt;&lt;-</panel_attributes>
     <additional_attributes>1500.0;10.0;10.0;10.0;10.0;180.0</additional_attributes>
@@ -271,10 +271,10 @@ m1=1</panel_attributes>
   <element>
     <id>UMLNote</id>
     <coordinates>
-      <x>188</x>
-      <y>312</y>
-      <w>56</w>
-      <h>28</h>
+      <x>0</x>
+      <y>441</y>
+      <w>98</w>
+      <h>49</h>
     </coordinates>
     <panel_attributes>Plugin
 </panel_attributes>
@@ -283,10 +283,10 @@ m1=1</panel_attributes>
   <element>
     <id>Relation</id>
     <coordinates>
-      <x>212</x>
-      <y>336</y>
-      <w>12</w>
-      <h>32</h>
+      <x>42</x>
+      <y>483</y>
+      <w>21</w>
+      <h>56</h>
     </coordinates>
     <panel_attributes>lt=..</panel_attributes>
     <additional_attributes>10.0;10.0;10.0;60.0</additional_attributes>
@@ -294,10 +294,10 @@ m1=1</panel_attributes>
   <element>
     <id>UMLClass</id>
     <coordinates>
-      <x>1096</x>
-      <y>360</y>
-      <w>84</w>
-      <h>64</h>
+      <x>1589</x>
+      <y>525</y>
+      <w>147</w>
+      <h>112</h>
     </coordinates>
     <panel_attributes>JointLimitsContainer
 --
@@ -309,10 +309,10 @@ m1=1</panel_attributes>
   <element>
     <id>UMLClass</id>
     <coordinates>
-      <x>1212</x>
-      <y>360</y>
-      <w>84</w>
-      <h>64</h>
+      <x>1792</x>
+      <y>525</y>
+      <w>147</w>
+      <h>112</h>
     </coordinates>
     <panel_attributes>CartesianLimit
 --
@@ -330,10 +330,10 @@ m1=1</panel_attributes>
   <element>
     <id>UMLClass</id>
     <coordinates>
-      <x>1144</x>
-      <y>288</y>
-      <w>112</w>
-      <h>52</h>
+      <x>1673</x>
+      <y>399</y>
+      <w>196</w>
+      <h>91</h>
     </coordinates>
     <panel_attributes>LimitsContainer
 --
@@ -349,10 +349,10 @@ m1=1</panel_attributes>
   <element>
     <id>Relation</id>
     <coordinates>
-      <x>1196</x>
-      <y>336</y>
-      <w>72</w>
-      <h>32</h>
+      <x>1764</x>
+      <y>483</y>
+      <w>126</w>
+      <h>56</h>
     </coordinates>
     <panel_attributes>lt=&lt;&lt;&lt;&lt;-
 m1=1</panel_attributes>
@@ -361,10 +361,10 @@ m1=1</panel_attributes>
   <element>
     <id>Relation</id>
     <coordinates>
-      <x>1136</x>
-      <y>336</y>
-      <w>40</w>
-      <h>32</h>
+      <x>1659</x>
+      <y>483</y>
+      <w>70</w>
+      <h>56</h>
     </coordinates>
     <panel_attributes>lt=&lt;&lt;&lt;&lt;-
 m1=1</panel_attributes>
@@ -373,10 +373,10 @@ m1=1</panel_attributes>
   <element>
     <id>UMLClass</id>
     <coordinates>
-      <x>284</x>
-      <y>764</y>
-      <w>72</w>
-      <h>24</h>
+      <x>168</x>
+      <y>1232</y>
+      <w>126</w>
+      <h>42</h>
     </coordinates>
     <panel_attributes>/KDL::VelocityProfile/
 --
@@ -388,10 +388,10 @@ m1=1</panel_attributes>
   <element>
     <id>UMLClass</id>
     <coordinates>
-      <x>204</x>
-      <y>804</y>
-      <w>84</w>
-      <h>36</h>
+      <x>28</x>
+      <y>1302</y>
+      <w>147</w>
+      <h>63</h>
     </coordinates>
     <panel_attributes>VelocityProfile_ATrap
 --
@@ -407,10 +407,10 @@ m1=1</panel_attributes>
   <element>
     <id>Relation</id>
     <coordinates>
-      <x>260</x>
-      <y>772</y>
-      <w>32</w>
-      <h>40</h>
+      <x>126</x>
+      <y>1246</y>
+      <w>56</w>
+      <h>70</h>
     </coordinates>
     <panel_attributes>lt=&lt;&lt;-</panel_attributes>
     <additional_attributes>60.0;10.0;10.0;10.0;10.0;80.0</additional_attributes>
@@ -418,10 +418,10 @@ m1=1</panel_attributes>
   <element>
     <id>Relation</id>
     <coordinates>
-      <x>240</x>
-      <y>648</y>
-      <w>12</w>
-      <h>164</h>
+      <x>91</x>
+      <y>1029</y>
+      <w>21</w>
+      <h>287</h>
     </coordinates>
     <panel_attributes>lt=&lt;&lt;&lt;&lt;-
 m1=n</panel_attributes>
@@ -430,10 +430,10 @@ m1=n</panel_attributes>
   <element>
     <id>UMLClass</id>
     <coordinates>
-      <x>488</x>
-      <y>812</y>
-      <w>52</w>
-      <h>24</h>
+      <x>525</x>
+      <y>1316</y>
+      <w>91</w>
+      <h>42</h>
     </coordinates>
     <panel_attributes>Package::KDL
 Path_Line
@@ -445,10 +445,10 @@ Path_Line
   <element>
     <id>UMLClass</id>
     <coordinates>
-      <x>664</x>
-      <y>812</y>
-      <w>48</w>
-      <h>24</h>
+      <x>833</x>
+      <y>1316</y>
+      <w>84</w>
+      <h>42</h>
     </coordinates>
     <panel_attributes>Package::KDL
 Path_Circle
@@ -460,10 +460,10 @@ Path_Circle
   <element>
     <id>UMLClass</id>
     <coordinates>
-      <x>748</x>
-      <y>812</y>
-      <w>60</w>
-      <h>24</h>
+      <x>980</x>
+      <y>1316</y>
+      <w>105</w>
+      <h>42</h>
     </coordinates>
     <panel_attributes>Package::KDL
 Path_Circle_Wrapper
@@ -475,10 +475,10 @@ Path_Circle_Wrapper
   <element>
     <id>UMLNote</id>
     <coordinates>
-      <x>984</x>
-      <y>732</y>
-      <w>56</w>
-      <h>28</h>
+      <x>1393</x>
+      <y>1176</y>
+      <w>98</w>
+      <h>49</h>
     </coordinates>
     <panel_attributes>Class to manage the Cartesian path
 bg=white</panel_attributes>
@@ -487,10 +487,10 @@ bg=white</panel_attributes>
   <element>
     <id>Relation</id>
     <coordinates>
-      <x>948</x>
-      <y>740</y>
-      <w>44</w>
-      <h>12</h>
+      <x>1330</x>
+      <y>1190</y>
+      <w>77</w>
+      <h>21</h>
     </coordinates>
     <panel_attributes>lt=..</panel_attributes>
     <additional_attributes>10.0;10.0;90.0;10.0</additional_attributes>
@@ -498,10 +498,10 @@ bg=white</panel_attributes>
   <element>
     <id>Relation</id>
     <coordinates>
-      <x>508</x>
-      <y>648</y>
-      <w>12</w>
-      <h>172</h>
+      <x>560</x>
+      <y>1029</y>
+      <w>21</w>
+      <h>301</h>
     </coordinates>
     <panel_attributes>lt=&lt;&lt;&lt;&lt;-</panel_attributes>
     <additional_attributes>10.0;10.0;10.0;410.0</additional_attributes>
@@ -509,10 +509,10 @@ bg=white</panel_attributes>
   <element>
     <id>UMLGeneric</id>
     <coordinates>
-      <x>692</x>
-      <y>632</y>
-      <w>96</w>
-      <h>20</h>
+      <x>882</x>
+      <y>1001</y>
+      <w>168</w>
+      <h>35</h>
     </coordinates>
     <panel_attributes>TrajectoryGeneratorCIRC
 --
@@ -522,10 +522,10 @@ bg=white</panel_attributes>
   <element>
     <id>Relation</id>
     <coordinates>
-      <x>772</x>
-      <y>648</y>
-      <w>12</w>
-      <h>172</h>
+      <x>1022</x>
+      <y>1029</y>
+      <w>21</w>
+      <h>301</h>
     </coordinates>
     <panel_attributes>lt=&lt;&lt;&lt;&lt;-</panel_attributes>
     <additional_attributes>10.0;10.0;10.0;410.0</additional_attributes>
@@ -533,10 +533,10 @@ bg=white</panel_attributes>
   <element>
     <id>Relation</id>
     <coordinates>
-      <x>520</x>
-      <y>744</y>
-      <w>396</w>
-      <h>76</h>
+      <x>581</x>
+      <y>1197</y>
+      <w>693</w>
+      <h>133</h>
     </coordinates>
     <panel_attributes>lt=&lt;&lt;-</panel_attributes>
     <additional_attributes>970.0;10.0;10.0;10.0;10.0;170.0</additional_attributes>
@@ -544,10 +544,10 @@ bg=white</panel_attributes>
   <element>
     <id>Relation</id>
     <coordinates>
-      <x>696</x>
-      <y>764</y>
-      <w>220</w>
-      <h>56</h>
+      <x>889</x>
+      <y>1232</y>
+      <w>385</w>
+      <h>98</h>
     </coordinates>
     <panel_attributes>lt=&lt;&lt;-</panel_attributes>
     <additional_attributes>530.0;10.0;10.0;10.0;10.0;120.0</additional_attributes>
@@ -555,10 +555,10 @@ bg=white</panel_attributes>
   <element>
     <id>Relation</id>
     <coordinates>
-      <x>788</x>
-      <y>784</y>
-      <w>128</w>
-      <h>36</h>
+      <x>1050</x>
+      <y>1267</y>
+      <w>224</w>
+      <h>63</h>
     </coordinates>
     <panel_attributes>lt=&lt;&lt;-</panel_attributes>
     <additional_attributes>300.0;10.0;10.0;10.0;10.0;70.0</additional_attributes>
@@ -566,10 +566,10 @@ bg=white</panel_attributes>
   <element>
     <id>UMLGeneric</id>
     <coordinates>
-      <x>700</x>
-      <y>484</y>
-      <w>72</w>
-      <h>20</h>
+      <x>896</x>
+      <y>742</y>
+      <w>126</w>
+      <h>35</h>
     </coordinates>
     <panel_attributes>PlanningContextCIRC
 --
@@ -579,10 +579,10 @@ bg=white</panel_attributes>
   <element>
     <id>Relation</id>
     <coordinates>
-      <x>732</x>
-      <y>500</y>
-      <w>12</w>
-      <h>140</h>
+      <x>952</x>
+      <y>770</y>
+      <w>21</w>
+      <h>245</h>
     </coordinates>
     <panel_attributes>lt=&lt;&lt;&lt;&lt;-
 m1=1</panel_attributes>
@@ -591,10 +591,10 @@ m1=1</panel_attributes>
   <element>
     <id>Relation</id>
     <coordinates>
-      <x>752</x>
-      <y>460</y>
-      <w>164</w>
-      <h>32</h>
+      <x>987</x>
+      <y>700</y>
+      <w>287</w>
+      <h>56</h>
     </coordinates>
     <panel_attributes>lt=&lt;&lt;-</panel_attributes>
     <additional_attributes>390.0;10.0;10.0;10.0;10.0;60.0</additional_attributes>
@@ -602,10 +602,10 @@ m1=1</panel_attributes>
   <element>
     <id>UMLGeneric</id>
     <coordinates>
-      <x>660</x>
-      <y>360</y>
-      <w>148</w>
-      <h>40</h>
+      <x>826</x>
+      <y>525</y>
+      <w>259</w>
+      <h>70</h>
     </coordinates>
     <panel_attributes>symbol=component
 PlanningContextLoaderCIRC
@@ -618,10 +618,10 @@ PlanningContextLoaderCIRC
   <element>
     <id>Relation</id>
     <coordinates>
-      <x>732</x>
-      <y>396</y>
-      <w>12</w>
-      <h>96</h>
+      <x>952</x>
+      <y>588</y>
+      <w>21</w>
+      <h>168</h>
     </coordinates>
     <panel_attributes>lt=&lt;..</panel_attributes>
     <additional_attributes>10.0;220.0;10.0;10.0</additional_attributes>
@@ -629,10 +629,10 @@ PlanningContextLoaderCIRC
   <element>
     <id>Text</id>
     <coordinates>
-      <x>688</x>
-      <y>408</y>
-      <w>100</w>
-      <h>8</h>
+      <x>875</x>
+      <y>609</y>
+      <w>175</w>
+      <h>14</h>
     </coordinates>
     <panel_attributes>&lt;&lt;bind&gt;&gt;&lt;T-&gt;TrajectoryGeneratorLIN&gt;</panel_attributes>
     <additional_attributes/>
@@ -640,10 +640,10 @@ PlanningContextLoaderCIRC
   <element>
     <id>Relation</id>
     <coordinates>
-      <x>752</x>
-      <y>592</y>
-      <w>116</w>
-      <h>48</h>
+      <x>987</x>
+      <y>931</y>
+      <w>203</w>
+      <h>84</h>
     </coordinates>
     <panel_attributes>lt=&lt;&lt;-</panel_attributes>
     <additional_attributes>270.0;10.0;10.0;10.0;10.0;100.0</additional_attributes>
@@ -651,10 +651,10 @@ PlanningContextLoaderCIRC
   <element>
     <id>Relation</id>
     <coordinates>
-      <x>672</x>
-      <y>260</y>
-      <w>68</w>
-      <h>108</h>
+      <x>847</x>
+      <y>350</y>
+      <w>119</w>
+      <h>189</h>
     </coordinates>
     <panel_attributes>lt=&lt;&lt;-</panel_attributes>
     <additional_attributes>10.0;10.0;150.0;10.0;150.0;250.0</additional_attributes>
@@ -662,10 +662,10 @@ PlanningContextLoaderCIRC
   <element>
     <id>Relation</id>
     <coordinates>
-      <x>240</x>
-      <y>328</y>
-      <w>248</w>
-      <h>40</h>
+      <x>91</x>
+      <y>469</y>
+      <w>434</w>
+      <h>70</h>
     </coordinates>
     <panel_attributes>lt=..</panel_attributes>
     <additional_attributes>10.0;10.0;600.0;10.0;600.0;80.0</additional_attributes>
@@ -673,10 +673,10 @@ PlanningContextLoaderCIRC
   <element>
     <id>Relation</id>
     <coordinates>
-      <x>240</x>
-      <y>316</y>
-      <w>464</w>
-      <h>52</h>
+      <x>91</x>
+      <y>448</y>
+      <w>812</w>
+      <h>91</h>
     </coordinates>
     <panel_attributes>lt=..</panel_attributes>
     <additional_attributes>10.0;10.0;1140.0;10.0;1140.0;110.0</additional_attributes>
@@ -684,10 +684,10 @@ PlanningContextLoaderCIRC
   <element>
     <id>UMLClass</id>
     <coordinates>
-      <x>352</x>
-      <y>132</y>
-      <w>324</w>
-      <h>36</h>
+      <x>287</x>
+      <y>126</y>
+      <w>567</w>
+      <h>63</h>
     </coordinates>
     <panel_attributes>CommandPlanner
 --
@@ -702,10 +702,10 @@ moveit_msgs::MoveItErrorCodes&amp; error_code):planning_interface::PlanningConte
   <element>
     <id>Relation</id>
     <coordinates>
-      <x>512</x>
-      <y>164</y>
-      <w>12</w>
-      <h>60</h>
+      <x>567</x>
+      <y>182</y>
+      <w>21</w>
+      <h>105</h>
     </coordinates>
     <panel_attributes>lt=&lt;&lt;&lt;&lt;-
 m1=n</panel_attributes>
@@ -714,10 +714,10 @@ m1=n</panel_attributes>
   <element>
     <id>UMLClass</id>
     <coordinates>
-      <x>460</x>
-      <y>60</y>
-      <w>116</w>
-      <h>28</h>
+      <x>476</x>
+      <y>0</y>
+      <w>203</w>
+      <h>49</h>
     </coordinates>
     <panel_attributes>PlanningInterface::PlannerManager
 --
@@ -729,10 +729,10 @@ m1=n</panel_attributes>
   <element>
     <id>Relation</id>
     <coordinates>
-      <x>512</x>
-      <y>84</y>
-      <w>12</w>
-      <h>56</h>
+      <x>567</x>
+      <y>42</y>
+      <w>21</w>
+      <h>98</h>
     </coordinates>
     <panel_attributes>lt=&lt;&lt;-</panel_attributes>
     <additional_attributes>10.0;10.0;10.0;120.0</additional_attributes>
@@ -740,10 +740,10 @@ m1=n</panel_attributes>
   <element>
     <id>UMLClass</id>
     <coordinates>
-      <x>880</x>
-      <y>356</y>
-      <w>116</w>
-      <h>28</h>
+      <x>1211</x>
+      <y>518</y>
+      <w>203</w>
+      <h>49</h>
     </coordinates>
     <panel_attributes>PlanningInterface::PlanningContext
 --
@@ -755,10 +755,10 @@ m1=n</panel_attributes>
   <element>
     <id>Relation</id>
     <coordinates>
-      <x>936</x>
-      <y>380</y>
-      <w>12</w>
-      <h>44</h>
+      <x>1309</x>
+      <y>560</y>
+      <w>21</w>
+      <h>77</h>
     </coordinates>
     <panel_attributes>lt=&lt;&lt;-</panel_attributes>
     <additional_attributes>10.0;10.0;10.0;90.0</additional_attributes>
@@ -766,10 +766,10 @@ m1=n</panel_attributes>
   <element>
     <id>Relation</id>
     <coordinates>
-      <x>708</x>
-      <y>820</y>
-      <w>48</w>
-      <h>12</h>
+      <x>910</x>
+      <y>1330</y>
+      <w>84</w>
+      <h>21</h>
     </coordinates>
     <panel_attributes>lt=&lt;&lt;&lt;&lt;-</panel_attributes>
     <additional_attributes>100.0;10.0;10.0;10.0</additional_attributes>
@@ -777,10 +777,10 @@ m1=n</panel_attributes>
   <element>
     <id>UMLClass</id>
     <coordinates>
-      <x>364</x>
-      <y>804</y>
-      <w>84</w>
-      <h>36</h>
+      <x>308</x>
+      <y>1302</y>
+      <w>147</w>
+      <h>63</h>
     </coordinates>
     <panel_attributes>Package::KDL
 VelocityProfile_Trap
@@ -796,10 +796,10 @@ VelocityProfile_Trap
   <element>
     <id>Relation</id>
     <coordinates>
-      <x>428</x>
-      <y>636</y>
-      <w>272</w>
-      <h>176</h>
+      <x>420</x>
+      <y>1008</y>
+      <w>476</w>
+      <h>308</h>
     </coordinates>
     <panel_attributes>lt=&lt;&lt;&lt;&lt;-</panel_attributes>
     <additional_attributes>660.0;10.0;410.0;10.0;410.0;140.0;10.0;140.0;10.0;420.0</additional_attributes>
@@ -807,10 +807,10 @@ VelocityProfile_Trap
   <element>
     <id>UMLClass</id>
     <coordinates>
-      <x>628</x>
-      <y>712</y>
-      <w>72</w>
-      <h>24</h>
+      <x>770</x>
+      <y>1141</y>
+      <w>126</w>
+      <h>42</h>
     </coordinates>
     <panel_attributes>Package::KDL
 Trajectory_Segment
@@ -822,10 +822,10 @@ Trajectory_Segment
   <element>
     <id>Relation</id>
     <coordinates>
-      <x>696</x>
-      <y>648</y>
-      <w>36</w>
-      <h>84</h>
+      <x>889</x>
+      <y>1029</y>
+      <w>63</w>
+      <h>147</h>
     </coordinates>
     <panel_attributes>lt=&lt;&lt;&lt;&lt;-</panel_attributes>
     <additional_attributes>70.0;10.0;70.0;190.0;10.0;190.0</additional_attributes>
@@ -833,10 +833,10 @@ Trajectory_Segment
   <element>
     <id>Relation</id>
     <coordinates>
-      <x>352</x>
-      <y>772</y>
-      <w>36</w>
-      <h>40</h>
+      <x>287</x>
+      <y>1246</y>
+      <w>63</w>
+      <h>70</h>
     </coordinates>
     <panel_attributes>lt=&lt;&lt;-</panel_attributes>
     <additional_attributes>10.0;10.0;70.0;10.0;70.0;80.0</additional_attributes>
@@ -844,10 +844,10 @@ Trajectory_Segment
   <element>
     <id>UMLClass</id>
     <coordinates>
-      <x>636</x>
-      <y>668</y>
-      <w>56</w>
-      <h>20</h>
+      <x>784</x>
+      <y>1064</y>
+      <w>98</w>
+      <h>35</h>
     </coordinates>
     <panel_attributes>/KDL::Trajectory/
 --
@@ -859,10 +859,10 @@ Trajectory_Segment
   <element>
     <id>Relation</id>
     <coordinates>
-      <x>660</x>
-      <y>684</y>
-      <w>12</w>
-      <h>36</h>
+      <x>826</x>
+      <y>1092</y>
+      <w>21</w>
+      <h>63</h>
     </coordinates>
     <panel_attributes>lt=&lt;&lt;-</panel_attributes>
     <additional_attributes>10.0;10.0;10.0;70.0</additional_attributes>
@@ -870,10 +870,10 @@ Trajectory_Segment
   <element>
     <id>UMLClass</id>
     <coordinates>
-      <x>908</x>
-      <y>736</y>
-      <w>44</w>
-      <h>64</h>
+      <x>1260</x>
+      <y>1183</y>
+      <w>77</w>
+      <h>112</h>
     </coordinates>
     <panel_attributes>/KDL::Path/
 --
@@ -884,10 +884,10 @@ Trajectory_Segment
   <element>
     <id>Relation</id>
     <coordinates>
-      <x>524</x>
-      <y>648</y>
-      <w>112</w>
-      <h>84</h>
+      <x>588</x>
+      <y>1029</y>
+      <w>196</w>
+      <h>147</h>
     </coordinates>
     <panel_attributes>lt=&lt;&lt;&lt;&lt;-</panel_attributes>
     <additional_attributes>10.0;10.0;10.0;190.0;260.0;190.0</additional_attributes>
@@ -895,10 +895,10 @@ Trajectory_Segment
   <element>
     <id>Relation</id>
     <coordinates>
-      <x>392</x>
-      <y>636</y>
-      <w>96</w>
-      <h>176</h>
+      <x>357</x>
+      <y>1008</y>
+      <w>168</w>
+      <h>308</h>
     </coordinates>
     <panel_attributes>lt=&lt;&lt;&lt;&lt;-</panel_attributes>
     <additional_attributes>220.0;10.0;10.0;10.0;10.0;420.0</additional_attributes>
