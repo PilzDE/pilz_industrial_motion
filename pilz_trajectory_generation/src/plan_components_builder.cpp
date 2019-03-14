@@ -79,7 +79,7 @@ void PlanComponentsBuilder::blend(robot_trajectory::RobotTrajectoryPtr other,
 void PlanComponentsBuilder::append(robot_trajectory::RobotTrajectoryPtr other,
                                    const double blend_radius)
 {
-  if (!model_) {throw NoRobolModelSetException("No robot model set");}
+  if (!model_) {throw NoRobotModelSetException("No robot model set");}
 
   if (!traj_tail_)
   {

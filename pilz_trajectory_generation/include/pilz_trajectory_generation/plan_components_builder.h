@@ -35,21 +35,66 @@ namespace pilz_trajectory_generation
 
 using TipFrameFunc_t = std::function<const std::string&(const std::string&)>;
 
+// List of exceptions which can be thrown by the PlanComponentsBuilder class.
 CREATE_MOVEIT_ERROR_CODE_EXCEPTION(NoBlenderSetException, moveit_msgs::MoveItErrorCodes::FAILURE);
 CREATE_MOVEIT_ERROR_CODE_EXCEPTION(NoTipFrameFunctionSetException, moveit_msgs::MoveItErrorCodes::FAILURE);
-CREATE_MOVEIT_ERROR_CODE_EXCEPTION(NoRobolModelSetException, moveit_msgs::MoveItErrorCodes::FAILURE);
+CREATE_MOVEIT_ERROR_CODE_EXCEPTION(NoRobotModelSetException, moveit_msgs::MoveItErrorCodes::FAILURE);
 CREATE_MOVEIT_ERROR_CODE_EXCEPTION(BlendingFailedException, moveit_msgs::MoveItErrorCodes::FAILURE);
 
+/**
+ * @brief Helper class to encapsulate the merge and blend process of
+ * trajectories.
+ */
 class PlanComponentsBuilder
 {
 public:
+  /**
+   * @brief Sets the blender used to blend two trajectories.
+   */
   void setBlender(std::unique_ptr<pilz::TrajectoryBlender> blender);
+
+  /**
+   * @brief Sets the robot model needed to create new trajectory elements.
+   */
   void setModel(const moveit::core::RobotModelConstPtr &model);
+
+  /**
+   * @brief Sets the function needed to determine the tip frame (link) of
+   * a group.
+   */
   void setTipFrameFunc(TipFrameFunc_t func);
 
+  /**
+   * @brief Appends the specified trajectory to the trajectory container
+   * under construction.
+   *
+   * The appending complies to the following rules:
+   * - A trajectory is simply added/attached to the previous trajectory:
+   *      - if they are from the same group and
+   *      - if the specified blend_radius is zero.
+   * - A trajectory is blended together with the previous trajectory:
+   *      - if they are from the same group and
+   *      - if the specified blend_radius is GREATER than zero.
+   * - A new trajectory element is created and the given trajectory is
+   * appended/attached to the newly created empty trajectory:
+   *      - if the given and previous trajectory are from different groups.
+   *
+   * @param other Trajectories which has to be added to the trajectory container
+   * under construction.
+   *
+   * @param blend_radius The blending radius between the previous and the
+   * specified trajectory.
+   */
   void append(robot_trajectory::RobotTrajectoryPtr other, const double blend_radius);
+
+  /**
+   * @brief Clears the trajectory container under construction.
+   */
   void reset();
 
+  /**
+   * @return The final trajectory container which results from the append calls.
+   */
   std::vector<robot_trajectory::RobotTrajectoryPtr> build() const;
 
 private:
@@ -70,11 +115,19 @@ private:
                                            const robot_trajectory::RobotTrajectory &source);
 
 private:
+  //! Blender used to blend two trajectories.
   std::unique_ptr<pilz::TrajectoryBlender> blender_;
+
+  //! Robot model needed to create new trajectory container elements.
   moveit::core::RobotModelConstPtr model_;
+
+  //! Function needed to determine the tip frame (link) of a group.
   TipFrameFunc_t tipFrameFunc_;
 
+  //! The previously added trajectory.
   robot_trajectory::RobotTrajectoryPtr traj_tail_;
+
+  //! The trajectory container under construction.
   std::vector<robot_trajectory::RobotTrajectoryPtr> traj_cont_;
 
 private:
