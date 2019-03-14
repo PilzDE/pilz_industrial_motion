@@ -26,18 +26,20 @@ from pilz_robot_programming.commands import *
 from pilz_industrial_motion_testutils.integration_test_utils import *
 from pilz_industrial_motion_testutils.robot_motion_observer import RobotMotionObserver
 
-PLANNING_GROUP_NAME = "manipulator"
 API_VERSION = "1"
-
 
 class TestSequenceWithGripper(unittest.TestCase):
 
     _GRIPPER_GROUP_NAME = "gripper"
-    _GRIPPER_POSE_CLOSED = 0.0
+    _GRIPPER_POSE_CLOSED = 0.001
 
-    _TOLERANCE_POSITION_COMPARE = 1e-4
+    _TOLERANCE_POSITION_COMPARE = 1e-3
 
     def setUp(self):
+        if not 'ros_init_done' in globals():
+            rospy.init_node('tst_sequence_with_gripper')
+            global ros_init_done
+
         self.robot = Robot(API_VERSION)
         self.robot_motion_observer = RobotMotionObserver(group_name=self._GRIPPER_GROUP_NAME)
         self.robot.move(Gripper(goal=self._GRIPPER_POSE_CLOSED))
@@ -58,9 +60,14 @@ class TestSequenceWithGripper(unittest.TestCase):
         seq.append(Gripper(goal=goal_joint))
         self.robot.move(seq)
 
+        # Check that gripper has moved
         current_joints = self.robot.get_current_joint_states(self._GRIPPER_GROUP_NAME)
         self.assertEqual(1, len(current_joints))
         self.assertAlmostEqual(goal_joint, current_joints[0])
+
+        # Check that robot has NOT moved
+        self.assertTrue(numpy.allclose(self.robot.get_current_joint_states(),
+                                       start_joint_values, atol=self._TOLERANCE_POSITION_COMPARE))
 
     def test_invalid_gripper_execution(self):
         """ Tests a sequence containing an invalid gripper command.
@@ -93,7 +100,7 @@ class TestSequenceWithGripper(unittest.TestCase):
         self.robot.move(Ptp(goal=start_joint_values))
 
         gripper_open = 0.02
-        gripper_totally_open = 0.03
+        gripper_totally_open = 0.029
 
         seq = Sequence()
         seq.append(Gripper(goal=gripper_open))
@@ -117,5 +124,7 @@ class TestSequenceWithGripper(unittest.TestCase):
 
 if __name__ == '__main__':
     import rostest
-    rospy.init_node('tst_sequence_with_gripper')
+    if not 'ros_init_done' in globals():
+        rospy.init_node('tst_sequence_with_gripper')
+        global ros_init_done
     rostest.rosrun('pilz_robot_programming', 'tst_sequence_with_gripper', TestSequenceWithGripper)
