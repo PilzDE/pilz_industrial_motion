@@ -50,8 +50,15 @@ void PlanComponentsBuilder::appendWithStrictTimeIncrease(robot_trajectory::Robot
 void PlanComponentsBuilder::blend(robot_trajectory::RobotTrajectoryPtr other,
                                   const double blend_radius)
 {
-  if (!blender_) {throw NoBlenderSetException("No blender set");}
-  if (!tipFrameFunc_) {throw NoTipFrameFunctionSetException("No getter fucntion for tip frame set");}
+  if (!blender_)
+  {
+    throw NoBlenderSetException("No blender set");
+  }
+
+  if (!tipFrameFunc_)
+  {
+    throw NoTipFrameFunctionSetException("No getter fucntion for tip frame set");
+  }
 
   assert(other->getGroupName() == traj_tail_->getGroupName());
 
@@ -79,7 +86,10 @@ void PlanComponentsBuilder::blend(robot_trajectory::RobotTrajectoryPtr other,
 void PlanComponentsBuilder::append(robot_trajectory::RobotTrajectoryPtr other,
                                    const double blend_radius)
 {
-  if (!model_) {throw NoRobotModelSetException("No robot model set");}
+  if (!model_)
+  {
+    throw NoRobotModelSetException("No robot model set");
+  }
 
   if (!traj_tail_)
   {
