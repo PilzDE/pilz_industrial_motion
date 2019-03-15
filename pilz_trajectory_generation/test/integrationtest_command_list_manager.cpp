@@ -15,31 +15,38 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
+#include <memory>
+#include <string>
+
 #include <gtest/gtest.h>
 
 #include <ros/ros.h>
 #include <ros/time.h>
+
 #include <moveit/robot_model_loader/robot_model_loader.h>
 #include <moveit/kinematic_constraints/utils.h>
 #include <moveit_msgs/MotionPlanResponse.h>
 #include <moveit_msgs/DisplayTrajectory.h>
 #include <moveit/planning_scene/planning_scene.h>
+
 #include <tf2_eigen/tf2_eigen.h>
+
+#include <pilz_industrial_motion_testutils/xml_testdata_loader.h>
+#include <pilz_industrial_motion_testutils/sequence.h>
+#include <pilz_industrial_motion_testutils/lin.h>
+
 #include "test_utils.h"
 
 #include "pilz_trajectory_generation/command_list_manager.h"
 
-#include "motion_plan_request_builder.h"
-#include "motion_sequence_request_builder.h"
-
 const std::string PARAM_MODEL_NO_GRIPPER_NAME {"robot_description"};
 const std::string PARAM_MODEL_WITH_GRIPPER_NAME {"robot_description_pg70"};
 
-const std::string PARAM_PLANNING_GROUP_NAME("planning_group");
-const std::string PARAM_TARGET_LINK_NAME("target_link");
+const std::string TEST_DATA_FILE_NAME("testdata_file_name");
 
 using testutils::hasStrictlyIncreasingTime;
 using namespace pilz_trajectory_generation;
+using namespace pilz_industrial_motion_testutils;
 
 class IntegrationTestCommandListManager : public testing::TestWithParam<std::string>
 {
@@ -51,15 +58,12 @@ protected:
   ros::NodeHandle ph_ {"~"};
   robot_model::RobotModelConstPtr robot_model_ {
     robot_model_loader::RobotModelLoader(GetParam()).getModel()};
-  std::shared_ptr<pilz_trajectory_generation::CommandListManager> manager_ {0};
-  planning_scene::PlanningScenePtr scene_ {0};
+  std::shared_ptr<pilz_trajectory_generation::CommandListManager> manager_;
+  planning_scene::PlanningScenePtr scene_;
 
-  std::string planning_group_, target_link_;
-  pilz_msgs::MotionSequenceRequest blend_command_lin_lin_;
-  pilz_msgs::MotionSequenceRequest blend_command_list_lin_lin_lin_;
-  moveit_msgs::MotionPlanRequest  req_lin1_, req_lin2_, req_lin3_;
-  moveit_msgs::MotionPlanRequest  req_ptp1_, req_ptp2_;
-  geometry_msgs::PoseStamped p1_, p2_, p3_;
+  std::string planning_group_;
+
+  std::unique_ptr<pilz_industrial_motion_testutils::TestdataLoader> data_loader_;
 };
 
 void IntegrationTestCommandListManager::SetUp()
@@ -69,56 +73,13 @@ void IntegrationTestCommandListManager::SetUp()
   {
     FAIL() << "Robot model could not be loaded. Maybe the robot_description(\"" <<GetParam() << "\") is missing.";
   }
-  ASSERT_TRUE(ph_.getParam(PARAM_PLANNING_GROUP_NAME, planning_group_));
-  ASSERT_TRUE(ph_.getParam(PARAM_TARGET_LINK_NAME, target_link_));
 
-  // check robot model
-  testutils::checkRobotModel(robot_model_, planning_group_, target_link_);
+  std::string test_data_file_name;
+  ASSERT_TRUE(ph_.getParam(TEST_DATA_FILE_NAME, test_data_file_name));
 
-  p1_.header.frame_id = robot_model_->getModelFrame();
-  p1_.pose.position.x = 0.25;
-  p1_.pose.position.y = 0.3;
-  p1_.pose.position.z = 0.65;
-  p1_.pose.orientation.x = 0.;
-  p1_.pose.orientation.y = 0.;
-  p1_.pose.orientation.z = 0.;
-  p1_.pose.orientation.w = 1.;
-
-  p2_ = p1_;
-  p2_.pose.position.x -= 0.15;
-
-  // TODO: move p3 to testUtils
-  p3_ = p1_;
-  p3_.pose.position.y -= 0.15;
-
-  MotionPlanRequestBuilder builder(planning_group_);
-
-  // goal 1 (with start state) for robot without gripper
-  robot_state::RobotState rstate(robot_model_);
-  rstate.setToDefaultValues();
-  rstate.setJointGroupPositions(planning_group_, {0., 0.007881892504574495, -1.8157263253868452,
-                                                  0., 1.8236082178909834, 0.});
-  builder.setJointStartState(rstate);
-  builder.setGoal(target_link_, p1_);
-
-  req_lin1_ = builder.createLin();
-  req_ptp1_ = builder.createPtp();
-
-  // Clear the start state for the next goals
-  builder.clearJointStartState();
-
-  // goal 2
-  builder.setGoal(target_link_, p2_);
-  req_lin2_ = builder.createLin();
-  req_ptp2_ = builder.createPtp();
-
-  // goal3
-  builder.setGoal(target_link_, p3_);
-  req_lin3_ = builder.createLin();
-
-  MotionSequenceRequestBuilder seq_request_builder;
-  blend_command_lin_lin_ = seq_request_builder.build({ {req_lin1_, 0.08}, {req_lin2_, 0} });
-  blend_command_list_lin_lin_lin_ = seq_request_builder.build({ {req_lin1_, 0.08}, {req_lin2_, 0.05}, {req_lin3_, 0} });
+  // load the test data provider
+  data_loader_.reset(new pilz_industrial_motion_testutils::XmlTestdataLoader{test_data_file_name, robot_model_});
+  ASSERT_NE(nullptr, data_loader_) << "Failed to load test data by provider.";
 
   // Define and set the current scene and manager test object
   scene_ = std::make_shared<planning_scene::PlanningScene>(robot_model_);
@@ -185,50 +146,49 @@ TEST_P(IntegrationTestCommandListManager, TestExceptionErrorCodeMapping)
  */
 TEST_P(IntegrationTestCommandListManager, concatThreeSegments)
 {
-  MotionSequenceRequestBuilder seq_request_builder;
-  pilz_msgs::MotionSequenceRequest req = seq_request_builder.build({std::make_pair<>(req_lin1_, 0),
-                                                                                     std::make_pair<>(req_lin2_, 0),
-                                                                                     std::make_pair<>(req_lin3_, 0)});
-  RobotTrajVec_t res123_vec {manager_->solve(scene_, req)};
+  Sequence seq {data_loader_->getSequence("ComplexSequence")};
+  ASSERT_GE(seq.size(), 3u);
+  seq.erase(3, seq.size());
+  seq.setAllBlendRadiiToZero();
+
+  RobotTrajVec_t res123_vec {manager_->solve(scene_, seq.toRequest())};
   EXPECT_EQ(res123_vec.size(), 1);
   EXPECT_GT(res123_vec.front()->getWayPointCount(), 0u);
   EXPECT_TRUE(hasStrictlyIncreasingTime(res123_vec.front())) << "Time steps not strictly positively increasing";
 
   ROS_INFO("step 2: only first segment");
-  req = seq_request_builder.build({std::make_pair<>(req_lin1_, 0)});
-
-  RobotTrajVec_t res1_vec {manager_->solve(scene_, req)};
+  pilz_msgs::MotionSequenceRequest req_1;
+  req_1.items.resize(1);
+  req_1.items.at(0).req = seq.getCmd(0).toRequest();
+  req_1.items.at(0).blend_radius = 0.;
+  RobotTrajVec_t res1_vec {manager_->solve(scene_, req_1)};
   EXPECT_EQ(res1_vec.size(), 1);
   EXPECT_GT(res1_vec.front()->getWayPointCount(), 0u);
   EXPECT_EQ(res1_vec.front()->getFirstWayPoint().getVariableCount(),
-            req.items[0].req.start_state.joint_state.name.size());
+            req_1.items.at(0).req.start_state.joint_state.name.size());
 
   ROS_INFO("step 3: only second segment");
-  // Create duplicate of req_lin2_ with start state
-  MotionPlanRequestBuilder builder_2(req_lin2_);
-  builder_2.setJointStartState(res1_vec.front()->getLastWayPoint());
-
-  moveit_msgs::MotionPlanRequest req2 = builder_2.createLin();
-  req = seq_request_builder.build({std::make_pair<>(req2, 0)});
-  RobotTrajVec_t res2_vec {manager_->solve(scene_, req)};
+  pilz_msgs::MotionSequenceRequest req_2;
+  req_2.items.resize(1);
+  req_2.items.at(0).req = seq.getCmd(1).toRequest();
+  req_2.items.at(0).blend_radius = 0.;
+  RobotTrajVec_t res2_vec {manager_->solve(scene_, req_2)};
   EXPECT_EQ(res2_vec.size(), 1);
   EXPECT_GT(res2_vec.front()->getWayPointCount(), 0u);
   EXPECT_EQ(res2_vec.front()->getFirstWayPoint().getVariableCount(),
-            req.items[0].req.start_state.joint_state.name.size());
+            req_2.items.at(0).req.start_state.joint_state.name.size());
 
 
   ROS_INFO("step 4: only third segment");
-  // Create duplicate of req_lin3_ with start state
-  MotionPlanRequestBuilder builder_3(req_lin3_);
-  builder_3.setJointStartState(res2_vec.front()->getLastWayPoint());
-
-  moveit_msgs::MotionPlanRequest req3 = builder_3.createLin();
-  req = seq_request_builder.build({std::make_pair<>(req3, 0)});
-  RobotTrajVec_t res3_vec {manager_->solve(scene_, req)};
+  pilz_msgs::MotionSequenceRequest req_3;
+  req_3.items.resize(1);
+  req_3.items.at(0).req = seq.getCmd(2).toRequest();
+  req_3.items.at(0).blend_radius = 0.;
+  RobotTrajVec_t res3_vec {manager_->solve(scene_, req_3)};
   EXPECT_EQ(res3_vec.size(), 1);
   EXPECT_GT(res3_vec.front()->getWayPointCount(), 0u);
   EXPECT_EQ(res3_vec.front()->getFirstWayPoint().getVariableCount(),
-            req.items[0].req.start_state.joint_state.name.size());
+            req_3.items.at(0).req.start_state.joint_state.name.size());
 
 
   // durations for the different segments
@@ -252,11 +212,10 @@ TEST_P(IntegrationTestCommandListManager, concatThreeSegments)
  */
 TEST_P(IntegrationTestCommandListManager, concatTwoPtpSegments)
 {
-  MotionSequenceRequestBuilder seq_request_builder;
-  pilz_msgs::MotionSequenceRequest req = seq_request_builder.build({ {req_ptp1_, 0},
-                                                                     {req_ptp2_, 0} });
+  Sequence seq {data_loader_->getSequence("PtpPtpSequence")};
+  seq.setAllBlendRadiiToZero();
 
-  RobotTrajVec_t res_vec {manager_->solve(scene_, req)};
+  RobotTrajVec_t res_vec {manager_->solve(scene_, seq.toRequest())};
   EXPECT_EQ(res_vec.size(), 1);
   EXPECT_GT(res_vec.front()->getWayPointCount(), 0u);
   EXPECT_TRUE(hasStrictlyIncreasingTime(res_vec.front()));
@@ -274,11 +233,10 @@ TEST_P(IntegrationTestCommandListManager, concatTwoPtpSegments)
  */
 TEST_P(IntegrationTestCommandListManager, concatPtpAndLinSegments)
 {
-  MotionSequenceRequestBuilder seq_request_builder;
-  pilz_msgs::MotionSequenceRequest req = seq_request_builder.build({ {req_ptp1_, 0},
-                                                                     {req_lin2_, 0} });
+  Sequence seq {data_loader_->getSequence("PtpLinSequence")};
+  seq.setAllBlendRadiiToZero();
 
-  RobotTrajVec_t res_vec {manager_->solve(scene_, req)};
+  RobotTrajVec_t res_vec {manager_->solve(scene_, seq.toRequest())};
   EXPECT_EQ(res_vec.size(), 1);
   EXPECT_GT(res_vec.front()->getWayPointCount(), 0u);
   EXPECT_TRUE(hasStrictlyIncreasingTime(res_vec.front()));
@@ -296,11 +254,10 @@ TEST_P(IntegrationTestCommandListManager, concatPtpAndLinSegments)
  */
 TEST_P(IntegrationTestCommandListManager, concatLinAndPtpSegments)
 {
-  MotionSequenceRequestBuilder seq_request_builder;
-  pilz_msgs::MotionSequenceRequest req = seq_request_builder.build({ {req_lin1_, 0},
-                                                                     {req_ptp2_, 0} });
+  Sequence seq {data_loader_->getSequence("LinPtpSequence")};
+  seq.setAllBlendRadiiToZero();
 
-  RobotTrajVec_t res_vec {manager_->solve(scene_, req)};
+  RobotTrajVec_t res_vec {manager_->solve(scene_, seq.toRequest())};
   EXPECT_EQ(res_vec.size(), 1);
   EXPECT_GT(res_vec.front()->getWayPointCount(), 0u);
   EXPECT_TRUE(hasStrictlyIncreasingTime(res_vec.front()));
@@ -317,12 +274,13 @@ TEST_P(IntegrationTestCommandListManager, concatLinAndPtpSegments)
  */
 TEST_P(IntegrationTestCommandListManager, blendTwoSegments)
 {
-  planning_interface::MotionPlanResponse res;
-  RobotTrajVec_t res_vec {manager_->solve(scene_, blend_command_lin_lin_)};
+  Sequence seq {data_loader_->getSequence("TestBlend")};
+  pilz_msgs::MotionSequenceRequest req {seq.toRequest()};
+  RobotTrajVec_t res_vec {manager_->solve(scene_, req)};
   EXPECT_EQ(res_vec.size(), 1);
   EXPECT_GT(res_vec.front()->getWayPointCount(), 0u);
   EXPECT_EQ(res_vec.front()->getFirstWayPoint().getVariableCount(),
-            blend_command_lin_lin_.items[0].req.start_state.joint_state.name.size());
+            req.items.at(0).req.start_state.joint_state.name.size());
 
 
   ros::NodeHandle nh;
@@ -368,9 +326,10 @@ TEST_P(IntegrationTestCommandListManager, emptyList)
  */
 TEST_P(IntegrationTestCommandListManager, firstGoalNotReachable)
 {
-  pilz_msgs::MotionSequenceRequest req = blend_command_lin_lin_;
-  req.items[0].req.goal_constraints[0].position_constraints[0].constraint_region.primitive_poses[0].position.y = 27;
-  EXPECT_THROW(manager_->solve(scene_, req), PlanningPipelineException);
+  Sequence seq {data_loader_->getSequence("TestBlend")};
+  LinCart& lin {seq.getCmd<LinCart>(0)};
+  lin.getGoalConfiguration().getPose().position.y = 2700;
+  EXPECT_THROW(manager_->solve(scene_, seq.toRequest()), PlanningPipelineException);
 }
 
 /**
@@ -384,8 +343,10 @@ TEST_P(IntegrationTestCommandListManager, firstGoalNotReachable)
  */
 TEST_P(IntegrationTestCommandListManager, startStateNotFirstGoal)
 {
-  pilz_msgs::MotionSequenceRequest req = blend_command_lin_lin_;
-  req.items[1].req.start_state.joint_state = testutils::generateJointState({-1., 2., -3., 4., -5., 0.});
+  Sequence seq {data_loader_->getSequence("TestBlend")};
+  const LinCart& lin {seq.getCmd<LinCart>(0)};
+  pilz_msgs::MotionSequenceRequest req {seq.toRequest()};
+  req.items.at(1).req.start_state = lin.getGoalConfiguration().toMoveitMsgsRobotState();
   EXPECT_THROW(manager_->solve(scene_, req), StartStateSetException);
 }
 
@@ -401,9 +362,9 @@ TEST_P(IntegrationTestCommandListManager, startStateNotFirstGoal)
  */
 TEST_P(IntegrationTestCommandListManager, blendingRadiusNegative)
 {
-  pilz_msgs::MotionSequenceRequest req = blend_command_lin_lin_;
-  req.items[0].blend_radius = -0.3;
-  EXPECT_THROW(manager_->solve(scene_, req), NegativeBlendRadiusException);
+  Sequence seq {data_loader_->getSequence("TestBlend")};
+  seq.setBlendRadii(0,-0.3);
+  EXPECT_THROW(manager_->solve(scene_, seq.toRequest()), NegativeBlendRadiusException);
 }
 
 /**
@@ -418,9 +379,9 @@ TEST_P(IntegrationTestCommandListManager, blendingRadiusNegative)
  */
 TEST_P(IntegrationTestCommandListManager, lastBlendingRadiusNonZero)
 {
-  pilz_msgs::MotionSequenceRequest req = blend_command_lin_lin_;
-  req.items[1].blend_radius = 0.03;
-  EXPECT_THROW(manager_->solve(scene_, req), LastBlendRadiusNotZeroException);
+  Sequence seq {data_loader_->getSequence("TestBlend")};
+  seq.setBlendRadii(1, 0.03);
+  EXPECT_THROW(manager_->solve(scene_, seq.toRequest()), LastBlendRadiusNotZeroException);
 }
 
 /**
@@ -436,11 +397,10 @@ TEST_P(IntegrationTestCommandListManager, lastBlendingRadiusNonZero)
  */
 TEST_P(IntegrationTestCommandListManager, blendRadiusGreaterThanSegment)
 {
-  pilz_msgs::MotionSequenceRequest req = blend_command_lin_lin_;
-  req.items[0].blend_radius = 42.;
-  EXPECT_THROW(manager_->solve(scene_, req), BlendingFailedException);
+  Sequence seq {data_loader_->getSequence("TestBlend")};
+  seq.setBlendRadii(0, 42.0);
+  EXPECT_THROW(manager_->solve(scene_, seq.toRequest()), BlendingFailedException);
 }
-
 
 /**
  * @brief Checks that exception is thrown if two consecutive blend radii
@@ -456,67 +416,74 @@ TEST_P(IntegrationTestCommandListManager, blendRadiusGreaterThanSegment)
  */
 TEST_P(IntegrationTestCommandListManager, blendingRadiusOverlapping)
 {
-  pilz_msgs::MotionSequenceRequest req = blend_command_list_lin_lin_lin_;
+  Sequence seq {data_loader_->getSequence("ComplexSequence")};
+  ASSERT_GE(seq.size(), 3u);
+  seq.erase(3, seq.size());
 
-  RobotTrajVec_t res_valid_vec {manager_->solve(scene_, req)};
+  RobotTrajVec_t res_valid_vec {manager_->solve(scene_, seq.toRequest())};
   EXPECT_EQ(res_valid_vec.size(), 1);
   EXPECT_GT(res_valid_vec.front()->getWayPointCount(), 0u);
 
   // calculate distance from first to second goal
+  const PtpJointCart& ptp {seq.getCmd<PtpJointCart>(0)};
+  const CircInterimCart& circ {seq.getCmd<CircInterimCart>(1)};
   Eigen::Affine3d p1, p2;
-  tf2::fromMsg(req.items[0].req.goal_constraints[0].position_constraints[0].constraint_region.primitive_poses[0], p1);
-  tf2::fromMsg(req.items[1].req.goal_constraints[0].position_constraints[0].constraint_region.primitive_poses[0], p2);
+  tf2::fromMsg(ptp.getGoalConfiguration().getPose(), p1);
+  tf2::fromMsg(circ.getGoalConfiguration().getPose(), p2);
   auto distance = (p2.translation()-p1.translation()).norm();
-  req.items[1].blend_radius = distance - req.items[0].blend_radius + 0.01; // overlapping radii
 
-  EXPECT_THROW(manager_->solve(scene_, req), OverlappingBlendRadiiException);
+  seq.setBlendRadii(1, (distance - seq.getBlendRadius(0) + 0.01) ); // overlapping radii
+  EXPECT_THROW(manager_->solve(scene_, seq.toRequest()), OverlappingBlendRadiiException);
 }
 
 /**
- * @brief
- * Stress test: Planning time for a large number of blending requests
+ * @brief Tests if the planned execution time scales correctly with the number
+ * of repetitions.
  *
  * Test Sequence:
- *    1. Generate request with three trajectories and measure planning time
- *    2. Generate request with repeated path along the three points
+ *    1. Generate trajectory and save calculated execution time.
+ *    2. Generate request with repeated path along the points from Test Step 1
+ *      (repeated two times).
  *
  * Expected Results:
- *    1. blending succeeds, result trajectory is not empty
- *    2. blending succeeds, planning time should be approx N times single planning time
- *       and time from start should be approx. N times single plan
+ *    1. Blending succeeds, result trajectory is not empty.
+ *    2. Blending succeeds, planned execution time should be approx N times
+ *       the single planned execution time.
  */
-TEST_P(IntegrationTestCommandListManager, largeRequest)
+TEST_P(IntegrationTestCommandListManager, TestExecutionTime)
 {
-  const int n = 30;
-  pilz_msgs::MotionSequenceRequest req = blend_command_list_lin_lin_lin_;
-
-  RobotTrajVec_t res_single_vec {manager_->solve(scene_, req)};
+  Sequence seq {data_loader_->getSequence("ComplexSequence")};
+  RobotTrajVec_t res_single_vec {manager_->solve(scene_, seq.toRequest())};
   EXPECT_EQ(res_single_vec.size(), 1);
   EXPECT_GT(res_single_vec.front()->getWayPointCount(), 0u);
 
-  // construct request
-  req.items.back().blend_radius = 0.01;
-  for(int i = 0; i < n; ++i)
+  pilz_msgs::MotionSequenceRequest req {seq.toRequest()};
+  // Create large request by making copies of the original sequence commands
+  // and adding them to the end of the original sequence.
+  const size_t N {req.items.size()};
+  for(size_t i = 0; i<N; ++i)
   {
-    req.items.push_back(req.items[0]);
-    req.items.back().req.start_state.joint_state.position.clear();
-    req.items.back().req.start_state.joint_state.velocity.clear();
-    req.items.back().req.start_state.joint_state.name.clear();
-    req.items.push_back(req.items[1]);
-    req.items.push_back(req.items[2]);
+    pilz_msgs::MotionSequenceItem item {req.items.at(i)};
+    if (i == 0)
+    {
+      // Remove start state because only the first request
+      // is allowed to have a start state in a sequence.
+      item.req.start_state = moveit_msgs::RobotState();
+    }
+    req.items.push_back(item);
   }
-  req.items.back().blend_radius = 0.0;
 
   RobotTrajVec_t res_n_vec {manager_->solve(scene_, req)};
   EXPECT_EQ(res_n_vec.size(), 1);
   EXPECT_GT(res_n_vec.front()->getWayPointCount(), 0u);
 
-  double trajectory_time_1 = res_single_vec.front()->getWayPointDurationFromStart(
+  const double trajectory_time_1 = res_single_vec.front()->getWayPointDurationFromStart(
         res_single_vec.front()->getWayPointCount()-1);
-  double trajectory_time_n = res_n_vec.front()->getWayPointDurationFromStart(
+  const double trajectory_time_n = res_n_vec.front()->getWayPointDurationFromStart(
         res_n_vec.front()->getWayPointCount()-1);
-  EXPECT_LE(trajectory_time_n, trajectory_time_1*n);
-  EXPECT_GE(trajectory_time_n, trajectory_time_1 * n * 0.5);
+  double multiplicator = req.items.size() / N;
+  EXPECT_LE(trajectory_time_n, trajectory_time_1*multiplicator);
+  EXPECT_GE(trajectory_time_n, trajectory_time_1 * multiplicator * 0.5);
 }
 
 int main(int argc, char **argv)
