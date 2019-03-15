@@ -75,6 +75,15 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
       <vel>1.0</vel>
       <acc>0.4</acc>
     </ptp>
+
+    <ptp name="Ptp2_1">
+      <planningGroup>manipulator</planningGroup>
+      <targetLink>prbt_tcp</targetLink>
+      <startPos>P2</startPos>
+      <endPos>P1</endPos>
+      <vel>1.0</vel>
+      <acc>0.4</acc>
+    </ptp>
   </ptps>
 
   <lins>
@@ -144,6 +153,18 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
     </blend>
     <blend name="NoIntersectionTraj2">
       <sequenceCmd name="lin2" type="lin_cart" blend_radius="0.21" />
+      <sequenceCmd name="lin4" type="lin_cart" blend_radius="0" />
+    </blend>
+    <blend name="PtpPtpSequence">
+      <sequenceCmd name="Ptp2" type="ptp_cart_cart" blend_radius="0.1" />
+      <sequenceCmd name="Ptp2_1" type="ptp_cart_cart" blend_radius="0" />
+    </blend>
+    <blend name="LinPtpSequence">
+      <sequenceCmd name="lin2" type="lin_cart" blend_radius="0.1" />
+      <sequenceCmd name="Ptp3" type="ptp_cart_cart" blend_radius="0" />
+    </blend>
+    <blend name="PtpLinSequence">
+      <sequenceCmd name="Ptp2" type="ptp_cart_cart" blend_radius="0.1" />
       <sequenceCmd name="lin4" type="lin_cart" blend_radius="0" />
     </blend>
   </sequences>
