@@ -46,7 +46,7 @@ bool CommandPlanner::initialize(const moveit::core::RobotModelConstPtr &model, c
 
   // Obtain the aggregated joint limits
   aggregated_limit_active_joints_ = pilz::JointLimitsAggregator::getAggregatedLimits(
-        ros::NodeHandle(PARAM_NAMESPACE_LIMTS),model->getActiveJointModels());
+        ros::NodeHandle(PARAM_NAMESPACE_LIMTS),model->getSingleDOFJointModels());
 
   // Obtain cartesian limits
   cartesian_limit_ = pilz::CartesianLimitsAggregator::getAggregatedLimits(ros::NodeHandle(PARAM_NAMESPACE_LIMTS));

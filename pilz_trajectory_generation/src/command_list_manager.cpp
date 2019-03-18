@@ -40,7 +40,7 @@ CommandListManager::CommandListManager(const ros::NodeHandle &nh, const moveit::
   pilz::JointLimitsContainer aggregated_limit_active_joints;
 
   aggregated_limit_active_joints = pilz::JointLimitsAggregator::getAggregatedLimits(
-          ros::NodeHandle(PARAM_NAMESPACE_LIMTS),model_->getActiveJointModels());
+          ros::NodeHandle(PARAM_NAMESPACE_LIMTS),model_->getSingleDOFJointModels());
 
 
   // Obtain cartesian limits
