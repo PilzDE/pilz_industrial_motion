@@ -24,6 +24,7 @@ find_package(catkin REQUIRED COMPONENTS
   moveit_ros_planning_interface
   pilz_industrial_motion_testutils
   pilz_testutils
+  kdl_conversions
 )
 
 

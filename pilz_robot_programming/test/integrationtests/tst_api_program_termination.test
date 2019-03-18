@@ -44,7 +44,6 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
   <!-- test node -->
   <test test-name="test_api_program_termination" pkg="pilz_robot_programming"
-    type="tst_api_program_termination.py" time-limit="25"
-    launch-prefix="$(arg pythontest_launch_prefix)" />
+    type="tst_api_program_termination.py" launch-prefix="$(arg pythontest_launch_prefix)" />
 
 </launch>
