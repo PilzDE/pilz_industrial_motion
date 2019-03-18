@@ -1202,13 +1202,11 @@ void testutils::checkRobotModel(const moveit::core::RobotModelConstPtr &robot_mo
                                                                                    << link_name << " is unknown";
 }
 
-
-::testing::AssertionResult testutils::hasTrapezoidVelocity(std::vector<double> accelerations, const double similiarity_tolerance) {
-
+::testing::AssertionResult testutils::hasTrapezoidVelocity(std::vector<double> accelerations,
+                                                           const double acc_tol)
+{
   // Check that acceleration is monotonously decreasing
-  if(!std::is_sorted(accelerations.begin(), accelerations.end(), [](double a, double b){
-    return !(std::abs(a - b) < 1e-6 || a < b); // true -> a is ordered before b -> list is not sorted
-  }))
+  if(!isMonotonouslyDecreasing(accelerations, acc_tol))
   {
     return ::testing::AssertionFailure() << "Cannot be a trapezoid since acceleration is not monotonously decreasing!";
   }
@@ -1216,13 +1214,13 @@ void testutils::checkRobotModel(const moveit::core::RobotModelConstPtr &robot_mo
   // Check accelerations
   double first_acc = accelerations.front();
   auto it_last_acc = std::find_if(accelerations.begin(), accelerations.end(),
-                                            [first_acc, similiarity_tolerance](double el){
-                                              return (std::abs(el - first_acc) > similiarity_tolerance);
+                                            [first_acc, acc_tol](double el){
+                                              return (std::abs(el - first_acc) > acc_tol);
                                             })-1;
 
   auto it_last_intermediate = std::find_if(it_last_acc+1, accelerations.end(),
-                                           [similiarity_tolerance](double el){
-                                            return (el < similiarity_tolerance);
+                                           [acc_tol](double el){
+                                            return (el < acc_tol);
                                           })-1;
 
   // Check that there are 1 or 2 intermediate points
@@ -1230,16 +1228,18 @@ void testutils::checkRobotModel(const moveit::core::RobotModelConstPtr &robot_mo
 
   if(n_intermediate_1 != 1 && n_intermediate_1 != 2){
 
-    return ::testing::AssertionFailure() << "Expected 1 or 2 intermediate points between acceleration and constant velocity phase but found: " << n_intermediate_1;
+    return ::testing::AssertionFailure()
+      << "Expected 1 or 2 intermediate points between acceleration and constant velocity phase but found: "
+      << n_intermediate_1;
   }
 
   // Const phase (vel == 0)
   auto it_first_const = it_last_intermediate+1;
   auto it_last_const = std::find_if(it_first_const, accelerations.end(),
-                                          [similiarity_tolerance](double el){
-                                            return (std::abs(el) > similiarity_tolerance);
+                                          [acc_tol](double el){
+                                            return (std::abs(el) > acc_tol);
                                           })-1;
-  // This test makes sense only if the generated traj is such that:
+  // This test makes sense only if the generated traj has enough points such that the trapezoid is not degenerated.
   if(std::distance(it_first_const, it_last_const) < 3)
   {
     return ::testing::AssertionFailure() << "Exptected the have at least 3 points during the phase of constant velocity.";
@@ -1248,14 +1248,16 @@ void testutils::checkRobotModel(const moveit::core::RobotModelConstPtr &robot_mo
   // Deceleration
   double deceleration = accelerations.back();
   auto it_first_dec = std::find_if(it_last_const+1, accelerations.end(),
-                                        [deceleration, similiarity_tolerance](double el){
-                                          return (std::abs(el - deceleration) > similiarity_tolerance);
+                                        [deceleration, acc_tol](double el){
+                                          return (std::abs(el - deceleration) > acc_tol);
                                         })+1;
 
   // Points between const and deceleration (again 1 or 2)
   auto n_intermediate_2 = std::distance(it_last_const, it_first_dec);
   if(n_intermediate_2 != 1 && n_intermediate_2 != 2){
-    return ::testing::AssertionFailure() << "Expected 1 or 2 intermediate points between constant velocity and deceleration phase but found: " << n_intermediate_2;
+    return ::testing::AssertionFailure()
+      << "Expected 1 or 2 intermediate points between constant velocity and deceleration phase but found: "
+      << n_intermediate_2;
   }
 
   std::stringstream debug_stream;
@@ -1284,8 +1286,86 @@ void testutils::checkRobotModel(const moveit::core::RobotModelConstPtr &robot_mo
     debug_stream << *it << "(Dec)" << std::endl;
   }
 
-  //ROS_ERROR_STREAM(debug_stream.str());
+  ROS_DEBUG_STREAM(debug_stream.str());
 
   return ::testing::AssertionSuccess();
 }
 
+::testing::AssertionResult testutils::checkCartesianTranslationalPath(robot_trajectory::RobotTrajectoryConstPtr trajectory,
+                                                                      const std::string &link_name,
+                                                                      const double acc_tol)
+{
+  // We require the following such that the test makes sense, else the traj would have a degenerated velocity profile
+  EXPECT_GT(trajectory->getWayPointCount(), 9u);
+
+  std::vector<double> accelerations;
+
+  // Iterate over waypoints collect accelerations
+  for(size_t i = 2; i < trajectory->getWayPointCount(); ++i)
+  {
+    auto waypoint_pose_0 = trajectory->getWayPoint(i-2).getFrameTransform(link_name);
+    auto waypoint_pose_1 = trajectory->getWayPoint(i-1).getFrameTransform(link_name);
+    auto waypoint_pose_2 = trajectory->getWayPoint(i).getFrameTransform(link_name);
+
+    auto t1 = trajectory->getWayPointDurationFromPrevious(i-1);
+    auto t2 = trajectory->getWayPointDurationFromPrevious(i);
+
+    auto vel1 = (waypoint_pose_1.translation() - waypoint_pose_0.translation()).norm() / t1;
+    auto vel2 = (waypoint_pose_2.translation() - waypoint_pose_1.translation()).norm() / t2;
+    auto acc_transl = (vel2 - vel1) / (t1 + t2);
+    accelerations.push_back(acc_transl);
+  }
+
+  return hasTrapezoidVelocity(accelerations, acc_tol);
+}
+
+::testing::AssertionResult testutils::checkCartesianRotationalPath(robot_trajectory::RobotTrajectoryConstPtr trajectory,
+                                                                   const std::string &link_name,
+                                                                   const double rot_axis_tol,
+                                                                   const double acc_tol)
+{
+  // We require the following such that the test makes sense, else the traj would have a degenerated velocity profile
+  EXPECT_GT(trajectory->getWayPointCount(), 9u);
+
+  std::vector<double> accelerations;
+  std::vector<Eigen::AngleAxisd> rotation_axes;
+
+  // Iterate over waypoints collect accelerations and rotation axes
+  for(size_t i = 2; i < trajectory->getWayPointCount(); ++i)
+  {
+    auto waypoint_pose_0 = trajectory->getWayPoint(i-2).getFrameTransform(link_name);
+    auto waypoint_pose_1 = trajectory->getWayPoint(i-1).getFrameTransform(link_name);
+    auto waypoint_pose_2 = trajectory->getWayPoint(i).getFrameTransform(link_name);
+
+    auto t1 = trajectory->getWayPointDurationFromPrevious(i-1);
+    auto t2 = trajectory->getWayPointDurationFromPrevious(i);
+
+    Eigen::Quaterniond orientation0(waypoint_pose_0.rotation());
+    Eigen::Quaterniond orientation1(waypoint_pose_1.rotation());
+    Eigen::Quaterniond orientation2(waypoint_pose_2.rotation());
+
+    if (i == 2)
+    {
+      Eigen::AngleAxisd axis(orientation0 * orientation1.inverse());
+      rotation_axes.push_back(axis);
+    }
+    Eigen::AngleAxisd axis(orientation1 * orientation2.inverse());
+    rotation_axes.push_back(axis);
+
+    double angular_vel1 = orientation0.angularDistance(orientation1) / t1;
+    double angular_vel2 = orientation1.angularDistance(orientation2) / t2;
+    double angular_acc = (angular_vel2 - angular_vel1) / (t1+t2);
+    accelerations.push_back(angular_acc);
+  }
+
+  // Check that rotation axis is fixed
+  if (std::adjacent_find( rotation_axes.begin(), rotation_axes.end(),
+                          [rot_axis_tol](const Eigen::AngleAxisd &axis1, const Eigen::AngleAxisd &axis2)
+                          {return ((axis1.axis() - axis2.axis()).norm() > rot_axis_tol);} )
+      != rotation_axes.end())
+  {
+    return ::testing::AssertionFailure() << "Rotational path of trajectory does not have a fixed rotation axis";
+  }
+
+  return hasTrapezoidVelocity(accelerations, acc_tol);
+}

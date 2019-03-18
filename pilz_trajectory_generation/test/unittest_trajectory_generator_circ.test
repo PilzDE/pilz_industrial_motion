@@ -33,8 +33,9 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
     <param name="planning_group" value="manipulator" />
     <param name="target_link" value="prbt_tcp" />
     <param name="cartesian_position_tolerance" value="1.0e-3" />
-    <param name="cartesian_angle_tolerance" value="1.0e-3" />
+    <param name="angular_acc_tolerance" value="1.0e-3" />
     <param name="rot_axis_norm_tolerance" value="1.0e-6" />
+    <param name="acceleration_tolerance" value="1.0e-3" />
     <param name="other_tolerance" value="1.0e-6" />
     <rosparam command="load" file="$(find prbt_moveit_config)/config/joint_limits.yaml" />
   </test>

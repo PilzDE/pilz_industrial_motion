@@ -627,7 +627,7 @@ CircCenterCart XmlTestdataLoader::getCircCartCenterCart(const std::string &cmd_n
   if(!getCmd(CIRCS_PATH_STR, cmd_name, planning_group, target_link,
              start_pos_name, goal_pos_name, vel_scale, acc_scale))
   {
-    throw TestDataLoaderReadingException("Did not \"" + cmd_name +  "\"");
+    throw TestDataLoaderReadingException("Did not find \"" + cmd_name +  "\"");
   }
 
   CircCenterCart cmd;
@@ -649,7 +649,7 @@ CircInterimCart XmlTestdataLoader::getCircCartInterimCart(const std::string &cmd
   if(!getCmd(CIRCS_PATH_STR, cmd_name, planning_group, target_link,
              start_pos_name, goal_pos_name, vel_scale, acc_scale))
   {
-    throw TestDataLoaderReadingException("Did not \"" + cmd_name +  "\"");
+    throw TestDataLoaderReadingException("Did not find \"" + cmd_name +  "\"");
   }
 
   CircInterimCart cmd;
@@ -671,7 +671,7 @@ CircJointInterimCart XmlTestdataLoader::getCircJointInterimCart(const std::strin
   if(!getCmd(CIRCS_PATH_STR, cmd_name, planning_group, target_link,
              start_pos_name, goal_pos_name, vel_scale, acc_scale))
   {
-    throw TestDataLoaderReadingException("Did not \"" + cmd_name +  "\"");
+    throw TestDataLoaderReadingException("Did not find \"" + cmd_name +  "\"");
   }
 
   CircJointInterimCart cmd;
@@ -693,7 +693,7 @@ CircJointCenterCart XmlTestdataLoader::getCircJointCenterCart(const std::string 
   if(!getCmd(CIRCS_PATH_STR, cmd_name, planning_group, target_link,
              start_pos_name, goal_pos_name, vel_scale, acc_scale))
   {
-    throw TestDataLoaderReadingException("Did not \"" + cmd_name +  "\"");
+    throw TestDataLoaderReadingException("Did not find \"" + cmd_name +  "\"");
   }
 
   CircJointCenterCart cmd;

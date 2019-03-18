@@ -239,9 +239,9 @@ TEST_P(TrajectoryGeneratorLINTest, cartesianSpaceGoal)
 
 /**
  * @brief test the trapezoid shape of the planning trajectory in Cartesian space
- * 
- * The test checks both translational and rotational acceleration for a trapezoid velocity profile.
- * Due to the way the acceleration is calculated 1 or 2 intermediate points occur that are neither 
+ *
+ * The test checks translational path for a trapezoid velocity profile.
+ * Due to the way the acceleration is calculated 1 or 2 intermediate points occur that are neither
  * acceleration, constant or deceleration.
  */
 TEST_P(TrajectoryGeneratorLINTest, cartesianTrapezoidProfile)
@@ -256,59 +256,7 @@ TEST_P(TrajectoryGeneratorLINTest, cartesianTrapezoidProfile)
   ASSERT_TRUE(lin_->generate(lin_joint_req, res, 0.01));
   EXPECT_EQ(res.error_code_.val, moveit_msgs::MoveItErrorCodes::SUCCESS);
 
-  // We require the following such that the test makes sense
-  EXPECT_GT(res.trajectory_->getWayPointCount(), 9u);
-
-  /// ++++++++++++++++++++++++++++++
-  /// + check the trapzoid profile +
-  /// ++++++++++++++++++++++++++++++
-
-
-  // variables to find the way point at given time
-  robot_state::RobotState waypoint_state(robot_model_);
-
-  std::vector<double> accelerations_transl;
-  std::vector<double> accelerations_rot;
-
-  // Iterate over waypoints collect accelerations
-  for(size_t i = 2; i < res.trajectory_->getWayPointCount(); ++i)
-  {
-    auto waypoint_pose_0 = res.trajectory_->getWayPoint(i-2).getFrameTransform(target_link_hcd_);
-    auto waypoint_pose_1 = res.trajectory_->getWayPoint(i-1).getFrameTransform(target_link_hcd_);
-    auto waypoint_pose_2 = res.trajectory_->getWayPoint(i).getFrameTransform(target_link_hcd_);
-
-    auto t1 = res.trajectory_->getWayPointDurationFromPrevious(i-1);
-    auto t2 = res.trajectory_->getWayPointDurationFromPrevious(i);
-
-    //***********************
-    // Translational part
-    //***********************
-    auto vel1 = (waypoint_pose_1.translation() - waypoint_pose_0.translation()).norm() / t1;
-    auto vel2 = (waypoint_pose_2.translation() - waypoint_pose_1.translation()).norm() / t2;
-    auto acc_transl = (vel2 - vel1) / (t1 + t2);
-    accelerations_transl.push_back(acc_transl);
-
-    //***********************
-    // Rotational part
-    //***********************
-    Eigen::AngleAxisd axis_wp12((waypoint_pose_0 * waypoint_pose_1.inverse()).rotation());
-    Eigen::AngleAxisd axis_wp23((waypoint_pose_1 * waypoint_pose_2.inverse()).rotation());
-    // Check that rotation axis stays the same
-    ASSERT_LT((axis_wp12.axis() - axis_wp23.axis()).norm(), 1e-8);
-
-    Eigen::Quaterniond orientation1(waypoint_pose_0.rotation());
-    Eigen::Quaterniond orientation2(waypoint_pose_1.rotation());
-    Eigen::Quaterniond orientation3(waypoint_pose_2.rotation());
-
-    double angular_vel1 = orientation1.angularDistance(orientation2) / t1;
-    double angular_vel2 = orientation2.angularDistance(orientation3) / t2;
-    double angular_acc = (angular_vel2 - angular_vel1) / (t1+t2);
-    accelerations_rot.push_back(angular_acc);
-  }
-
-  // Check the accelerations
-  ASSERT_TRUE(testutils::hasTrapezoidVelocity(accelerations_transl, 1e-6));
-  ASSERT_TRUE(testutils::hasTrapezoidVelocity(accelerations_rot, 1e-6));
+  ASSERT_TRUE(testutils::checkCartesianTranslationalPath(res.trajectory_, target_link_hcd_));
 
   // check last point for vel=acc=0
   for(size_t idx = 0; idx < res.trajectory_->getLastWayPointPtr()->getVariableCount(); ++idx)
@@ -316,7 +264,6 @@ TEST_P(TrajectoryGeneratorLINTest, cartesianTrapezoidProfile)
     EXPECT_NEAR(0.0, res.trajectory_->getLastWayPointPtr()->getVariableVelocity(idx), other_tolerance_);
     EXPECT_NEAR(0.0, res.trajectory_->getLastWayPointPtr()->getVariableAcceleration(idx), other_tolerance_);
   }
-
 }
 
 /**
@@ -361,10 +308,10 @@ TEST_P(TrajectoryGeneratorLINTest, LinStartEqualsGoal)
   jointStateToRobotState(lin_joint_req.start_state.joint_state, start_state);
 
 
-  for(size_t i = 0; i < lin_joint_req.goal_constraints[0].joint_constraints.size(); i++)
+  for(size_t i = 0; i < lin_joint_req.goal_constraints.at(0).joint_constraints.size(); i++)
   {
-    lin_joint_req.goal_constraints[0].joint_constraints[i].position 
-      = start_state.getVariablePosition(lin_joint_req.goal_constraints[0].joint_constraints[i].joint_name);
+    lin_joint_req.goal_constraints.at(0).joint_constraints.at(i).position
+      = start_state.getVariablePosition(lin_joint_req.goal_constraints.at(0).joint_constraints.at(i).joint_name);
   }
 
   // generate the LIN trajectory

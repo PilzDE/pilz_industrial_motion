@@ -38,8 +38,9 @@ const std::string TEST_DATA_FILE_NAME("testdata_file_name");
 const std::string PARAM_PLANNING_GROUP_NAME("planning_group");
 const std::string PARAM_TARGET_LINK_NAME("target_link");
 const std::string CARTESIAN_POSITION_TOLERANCE("cartesian_position_tolerance");
-const std::string CARTESIAN_ANGLE_TOLERANCE("cartesian_angle_tolerance");
+const std::string ANGULAR_ACC_TOLERANCE("angular_acc_tolerance");
 const std::string ROTATION_AXIS_NORM_TOLERANCE("rot_axis_norm_tolerance");
+const std::string ACCELERATION_TOLERANCE("acceleration_tolerance");
 const std::string OTHER_TOLERANCE("other_tolerance");
 
 #define SKIP_IF_GRIPPER if(GetParam() == PARAM_MODEL_WITH_GRIPPER_NAME) { SUCCEED(); return; };
@@ -60,6 +61,10 @@ protected:
   void checkCircResult(const planning_interface::MotionPlanRequest &req,
                        const planning_interface::MotionPlanResponse& res);
 
+  void getCircCenter(const planning_interface::MotionPlanRequest &req,
+                     const planning_interface::MotionPlanResponse &res,
+                     Eigen::Vector3d &circCenter);
+
 protected:
   // ros stuff
   ros::NodeHandle ph_ {"~"};
@@ -74,7 +79,8 @@ protected:
   // test parameters from parameter server
   std::string planning_group_, target_link_, test_data_file_name_;
   int random_trial_num_;
-  double cartesian_position_tolerance_, cartesian_angle_tolerance_, rot_axis_norm_tolerance_, other_tolerance_;
+  double cartesian_position_tolerance_, angular_acc_tolerance_, rot_axis_norm_tolerance_, acceleration_tolerance_,
+         other_tolerance_;
   LimitsContainer planner_limits_;
 };
 
@@ -86,8 +92,9 @@ void TrajectoryGeneratorCIRCTest::SetUp()
   ASSERT_TRUE(ph_.getParam(PARAM_PLANNING_GROUP_NAME, planning_group_));
   ASSERT_TRUE(ph_.getParam(PARAM_TARGET_LINK_NAME, target_link_));
   ASSERT_TRUE(ph_.getParam(CARTESIAN_POSITION_TOLERANCE, cartesian_position_tolerance_));
-  ASSERT_TRUE(ph_.getParam(CARTESIAN_ANGLE_TOLERANCE, cartesian_angle_tolerance_));
+  ASSERT_TRUE(ph_.getParam(ANGULAR_ACC_TOLERANCE, angular_acc_tolerance_));
   ASSERT_TRUE(ph_.getParam(ROTATION_AXIS_NORM_TOLERANCE, rot_axis_norm_tolerance_));
+  ASSERT_TRUE(ph_.getParam(ACCELERATION_TOLERANCE, acceleration_tolerance_));
   ASSERT_TRUE(ph_.getParam(OTHER_TOLERANCE, other_tolerance_));
 
   // check robot model
@@ -132,18 +139,45 @@ void TrajectoryGeneratorCIRCTest::checkCircResult(const planning_interface::Moti
                                               planner_limits_.getJointLimitContainer()));
 
   EXPECT_EQ(req.path_constraints.position_constraints.size(),1u);
-  EXPECT_EQ(req.path_constraints.position_constraints[0].constraint_region.primitive_poses.size(),1u);
+  EXPECT_EQ(req.path_constraints.position_constraints.at(0).constraint_region.primitive_poses.size(),1u);
 
-  // Get the circ center
+  // Check that all point have the equal distance to the center
   Eigen::Vector3d circCenter;
+  getCircCenter(req, res, circCenter);
+
+  for(std::size_t i = 0; i < res.trajectory_->getWayPointCount(); ++i )
+  {
+    Eigen::Affine3d waypoint_pose = res.trajectory_->getWayPointPtr(i)->getFrameTransform(target_link_);
+    EXPECT_NEAR((res.trajectory_->getFirstWayPointPtr()->getFrameTransform(target_link_).translation() - circCenter).norm(),
+                (circCenter - waypoint_pose.translation()).norm(), cartesian_position_tolerance_);
+  }
+
+  // check translational and rotational paths
+  ASSERT_TRUE(testutils::checkCartesianTranslationalPath(res.trajectory_, target_link_, acceleration_tolerance_));
+  ASSERT_TRUE(testutils::checkCartesianRotationalPath(res.trajectory_,
+                                                      target_link_,
+                                                      angular_acc_tolerance_,
+                                                      rot_axis_norm_tolerance_));
+
+  for(size_t idx = 0; idx < res.trajectory_->getLastWayPointPtr()->getVariableCount(); ++idx)
+  {
+    EXPECT_NEAR(0.0, res.trajectory_->getLastWayPointPtr()->getVariableVelocity(idx), other_tolerance_);
+    EXPECT_NEAR(0.0, res.trajectory_->getLastWayPointPtr()->getVariableAcceleration(idx), other_tolerance_);
+  }
+}
+
+void TrajectoryGeneratorCIRCTest::getCircCenter(const planning_interface::MotionPlanRequest &req,
+                                                const planning_interface::MotionPlanResponse &res,
+                                                Eigen::Vector3d &circCenter)
+{
   if(req.path_constraints.name == "center")
   {
-    tf::pointMsgToEigen(req.path_constraints.position_constraints[0].constraint_region.primitive_poses[0].position, circCenter);
+    tf::pointMsgToEigen(req.path_constraints.position_constraints.at(0).constraint_region.primitive_poses.at(0).position, circCenter);
   }
   else if(req.path_constraints.name == "interim")
   {
     Eigen::Vector3d interim;
-    tf::pointMsgToEigen(req.path_constraints.position_constraints[0].constraint_region.primitive_poses[0].position, interim);
+    tf::pointMsgToEigen(req.path_constraints.position_constraints.at(0).constraint_region.primitive_poses.at(0).position, interim);
     Eigen::Vector3d start = res.trajectory_->getFirstWayPointPtr()->getFrameTransform(target_link_).translation();
     Eigen::Vector3d goal = res.trajectory_->getLastWayPointPtr()->getFrameTransform(target_link_).translation();
 
@@ -153,66 +187,9 @@ void TrajectoryGeneratorCIRCTest::checkCircResult(const planning_interface::Moti
 
     const Eigen::Vector3d w = t.cross(u);
 
+    ASSERT_GT(w.norm(), 1e-8) << "Circle center not well defined for given start, interim and goal.";
+
     circCenter = start + (u*t.dot(t)*u.dot(v) - t*u.dot(u)*t.dot(v)) * 0.5/pow(w.norm(),2);
-  }
-
-  // Check that all point have the equal distance to the center
-  for(std::size_t i = 0; i < res.trajectory_->getWayPointCount(); ++i )
-  {
-    Eigen::Isometry3d waypoint_pose = res.trajectory_->getWayPointPtr(i)->getFrameTransform(target_link_);
-    EXPECT_NEAR((res.trajectory_->getFirstWayPointPtr()->getFrameTransform(target_link_).translation() - circCenter).norm(),
-                (circCenter - waypoint_pose.translation()).norm(), cartesian_position_tolerance_);
-  }
-
-  std::vector<double> accelerations_transl;
-  std::vector<double> accelerations_rot;
-
-  // Iterate over waypoints collect accelerations
-  for(size_t i = 2; i < res.trajectory_->getWayPointCount(); ++i)
-  {
-    auto waypoint_pose_0 = res.trajectory_->getWayPoint(i-2).getFrameTransform(target_link_);
-    auto waypoint_pose_1 = res.trajectory_->getWayPoint(i-1).getFrameTransform(target_link_);
-    auto waypoint_pose_2 = res.trajectory_->getWayPoint(i).getFrameTransform(target_link_);
-
-    auto t1 = res.trajectory_->getWayPointDurationFromPrevious(i-1);
-    auto t2 = res.trajectory_->getWayPointDurationFromPrevious(i);
-
-    //***********************
-    // Translational part
-    //***********************
-    auto vel1 = (waypoint_pose_1.translation() - waypoint_pose_0.translation()).norm() / t1;
-    auto vel2 = (waypoint_pose_2.translation() - waypoint_pose_1.translation()).norm() / t2;
-    auto acc_transl = (vel2 - vel1) / (t1 + t2);
-    accelerations_transl.push_back(acc_transl);
-
-    //***********************
-    // Rotational part
-    //***********************
-    Eigen::AngleAxisd axis_wp12((waypoint_pose_0 * waypoint_pose_1.inverse()).rotation());
-    Eigen::AngleAxisd axis_wp23((waypoint_pose_1 * waypoint_pose_2.inverse()).rotation());
-    // Check that rotation axis stays the same
-    ASSERT_LT((axis_wp12.axis() - axis_wp23.axis()).norm(), 1e-8);
-
-    Eigen::Quaterniond orientation1(waypoint_pose_0.rotation());
-    Eigen::Quaterniond orientation2(waypoint_pose_1.rotation());
-    Eigen::Quaterniond orientation3(waypoint_pose_2.rotation());
-
-    double angular_vel1 = orientation1.angularDistance(orientation2) / t1;
-    double angular_vel2 = orientation2.angularDistance(orientation3) / t2;
-    double angular_acc = (angular_vel2 - angular_vel1) / (t1+t2);
-    accelerations_rot.push_back(angular_acc);
-  }
-
-  //for(auto a : accelerations_rot) std::cout << a << std::endl;
-
-  // Check the accelerations
-  ASSERT_TRUE(testutils::hasTrapezoidVelocity(accelerations_transl, 1e-3)); // TODO investigate if this tolerance is acceptable
-  ASSERT_TRUE(testutils::hasTrapezoidVelocity(accelerations_rot, 1e-6));
-
-  for(size_t idx = 0; idx < res.trajectory_->getLastWayPointPtr()->getVariableCount(); ++idx)
-  {
-    EXPECT_NEAR(0.0, res.trajectory_->getLastWayPointPtr()->getVariableVelocity(idx), other_tolerance_);
-    EXPECT_NEAR(0.0, res.trajectory_->getLastWayPointPtr()->getVariableAcceleration(idx), other_tolerance_);
   }
 }
 
@@ -309,17 +286,15 @@ TEST_P(TrajectoryGeneratorCIRCTest, samePoints)
  */
 TEST_P(TrajectoryGeneratorCIRCTest, emptyAux)
 {
-  // Define auxiliary point and goal to be the same as the start
   auto circ {tdp_->getCircCartCenterCart("circ1_center_2")};
 
-  // empty path constraint
   planning_interface::MotionPlanRequest req = circ.toRequest();
 
   req.path_constraints.position_constraints.clear();
 
   planning_interface::MotionPlanResponse res;
   EXPECT_FALSE(circ_->generate(req,res));
-  EXPECT_EQ(res.error_code_.val, moveit_msgs::MoveItErrorCodes::INVALID_MOTION_PLAN) << req;
+  EXPECT_EQ(res.error_code_.val, moveit_msgs::MoveItErrorCodes::INVALID_MOTION_PLAN);
 }
 
 /**
@@ -327,14 +302,12 @@ TEST_P(TrajectoryGeneratorCIRCTest, emptyAux)
  */
 TEST_P(TrajectoryGeneratorCIRCTest, invalidAuxName)
 {
-  // Define auxiliary point and goal to be the same as the start
   auto circ {tdp_->getCircCartCenterCart("circ1_center_2")};
 
-  // empty path constraint
   planning_interface::MotionPlanRequest req = circ.toRequest();
 
-  // empty path constraint
   req.path_constraints.name = "";
+
   planning_interface::MotionPlanResponse res;
   EXPECT_FALSE(circ_->generate(req,res));
   EXPECT_EQ(res.error_code_.val, moveit_msgs::MoveItErrorCodes::INVALID_MOTION_PLAN);
@@ -342,22 +315,18 @@ TEST_P(TrajectoryGeneratorCIRCTest, invalidAuxName)
 
 /**
  * @brief test invalid motion plan request with invalid link name in the auxiliary point
- * 
- * @note the request must have a joint goal
  */
 TEST_P(TrajectoryGeneratorCIRCTest, invalidAuxLinkName)
 {
-  // Define auxiliary point and goal to be the same as the start
   auto circ {tdp_->getCircJointInterimCart("circ3_interim")};
 
-  // empty path constraint
   planning_interface::MotionPlanRequest req = circ.toRequest();
 
-  // empty path constraint
   req.path_constraints.position_constraints.front().link_name = "INVALID";
+
   planning_interface::MotionPlanResponse res;
   EXPECT_FALSE(circ_->generate(req,res));
-  EXPECT_EQ(res.error_code_.val, moveit_msgs::MoveItErrorCodes::INVALID_LINK_NAME) << req;
+  EXPECT_EQ(res.error_code_.val, moveit_msgs::MoveItErrorCodes::INVALID_LINK_NAME);
 }
 
 /**
@@ -365,7 +334,6 @@ TEST_P(TrajectoryGeneratorCIRCTest, invalidAuxLinkName)
  */
 TEST_P(TrajectoryGeneratorCIRCTest, wrongCenter)
 {
-  // Define auxiliary point and goal to be the same as the start
   auto circ {tdp_->getCircCartCenterCart("circ1_center_2")};
   circ.getAuxiliaryConfiguration().getConfiguration().setPose(circ.getStartConfiguration().getPose());
   circ.getAuxiliaryConfiguration().getConfiguration().getPose().position.y += 1;
@@ -380,7 +348,6 @@ TEST_P(TrajectoryGeneratorCIRCTest, wrongCenter)
  */
 TEST_P(TrajectoryGeneratorCIRCTest, colinearCenter)
 {
-  // Define auxiliary point and goal to be the same as the start
   auto circ {tdp_->getCircCartCenterCart("circ1_center_2")};
   circ.getAuxiliaryConfiguration().getConfiguration().setPose(circ.getStartConfiguration().getPose());
   circ.getGoalConfiguration().setPose(circ.getStartConfiguration().getPose());
@@ -399,7 +366,6 @@ TEST_P(TrajectoryGeneratorCIRCTest, colinearCenter)
  */
 TEST_P(TrajectoryGeneratorCIRCTest, colinearInterim)
 {
-  // Define auxiliary point and goal to be the same as the start
   auto circ {tdp_->getCircCartInterimCart("circ3_interim")};
   circ.getAuxiliaryConfiguration().getConfiguration().setPose(circ.getStartConfiguration().getPose());
   circ.getGoalConfiguration().setPose(circ.getStartConfiguration().getPose());
@@ -424,7 +390,6 @@ TEST_P(TrajectoryGeneratorCIRCTest, colinearInterim)
 TEST_P(TrajectoryGeneratorCIRCTest, colinearCenterDueToInterim)
 {
   // get the test data from xml
-  // Define auxiliary point and goal to be the same as the start
   auto circ {tdp_->getCircCartInterimCart("circ3_interim")};
 
   planning_interface::MotionPlanResponse res;
@@ -442,7 +407,6 @@ TEST_P(TrajectoryGeneratorCIRCTest, centerPointJointGoal)
   auto circ {tdp_->getCircJointCenterCart("circ1_center_2")};
   moveit_msgs::MotionPlanRequest req = circ.toRequest();
 
-  // empty path constraint
   planning_interface::MotionPlanResponse res;
   ASSERT_TRUE(circ_->generate(req,res));
   EXPECT_EQ(res.error_code_.val, moveit_msgs::MoveItErrorCodes::SUCCESS);
@@ -457,7 +421,6 @@ TEST_P(TrajectoryGeneratorCIRCTest, InvalidAdditionalPrimitivePose)
 {
   auto circ {tdp_->getCircCartCenterCart("circ1_center_2")};
 
-  // construct planning request
   moveit_msgs::MotionPlanRequest req = circ.toRequest();
 
   // Contains one pose (interim / center)
@@ -470,8 +433,6 @@ TEST_P(TrajectoryGeneratorCIRCTest, InvalidAdditionalPrimitivePose)
   center_position.position.z = 0.65;
   req.path_constraints.position_constraints.back().constraint_region.primitive_poses.push_back(center_position);
 
-
-  // empty path constraint
   planning_interface::MotionPlanResponse res;
   ASSERT_FALSE(circ_->generate(req,res));
   EXPECT_EQ(res.error_code_.val, moveit_msgs::MoveItErrorCodes::INVALID_MOTION_PLAN);
@@ -492,7 +453,6 @@ TEST_P(TrajectoryGeneratorCIRCTest, InvalidExtraJointConstraint)
   joint_constraint.joint_name = req.goal_constraints.front().joint_constraints.front().joint_name;
   req.goal_constraints.front().joint_constraints.push_back(joint_constraint); //<-- Additional constraint
 
-  // empty path constraint
   planning_interface::MotionPlanResponse res;
   EXPECT_FALSE(circ_->generate(req,res));
   EXPECT_EQ(res.error_code_.val, moveit_msgs::MoveItErrorCodes::INVALID_GOAL_CONSTRAINTS);
@@ -508,7 +468,6 @@ TEST_P(TrajectoryGeneratorCIRCTest, CenterPointPoseGoal)
 
   moveit_msgs::MotionPlanRequest req = circ.toRequest();
 
-  // empty path constraint
   planning_interface::MotionPlanResponse res;
   ASSERT_TRUE(circ_->generate(req,res));
   EXPECT_EQ(res.error_code_.val, moveit_msgs::MoveItErrorCodes::SUCCESS);
@@ -543,7 +502,6 @@ TEST_P(TrajectoryGeneratorCIRCTest, CenterPointPoseGoalFrameIdOrientationConstra
   moveit_msgs::MotionPlanRequest req = circ.toRequest();
   req.goal_constraints.front().orientation_constraints.front().header.frame_id = robot_model_->getModelFrame();
 
-  // empty path constraint
   planning_interface::MotionPlanResponse res;
   ASSERT_TRUE(circ_->generate(req,res));
   EXPECT_EQ(res.error_code_.val, moveit_msgs::MoveItErrorCodes::SUCCESS);
@@ -563,7 +521,6 @@ TEST_P(TrajectoryGeneratorCIRCTest, CenterPointPoseGoalFrameIdBothConstraints)
   req.goal_constraints.front().position_constraints.front().header.frame_id = robot_model_->getModelFrame();
   req.goal_constraints.front().orientation_constraints.front().header.frame_id = robot_model_->getModelFrame();
 
-  // empty path constraint
   planning_interface::MotionPlanResponse res;
   ASSERT_TRUE(circ_->generate(req,res));
   EXPECT_EQ(res.error_code_.val, moveit_msgs::MoveItErrorCodes::SUCCESS);
@@ -581,7 +538,6 @@ TEST_P(TrajectoryGeneratorCIRCTest, InterimPointJointGoal)
 
   moveit_msgs::MotionPlanRequest req = circ.toRequest();
 
-  // empty path constraint
   planning_interface::MotionPlanResponse res;
   ASSERT_TRUE(circ_->generate(req,res));
   EXPECT_EQ(res.error_code_.val, moveit_msgs::MoveItErrorCodes::SUCCESS);
@@ -604,7 +560,6 @@ TEST_P(TrajectoryGeneratorCIRCTest, InterimPointJointGoalStartVelNearZero)
   // Set velocity near zero
   req.start_state.joint_state.velocity = std::vector<double>(req.start_state.joint_state.position.size(), 1e-16);
 
-  // empty path constraint
   planning_interface::MotionPlanResponse res;
   ASSERT_TRUE(circ_->generate(req,res));
   EXPECT_EQ(res.error_code_.val, moveit_msgs::MoveItErrorCodes::SUCCESS);
@@ -619,7 +574,6 @@ TEST_P(TrajectoryGeneratorCIRCTest, InterimPointPoseGoal)
   auto circ {tdp_->getCircJointInterimCart("circ3_interim")};
   moveit_msgs::MotionPlanRequest req = circ.toRequest();
 
-  // empty path constraint
   planning_interface::MotionPlanResponse res;
   ASSERT_TRUE(circ_->generate(req,res));
   EXPECT_EQ(res.error_code_.val, moveit_msgs::MoveItErrorCodes::SUCCESS);
