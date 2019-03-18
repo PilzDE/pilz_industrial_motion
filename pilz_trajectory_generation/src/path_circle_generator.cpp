@@ -30,18 +30,6 @@ std::unique_ptr<KDL::Path> PathCircleGenerator::circleFromCenter(
   double b = (goal_pose.p - center_point).Norm();
   double c = (start_pose.p - goal_pose.p).Norm();
 
-  const KDL::Vector t = center_point - start_pose.p;
-  const KDL::Vector u = goal_pose.p - start_pose.p;
-
-  // triangle normal
-  const KDL::Vector w = t*u; // cross product
-
-  // circle center
-  if (w.Norm() < MAX_COLINEAR_NORM)
-  {
-    throw KDL::Error_MotionPlanning_Circle_No_Plane();
-  }
-
   if(fabs(a-b) > MAX_RADIUS_DIFF)
   {
     throw Error_MotionPlanning_CenterPointDifferentRadius();
