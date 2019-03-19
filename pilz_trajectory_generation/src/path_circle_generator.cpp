@@ -39,8 +39,10 @@ std::unique_ptr<KDL::Path> PathCircleGenerator::circleFromCenter(
   double alpha = cosines(a,b,c);
 
   KDL::RotationalInterpolation* rot_interpo = new KDL::RotationalInterpolation_SingleAxis();
+  double old_kdl_epsilon = KDL::epsilon;
   try
   {
+    KDL::epsilon = MAX_COLINEAR_NORM;
     return std::unique_ptr<KDL::Path>(new KDL::Path_Circle(start_pose,
                                            center_point,
                                            goal_pose.p,
@@ -49,10 +51,12 @@ std::unique_ptr<KDL::Path> PathCircleGenerator::circleFromCenter(
                                            rot_interpo,
                                            eqradius,
                                            true /* take ownership of RotationalInterpolation */));
+    KDL::epsilon = old_kdl_epsilon;
   }
   catch(KDL::Error_MotionPlanning &)
   {
     delete rot_interpo; // in case we could not construct the Path object, avoid a memory leak
+    KDL::epsilon = old_kdl_epsilon;
     throw; // and pass the exception on to the caller
   }
 }
