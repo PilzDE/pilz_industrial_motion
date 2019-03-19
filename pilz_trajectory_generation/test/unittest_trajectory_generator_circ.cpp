@@ -414,11 +414,14 @@ TEST_P(TrajectoryGeneratorCIRCTest, colinearCenterAndInterim)
 {
   auto circ {tdp_->getCircCartInterimCart("circ3_interim")};
 
-  // swap goal and interim
-  std::swap(circ.getAuxiliaryConfiguration().getConfiguration().getPose().position,
-            circ.getGoalConfiguration().getPose().position);
-  // move goal slightly such that center lies in between start and interim
-  circ.getGoalConfiguration().getPose().position.x += 0.023607;
+  // alter start, interim and goal such that start/center and interim are colinear
+  circ.getAuxiliaryConfiguration().getConfiguration().setPose(circ.getStartConfiguration().getPose());
+  circ.getGoalConfiguration().setPose(circ.getStartConfiguration().getPose());
+
+  circ.getStartConfiguration().getPose().position.x -= 0.2;
+  circ.getAuxiliaryConfiguration().getConfiguration().getPose().position.x += 0.2;
+  circ.getGoalConfiguration().getPose().position.y -= 0.2;
+
   circ.setAccelerationScale(0.05);
   circ.setVelocityScale(0.05);
 
