@@ -16,11 +16,8 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 -->
 
 <launch>
-  <!-- Parametrized test running with and without gripper! -->
-
-  <!-- Load the context with and without the pg70 -->
-  <include file="$(find pilz_trajectory_generation)/test/test_robots/prbt/launch/test_context.launch" />
-  <include file="$(find pilz_trajectory_generation)/test/test_robots/prbt/launch/test_context.launch">
+  <!-- Load the context with the pg70 -->
+  <include file="$(find prbt_moveit_config)/launch/planning_context.launch" >
     <arg name="gripper" value="pg70" />
   </include>
 
