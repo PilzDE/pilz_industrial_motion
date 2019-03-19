@@ -352,8 +352,8 @@ TEST_P(TrajectoryGeneratorCIRCTest, colinearCenter)
   circ.getAuxiliaryConfiguration().getConfiguration().setPose(circ.getStartConfiguration().getPose());
   circ.getGoalConfiguration().setPose(circ.getStartConfiguration().getPose());
 
-  // Stretch auxiliary and goal pose along line
-  circ.getAuxiliaryConfiguration().getConfiguration().getPose().position.x += 0.05;
+  // Stretch start and goal pose along line
+  circ.getStartConfiguration().getPose().position.x -= 0.1;
   circ.getGoalConfiguration().getPose().position.x += 0.1;
 
   planning_interface::MotionPlanResponse res;
@@ -370,8 +370,8 @@ TEST_P(TrajectoryGeneratorCIRCTest, colinearInterim)
   circ.getAuxiliaryConfiguration().getConfiguration().setPose(circ.getStartConfiguration().getPose());
   circ.getGoalConfiguration().setPose(circ.getStartConfiguration().getPose());
 
-  // Stretch auxiliary and goal pose along line
-  circ.getAuxiliaryConfiguration().getConfiguration().getPose().position.x += 0.05;
+  // Stretch start and goal pose along line
+  circ.getStartConfiguration().getPose().position.x -= 0.1;
   circ.getGoalConfiguration().getPose().position.x += 0.1;
 
   planning_interface::MotionPlanResponse res;
