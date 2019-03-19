@@ -39,8 +39,8 @@
 
 #include "pilz_trajectory_generation/command_list_manager.h"
 
-const std::string PARAM_MODEL_NO_GRIPPER_NAME {"robot_description"};
-const std::string PARAM_MODEL_WITH_GRIPPER_NAME {"robot_description_pg70"};
+const std::string ROBOT_DESCRIPTION_STR {"robot_description"};
+const std::string EMPTY_VALUE {""};
 
 const std::string TEST_DATA_FILE_NAME("testdata_file_name");
 
@@ -57,7 +57,7 @@ protected:
   // ros stuff
   ros::NodeHandle ph_ {"~"};
   robot_model::RobotModelConstPtr robot_model_ {
-    robot_model_loader::RobotModelLoader(GetParam()).getModel()};
+    robot_model_loader::RobotModelLoader(ROBOT_DESCRIPTION_STR).getModel() };
   std::shared_ptr<pilz_trajectory_generation::CommandListManager> manager_;
   planning_scene::PlanningScenePtr scene_;
 
@@ -87,10 +87,8 @@ void IntegrationTestCommandListManager::SetUp()
 }
 
 // Instantiate the test cases for robot model with and without gripper
-INSTANTIATE_TEST_CASE_P(InstantiationName, IntegrationTestCommandListManager, ::testing::Values(
-                          PARAM_MODEL_NO_GRIPPER_NAME
-                          , PARAM_MODEL_WITH_GRIPPER_NAME
-                          ));
+INSTANTIATE_TEST_CASE_P( InstantiationName, IntegrationTestCommandListManager,
+                         ::testing::Values(EMPTY_VALUE) );
 
 /**
  * @brief Checks that each derived MoveItErrorCodeException contains the correct
@@ -484,6 +482,39 @@ TEST_P(IntegrationTestCommandListManager, TestExecutionTime)
   double multiplicator = req.items.size() / N;
   EXPECT_LE(trajectory_time_n, trajectory_time_1*multiplicator);
   EXPECT_GE(trajectory_time_n, trajectory_time_1 * multiplicator * 0.5);
+}
+
+/**
+ * @brief Tests if it possible to send requests which contain more than
+ * one group.
+ *
+ * Please note: This test is still quite trivial. It does not check the
+ * "correctness" of a calculated trajectory. It only checks that for each
+ * group and group change there exists a calculated trajectory.
+ *
+ */
+TEST_P(IntegrationTestCommandListManager, TestDifferentGroups)
+{
+  Sequence seq {data_loader_->getSequence("ComplexSequenceWithGripper")};
+  ASSERT_GE(seq.size(), 1);
+  // Count the number of group changes in the given sequence
+  unsigned int num_groups {1};
+  std::string last_group_name {seq.getCmd(0).getPlanningGroup()};
+  for (size_t i = 1; i < seq.size(); ++i)
+  {
+    if (seq.getCmd(i).getPlanningGroup() != last_group_name)
+    {
+      ++num_groups;
+      last_group_name = seq.getCmd(i).getPlanningGroup();
+    }
+  }
+
+  RobotTrajVec_t res_single_vec {manager_->solve(scene_, seq.toRequest())};
+  EXPECT_EQ(res_single_vec.size(), num_groups);
+  for(RobotTrajVec_t::size_type i = 0; i<res_single_vec.size(); ++i)
+  {
+    EXPECT_GT(res_single_vec.at(i)->getWayPointCount(), 0u);
+  }
 }
 
 int main(int argc, char **argv)

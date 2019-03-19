@@ -20,14 +20,65 @@
 
 #include <boost/property_tree/xml_parser.hpp>
 #include <boost/algorithm/string.hpp>
+#include <boost/optional.hpp>
 
 #include "pilz_industrial_motion_testutils/default_values.h"
-
 #include "pilz_industrial_motion_testutils/exception_types.h"
+#include "pilz_industrial_motion_testutils/xml_constants.h"
 
 namespace pt = boost::property_tree;
 namespace pilz_industrial_motion_testutils
 {
+
+class CmdReader
+{
+public:
+  CmdReader(const pt::ptree::value_type & node)
+    : cmd_node_(node)
+  {}
+
+public:
+  std::string getPlanningGroup() const;
+  std::string getTargetLink() const;
+  std::string getStartPoseName() const;
+  std::string getEndPoseName() const;
+
+  boost::optional<double> getVelocityScale() const;
+  boost::optional<double> getAccelerationScale() const;
+
+private:
+  const pt::ptree::value_type &cmd_node_;
+};
+
+inline std::string CmdReader::getPlanningGroup() const
+{
+  return cmd_node_.second.get<std::string>(PLANNING_GROUP_STR);
+}
+
+inline std::string CmdReader::getTargetLink() const
+{
+  return cmd_node_.second.get<std::string>(TARGET_LINK_STR);
+}
+
+inline std::string CmdReader::getStartPoseName() const
+{
+  return cmd_node_.second.get<std::string>(START_POS_STR);
+}
+
+inline std::string CmdReader::getEndPoseName() const
+{
+  return cmd_node_.second.get<std::string>(END_POS_STR);
+}
+
+inline boost::optional<double> CmdReader::getVelocityScale() const
+{
+  return cmd_node_.second.get_optional<double>(VEL_STR);
+}
+
+inline boost::optional<double> CmdReader::getAccelerationScale() const
+{
+  return cmd_node_.second.get_optional<double>(ACC_STR);
+}
 
 template<class CmdType>
 class CmdGetterAdapter : public XmlTestdataLoader::AbstractCmdGetterAdapter
@@ -69,6 +120,8 @@ XmlTestdataLoader::XmlTestdataLoader(const std::string &path_filename)
   cmd_getter_funcs_["circ_center_cart"] = AbstractCmdGetterUPtr(new CmdGetterAdapter<CircCenterCart>(std::bind(&XmlTestdataLoader::getCircCartCenterCart, this, _1)));
   cmd_getter_funcs_["circ_interim_cart"] = AbstractCmdGetterUPtr(new CmdGetterAdapter<CircInterimCart>(std::bind(&XmlTestdataLoader::getCircCartInterimCart, this, _1)));
   cmd_getter_funcs_["circ_joint_interim_cart"] = AbstractCmdGetterUPtr(new CmdGetterAdapter<CircJointInterimCart>(std::bind(&XmlTestdataLoader::getCircJointInterimCart, this, _1)));
+
+  cmd_getter_funcs_["gripper"] = AbstractCmdGetterUPtr(new CmdGetterAdapter<Gripper>(std::bind(&XmlTestdataLoader::getGripper, this, _1)));
 }
 
 XmlTestdataLoader::XmlTestdataLoader(const std::string &path_filename,
@@ -487,28 +540,28 @@ bool XmlTestdataLoader::getCmd(const std::string &path2cmd,
   const pt::ptree::value_type &cmd_node { findCmd(cmd_name, path2cmd, ok) };
   if (!ok){ return false; }
 
-  group_name = cmd_node.second.get<std::string>(PLANNING_GROUP_STR, empty_str_);
+  group_name = cmd_node.second.get<std::string>(PLANNING_GROUP_STR, EMPTY_STR);
   if (group_name.empty())
   {
     ROS_ERROR("No planning group name found.");
     return false;
   }
 
-  target_link = cmd_node.second.get<std::string>(TARGET_LINK_STR, empty_str_);
+  target_link = cmd_node.second.get<std::string>(TARGET_LINK_STR, EMPTY_STR);
   if (target_link.empty())
   {
     ROS_ERROR("No target link name found.");
     return false;
   }
 
-  start_pos_name = cmd_node.second.get<std::string>(START_POS_STR, empty_str_);
+  start_pos_name = cmd_node.second.get<std::string>(START_POS_STR, EMPTY_STR);
   if (start_pos_name.empty())
   {
     ROS_ERROR("No start pos found.");
     return false;
   }
 
-  end_pos_name = cmd_node.second.get<std::string>(END_POS_STR, empty_str_);
+  end_pos_name = cmd_node.second.get<std::string>(END_POS_STR, EMPTY_STR);
   if (end_pos_name.empty())
   {
     ROS_ERROR("No end pos found.");
@@ -744,6 +797,22 @@ Sequence XmlTestdataLoader::getSequence(const std::string &cmd_name) const
   }
 
   return seq;
+}
+
+Gripper XmlTestdataLoader::getGripper(const std::string &cmd_name) const
+{
+  CmdReader cmd_reader{ findCmd(cmd_name, GRIPPERS_PATH_STR, GRIPPER_STR) };
+  std::string planning_group {cmd_reader.getPlanningGroup()};
+
+  Gripper cmd;
+  cmd.setPlanningGroup(planning_group);
+  cmd.setVelocityScale(cmd_reader.getVelocityScale());
+  cmd.setAccelerationScale(cmd_reader.getAccelerationScale());
+
+  cmd.setStartConfiguration(getJoints(cmd_reader.getStartPoseName(), planning_group));
+  cmd.setGoalConfiguration(getJoints(cmd_reader.getEndPoseName(), planning_group));
+
+  return cmd;
 }
 
 

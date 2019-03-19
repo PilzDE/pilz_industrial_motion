@@ -28,6 +28,7 @@
 #include "cartesianconfiguration.h"
 #include "command_types_typedef.h"
 #include "sequence.h"
+#include "gripper.h"
 
 namespace pilz_industrial_motion_testutils
 {
@@ -150,6 +151,11 @@ public:
    * @brief Returns the command with the specified name from the test data.
    */
   virtual Sequence getSequence(const std::string &cmd_name) const = 0;
+
+  /**
+   * @brief Returns the command with the specified name from the test data.
+   */
+  virtual Gripper getGripper(const std::string &cmd_name) const = 0;
 
 public:
   static geometry_msgs::Pose fromVecToMsg(const std::vector<double>& vec);

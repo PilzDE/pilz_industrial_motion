@@ -20,6 +20,8 @@
 #include <string>
 #include <memory>
 
+#include <boost/optional.hpp>
+
 #include "motionplanrequestconvertible.h"
 
 namespace pilz_industrial_motion_testutils
@@ -38,9 +40,13 @@ public:
 
 public:
   void setPlanningGroup(const std::string &planning_group);
+  const std::string& getPlanningGroup() const;
 
   void setVelocityScale(double velocity_scale);
+  void setVelocityScale(boost::optional<double> velocity_scale);
+
   void setAccelerationScale(double acceleration_scale);
+  void setAccelerationScale(boost::optional<double> acceleration_scale);
 
 protected:
   std::string planning_group_;
@@ -55,14 +61,35 @@ inline void MotionCmd::setPlanningGroup(const std::string &planning_group)
   planning_group_ = planning_group;
 }
 
+inline const std::string& MotionCmd::getPlanningGroup() const
+{
+  return planning_group_;
+}
+
 inline void MotionCmd::setVelocityScale(double velocity_scale)
 {
   vel_scale_ = velocity_scale;
 }
 
+inline void MotionCmd::setVelocityScale(boost::optional<double> velocity_scale)
+{
+  if (velocity_scale)
+  {
+    setVelocityScale(velocity_scale.value());
+  }
+}
+
 inline void MotionCmd::setAccelerationScale(double acceleration_scale)
 {
   acc_scale_ = acceleration_scale;
+}
+
+inline void MotionCmd::setAccelerationScale(boost::optional<double> acceleration_scale)
+{
+  if (acceleration_scale)
+  {
+    setVelocityScale(acceleration_scale.value());
+  }
 }
 
 using MotionCmdUPtr = std::unique_ptr<MotionCmd>;

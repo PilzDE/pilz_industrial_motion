@@ -17,6 +17,8 @@
 #ifndef COMMAND_LIST_MANAGER_H
 #define COMMAND_LIST_MANAGER_H
 
+#include <string>
+
 #include <boost/optional.hpp>
 
 #include <moveit/planning_interface/planning_interface.h>
