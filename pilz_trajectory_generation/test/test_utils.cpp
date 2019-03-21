@@ -143,7 +143,7 @@ bool testutils::isGoalReached(const moveit::core::RobotModelConstPtr &robot_mode
 
   auto actual_position {goal_pose_actual.translation()};
   auto expected_position {goal_pose_expect.translation()};
-  auto pos_diff {actual_rotation-expected_rotation};
+  auto pos_diff {actual_position-expected_position};
   if (pos_diff.norm() > pos_tolerance)
   {
     std::cout << "\nPosition difference = " << pos_diff.norm()
