@@ -211,6 +211,7 @@ TEST_P(IntegrationTestCommandListManager, concatThreeSegments)
 TEST_P(IntegrationTestCommandListManager, concatTwoPtpSegments)
 {
   Sequence seq {data_loader_->getSequence("PtpPtpSequence")};
+  ASSERT_GE(seq.size(), 2u);
   seq.setAllBlendRadiiToZero();
 
   RobotTrajVec_t res_vec {manager_->solve(scene_, seq.toRequest())};
@@ -232,6 +233,7 @@ TEST_P(IntegrationTestCommandListManager, concatTwoPtpSegments)
 TEST_P(IntegrationTestCommandListManager, concatPtpAndLinSegments)
 {
   Sequence seq {data_loader_->getSequence("PtpLinSequence")};
+  ASSERT_GE(seq.size(), 2u);
   seq.setAllBlendRadiiToZero();
 
   RobotTrajVec_t res_vec {manager_->solve(scene_, seq.toRequest())};
@@ -253,6 +255,7 @@ TEST_P(IntegrationTestCommandListManager, concatPtpAndLinSegments)
 TEST_P(IntegrationTestCommandListManager, concatLinAndPtpSegments)
 {
   Sequence seq {data_loader_->getSequence("LinPtpSequence")};
+  ASSERT_GE(seq.size(), 2u);
   seq.setAllBlendRadiiToZero();
 
   RobotTrajVec_t res_vec {manager_->solve(scene_, seq.toRequest())};
@@ -272,7 +275,8 @@ TEST_P(IntegrationTestCommandListManager, concatLinAndPtpSegments)
  */
 TEST_P(IntegrationTestCommandListManager, blendTwoSegments)
 {
-  Sequence seq {data_loader_->getSequence("TestBlend")};
+  Sequence seq {data_loader_->getSequence("SimpleSequence")};
+  ASSERT_EQ(seq.size(), 2u);
   pilz_msgs::MotionSequenceRequest req {seq.toRequest()};
   RobotTrajVec_t res_vec {manager_->solve(scene_, req)};
   EXPECT_EQ(res_vec.size(), 1);
@@ -324,7 +328,8 @@ TEST_P(IntegrationTestCommandListManager, emptyList)
  */
 TEST_P(IntegrationTestCommandListManager, firstGoalNotReachable)
 {
-  Sequence seq {data_loader_->getSequence("TestBlend")};
+  Sequence seq {data_loader_->getSequence("SimpleSequence")};
+  ASSERT_GE(seq.size(), 2u);
   LinCart& lin {seq.getCmd<LinCart>(0)};
   lin.getGoalConfiguration().getPose().position.y = 2700;
   EXPECT_THROW(manager_->solve(scene_, seq.toRequest()), PlanningPipelineException);
@@ -341,7 +346,8 @@ TEST_P(IntegrationTestCommandListManager, firstGoalNotReachable)
  */
 TEST_P(IntegrationTestCommandListManager, startStateNotFirstGoal)
 {
-  Sequence seq {data_loader_->getSequence("TestBlend")};
+  Sequence seq {data_loader_->getSequence("SimpleSequence")};
+  ASSERT_GE(seq.size(), 2u);
   const LinCart& lin {seq.getCmd<LinCart>(0)};
   pilz_msgs::MotionSequenceRequest req {seq.toRequest()};
   req.items.at(1).req.start_state = lin.getGoalConfiguration().toMoveitMsgsRobotState();
@@ -360,7 +366,8 @@ TEST_P(IntegrationTestCommandListManager, startStateNotFirstGoal)
  */
 TEST_P(IntegrationTestCommandListManager, blendingRadiusNegative)
 {
-  Sequence seq {data_loader_->getSequence("TestBlend")};
+  Sequence seq {data_loader_->getSequence("SimpleSequence")};
+  ASSERT_GE(seq.size(), 2u);
   seq.setBlendRadii(0,-0.3);
   EXPECT_THROW(manager_->solve(scene_, seq.toRequest()), NegativeBlendRadiusException);
 }
@@ -377,7 +384,8 @@ TEST_P(IntegrationTestCommandListManager, blendingRadiusNegative)
  */
 TEST_P(IntegrationTestCommandListManager, lastBlendingRadiusNonZero)
 {
-  Sequence seq {data_loader_->getSequence("TestBlend")};
+  Sequence seq {data_loader_->getSequence("SimpleSequence")};
+  ASSERT_EQ(seq.size(), 2u);
   seq.setBlendRadii(1, 0.03);
   EXPECT_THROW(manager_->solve(scene_, seq.toRequest()), LastBlendRadiusNotZeroException);
 }
@@ -395,7 +403,8 @@ TEST_P(IntegrationTestCommandListManager, lastBlendingRadiusNonZero)
  */
 TEST_P(IntegrationTestCommandListManager, blendRadiusGreaterThanSegment)
 {
-  Sequence seq {data_loader_->getSequence("TestBlend")};
+  Sequence seq {data_loader_->getSequence("SimpleSequence")};
+  ASSERT_GE(seq.size(), 2u);
   seq.setBlendRadii(0, 42.0);
   EXPECT_THROW(manager_->solve(scene_, seq.toRequest()), BlendingFailedException);
 }
@@ -451,6 +460,7 @@ TEST_P(IntegrationTestCommandListManager, blendingRadiusOverlapping)
 TEST_P(IntegrationTestCommandListManager, TestExecutionTime)
 {
   Sequence seq {data_loader_->getSequence("ComplexSequence")};
+  ASSERT_GE(seq.size(), 2u);
   RobotTrajVec_t res_single_vec {manager_->solve(scene_, seq.toRequest())};
   EXPECT_EQ(res_single_vec.size(), 1);
   EXPECT_GT(res_single_vec.front()->getWayPointCount(), 0u);
