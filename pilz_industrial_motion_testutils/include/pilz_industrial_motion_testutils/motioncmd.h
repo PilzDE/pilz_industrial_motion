@@ -20,8 +20,6 @@
 #include <string>
 #include <memory>
 
-#include <boost/optional.hpp>
-
 #include "motionplanrequestconvertible.h"
 
 namespace pilz_industrial_motion_testutils
