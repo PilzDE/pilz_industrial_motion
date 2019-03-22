@@ -184,6 +184,10 @@ if(CATKIN_ENABLE_TESTING)
   find_package(code_coverage REQUIRED)
   find_package(pilz_testutils REQUIRED)
 
+  include_directories(
+    ${pilz_testutils_INCLUDE_DIRS}
+  )
+
   if(ENABLE_COVERAGE_TESTING)
     include(CodeCoverage)
     APPEND_COVERAGE_COMPILER_FLAGS()
