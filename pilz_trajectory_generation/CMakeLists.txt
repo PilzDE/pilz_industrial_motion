@@ -303,6 +303,14 @@ add_rostest_gtest(integrationtest_command_list_manager
 target_link_libraries(integrationtest_command_list_manager
 ${catkin_LIBRARIES} ${PROJECT_NAME}_test)
 
+add_rostest_gtest(integrationtest_plan_components_builder
+  test/integrationtest_plan_components_builder.test
+  test/integrationtest_plan_components_builder.cpp
+)
+target_link_libraries(integrationtest_plan_components_builder
+${catkin_LIBRARIES} ${PROJECT_NAME}_test)
+
+
 
 ##################
 ####Unit Tests####
