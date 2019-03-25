@@ -495,7 +495,7 @@ TEST_F(IntegrationTestSequenceAction, TestNegativeBlendRadiusForPlanOnly)
 
   pilz_msgs::MoveGroupSequenceGoal seq_goal;
   seq_goal.request = seq.toRequest();
-  seq_goal.planning_options.planning_scene_diff.robot_state.is_diff = true;
+  seq_goal.planning_options.plan_only = true;
 
   ac_.sendGoalAndWait(seq_goal);
 
