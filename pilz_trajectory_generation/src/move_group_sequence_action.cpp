@@ -187,7 +187,8 @@ void MoveGroupSequenceAction::executeMoveCallback_PlanOnly(const pilz_msgs::Move
   }
   catch(const MoveItErrorCodeException& ex)
   {
-    ROS_ERROR("Planning pipeline threw an exception: %s", ex.what());
+    ROS_ERROR_STREAM("Planning pipeline threw an exception (error code: "
+                     << ex.getErrorCode() << "): " << ex.what());
     res.error_code.val = ex.getErrorCode();
     return;
   }
