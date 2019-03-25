@@ -19,7 +19,6 @@
 #define PLANCOMPONENTSBUILDER_H
 
 #include <string>
-#include <functional>
 #include <memory>
 
 #include <moveit/robot_model/robot_model.h>
@@ -57,12 +56,6 @@ public:
    * @brief Sets the robot model needed to create new trajectory elements.
    */
   void setModel(const moveit::core::RobotModelConstPtr &model);
-
-  /**
-   * @brief Sets the function needed to determine the tip frame (link) of
-   * a group.
-   */
-  void setTipFrameFunc(TipFrameFunc_t func);
 
   /**
    * @brief Appends the specified trajectory to the trajectory container
@@ -121,9 +114,6 @@ private:
   //! Robot model needed to create new trajectory container elements.
   moveit::core::RobotModelConstPtr model_;
 
-  //! Function needed to determine the tip frame (link) of a group.
-  TipFrameFunc_t tipFrameFunc_;
-
   //! The previously added trajectory.
   robot_trajectory::RobotTrajectoryPtr traj_tail_;
 
@@ -138,11 +128,6 @@ private:
 inline void PlanComponentsBuilder::setBlender(std::unique_ptr<pilz::TrajectoryBlender> blender)
 {
   blender_ = std::move(blender);
-}
-
-inline void PlanComponentsBuilder::setTipFrameFunc(TipFrameFunc_t func)
-{
-  tipFrameFunc_ = func;
 }
 
 inline void PlanComponentsBuilder::setModel(const moveit::core::RobotModelConstPtr &model)

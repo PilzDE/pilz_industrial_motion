@@ -40,9 +40,7 @@ CREATE_MOVEIT_ERROR_CODE_EXCEPTION(LastBlendRadiusNotZeroException, moveit_msgs:
 CREATE_MOVEIT_ERROR_CODE_EXCEPTION(StartStateSetException, moveit_msgs::MoveItErrorCodes::INVALID_ROBOT_STATE);
 CREATE_MOVEIT_ERROR_CODE_EXCEPTION(OverlappingBlendRadiiException, moveit_msgs::MoveItErrorCodes::INVALID_MOTION_PLAN);
 CREATE_MOVEIT_ERROR_CODE_EXCEPTION(PlanningPipelineException, moveit_msgs::MoveItErrorCodes::FAILURE);
-CREATE_MOVEIT_ERROR_CODE_EXCEPTION(MultipleEndeffectorException, moveit_msgs::MoveItErrorCodes::FAILURE);
-CREATE_MOVEIT_ERROR_CODE_EXCEPTION(EndeffectorWithoutLinksException, moveit_msgs::MoveItErrorCodes::FAILURE);
-CREATE_MOVEIT_ERROR_CODE_EXCEPTION(NoSolverException, moveit_msgs::MoveItErrorCodes::FAILURE);
+CREATE_MOVEIT_ERROR_CODE_EXCEPTION(EndEffectorBlendingException, moveit_msgs::MoveItErrorCodes::INVALID_MOTION_PLAN);
 
 /**
  * @brief This class orchestrates the planning of single commands and
@@ -91,7 +89,7 @@ private:
    * @param motion_plan_responses Container of calculated/generated trajectories.
    * @param radii Container stating the blend radii.
    */
-  void validateBlendingRadiiDoNotOverlap(const MotionResponseCont& resp_cont,
+  void checkForOverlappingRadii(const MotionResponseCont& resp_cont,
                                          const RadiiCont &radii) const;
 
   /**
@@ -106,11 +104,6 @@ private:
                                         const pilz_msgs::MotionSequenceRequest &req_list) const;
 
   /**
-   * @return The name of the tip frame (link) of the specified group.
-   */
-  const std::string& getTipFrame(const std::string& group_name) const;
-
-  /**
    * @return TRUE if the blending radii of specified trajectories overlap,
    * otherwise FALSE. The functions returns FALSE if both trajectories are from
    * different groups.
@@ -119,6 +112,12 @@ private:
                             const double radii_A,
                             const robot_trajectory::RobotTrajectory& traj_B,
                             const double radii_B) const;
+
+  /**
+   * @brief Checks if the requests consists of items requesting to blend
+   * two end-effector trajectories.
+   */
+  void checkForEndEffectorBlending(const pilz_msgs::MotionSequenceRequest &req_list);
 
 private:
   /**
@@ -136,17 +135,14 @@ private:
                             const std::string &group_name,
                             moveit_msgs::RobotState& start_state);
 
-
   /**
    * @return Container of radii extracted from the specified request list.
    */
   static RadiiCont getRadii(const pilz_msgs::MotionSequenceRequest &req_list);
 
-  /**
-   * @brief Validates if the request list fullfills the conditions noted
-   * under pilz_trajectory_generation::CommandListManager::solve.
-   */
-  static void validateRequestList(const pilz_msgs::MotionSequenceRequest &req_list);
+  static void checkForNegativeRadii(const pilz_msgs::MotionSequenceRequest &req_list);
+  static void checkLastBlendRadius(const pilz_msgs::MotionSequenceRequest &req_list);
+  static void checkStartStates(const pilz_msgs::MotionSequenceRequest &req_list);
 
 private:
   //! Node handle
@@ -159,6 +155,14 @@ private:
   //! trajectories.
   PlanComponentsBuilder plan_comp_builder_;
 };
+
+inline void CommandListManager::checkLastBlendRadius(const pilz_msgs::MotionSequenceRequest &req_list)
+{
+  if(req_list.items.back().blend_radius != 0.0)
+  {
+    throw LastBlendRadiusNotZeroException("The last blending radius must be zero");
+  }
+}
 
 }
 

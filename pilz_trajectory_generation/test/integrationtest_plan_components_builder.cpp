@@ -109,25 +109,6 @@ TEST_P(IntegrationTestPlanComponentBuilder, TestNoBlenderSet)
   EXPECT_THROW(builder.append(traj, 1.0), NoBlenderSetException);
 }
 
-/**
- * @brief Checks that exception is thrown if no tip frame getter function
- * is set.
- *
- */
-TEST_P(IntegrationTestPlanComponentBuilder, TestNoTipFrameFuncSet)
-{
-  robot_trajectory::RobotTrajectoryPtr traj {new robot_trajectory::RobotTrajectory(robot_model_, planning_group_)};
-  PlanComponentsBuilder builder;
-  builder.setModel(robot_model_);
-  LimitsContainer limits;
-  std::unique_ptr<TrajectoryBlenderTransitionWindow> blender {new TrajectoryBlenderTransitionWindow(limits)};
-  builder.setBlender(std::move(blender));
-
-  builder.append(traj, 0.0);
-
-  EXPECT_THROW(builder.append(traj, 1.0), NoTipFrameFunctionSetException);
-}
-
 int main(int argc, char **argv)
 {
   ros::init(argc, argv, "integrationtest_plan_components_builder");
