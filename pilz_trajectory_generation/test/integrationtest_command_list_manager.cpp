@@ -110,14 +110,8 @@ TEST_P(IntegrationTestCommandListManager, TestExceptionErrorCodeMapping)
   PlanningPipelineException pp_ex("");
   EXPECT_EQ(pp_ex.getErrorCode(), moveit_msgs::MoveItErrorCodes::FAILURE);
 
-  MultipleEndeffectorException me_ex("");
-  EXPECT_EQ(me_ex.getErrorCode(), moveit_msgs::MoveItErrorCodes::FAILURE);
-
-  EndeffectorWithoutLinksException ewl_ex("");
-  EXPECT_EQ(ewl_ex.getErrorCode(), moveit_msgs::MoveItErrorCodes::FAILURE);
-
-  NoSolverException ns_ex("");
-  EXPECT_EQ(ns_ex.getErrorCode(), moveit_msgs::MoveItErrorCodes::FAILURE);
+  EndEffectorBlendingException eeb_ex("");
+  EXPECT_EQ(eeb_ex.getErrorCode(), moveit_msgs::MoveItErrorCodes::INVALID_MOTION_PLAN);
 }
 
 /**
@@ -523,6 +517,22 @@ TEST_P(IntegrationTestCommandListManager, TestDifferentGroups)
   {
     EXPECT_GT(res_single_vec.at(i)->getWayPointCount(), 0u);
   }
+}
+
+/**
+ * @brief Checks that exception is thrown if two gripper commands are blended.
+ *
+ */
+TEST_P(IntegrationTestCommandListManager, TestPureGripperBlending)
+{
+  Sequence seq {data_loader_->getSequence("PureGripperSequence")};
+  ASSERT_GE(seq.size(), 2);
+  ASSERT_TRUE(seq.cmdIsOfType<Gripper>(0));
+  ASSERT_TRUE(seq.cmdIsOfType<Gripper>(1));
+
+  // Ensure that blending is requested for gripper commands.
+  seq.setBlendRadii(0, 1.0);
+  EXPECT_THROW(manager_->solve(scene_, seq.toRequest()), EndEffectorBlendingException);
 }
 
 int main(int argc, char **argv)

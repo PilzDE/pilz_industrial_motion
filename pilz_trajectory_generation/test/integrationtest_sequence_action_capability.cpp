@@ -477,6 +477,35 @@ TEST_F(IntegrationTestSequenceAction, TestIgnoreRobotStateForPlanOnly)
 }
 
 /**
+ * @brief Tests that negative blend radii are detected
+ * (Mainly for full coverage) in case "plan only" flag is set.
+ *
+ * Test Sequence:
+ *    1. Send goal for planning and execution.
+ *    2. Evaluate the result.
+ *
+ * Expected Results:
+ *    1. Goal is sent to the action server.
+ *    2. Error code of the result is not success and the planned trajectory is empty.
+ */
+TEST_F(IntegrationTestSequenceAction, TestNegativeBlendRadiusForPlanOnly)
+{
+  Sequence seq {data_loader_->getSequence("ComplexSequence")};
+  seq.setBlendRadii(0, -1.0);
+
+  pilz_msgs::MoveGroupSequenceGoal seq_goal;
+  seq_goal.request = seq.toRequest();
+  seq_goal.planning_options.planning_scene_diff.robot_state.is_diff = true;
+
+  ac_.sendGoalAndWait(seq_goal);
+
+  pilz_msgs::MoveGroupSequenceResultConstPtr res = ac_.getResult();
+  EXPECT_EQ(res->error_code.val, moveit_msgs::MoveItErrorCodes::INVALID_MOTION_PLAN) << "Incorrect error code.";
+  EXPECT_TRUE(res->planned_trajectory.empty());
+  EXPECT_TRUE(res->trajectory_start.empty());
+}
+
+/**
  * @brief Tests that robot state in planning_scene_diff is
  * ignored (Mainly for full coverage).
  *

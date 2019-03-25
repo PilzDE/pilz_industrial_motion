@@ -201,6 +201,10 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
       <sequenceCmd name="Ptp2" type="ptp_cart_cart" blend_radius="0.1" />
       <sequenceCmd name="lin4" type="lin_cart" blend_radius="0" />
     </blend>
+    <blend name="PureGripperSequence">
+      <sequenceCmd name="open_gripper" type="gripper" blend_radius="0.0" />
+      <sequenceCmd name="close_gripper" type="gripper" blend_radius="0.0" />
+    </blend>
   </sequences>
 
 </testdata>

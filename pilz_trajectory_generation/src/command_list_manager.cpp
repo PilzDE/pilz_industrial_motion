@@ -17,7 +17,9 @@
 
 #include "pilz_trajectory_generation/command_list_manager.h"
 
+#include <sstream>
 #include <functional>
+#include <cassert>
 
 #include <ros/ros.h>
 #include <moveit/planning_pipeline/planning_pipeline.h>
@@ -27,6 +29,7 @@
 #include "pilz_trajectory_generation/cartesian_limits_aggregator.h"
 #include "pilz_trajectory_generation/trajectory_blender_transition_window.h"
 #include "pilz_trajectory_generation/trajectory_blend_request.h"
+#include "pilz_trajectory_generation/tip_frame_getter.h"
 
 namespace pilz_trajectory_generation
 {
@@ -53,20 +56,22 @@ CommandListManager::CommandListManager(const ros::NodeHandle &nh, const moveit::
 
   plan_comp_builder_.setModel(model);
   plan_comp_builder_.setBlender(std::unique_ptr<pilz::TrajectoryBlender>(new pilz::TrajectoryBlenderTransitionWindow(limits)));
-  using std::placeholders::_1;
-  plan_comp_builder_.setTipFrameFunc( std::bind(&CommandListManager::getTipFrame, this, _1) );
 }
 
 RobotTrajVec_t CommandListManager::solve(const planning_scene::PlanningSceneConstPtr& planning_scene,
                                          const pilz_msgs::MotionSequenceRequest& req_list)
 {
   if(req_list.items.empty()) { return RobotTrajVec_t(); }
-  validateRequestList(req_list);
+
+  checkForNegativeRadii(req_list);
+  checkLastBlendRadius(req_list);
+  checkForEndEffectorBlending(req_list);
+  checkStartStates(req_list);
 
   MotionResponseCont resp_cont {solveSequenceItems(planning_scene, req_list)};
 
   RadiiCont radii {getRadii(req_list)};
-  validateBlendingRadiiDoNotOverlap(resp_cont, radii);
+  checkForOverlappingRadii(resp_cont, radii);
 
   plan_comp_builder_.reset();
   for(MotionResponseCont::size_type i = 0; i < resp_cont.size(); ++i)
@@ -80,33 +85,6 @@ RobotTrajVec_t CommandListManager::solve(const planning_scene::PlanningSceneCons
   return plan_comp_builder_.build();
 }
 
-void CommandListManager::validateRequestList(const pilz_msgs::MotionSequenceRequest &req_list)
-{
-  if(! std::all_of(req_list.items.begin(), req_list.items.end(),
-                   [](const pilz_msgs::MotionSequenceItem& req){return (req.blend_radius >= 0.0);}))
-  {
-    throw NegativeBlendRadiusException("All blending radii MUST be non negative");
-  }
-
-  if(req_list.items.back().blend_radius != 0.0)
-  {
-    throw LastBlendRadiusNotZeroException("The last blending radius must be zero");
-  }
-
-  if(req_list.items.size() > 1 &&
-     std::any_of(req_list.items.begin()+1, req_list.items.end(),
-                 [](const pilz_msgs::MotionSequenceItem& req){
-                 return !(req.req.start_state.joint_state.position.empty()
-                          && req.req.start_state.joint_state.velocity.empty()
-                          && req.req.start_state.joint_state.effort.empty()
-                          && req.req.start_state.joint_state.name.empty());
-}))
-  {
-    throw StartStateSetException("Only the first request is allowed to have a start state");
-  }
-
-}
-
 bool CommandListManager::checkRadiiForOverlap(const robot_trajectory::RobotTrajectory& traj_A,
                                               const double radii_A,
                                               const robot_trajectory::RobotTrajectory& traj_B,
@@ -118,16 +96,14 @@ bool CommandListManager::checkRadiiForOverlap(const robot_trajectory::RobotTraje
   auto sum_radii {radii_A + radii_B};
   if(sum_radii == 0.) {return false;}
 
-  const std::string& frame_A {getTipFrame(traj_A.getGroupName())};
-  const std::string& frame_B {getTipFrame(traj_B.getGroupName())};
-
-  auto distance_endpoints = (traj_A.getLastWayPoint().getFrameTransform(frame_A).translation() -
-                             traj_B.getLastWayPoint().getFrameTransform(frame_B).translation()).norm();
+  const std::string& blend_frame {getTipFrame(model_->getJointModelGroup(traj_A.getGroupName()))};
+  auto distance_endpoints = (traj_A.getLastWayPoint().getFrameTransform(blend_frame).translation() -
+                             traj_B.getLastWayPoint().getFrameTransform(blend_frame).translation()).norm();
   return distance_endpoints <= sum_radii;
 }
 
-void CommandListManager::validateBlendingRadiiDoNotOverlap(const MotionResponseCont &resp_cont,
-                                                           const RadiiCont &radii) const
+void CommandListManager::checkForOverlappingRadii(const MotionResponseCont &resp_cont,
+                                                  const RadiiCont &radii) const
 {
   if(resp_cont.empty()) { return; }
   if(resp_cont.size() < 3) { return; }
@@ -207,34 +183,55 @@ CommandListManager::MotionResponseCont CommandListManager::solveSequenceItems(
   return motion_plan_responses;
 }
 
-const std::string &CommandListManager::getTipFrame(const std::string& group_name) const
+void CommandListManager::checkForEndEffectorBlending(const pilz_msgs::MotionSequenceRequest &req_list)
 {
-  auto group {model_->getJointModelGroup(group_name)};
-  if(group->isEndEffector())
+  for(pilz_msgs::MotionSequenceRequest::_items_type::size_type i = 0; i < req_list.items.size()-1; ++i)
   {
-    auto links = group->getLinkModels();
-
-    if(links.size() > 1)
+    const pilz_msgs::MotionSequenceItem& item_A {req_list.items.at(i)};
+    if (item_A.blend_radius <= 0)
     {
-      throw MultipleEndeffectorException("Endeffector with multiple links not supported");
+      continue;
     }
-
-    if(links.size() < 1)
+    const pilz_msgs::MotionSequenceItem& item_B {req_list.items.at(i+1)};
+    if (item_A.req.group_name != item_B.req.group_name)
     {
-      throw EndeffectorWithoutLinksException("Endeffector with no links not supported");
+      continue;
     }
+    if (model_->getJointModelGroup(item_A.req.group_name)->isEndEffector())
+    {
+      std::ostringstream os;
+      os << "Blending of two End-Effector trajectories between [" << i << "] and [" << i+1 << "]";
+      throw EndEffectorBlendingException(os.str());
+    }
+  }
+}
 
-    return links.front()->getName();
+void CommandListManager::checkForNegativeRadii(const pilz_msgs::MotionSequenceRequest &req_list)
+{
+  if(!std::all_of(req_list.items.begin(), req_list.items.end(),
+                  [](const pilz_msgs::MotionSequenceItem& req){return (req.blend_radius >= 0.);}))
+  {
+    throw NegativeBlendRadiusException("All blending radii MUST be non negative");
+  }
+}
+
+void CommandListManager::checkStartStates(const pilz_msgs::MotionSequenceRequest &req_list)
+{
+  if (req_list.items.size() <= 1)
+  {
+    return;
   }
 
-  auto solver = group->getSolverInstance();
-
-  if(solver == nullptr)
+  if(std::any_of(req_list.items.begin()+1, req_list.items.end(),
+                 [](const pilz_msgs::MotionSequenceItem& req){
+                 return !(req.req.start_state.joint_state.position.empty()
+                          && req.req.start_state.joint_state.velocity.empty()
+                          && req.req.start_state.joint_state.effort.empty()
+                          && req.req.start_state.joint_state.name.empty());
+}))
   {
-    throw NoSolverException("No solver for group " + group_name);
+    throw StartStateSetException("Only the first request is allowed to have a start state");
   }
-
-  return solver->getTipFrame();
 }
 
 }

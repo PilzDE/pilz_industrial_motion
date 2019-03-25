@@ -17,6 +17,10 @@
 
 #include "pilz_trajectory_generation/plan_components_builder.h"
 
+#include <cassert>
+
+#include <pilz_trajectory_generation/tip_frame_getter.h>
+
 namespace pilz_trajectory_generation
 {
 
@@ -55,11 +59,6 @@ void PlanComponentsBuilder::blend(robot_trajectory::RobotTrajectoryPtr other,
     throw NoBlenderSetException("No blender set");
   }
 
-  if (!tipFrameFunc_)
-  {
-    throw NoTipFrameFunctionSetException("No getter fucntion for tip frame set");
-  }
-
   assert(other->getGroupName() == traj_tail_->getGroupName());
 
   pilz::TrajectoryBlendRequest blend_request;
@@ -68,7 +67,7 @@ void PlanComponentsBuilder::blend(robot_trajectory::RobotTrajectoryPtr other,
   blend_request.second_trajectory = other;
   blend_request.blend_radius = blend_radius;
   blend_request.group_name = traj_tail_->getGroupName();
-  blend_request.link_name = tipFrameFunc_(blend_request.group_name);
+  blend_request.link_name = getTipFrame(model_->getJointModelGroup(blend_request.group_name));
 
   pilz::TrajectoryBlendResponse blend_response;
   if (!blender_->blend(blend_request, blend_response))
