@@ -61,8 +61,6 @@ protected:
   std::shared_ptr<pilz_trajectory_generation::CommandListManager> manager_;
   planning_scene::PlanningScenePtr scene_;
 
-  std::string planning_group_;
-
   std::unique_ptr<pilz_industrial_motion_testutils::TestdataLoader> data_loader_;
 };
 
