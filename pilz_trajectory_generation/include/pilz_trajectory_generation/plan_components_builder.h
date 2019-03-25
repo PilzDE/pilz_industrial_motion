@@ -107,9 +107,9 @@ private:
    * first point, if it matches the last point of the result trajectory.
    *
    * @note Controllers, so far at least the
-   * ros_controllers::JointTrajectoryController require a timewise strictly
+   * ros_controllers::JointTrajectoryController requires a timewise strictly
    * increasing trajectory. If through appending the last point of the
-   * original trajectory gets repeated it is removed here.
+   * original trajectory gets repeated, it is removed here.
    */
   static void appendWithStrictTimeIncrease(robot_trajectory::RobotTrajectory &result,
                                            const robot_trajectory::RobotTrajectory &source);
