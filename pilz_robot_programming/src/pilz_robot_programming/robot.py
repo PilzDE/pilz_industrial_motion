@@ -105,7 +105,8 @@ class Robot(object):
     _PID_STRING = "pid"
     _PROCESS_CREATE_TIME_STRING = "create_time"
 
-    def __init__(self, version=None):
+    def __init__(self, version=None, *args, **kwargs):
+        super(Robot, self).__init__(*args, **kwargs)
         rospy.logdebug("Initialize Robot Api.")
 
         # tf listener is necessary for pose transformation
