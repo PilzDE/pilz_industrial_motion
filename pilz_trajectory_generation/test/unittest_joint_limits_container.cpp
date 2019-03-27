@@ -122,7 +122,7 @@ TEST_F(JointLimitsContainerTest, CheckDecelerationUnification)
 /**
  * @brief Check AddLimit for positive and null deceleration
  */
-TEST_F(JointLimitsContainerTest, CheckAddLimit)
+TEST_F(JointLimitsContainerTest, CheckAddLimitDeceleration)
 {
 
   pilz_extensions::JointLimit lim_invalid1;
@@ -142,6 +142,20 @@ TEST_F(JointLimitsContainerTest, CheckAddLimit)
   EXPECT_EQ(false, container.addLimit("joint_invalid1", lim_invalid1));
   EXPECT_EQ(false, container.addLimit("joint_invalid2", lim_invalid2));
   EXPECT_EQ(true, container.addLimit("joint_valid", lim_valid));
+}
+
+/**
+ * @brief Check AddLimit for already contained limit
+ */
+TEST_F(JointLimitsContainerTest, CheckAddLimitAlreadyContained)
+{
+  pilz_extensions::JointLimit lim_valid;
+  lim_valid.has_deceleration_limits = true;
+  lim_valid.max_deceleration = -1;
+
+  pilz::JointLimitsContainer container;
+  ASSERT_TRUE(container.addLimit("joint_valid", lim_valid));
+  EXPECT_FALSE(container.addLimit("joint_valid", lim_valid));
 }
 
 /**

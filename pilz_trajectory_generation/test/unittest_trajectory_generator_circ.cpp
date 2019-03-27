@@ -261,12 +261,35 @@ TEST_P(TrajectoryGeneratorCIRCTest, accScaleToHigh)
 }
 
 /**
- * @brief Use three points with a really small distance between to trigger a internal throw from KDL
+ * @brief Use three points (with center) with a really small distance between to trigger a internal throw from KDL
  */
-TEST_P(TrajectoryGeneratorCIRCTest, samePoints)
+TEST_P(TrajectoryGeneratorCIRCTest, samePointsWithCenter)
 {
   // Define auxiliary point and goal to be the same as the start
   auto circ {tdp_->getCircCartCenterCart("circ1_center_2")};
+  circ.getAuxiliaryConfiguration().getConfiguration().setPose(circ.getStartConfiguration().getPose());
+  circ.getAuxiliaryConfiguration().getConfiguration().getPose().position.x += 1e-8;
+  circ.getAuxiliaryConfiguration().getConfiguration().getPose().position.y += 1e-8;
+  circ.getAuxiliaryConfiguration().getConfiguration().getPose().position.z += 1e-8;
+  circ.getGoalConfiguration().setPose(circ.getStartConfiguration().getPose());
+  circ.getGoalConfiguration().getPose().position.x -= 1e-8;
+  circ.getGoalConfiguration().getPose().position.y -= 1e-8;
+  circ.getGoalConfiguration().getPose().position.z -= 1e-8;
+
+  planning_interface::MotionPlanResponse res;
+  EXPECT_FALSE(circ_->generate(circ.toRequest(),res));
+  EXPECT_EQ(res.error_code_.val, moveit_msgs::MoveItErrorCodes::INVALID_MOTION_PLAN);
+}
+
+/**
+ * @brief Use three points (with interim) with a really small distance between
+ *
+ * Expected: Planning should fail.
+ */
+TEST_P(TrajectoryGeneratorCIRCTest, samePointsWithInterim)
+{
+  // Define auxiliary point and goal to be the same as the start
+  auto circ {tdp_->getCircCartInterimCart("circ3_interim")};
   circ.getAuxiliaryConfiguration().getConfiguration().setPose(circ.getStartConfiguration().getPose());
   circ.getAuxiliaryConfiguration().getConfiguration().getPose().position.x += 1e-8;
   circ.getAuxiliaryConfiguration().getConfiguration().getPose().position.y += 1e-8;
