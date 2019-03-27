@@ -89,8 +89,10 @@ protected:
     testutils::checkRobotModel(robot_model_, planning_group_, target_link_);
 
     // create the limits container
+    std::string robot_description_param = (!T::Value_ ? PARAM_MODEL_NO_GRIPPER_NAME: PARAM_MODEL_WITH_GRIPPER_NAME);
     pilz::JointLimitsContainer joint_limits =
-        pilz::JointLimitsAggregator::getAggregatedLimits(ph_, robot_model_->getActiveJointModels());
+        pilz::JointLimitsAggregator::getAggregatedLimits(ros::NodeHandle(robot_description_param + "_planning"),
+                                                         robot_model_->getActiveJointModels());
     pilz::CartesianLimit cart_limits;
     cart_limits.setMaxRotationalVelocity(0.5*M_PI);
     cart_limits.setMaxTranslationalAcceleration(2);

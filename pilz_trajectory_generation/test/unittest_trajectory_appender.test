@@ -17,7 +17,7 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 <launch>
     <!-- Load the context -->
-    <include file="$(find prbt_moveit_config)/launch/test_context.launch" />
+    <include file="$(find pilz_trajectory_generation)/test/test_robots/prbt/launch/test_context.launch" />
 
     <!-- run test -->
     <test pkg="pilz_trajectory_generation" test-name="unittest_trajectory_appender"

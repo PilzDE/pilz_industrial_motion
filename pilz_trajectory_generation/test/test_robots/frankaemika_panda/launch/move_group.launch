@@ -13,6 +13,11 @@
     <arg name="load_gripper" value="$(arg load_gripper)" />
   </include>
 
+  <!-- Load additional joint limits for compability with the PTP planner -->
+  <group ns="robot_description_planning">
+    <rosparam command="load" file="$(find pilz_trajectory_generation)/test/test_robots/frankaemika_panda/config/joint_limits.yaml"/>
+  </group>
+
   <!-- GDB Debug Option -->
   <arg name="debug" default="false" />
   <arg unless="$(arg debug)" name="launch_prefix" value="" />
