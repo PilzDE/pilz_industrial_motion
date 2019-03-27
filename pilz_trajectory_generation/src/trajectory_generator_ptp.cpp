@@ -192,12 +192,14 @@ void TrajectoryGeneratorPTP::planPTP(const std::map<std::string, double>& start_
       // by using the most strict limit, the following should always return true
       if (!velocity_profile.at(joint_name).SetProfileAllDurations(start_pos.at(joint_name), goal_pos.at(joint_name),
                                                                   acc_time,const_time,dec_time))
+      // LCOV_EXCL_START
       {
         std::stringstream error_str;
         error_str << "TrajectoryGeneratorPTP::planPTP(): Can not synchronize velocity profile of axis " << joint_name
                << " with leading axis " << leading_axis;
         std::runtime_error(error_str.str());
       }
+      // LCOV_EXCL_STOP
     }
   }
 
