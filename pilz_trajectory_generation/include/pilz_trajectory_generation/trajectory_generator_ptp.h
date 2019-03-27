@@ -91,6 +91,7 @@ private:
    * @param start_pos
    * @param goal_pos
    * @param joint_trajectory
+   * @param group_name
    * @param velocity_scaling_factor
    * @param acceleration_scaling_factor
    * @param sampling_time
@@ -98,15 +99,16 @@ private:
   void planPTP(const std::map<std::string, double>& start_pos,
                const std::map<std::string, double>& goal_pos,
                trajectory_msgs::JointTrajectory& joint_trajectory,
+               const std::string &group_name,
                const double& velocity_scaling_factor,
                const double& acceleration_scaling_factor,
                const double& sampling_time);
 
 private:
   const double MIN_MOVEMENT = 0.001;
-  /// ptp planner assume all joints have the same limit
   pilz::JointLimitsContainer joint_limits_;
-  pilz_extensions::JointLimit mostStrictLimit_;
+  // most strict joint limits for each group
+  std::map<std::string, pilz_extensions::JointLimit> most_strict_limits_;
 };
 
 }
