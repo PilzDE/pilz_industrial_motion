@@ -46,8 +46,15 @@ public:
   double getVelocityScale() const;
   double getAccelerationScale() const;
 
-protected:
+  CmdReader& setDefaultVelocityScale(double scale);
+  CmdReader& setDefaultAccelerationScale(double scale);
+
+private:
   const pt::ptree::value_type &cmd_node_;
+
+  double default_velocity_scale_ {DEFAULT_VEL};
+  double default_acceleration_scale_ {DEFAULT_ACC};
+
 };
 
 inline std::string CmdReader::getPlanningGroup() const
@@ -74,14 +81,26 @@ inline double CmdReader::getVelocityScale() const
 {
   return cmd_node_.second.get_optional<double>(VEL_STR) ?
         cmd_node_.second.get_optional<double>(VEL_STR).value():
-        DEFAULT_VEL;
+        default_velocity_scale_;
 }
 
 inline double CmdReader::getAccelerationScale() const
 {
   return cmd_node_.second.get_optional<double>(ACC_STR) ?
         cmd_node_.second.get_optional<double>(ACC_STR).value():
-        DEFAULT_ACC;
+        default_acceleration_scale_;
+}
+
+inline CmdReader& CmdReader::setDefaultVelocityScale(double scale)
+{
+  default_velocity_scale_ = scale;
+  return *this;
+}
+
+inline CmdReader& CmdReader::setDefaultAccelerationScale(double scale)
+{
+  default_acceleration_scale_ = scale;
+  return *this;
 }
 
 template<class CmdType>
@@ -761,6 +780,8 @@ Sequence XmlTestdataLoader::getSequence(const std::string &cmd_name) const
 Gripper XmlTestdataLoader::getGripper(const std::string &cmd_name) const
 {
   CmdReader cmd_reader{ findCmd(cmd_name, GRIPPERS_PATH_STR, GRIPPER_STR) };
+  cmd_reader.setDefaultVelocityScale(DEFAULT_VEL_GRIPPER);
+  cmd_reader.setDefaultAccelerationScale(DEFAULT_ACC_GRIPPER);
   std::string planning_group {cmd_reader.getPlanningGroup()};
 
   Gripper cmd;
