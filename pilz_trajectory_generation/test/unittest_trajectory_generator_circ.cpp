@@ -330,9 +330,9 @@ TEST_P(TrajectoryGeneratorCIRCTest, invalidAuxLinkName)
 }
 
 /**
- * @brief test the circ planner with wrong center point
+ * @brief test the circ planner with invalid center point
  */
-TEST_P(TrajectoryGeneratorCIRCTest, wrongCenter)
+TEST_P(TrajectoryGeneratorCIRCTest, invalidCenter)
 {
   auto circ {tdp_->getCircCartCenterCart("circ1_center_2")};
   circ.getAuxiliaryConfiguration().getConfiguration().setPose(circ.getStartConfiguration().getPose());
@@ -345,6 +345,8 @@ TEST_P(TrajectoryGeneratorCIRCTest, wrongCenter)
 
 /**
  * @brief test the circ planner with colinear start/goal/center position
+ *
+ * Expected: Planning should fail since the path is not uniquely defined.
  */
 TEST_P(TrajectoryGeneratorCIRCTest, colinearCenter)
 {
@@ -363,6 +365,8 @@ TEST_P(TrajectoryGeneratorCIRCTest, colinearCenter)
 
 /**
  * @brief test the circ planner with  colinear start/goal/interim position
+ *
+ * Expected: Planning should fail. These positions do not even represent a circle.
  */
 TEST_P(TrajectoryGeneratorCIRCTest, colinearInterim)
 {
@@ -382,7 +386,7 @@ TEST_P(TrajectoryGeneratorCIRCTest, colinearInterim)
 /**
  * @brief test the circ planner with half circle with interim point
  *
- * The request contains start/interim/goal so that
+ * The request contains start/interim/goal such that
  * start, center (not explicitly given) and goal are colinear
  *
  * Expected: Planning should successfully return.
@@ -395,6 +399,69 @@ TEST_P(TrajectoryGeneratorCIRCTest, colinearCenterDueToInterim)
   planning_interface::MotionPlanResponse res;
   ASSERT_TRUE(circ_->generate(circ.toRequest(),res));
   EXPECT_EQ(res.error_code_.val, moveit_msgs::MoveItErrorCodes::SUCCESS);
+}
+
+/**
+ * @brief test the circ planner with colinear start/center/interim positions
+ *
+ * The request contains start/interim/goal such that
+ * start, center (not explicitly given) and interim are colinear.
+ * In case the interim is used as auxiliary point for KDL::Path_Circle this should fail.
+ *
+ * Expected: Planning should successfully return.
+ */
+TEST_P(TrajectoryGeneratorCIRCTest, colinearCenterAndInterim)
+{
+  auto circ {tdp_->getCircCartInterimCart("circ3_interim")};
+
+  // alter start, interim and goal such that start/center and interim are colinear
+  circ.getAuxiliaryConfiguration().getConfiguration().setPose(circ.getStartConfiguration().getPose());
+  circ.getGoalConfiguration().setPose(circ.getStartConfiguration().getPose());
+
+  circ.getStartConfiguration().getPose().position.x -= 0.2;
+  circ.getAuxiliaryConfiguration().getConfiguration().getPose().position.x += 0.2;
+  circ.getGoalConfiguration().getPose().position.y -= 0.2;
+
+  circ.setAccelerationScale(0.05);
+  circ.setVelocityScale(0.05);
+
+  moveit_msgs::MotionPlanRequest req = circ.toRequest();
+
+  planning_interface::MotionPlanResponse res;
+  EXPECT_TRUE(circ_->generate(req,res));
+  EXPECT_EQ(res.error_code_.val, moveit_msgs::MoveItErrorCodes::SUCCESS);
+  checkCircResult(req, res);
+}
+
+/**
+ * @brief test the circ planner with a circ path where the angle between goal and interim is larger than 180 degree
+ *
+ * The request contains start/interim/goal such that 180 degree < interim angle < goal angle.
+ *
+ * Expected: Planning should successfully return.
+ */
+TEST_P(TrajectoryGeneratorCIRCTest, interimLarger180Degree)
+{
+  auto circ {tdp_->getCircCartInterimCart("circ3_interim")};
+
+  // alter start, interim and goal such that start/center and interim are colinear
+  circ.getAuxiliaryConfiguration().getConfiguration().setPose(circ.getStartConfiguration().getPose());
+  circ.getGoalConfiguration().setPose(circ.getStartConfiguration().getPose());
+
+  circ.getStartConfiguration().getPose().position.x -= 0.2;
+  circ.getAuxiliaryConfiguration().getConfiguration().getPose().position.x += 0.14142136;
+  circ.getAuxiliaryConfiguration().getConfiguration().getPose().position.y -= 0.14142136;
+  circ.getGoalConfiguration().getPose().position.y -= 0.2;
+
+  circ.setAccelerationScale(0.05);
+  circ.setVelocityScale(0.05);
+
+  moveit_msgs::MotionPlanRequest req = circ.toRequest();
+
+  planning_interface::MotionPlanResponse res;
+  EXPECT_TRUE(circ_->generate(req,res));
+  EXPECT_EQ(res.error_code_.val, moveit_msgs::MoveItErrorCodes::SUCCESS);
+  checkCircResult(req, res);
 }
 
 /**

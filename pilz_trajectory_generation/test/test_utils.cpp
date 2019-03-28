@@ -1324,6 +1324,14 @@ void testutils::checkRobotModel(const moveit::core::RobotModelConstPtr &robot_mo
                                                                    const double rot_axis_tol,
                                                                    const double acc_tol)
 {
+  // skip computations if rotation angle is zero
+  if (trajectory->getFirstWayPoint().getFrameTransform(link_name).rotation().isApprox(
+      trajectory->getLastWayPoint().getFrameTransform(link_name).rotation()
+      , rot_axis_tol))
+  {
+    return ::testing::AssertionSuccess();
+  }
+
   // We require the following such that the test makes sense, else the traj would have a degenerated velocity profile
   EXPECT_GT(trajectory->getWayPointCount(), 9u);
 
@@ -1344,16 +1352,16 @@ void testutils::checkRobotModel(const moveit::core::RobotModelConstPtr &robot_mo
     Eigen::Quaterniond orientation1(waypoint_pose_1.rotation());
     Eigen::Quaterniond orientation2(waypoint_pose_2.rotation());
 
+    Eigen::AngleAxisd axis1(orientation0 * orientation1.inverse());
+    Eigen::AngleAxisd axis2(orientation1 * orientation2.inverse());
     if (i == 2)
     {
-      Eigen::AngleAxisd axis(orientation0 * orientation1.inverse());
-      rotation_axes.push_back(axis);
+      rotation_axes.push_back(axis1);
     }
-    Eigen::AngleAxisd axis(orientation1 * orientation2.inverse());
-    rotation_axes.push_back(axis);
+    rotation_axes.push_back(axis2);
 
-    double angular_vel1 = orientation0.angularDistance(orientation1) / t1;
-    double angular_vel2 = orientation1.angularDistance(orientation2) / t2;
+    double angular_vel1 = axis1.angle() / t1;
+    double angular_vel2 = axis2.angle() / t2;
     double angular_acc = (angular_vel2 - angular_vel1) / (t1+t2);
     accelerations.push_back(angular_acc);
   }

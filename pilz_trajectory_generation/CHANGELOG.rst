@@ -5,6 +5,8 @@ Changelog for package pilz_trajectory_generation
 Forthcoming
 -----------
 * update dependencies of trajectory_generation
+* fix CIRC path generator and increase test coverage
+* Contributors: Pilz GmbH and Co. KG
 
 0.3.6 (2019-02-26)
 ------------------
