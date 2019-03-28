@@ -20,6 +20,7 @@
 #include <memory>
 #include <string>
 #include <vector>
+#include <functional>
 
 #include <ros/ros.h>
 #include <moveit_msgs/Constraints.h>
@@ -45,6 +46,11 @@
 const std::string TEST_DATA_FILE_NAME("testdata_file_name");
 
 using namespace pilz_industrial_motion_testutils;
+
+static std::string createJointName(const size_t& joint_number)
+{
+ return std::string("prbt_joint_") + std::to_string(joint_number + 1);
+}
 
 class IntegrationTestSequenceService : public ::testing::Test
 {
@@ -221,8 +227,9 @@ TEST_F(IntegrationTestSequenceService, TestSecondTrajInvalidStartState)
   pilz_msgs::MotionSequenceRequest req_list {seq.toRequest()};
 
   // Set start state
-  JointConfiguration config {"MyGroupName", {-1., 2., -3., 4., -5., 0.} };
-  config.setJointPrefix("prbt_joint_");
+  using std::placeholders::_1;
+  JointConfiguration config {"MyGroupName", {-1., 2., -3., 4., -5., 0.},
+                            std::bind(&createJointName, _1)};
   req_list.items[1].req.start_state.joint_state = config.toSensorMsg();
 
   pilz_msgs::GetMotionSequence srv;
