@@ -130,10 +130,11 @@ motion plan fails due to violation of joint space limits.
 
 
 ## The CIRC motion command
-This planner generates an circular arc trajectory in Cartesian space between goal and start poses. The center point of
-the circle or a interim point on the arc needs to be given as path constraint. The planner always generates the shorter
-arc between start and goal poses and cannot generate half circle in case of given center point. The planner cannot generate
-full circle. The Cartesian limits, namely translational/rotational velocity/acceleration/deceleration need to be set
+This planner generates a circular arc trajectory in Cartesian space between goal and start poses. There are two options for giving a path constraint:
+ - the *center* point of the circle: The planner always generates the shorter arc between start and goal and cannot generate a half circle,
+ - an *interim* point on the arc: The generated trajectory always goes through the interim point. The planner cannot generate a full circle.
+
+The Cartesian limits, namely translational/rotational velocity/acceleration/deceleration need to be set
 and the planner uses these limits to generate a trapezoid velocity profile in Cartesian space. The rotational motion is
 quaternion slerp between start and goal orientation. The translational and rotational motion is synchronized in time.
 This planner only accepts start state with zero velocity. Planning result is a joint trajectory. The user needs to adapt
