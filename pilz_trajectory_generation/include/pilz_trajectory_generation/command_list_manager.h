@@ -81,6 +81,7 @@ private:
   using MotionResponseCont = std::vector<planning_interface::MotionPlanResponse>;
   using RobotState_OptRef = boost::optional<const robot_state::RobotState& >;
   using RadiiCont = std::vector<double>;
+  using GroupNamesCont = std::vector<std::string>;
 
 private:
   /**
@@ -90,7 +91,7 @@ private:
    * @param radii Container stating the blend radii.
    */
   void checkForOverlappingRadii(const MotionResponseCont& resp_cont,
-                                         const RadiiCont &radii) const;
+                                const RadiiCont &radii) const;
 
   /**
    * @brief Solve each sequence item individually.
@@ -140,9 +141,34 @@ private:
    */
   static RadiiCont getRadii(const pilz_msgs::MotionSequenceRequest &req_list);
 
+  /**
+   * @brief Checks that all blend radii are greater or equal to zero.
+   */
   static void checkForNegativeRadii(const pilz_msgs::MotionSequenceRequest &req_list);
-  static void checkLastBlendRadius(const pilz_msgs::MotionSequenceRequest &req_list);
+
+  /**
+   * @brief Checks that last blend radius is zero.
+   */
+  static void checkLastBlendRadiusZero(const pilz_msgs::MotionSequenceRequest &req_list);
+
+  /**
+   * @brief Checks that only the first request of the specified group has
+   * a start state in the specified request list.
+   */
+  static void checkStartStatesOfGroup(const pilz_msgs::MotionSequenceRequest &req_list,
+                                      const std::string& group_name);
+
+  /**
+   * @brief Checks that each group in the specified request list has only
+   * one start state.
+   */
   static void checkStartStates(const pilz_msgs::MotionSequenceRequest &req_list);
+
+  /**
+   * @return Returns all group names which are present in the specified
+   * request.
+   */
+  static GroupNamesCont getGroupNames(const pilz_msgs::MotionSequenceRequest &req_list);
 
 private:
   //! Node handle
@@ -156,7 +182,7 @@ private:
   PlanComponentsBuilder plan_comp_builder_;
 };
 
-inline void CommandListManager::checkLastBlendRadius(const pilz_msgs::MotionSequenceRequest &req_list)
+inline void CommandListManager::checkLastBlendRadiusZero(const pilz_msgs::MotionSequenceRequest &req_list)
 {
   if(req_list.items.back().blend_radius != 0.0)
   {

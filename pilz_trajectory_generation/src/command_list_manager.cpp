@@ -61,14 +61,20 @@ CommandListManager::CommandListManager(const ros::NodeHandle &nh, const moveit::
 RobotTrajVec_t CommandListManager::solve(const planning_scene::PlanningSceneConstPtr& planning_scene,
                                          const pilz_msgs::MotionSequenceRequest& req_list)
 {
-  if(req_list.items.empty()) { return RobotTrajVec_t(); }
+  if(req_list.items.empty())
+  {
+    return RobotTrajVec_t();
+  }
 
   checkForNegativeRadii(req_list);
-  checkLastBlendRadius(req_list);
+  checkLastBlendRadiusZero(req_list);
   checkForEndEffectorBlending(req_list);
   checkStartStates(req_list);
 
-  MotionResponseCont resp_cont {solveSequenceItems(planning_scene, req_list)};
+  MotionResponseCont resp_cont
+  {
+    solveSequenceItems(planning_scene, req_list)
+  };
 
   RadiiCont radii {getRadii(req_list)};
   checkForOverlappingRadii(resp_cont, radii);
@@ -215,6 +221,36 @@ void CommandListManager::checkForNegativeRadii(const pilz_msgs::MotionSequenceRe
   }
 }
 
+void CommandListManager::checkStartStatesOfGroup(const pilz_msgs::MotionSequenceRequest &req_list,
+                                                 const std::string& group_name)
+{
+  bool first_elem {true};
+  for (const pilz_msgs::MotionSequenceItem& item : req_list.items)
+  {
+    if (item.req.group_name != group_name)
+    {
+      continue;
+    }
+
+    if (first_elem)
+    {
+      first_elem = false;
+      continue;
+    }
+
+    if (!(item.req.start_state.joint_state.position.empty()
+          && item.req.start_state.joint_state.velocity.empty()
+          && item.req.start_state.joint_state.effort.empty()
+          && item.req.start_state.joint_state.name.empty()))
+    {
+      std::ostringstream os;
+      os << "Only the first request is allowed to have a start state, but"
+         << " the requests for group: \"" << group_name << "\" violate the rule" ;
+      throw StartStateSetException(os.str());
+    }
+  }
+}
+
 void CommandListManager::checkStartStates(const pilz_msgs::MotionSequenceRequest &req_list)
 {
   if (req_list.items.size() <= 1)
@@ -222,16 +258,26 @@ void CommandListManager::checkStartStates(const pilz_msgs::MotionSequenceRequest
     return;
   }
 
-  if(std::any_of(req_list.items.begin()+1, req_list.items.end(),
-                 [](const pilz_msgs::MotionSequenceItem& req){
-                 return !(req.req.start_state.joint_state.position.empty()
-                          && req.req.start_state.joint_state.velocity.empty()
-                          && req.req.start_state.joint_state.effort.empty()
-                          && req.req.start_state.joint_state.name.empty());
-}))
+  GroupNamesCont group_names {getGroupNames(req_list)};
+  for(const auto& curr_group_name : group_names)
   {
-    throw StartStateSetException("Only the first request is allowed to have a start state");
+    checkStartStatesOfGroup(req_list, curr_group_name);
   }
+}
+
+CommandListManager::GroupNamesCont CommandListManager::getGroupNames(const pilz_msgs::MotionSequenceRequest &req_list)
+{
+  GroupNamesCont group_names;
+  std::for_each(req_list.items.cbegin(), req_list.items.cend(),
+                [&group_names](const pilz_msgs::MotionSequenceItem& item)
+  {
+    if(std::find(group_names.cbegin(), group_names.cend(), item.req.group_name) == group_names.cend())
+    {
+      group_names.emplace_back(item.req.group_name);
+    }
+  }
+  );
+  return group_names;
 }
 
 }
