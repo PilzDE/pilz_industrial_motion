@@ -18,6 +18,8 @@
 #include "pilz_trajectory_generation/trajectory_generator_circ.h"
 #include "pilz_trajectory_generation/path_circle_generator.h"
 
+#include <cassert>
+
 #include <ros/ros.h>
 #include <eigen_conversions/eigen_msg.h>
 #include <moveit/robot_state/conversions.h>
@@ -31,8 +33,8 @@
 namespace pilz {
 
 TrajectoryGeneratorCIRC::TrajectoryGeneratorCIRC(const moveit::core::RobotModelConstPtr &robot_model,
-                                               const LimitsContainer &planner_limits)
-:TrajectoryGenerator::TrajectoryGenerator(robot_model, planner_limits)
+                                                 const LimitsContainer &planner_limits)
+  :TrajectoryGenerator::TrajectoryGenerator(robot_model, planner_limits)
 {
   if(!planner_limits_.hasFullCartesianLimits())
   {
@@ -109,7 +111,7 @@ bool TrajectoryGeneratorCIRC::generate(const planning_interface::MotionPlanReque
 }
 
 bool TrajectoryGeneratorCIRC::validateRequest(const planning_interface::MotionPlanRequest &req,
-                                        moveit_msgs::MoveItErrorCodes &error_code) const
+                                              moveit_msgs::MoveItErrorCodes &error_code) const
 {
 
   if(!TrajectoryGenerator::validateRequest(req, error_code))
@@ -119,7 +121,7 @@ bool TrajectoryGeneratorCIRC::validateRequest(const planning_interface::MotionPl
 
   // CIRC needs one position constraint as interim or center point
   if(! (req.path_constraints.name == "interim" ||
-     req.path_constraints.name == "center") )
+        req.path_constraints.name == "center") )
   {
     ROS_ERROR_STREAM("Undefined path constraint with the name: " << req.path_constraints.name << " for CIRC motion."
                      << "Only interim/center point is allowed.");
@@ -154,14 +156,14 @@ bool TrajectoryGeneratorCIRC::extractMotionPlanInfo(const planning_interface::Mo
   // goal given in joint space
   if(req.goal_constraints.front().joint_constraints.size() != 0)
   {
-      // TODO: link name from goal constraint and path constraint
-      info.link_name = req.path_constraints.position_constraints.front().link_name;
-      if(!robot_model_->hasLinkModel(info.link_name))
-      {
-        ROS_ERROR("Unknown link name of CIRC help point.");
-        error_code.val = moveit_msgs::MoveItErrorCodes::INVALID_LINK_NAME;
-        return false;
-      }
+    // TODO: link name from goal constraint and path constraint
+    info.link_name = req.path_constraints.position_constraints.front().link_name;
+    if(!robot_model_->hasLinkModel(info.link_name))
+    {
+      ROS_ERROR("Unknown link name of CIRC help point.");
+      error_code.val = moveit_msgs::MoveItErrorCodes::INVALID_LINK_NAME;
+      return false;
+    }
 
 
     if(req.goal_constraints.front().joint_constraints.size() !=
@@ -178,10 +180,10 @@ bool TrajectoryGeneratorCIRC::extractMotionPlanInfo(const planning_interface::Mo
     }
 
 
-      computeLinkFK(robot_model_,
-                    info.link_name,
-                    info.goal_joint_position,
-                    info.goal_pose);
+    computeLinkFK(robot_model_,
+                  info.link_name,
+                  info.goal_joint_position,
+                  info.goal_pose);
 
   }
   // goal given in Cartesian space
@@ -206,42 +208,46 @@ bool TrajectoryGeneratorCIRC::extractMotionPlanInfo(const planning_interface::Mo
     tf::poseMsgToEigen(goal_pose_msg, info.goal_pose);
   }
 
-  // copy start state only with the joint
-  robot_state::RobotState start_state(robot_model_);
-  start_state.setToDefaultValues();
-  moveit::core::robotStateMsgToRobotState(req.start_state, start_state, false);
-
+  assert(req.start_state.joint_state.name.size() == req.start_state.joint_state.position.size());
   for(const auto& joint_name : robot_model_->getJointModelGroup(req.group_name)->getActiveJointModelNames())
   {
-    info.start_joint_position[joint_name] = start_state.getVariablePosition(joint_name);
+    auto it {std::find(req.start_state.joint_state.name.cbegin(), req.start_state.joint_state.name.cend(), joint_name)};
+    if (it == req.start_state.joint_state.name.cend())
+    {
+      ROS_ERROR_STREAM("Could not find joint \"" << joint_name << "\" of group \"" << req.group_name << "\" in start state of request");
+      error_code.val = moveit_msgs::MoveItErrorCodes::INVALID_ROBOT_STATE;
+      return false;
+    }
+    size_t index = it - req.start_state.joint_state.name.cbegin();
+    info.start_joint_position[joint_name] = req.start_state.joint_state.position[index];
   }
 
-    computeLinkFK(robot_model_,
-                  info.link_name,
-                  info.start_joint_position,
-                  info.start_pose);
+  computeLinkFK(robot_model_,
+                info.link_name,
+                info.start_joint_position,
+                info.start_pose);
 
-    //check goal pose ik before Cartesian motion plan starts
-    std::map<std::string, double> ik_solution;
-    if(!computePoseIK(robot_model_,
-                      info.group_name,
-                      info.link_name,
-                      info.goal_pose,
-                      frame_id,
-                      info.start_joint_position,
-                      ik_solution))
-    {
-      // LCOV_EXCL_START
-      ROS_ERROR_STREAM("Failed to compute inverse kinematics for link: " << info.link_name << " of goal pose.");
-      error_code.val = moveit_msgs::MoveItErrorCodes::NO_IK_SOLUTION;
-      return false;
-      // LCOV_EXCL_STOP // not able to trigger here since lots of checks before are in place
-    }
+  //check goal pose ik before Cartesian motion plan starts
+  std::map<std::string, double> ik_solution;
+  if(!computePoseIK(robot_model_,
+                    info.group_name,
+                    info.link_name,
+                    info.goal_pose,
+                    frame_id,
+                    info.start_joint_position,
+                    ik_solution))
+  {
+    // LCOV_EXCL_START
+    ROS_ERROR_STREAM("Failed to compute inverse kinematics for link: " << info.link_name << " of goal pose.");
+    error_code.val = moveit_msgs::MoveItErrorCodes::NO_IK_SOLUTION;
+    return false;
+    // LCOV_EXCL_STOP // not able to trigger here since lots of checks before are in place
+  }
 
 
   Eigen::Vector3d circ_path_point;
   tf::pointMsgToEigen(req.path_constraints.position_constraints.front()
-                    .constraint_region.primitive_poses.front().position, circ_path_point);
+                      .constraint_region.primitive_poses.front().position, circ_path_point);
 
   info.circ_path_point.first = req.path_constraints.name;
   info.circ_path_point.second = circ_path_point;
@@ -250,7 +256,7 @@ bool TrajectoryGeneratorCIRC::extractMotionPlanInfo(const planning_interface::Mo
 }
 
 std::unique_ptr<KDL::Path> TrajectoryGeneratorCIRC::setPathCIRC(const MotionPlanInfo &info,
-                                                                 moveit_msgs::MoveItErrorCodes &error_code) const
+                                                                moveit_msgs::MoveItErrorCodes &error_code) const
 {
   ROS_DEBUG("Set Cartesian path for CIRC command.");
 
