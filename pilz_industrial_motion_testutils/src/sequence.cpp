@@ -52,21 +52,21 @@ pilz_msgs::MotionSequenceRequest Sequence::toRequest() const
 {
   pilz_msgs::MotionSequenceRequest req;
 
-  bool first_cmd {true};
+  std::vector<std::string> group_names;
   for (const auto& cmd : cmds_)
   {
     pilz_msgs::MotionSequenceItem item;
     item.req = boost::apply_visitor( ToReqVisitor(), cmd.first);
 
-    if (!first_cmd)
+    if ( std::find(group_names.begin(), group_names.end(), item.req.group_name) != group_names.end() )
     {
-      // Remove start state because only the first request
+      // Remove start state because only the first request of a group
       // is allowed to have a start state in a sequence.
       item.req.start_state = moveit_msgs::RobotState();
     }
     else
     {
-      first_cmd = false;
+      group_names.emplace_back(item.req.group_name);
     }
 
     item.blend_radius = cmd.second;
