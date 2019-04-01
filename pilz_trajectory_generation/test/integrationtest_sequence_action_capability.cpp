@@ -23,7 +23,6 @@
 #include <mutex>
 #include <condition_variable>
 #include <chrono>
-#include <functional>
 #include <stdexcept>
 
 #include <ros/ros.h>
@@ -61,23 +60,6 @@ const std::string TEST_DATA_FILE_NAME("testdata_file_name");
 const std::string GROUP_NAME("group_name");
 
 using namespace pilz_industrial_motion_testutils;
-
-static std::string createManipulatorJointName(const size_t& joint_number)
-{
-  return std::string("prbt_joint_") + std::to_string(joint_number + 1);
-}
-
-static std::string createGripperJointName(const size_t& joint_number)
-{
-  switch (joint_number)
-  {
-  case 0:
-    return "prbt_gripper_finger_left_joint";
-  default:
-    break;
-  }
-  throw std::runtime_error("Could not create gripper joint name");
-}
 
 class IntegrationTestSequenceAction : public testing::Test, public testing::AsyncTest
 {
@@ -136,7 +118,7 @@ void IntegrationTestSequenceAction::SetUp()
   move_group_->setJointValueTarget(rState);
   move_group_->move();
 
-  // ASSERT_TRUE(isAtExpectedPosition(rState, *(move_group_->getCurrentState()), joint_position_tolerance_));
+  ASSERT_TRUE(isAtExpectedPosition(rState, *(move_group_->getCurrentState()), joint_position_tolerance_));
 }
 
 /**
@@ -649,50 +631,6 @@ TEST_F(IntegrationTestSequenceAction, TestComplexSequenceWithBlending)
   EXPECT_FALSE(res->planned_trajectory.empty()) << "Planned trajectory is empty";
   EXPECT_FALSE(res->trajectory_start.empty()) << "No start states returned";
 }
-
-/**
- * @brief Tests the execution of a sequence in which each group states a start
- * state only consisting of joints of the corresonding group.
- *
- * Test Sequence:
- *    1. Create sequence goal for which each start state only consists of joints
- *        of the corresonding group and send goal via ActionClient.
- *    2. Wait for successful completion of command.
- *
- * Expected Results:
- *    1. -
- *    2. ActionClient reports successful completion of command.
- */
-TEST_F(IntegrationTestSequenceAction, TestGroupSpecificStartState)
-{
-  using std::placeholders::_1;
-
-  Sequence seq {data_loader_->getSequence("ComplexSequenceWithGripper")};
-  ASSERT_GE(seq.size(), 4);
-  seq.erase(4, seq.size());
-
-  Gripper& gripper {seq.getCmd<Gripper>(0)};
-  gripper.getStartConfiguration().setCreateJointNameFunc(std::bind(&createGripperJointName, _1));
-  // By deleting the model we guarantee that the start state only consists
-  // of joints of the gripper group without the manipulator
-  gripper.getStartConfiguration().clearModel();
-
-  PtpJointCart& ptp {seq.getCmd<PtpJointCart>(1)};
-  ptp.getStartConfiguration().setCreateJointNameFunc(std::bind(&createManipulatorJointName, _1));
-  // By deleting the model we guarantee that the start state only consists
-  // of joints of the manipulator group without the gripper
-  ptp.getStartConfiguration().clearModel();
-
-  pilz_msgs::MoveGroupSequenceGoal seq_goal;
-  seq_goal.request = seq.toRequest();
-
-  ac_.sendGoalAndWait(seq_goal);
-  pilz_msgs::MoveGroupSequenceResultConstPtr res = ac_.getResult();
-  EXPECT_EQ(res->error_code.val, moveit_msgs::MoveItErrorCodes::SUCCESS);
-  EXPECT_FALSE(res->planned_trajectory.empty()) << "Planned trajectory is empty";
-  EXPECT_FALSE(res->trajectory_start.empty()) << "No start states returned";
-}
-
 
 int main(int argc, char **argv)
 {

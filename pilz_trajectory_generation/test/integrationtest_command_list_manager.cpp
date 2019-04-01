@@ -22,6 +22,7 @@
 
 #include <ros/ros.h>
 #include <ros/time.h>
+#include <functional>
 
 #include <moveit/robot_model_loader/robot_model_loader.h>
 #include <moveit/kinematic_constraints/utils.h>
@@ -34,6 +35,7 @@
 #include <pilz_industrial_motion_testutils/xml_testdata_loader.h>
 #include <pilz_industrial_motion_testutils/sequence.h>
 #include <pilz_industrial_motion_testutils/lin.h>
+#include <pilz_industrial_motion_testutils/gripper.h>
 
 #include "test_utils.h"
 
@@ -47,6 +49,23 @@ const std::string TEST_DATA_FILE_NAME("testdata_file_name");
 using testutils::hasStrictlyIncreasingTime;
 using namespace pilz_trajectory_generation;
 using namespace pilz_industrial_motion_testutils;
+
+static std::string createManipulatorJointName(const size_t& joint_number)
+{
+  return std::string("prbt_joint_") + std::to_string(joint_number + 1);
+}
+
+static std::string createGripperJointName(const size_t& joint_number)
+{
+  switch (joint_number)
+  {
+  case 0:
+    return "prbt_gripper_finger_left_joint";
+  default:
+    break;
+  }
+  throw std::runtime_error("Could not create gripper joint name");
+}
 
 class IntegrationTestCommandListManager : public testing::TestWithParam<std::string>
 {
@@ -533,6 +552,44 @@ TEST_P(IntegrationTestCommandListManager, TestPureGripperBlending)
   // Ensure that blending is requested for gripper commands.
   seq.setBlendRadii(0, 1.0);
   EXPECT_THROW(manager_->solve(scene_, seq.toRequest()), EndEffectorBlendingException);
+}
+
+/**
+ * @brief Tests the execution of a sequence in which each group states a start
+ * state only consisting of joints of the corresonding group.
+ *
+ * Test Sequence:
+ *    1. Create sequence request for which each start state only consists of
+ *        joints of the corresonding group
+ *
+ * Expected Results:
+ *    1. Trajectory generation is successful, result trajectory is not empty.
+ *
+ *
+ */
+TEST_P(IntegrationTestCommandListManager, TestGroupSpecificStartState)
+{
+  using std::placeholders::_1;
+
+  Sequence seq {data_loader_->getSequence("ComplexSequenceWithGripper")};
+  ASSERT_GE(seq.size(), 4);
+  seq.erase(4, seq.size());
+
+  Gripper& gripper {seq.getCmd<Gripper>(0)};
+  gripper.getStartConfiguration().setCreateJointNameFunc(std::bind(&createGripperJointName, _1));
+  // By deleting the model we guarantee that the start state only consists
+  // of joints of the gripper group without the manipulator
+  gripper.getStartConfiguration().clearModel();
+
+  PtpJointCart& ptp {seq.getCmd<PtpJointCart>(1)};
+  ptp.getStartConfiguration().setCreateJointNameFunc(std::bind(&createManipulatorJointName, _1));
+  // By deleting the model we guarantee that the start state only consists
+  // of joints of the manipulator group without the gripper
+  ptp.getStartConfiguration().clearModel();
+
+  RobotTrajVec_t res_vec {manager_->solve(scene_, seq.toRequest())};
+  EXPECT_GE(res_vec.size(), 1);
+  EXPECT_GT(res_vec.front()->getWayPointCount(), 0u);
 }
 
 int main(int argc, char **argv)
