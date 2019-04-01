@@ -13,7 +13,7 @@ This package implements the `planning_interface::PlannerManager` interface of Mo
 planning pipeline (`pilz_command_planner_planning_pipeline.launch.xml` in `prbt_moveit_config` package), the trajectory
 generation functionalities can be accessed through the user interface (c++, python or rviz) provided by
 the `move_group` node, e.g. `/plan_kinematics_path` service and `/move_group` action. For detailed tutorials please
-refer to [MoveIt! Tutorials](http://docs.ros.org/indigo/api/moveit_tutorials/html/index.html).
+refer to [MoveIt! Tutorials](http://docs.ros.org/melodic/api/moveit_tutorials/html/index.html).
 
 ## Joint Limits
 For all commands the planner needs to know the limitations of each robot joint.
@@ -51,7 +51,7 @@ As defined by the user interface of MoveIt!, this package uses `moveit_msgs::Mot
 comprehensive and general. The parameters needed by specific planning algorithm are explained below in detail.
 
 For a general introduction how to fill a `MotionPlanRequest` see the
-[Move Group Interface Tutorial](http://docs.ros.org/kinetic/api/moveit_tutorials/html/doc/pr2_tutorials/planning/src/doc/move_group_interface_tutorial.html).
+[Move Group Interface Tutorial](http://docs.ros.org/melodic/api/moveit_tutorials/html/doc/move_group_interface/move_group_interface_tutorial.html#planning-to-a-pose-goal).
 
 The planner is able to handle all the different commands. Just put "PTP", "LIN" or "CIRC" as planner_id in
 the motion request.
