@@ -29,7 +29,7 @@ catkin_python_setup()
 catkin_package(
   INCLUDE_DIRS include
   LIBRARIES ${PROJECT_NAME}
-  CATKIN_DEPENDS moveit_core moveit_msgs
+  CATKIN_DEPENDS moveit_core moveit_msgs pilz_msgs
   DEPENDS Boost
 )
 
