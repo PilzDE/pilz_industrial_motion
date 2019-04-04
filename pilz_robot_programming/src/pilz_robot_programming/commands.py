@@ -502,10 +502,10 @@ class _SequenceSubCmd(object):
 class Sequence(_AbstractCmd):
     """ Represents an overall Sequence command. Each :py:class:`Sequence` command consists of two or more
      robot motion commands. :py:class:`Sequence` commands allow the user to define a robot motion consisting of
-     two or more robot motion commands which are executed like a single robot motion command, in other words, without
-     stop at the end of each command.
+     two or more robot motion commands which are planned and executed together.
 
-     :note: Currently, blending is only supported for :py:class:`Lin` commands.
+     :note: In case the blend radius is zero, the robot will stop between commands. The robot also stops between
+     gripper and non-gripper commands.
 
     """
     def __init__(self, *args, **kwargs):
@@ -514,14 +514,14 @@ class Sequence(_AbstractCmd):
         self.items = []
 
     def append(self, cmd, blend_radius=0):
-        """Adds the given robot motion command to the sequence. Currently, blending is only supported
-        for :py:class:`Lin` commands, however other commands can be used in a sequence if the blend radius is 0 (except
-        for the :py:class:`Gripper` command).
+        """Adds the given robot motion command to the sequence.
 
         :param cmd: The robot motion command which has to be added to the sequence.
             The blending happens between the specified command and the command following the specified command
             if a non-zero blend_radius is defined. Otherwise, if the blend radius is 0, the commands will
             execute consecutively.
+            The blend radius preceding a gripper command is always ignored. The blend radius stated with a gripper
+            command is also ignored.
         :type cmd: :py:class:`pilz_robot_programming.commands._BaseCmd`
 
         :param blend_radius: The blending radius states how much the robot trajectory can deviate from the
