@@ -133,8 +133,8 @@ private:
    * @param joint_limit
    * @param common_limit the current most strict limit
    */
-  void updateCommonLimit(const pilz_extensions::JointLimit& joint_limit,
-                         pilz_extensions::JointLimit& common_limit) const;
+  static void updateCommonLimit(const pilz_extensions::JointLimit& joint_limit,
+                                pilz_extensions::JointLimit& common_limit);
 
 protected:
   /// Actual container object containing the data

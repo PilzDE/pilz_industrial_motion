@@ -60,7 +60,7 @@ the motion request.
 This planner generates full synchronized point to point trajectories with trapezoid joint velocity profile. All joints
 are assumed to have the same maximal joint velocity/acceleration/deceleration limits. If not, the strictest limits are
 adopted. The axis with the longest time to reach the goal is selected as the lead axis.
-Other axes are accelerated so that they share the same acceleration/constant velocity/deceleration phases
+Other axes are decelerated so that they share the same acceleration/constant velocity/deceleration phases
 as the lead axis.
 
 ![ptp no vel](doc/figure/ptp.png)

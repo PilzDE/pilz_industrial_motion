@@ -61,31 +61,8 @@ inline std::string getJointName(size_t joint_number, std::string joint_prefix)
 
 /**
    * @brief Create limits for tests to avoid the need to get the limits from the parameter server
-   * @param robot_model
-   * @return
    */
-inline pilz::JointLimitsContainer createFakeLimits(robot_model::RobotModelConstPtr &robot_model)
-{
-  pilz::JointLimitsContainer container;
-
-  for(std::string name : robot_model->getVariableNames())
-  {
-    pilz_extensions::JointLimit limit;
-    limit.has_position_limits = true;
-    limit.max_position = 2.967;
-    limit.min_position = -2.967;
-    limit.has_velocity_limits = true;
-    limit.max_velocity = 1;
-    limit.has_acceleration_limits = true;
-    limit.max_acceleration = 0.5;
-    limit.has_deceleration_limits = true;
-    limit.max_deceleration = -1;
-
-    container.addLimit(name, limit);
-  }
-
-  return container;
-}
+pilz::JointLimitsContainer createFakeLimits(const std::vector<std::string>& joint_names);
 
 
 inline std::string demangel(char const * name)
