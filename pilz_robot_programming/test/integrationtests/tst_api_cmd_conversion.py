@@ -29,6 +29,7 @@ from pilz_robot_programming.commands import *
 _TEST_DATA_FILE_NAME = RosPack().get_path("pilz_industrial_motion_testutils") + "/test_data/testdata_deprecated.xml"
 PLANNING_GROUP_NAME = "manipulator"
 TARGET_LINK_NAME = "prbt_tcp"
+BASE_LINK_NAME = "prbt_base"
 API_VERSION = "1"
 
 EXP_VEL_SCALE = 0.7
@@ -50,6 +51,13 @@ EULER_SAMPLES_RELATIVE_ROTATION = \
 
 class TestAPICmdConversion(unittest.TestCase):
     """ Test the _cmd_to_request function of commands"""
+
+    def _transform_pose_to_root(self, pose):
+        robot_root = self.robot._robot_commander.get_planning_frame()
+        stamped = PoseStamped()
+        stamped.header.frame_id = BASE_LINK_NAME
+        stamped.pose = pose
+        return self.robot.tf_listener_.transformPose(robot_root, stamped).pose
 
     def _analyze_request_general(self, exp_move_group_name, exp_planner_id, exp_vel_scale, exp_acc_scale, act_request):
         self.assertEquals(exp_planner_id, act_request.planner_id)
@@ -92,7 +100,9 @@ class TestAPICmdConversion(unittest.TestCase):
 
         request_pose = Pose(position=pose_con.constraint_region.primitive_poses[0].position,
                             orientation=ori_con.orientation)
-        self._analyze_pose(exp_pose, request_pose, position_delta, quat_delta)
+        # request contains expected pose in frame of root link
+        exp_pose_root = self._transform_pose_to_root(exp_pose)
+        self._analyze_pose(exp_pose_root, request_pose, position_delta, quat_delta)
 
 
 
@@ -128,11 +138,15 @@ class TestAPICmdConversion(unittest.TestCase):
         self.assertEqual(exp_help_name,
                          req.path_constraints.name)
         req_position = req.path_constraints.position_constraints[0].constraint_region.primitive_poses[0].position
-        self.assertAlmostEqual(exp_help_pose.position.x,
+
+        # request contains expected help pose in frame of root link
+        exp_help_pose_root = self._transform_pose_to_root(exp_help_pose)
+
+        self.assertAlmostEqual(exp_help_pose_root.position.x,
                                req_position.x)
-        self.assertAlmostEqual(exp_help_pose.position.y,
+        self.assertAlmostEqual(exp_help_pose_root.position.y,
                                req_position.y)
-        self.assertAlmostEqual(exp_help_pose.position.z,
+        self.assertAlmostEqual(exp_help_pose_root.position.z,
                                req_position.z)
 
     def setUp(self):
@@ -184,8 +198,7 @@ class TestAPICmdConversion(unittest.TestCase):
         self.robot.move(Ptp(goal=self.test_data.get_joints("PTPJointValid", PLANNING_GROUP_NAME)))
 
         # 2
-        exp_goal_pose = self.robot._robot_commander.get_group(PLANNING_GROUP_NAME).\
-            get_current_pose(TARGET_LINK_NAME).pose
+        exp_goal_pose = self.robot.get_current_pose()
 
         input_goal_pose = Pose(position=exp_goal_pose.position, orientation=Quaternion())
 
@@ -769,7 +782,7 @@ class TestAPICmdConversion(unittest.TestCase):
         # init
         time_tf = rospy.Time.now()
         goal_pose_in_rf = [[0, 0, 0], [0, 0, 0, 1]]
-        base_frame_name = self.robot._robot_commander.get_planning_frame()
+        base_frame_name = BASE_LINK_NAME
 
         try:
             self.tf.sendTransform(goal_pose_bf_tf[0], goal_pose_bf_tf[1], time_tf,
@@ -829,7 +842,7 @@ class TestAPICmdConversion(unittest.TestCase):
         goal_pose_bf = self.test_data.get_pose("Blend_1_Mid", PLANNING_GROUP_NAME)
 
         # frame equals base frame: should return identity
-        same = Ptp(goal=goal_pose_bf, reference_frame=self.robot._robot_commander.get_planning_frame())
+        same = Ptp(goal=goal_pose_bf, reference_frame=BASE_LINK_NAME)
         request_same = same._cmd_to_request(self.robot)
 
         self._analyze_request_pose(TARGET_LINK_NAME, goal_pose_bf, request_same)
@@ -840,8 +853,7 @@ class TestAPICmdConversion(unittest.TestCase):
         self.assertRaises(RobotCurrentStateError, ptp_no_tf._cmd_to_request, self.robot)
 
         # no rotation assigned: should interpret the rotation as Quaternion(0, 0, 0, 1)
-        no_rot = Ptp(goal=Pose(position=Point(0, 0, 1)),
-                     reference_frame=self.robot._robot_commander.get_planning_frame())
+        no_rot = Ptp(goal=Pose(position=Point(0, 0, 1)), reference_frame=BASE_LINK_NAME)
         no_rot_req = no_rot._cmd_to_request(self.robot)
 
         self._analyze_request_pose(TARGET_LINK_NAME, Pose(position=Point(0, 0, 1), orientation=Quaternion(0, 0, 0, 1)),
@@ -869,7 +881,7 @@ class TestAPICmdConversion(unittest.TestCase):
         rospy.sleep(rospy.Duration.from_sec(0.5))
 
         # init
-        base_frame_name = self.robot._robot_commander.get_planning_frame()
+        base_frame_name = BASE_LINK_NAME
         time_tf = rospy.Time.now()
         goal_pose_in_rf = [[0, 0, 0], [0, 0, 0, 1]]
 
@@ -925,7 +937,7 @@ class TestAPICmdConversion(unittest.TestCase):
         tcp_ref = [[0, 0, 0], [0, 0, 0, 1]]
         tcp_base = [[0, 0, 0], [0, 0, 0, 1]]
         time_tf = rospy.Time.now()
-        base_frame = self.robot._robot_commander.get_planning_frame()
+        base_frame = BASE_LINK_NAME
 
         try:
             self.tf.sendTransform(ref_frame_tf[0], ref_frame_tf[1],

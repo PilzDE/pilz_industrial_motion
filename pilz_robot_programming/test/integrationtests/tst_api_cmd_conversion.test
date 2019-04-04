@@ -29,12 +29,17 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
   <node name="robot_state_publisher" pkg="robot_state_publisher" type="robot_state_publisher" respawn="true" output="screen" />
 
+  <!-- Load universal robot description format (URDF) -->
+  <param  name="robot_description"
+          command="$(find xacro)/xacro --inorder $(find pilz_robot_programming)/test/integrationtests/urdf/moved_prbt.xacro"/>
+
   <include file="$(find prbt_moveit_config)/launch/move_group.launch">
     <arg name="allow_trajectory_execution" value="true"/>
     <arg name="fake_execution" value="true"/>
     <arg name="info" value="true"/>
     <arg name="debug" value="$(arg debug)"/>
     <arg name="pipeline" value="pilz_command_planner" />
+    <arg name="load_robot_description" value="false" />
   </include>
 
   <!-- test node -->
