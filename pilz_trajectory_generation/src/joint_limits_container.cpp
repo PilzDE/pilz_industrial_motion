@@ -30,7 +30,9 @@ bool JointLimitsContainer::addLimit(const std::string &joint_name, pilz_extensio
     ROS_ERROR_STREAM("joint_limit.max_deceleration MUST be negative!");
     return false;
   }
-  if (!container_.insert(std::pair<std::string, pilz_extensions::JointLimit>(joint_name, joint_limit)).second)
+  const auto& insertion_result { container_.insert(std::pair<std::string, pilz_extensions::JointLimit>(joint_name,
+                                                                                                       joint_limit)) };
+  if (!insertion_result.second)
   {
     ROS_ERROR_STREAM("joint_limit for joint " << joint_name << " already contained.");
     return false;
@@ -66,7 +68,7 @@ pilz_extensions::JointLimit JointLimitsContainer::getCommonLimit() const
 pilz_extensions::JointLimit JointLimitsContainer::getCommonLimit(const std::vector<std::string> &joint_names) const
 {
   pilz_extensions::JointLimit common_limit;
-  for(auto joint_name : joint_names)
+  for(const auto& joint_name : joint_names)
   {
     updateCommonLimit(container_.at(joint_name), common_limit);
   }
@@ -127,7 +129,7 @@ bool JointLimitsContainer::verifyPositionLimits(const std::vector<std::string> &
 }
 
 void JointLimitsContainer::updateCommonLimit(const pilz_extensions::JointLimit& joint_limit,
-                                                   pilz_extensions::JointLimit& common_limit) const
+                                                   pilz_extensions::JointLimit& common_limit)
 {
   // check position limits
   if(joint_limit.has_position_limits)

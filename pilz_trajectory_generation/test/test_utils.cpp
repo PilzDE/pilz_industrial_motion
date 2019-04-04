@@ -22,6 +22,29 @@
 #include <moveit/robot_state/conversions.h>
 #include <moveit/planning_interface/planning_interface.h>
 
+pilz::JointLimitsContainer testutils::createFakeLimits(const std::vector<std::string>& joint_names)
+{
+  pilz::JointLimitsContainer container;
+
+  for(const std::string& name : joint_names)
+  {
+    pilz_extensions::JointLimit limit;
+    limit.has_position_limits = true;
+    limit.max_position = 2.967;
+    limit.min_position = -2.967;
+    limit.has_velocity_limits = true;
+    limit.max_velocity = 1;
+    limit.has_acceleration_limits = true;
+    limit.max_acceleration = 0.5;
+    limit.has_deceleration_limits = true;
+    limit.max_deceleration = -1;
+
+    container.addLimit(name, limit);
+  }
+
+  return container;
+}
+
 bool testutils::getExpectedGoalPose(const moveit::core::RobotModelConstPtr &robot_model,
                                     const planning_interface::MotionPlanRequest &req,
                                     std::string &link_name,

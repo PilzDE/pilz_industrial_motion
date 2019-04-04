@@ -38,7 +38,7 @@ TrajectoryGeneratorPTP::TrajectoryGeneratorPTP(const robot_model::RobotModelCons
   joint_limits_ = planner_limits_.getJointLimitContainer();
 
   // collect most strict joint limits for each group in robot model
-  for(auto jmg : robot_model->getJointModelGroups())
+  for(const auto& jmg : robot_model->getJointModelGroups())
   {
     pilz_extensions::JointLimit most_strict_limit = joint_limits_.getCommonLimit(jmg->getActiveJointModelNames());
 
@@ -197,7 +197,7 @@ void TrajectoryGeneratorPTP::planPTP(const std::map<std::string, double>& start_
         std::stringstream error_str;
         error_str << "TrajectoryGeneratorPTP::planPTP(): Can not synchronize velocity profile of axis " << joint_name
                << " with leading axis " << leading_axis;
-        std::runtime_error(error_str.str());
+        throw TrajectoryGeneratorException(error_str.str());
       }
       // LCOV_EXCL_STOP
     }

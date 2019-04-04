@@ -91,7 +91,7 @@ void TrajectoryGeneratorPTPTest::SetUp()
 
   // create the limits container
   pilz::JointLimitsContainer joint_limits;
-  for(auto jmg : robot_model_->getJointModelGroups())
+  for(const auto& jmg : robot_model_->getJointModelGroups())
   {
     std::vector<std::string> joint_names = jmg->getActiveJointModelNames();
     pilz_extensions::joint_limits_interface::JointLimits joint_limit;
@@ -206,7 +206,7 @@ TEST_P(TrajectoryGeneratorPTPTest, missingDecelerationimits)
   LimitsContainer planner_limits;
 
   pilz::JointLimitsContainer joint_limits;
-  auto joint_models = robot_model_->getActiveJointModels();
+  const auto& joint_models = robot_model_->getActiveJointModels();
   pilz_extensions::joint_limits_interface::JointLimits joint_limit;
   joint_limit.has_velocity_limits = true;
   joint_limit.has_acceleration_limits = true;
@@ -233,7 +233,10 @@ TEST_P(TrajectoryGeneratorPTPTest, missingDecelerationimits)
  */
 TEST_P(TrajectoryGeneratorPTPTest, testInsufficientLimit)
 {
-  auto joint_models = robot_model_->getActiveJointModels();
+  /**********/
+  /* Step 1 */
+  /**********/
+  const auto& joint_models = robot_model_->getActiveJointModels();
   ASSERT_TRUE(joint_models.size());
 
   // joint limit with insufficient limits (no acc/dec limits)
@@ -254,6 +257,15 @@ TEST_P(TrajectoryGeneratorPTPTest, testInsufficientLimit)
   LimitsContainer insufficient_planner_limits;
   insufficient_planner_limits.setJointLimits(insufficient_joint_limits);
 
+  EXPECT_THROW({
+                 std::unique_ptr<TrajectoryGeneratorPTP> ptp_error(
+                 new TrajectoryGeneratorPTP(robot_model_, insufficient_planner_limits));
+               },
+               TrajectoryGeneratorInvalidLimitsException);
+
+  /**********/
+  /* Step 2 */
+  /**********/
   // joint limit with sufficient limits
   pilz_extensions::joint_limits_interface::JointLimits sufficient_limit;
   sufficient_limit.has_position_limits = true;
@@ -266,12 +278,14 @@ TEST_P(TrajectoryGeneratorPTPTest, testInsufficientLimit)
   sufficient_limit.has_deceleration_limits = true;
   sufficient_limit.max_deceleration = -1;
   JointLimitsContainer sufficient_joint_limits;
-  for(auto jmg : robot_model_->getJointModelGroups())
+  // fill joint limits container, such that it contains one sufficient limit and all others are insufficient
+  for(const auto& jmg : robot_model_->getJointModelGroups())
   {
-    auto joint_names {jmg->getActiveJointModelNames()};
-    ASSERT_TRUE(joint_names.size());
+    const auto& joint_names {jmg->getActiveJointModelNames()};
+    ASSERT_FALSE(joint_names.empty());
     ASSERT_TRUE(sufficient_joint_limits.addLimit(joint_names.front(), sufficient_limit))
       << "Failed to add the limits for joint " << joint_names.front();
+
     for(auto it = std::next(joint_names.begin()); it != joint_names.end(); ++it)
     {
       ASSERT_TRUE(sufficient_joint_limits.addLimit((*it), insufficient_limit))
@@ -280,13 +294,6 @@ TEST_P(TrajectoryGeneratorPTPTest, testInsufficientLimit)
   }
   LimitsContainer sufficient_planner_limits;
   sufficient_planner_limits.setJointLimits(sufficient_joint_limits);
-
-  EXPECT_THROW({
-                 std::unique_ptr<TrajectoryGeneratorPTP> ptp_error(
-                 new TrajectoryGeneratorPTP(robot_model_, insufficient_planner_limits));
-               },
-               TrajectoryGeneratorInvalidLimitsException);
-
 
   EXPECT_NO_THROW({
                     std::unique_ptr<TrajectoryGeneratorPTP> ptp_no_error(
