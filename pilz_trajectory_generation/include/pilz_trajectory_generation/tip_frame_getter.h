@@ -23,7 +23,7 @@ static const std::string& getTipFrame(const moveit::core::JointModelGroup* group
 {
   if (group->isEndEffector())
   {
-    throw EndEffectorException("Give group is an end-effector which is not allowed | group: " + group->getName());
+    throw EndEffectorException("Given group is an end-effector which is not allowed | group: " + group->getName());
   }
 
   auto solver {group->getSolverInstance()};
