@@ -68,7 +68,6 @@ RobotTrajVec_t CommandListManager::solve(const planning_scene::PlanningSceneCons
 
   checkForNegativeRadii(req_list);
   checkLastBlendRadiusZero(req_list);
-  checkForEndEffectorBlending(req_list);
   checkStartStates(req_list);
 
   MotionResponseCont resp_cont
@@ -76,7 +75,8 @@ RobotTrajVec_t CommandListManager::solve(const planning_scene::PlanningSceneCons
     solveSequenceItems(planning_scene, req_list)
   };
 
-  RadiiCont radii {getRadii(req_list)};
+  assert(model_);
+  RadiiCont radii {extractBlendRadii(*model_, req_list)};
   checkForOverlappingRadii(resp_cont, radii);
 
   plan_comp_builder_.reset();
@@ -96,11 +96,17 @@ bool CommandListManager::checkRadiiForOverlap(const robot_trajectory::RobotTraje
                                               const robot_trajectory::RobotTrajectory& traj_B,
                                               const double radii_B) const
 {
-  // No blending between trajectories from different groups.
-  if (traj_A.getGroupName() != traj_B.getGroupName()) {return false;}
+  // No blending between trajectories from different groups
+  if (traj_A.getGroupName() != traj_B.getGroupName())
+  {
+    return false;
+  }
 
   auto sum_radii {radii_A + radii_B};
-  if(sum_radii == 0.) {return false;}
+  if(sum_radii == 0.)
+  {
+    return false;
+  }
 
   const std::string& blend_frame {getTipFrame(model_->getJointModelGroup(traj_A.getGroupName()))};
   auto distance_endpoints = (traj_A.getLastWayPoint().getFrameTransform(blend_frame).translation() -
@@ -150,14 +156,47 @@ void CommandListManager::setStartState(const MotionResponseCont &motion_plan_res
   }
 }
 
-CommandListManager::RadiiCont CommandListManager::getRadii(const pilz_msgs::MotionSequenceRequest &req_list)
+bool CommandListManager::isInvalidBlendRadii(const moveit::core::RobotModel &model,
+                                             const pilz_msgs::MotionSequenceItem& item_A,
+                                             const pilz_msgs::MotionSequenceItem& item_B)
+{
+  // Zero blend radius is always valid
+  if (item_A.blend_radius == 0.)
+  {
+    return false;
+  }
+
+  // No blending between different groups
+  if (item_A.req.group_name != item_B.req.group_name)
+  {
+    ROS_WARN_STREAM("Blending between different groups (in this case: \""
+                    << item_A.req.group_name << "\" and \""
+                    << item_B.req.group_name << "\") not allowed");
+    return true;
+  }
+
+  // No blending between end-effectors
+  if (model.getJointModelGroup(item_A.req.group_name)->isEndEffector())
+  {
+    ROS_WARN_STREAM("Blending between end-effector commands not allowed");
+    return true;
+  }
+
+  return false;
+}
+
+CommandListManager::RadiiCont CommandListManager::extractBlendRadii(const moveit::core::RobotModel& model,
+                                                                    const pilz_msgs::MotionSequenceRequest &req_list)
 {
   RadiiCont radii(req_list.items.size(), 0.);
-  RadiiCont::size_type i {0};
-  for(const auto& req : req_list.items)
+  for(RadiiCont::size_type i = 0; i < (radii.size()-1); ++i)
   {
-    radii.at(i) = req.blend_radius;
-    ++i;
+    if (isInvalidBlendRadii(model, req_list.items.at(i), req_list.items.at(i+1)))
+    {
+      ROS_WARN_STREAM("Invalid blend radii between commands: [" << i << "] and [" << i+1 << "] => Blend radii set to zero");
+      continue;
+    }
+    radii.at(i) = req_list.items.at(i).blend_radius;
   }
   return radii;
 }
@@ -187,29 +226,6 @@ CommandListManager::MotionResponseCont CommandListManager::solveSequenceItems(
     ROS_DEBUG_STREAM("Solved [" << ++curr_req_index << "/" << num_req << "]");
   }
   return motion_plan_responses;
-}
-
-void CommandListManager::checkForEndEffectorBlending(const pilz_msgs::MotionSequenceRequest &req_list)
-{
-  for(pilz_msgs::MotionSequenceRequest::_items_type::size_type i = 0; i < req_list.items.size()-1; ++i)
-  {
-    const pilz_msgs::MotionSequenceItem& item_A {req_list.items.at(i)};
-    if (item_A.blend_radius <= 0)
-    {
-      continue;
-    }
-    const pilz_msgs::MotionSequenceItem& item_B {req_list.items.at(i+1)};
-    if (item_A.req.group_name != item_B.req.group_name)
-    {
-      continue;
-    }
-    if (model_->getJointModelGroup(item_A.req.group_name)->isEndEffector())
-    {
-      std::ostringstream os;
-      os << "Blending of two End-Effector trajectories between [" << i << "] and [" << i+1 << "]";
-      throw EndEffectorBlendingException(os.str());
-    }
-  }
 }
 
 void CommandListManager::checkForNegativeRadii(const pilz_msgs::MotionSequenceRequest &req_list)

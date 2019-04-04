@@ -28,15 +28,17 @@ from pilz_industrial_motion_testutils.robot_motion_observer import RobotMotionOb
 
 API_VERSION = "1"
 
+
 class TestSequenceWithGripper(unittest.TestCase):
 
     _GRIPPER_GROUP_NAME = "gripper"
     _GRIPPER_POSE_CLOSED = 0.001
+    _GRIPPER_POSE_OPEN = 0.02
 
     _TOLERANCE_POSITION_COMPARE = 1e-3
 
     def setUp(self):
-        if not 'ros_init_done' in globals():
+        if 'ros_init_done' not in globals():
             rospy.init_node('tst_sequence_with_gripper')
             global ros_init_done
 
@@ -50,20 +52,21 @@ class TestSequenceWithGripper(unittest.TestCase):
             self.robot = None
 
     def test_only_gripper_in_sequence(self):
-        """ Tests a sequence with only a gripper command.
+        """ Tests a sequence with only gripper commands.
         """
         start_joint_values = [0, 0.5, 0.5, 0, 0, 0]
         self.robot.move(Ptp(goal=start_joint_values))
 
-        goal_joint = 0.02
         seq = Sequence()
-        seq.append(Gripper(goal=goal_joint))
+        seq.append(Gripper(goal=self._GRIPPER_POSE_OPEN), blend_radius=0.1)
+        seq.append(Gripper(goal=self._GRIPPER_POSE_CLOSED), blend_radius=0.1)
+        seq.append(Gripper(goal=self._GRIPPER_POSE_OPEN))
         self.robot.move(seq)
 
         # Check that gripper has moved
         current_joints = self.robot.get_current_joint_states(self._GRIPPER_GROUP_NAME)
         self.assertEqual(1, len(current_joints))
-        self.assertAlmostEqual(goal_joint, current_joints[0])
+        self.assertAlmostEqual(self._GRIPPER_POSE_OPEN, current_joints[0])
 
         # Check that robot has NOT moved
         self.assertTrue(numpy.allclose(self.robot.get_current_joint_states(),
@@ -75,11 +78,10 @@ class TestSequenceWithGripper(unittest.TestCase):
         start_joint_values = [0, 0.5, 0.5, 0, 0, 0]
         self.robot.move(Ptp(goal=start_joint_values))
 
-        gripper_open = 0.02
         gripper_invalid_pos = 1
 
         seq = Sequence()
-        seq.append(Gripper(goal=gripper_open))
+        seq.append(Gripper(goal=self._GRIPPER_POSE_OPEN))
 
         seq.append(Lin(goal=Pose(position=Point(0.2, 0, 0.7))), blend_radius=0.01)
         seq.append(Lin(goal=Pose(position=Point(0.2, 0.1, 0.7))))
@@ -93,22 +95,22 @@ class TestSequenceWithGripper(unittest.TestCase):
         self.assertTrue(numpy.allclose(self.robot.get_current_joint_states(),
                                        start_joint_values, atol=self._TOLERANCE_POSITION_COMPARE))
 
-    def test_several_gripper_cmds_in_sequence(self):
-        """ Tests a sequence command which contains several gripper commands.
+    def test_mixed_cmds_in_sequence(self):
+        """ Tests a sequence which contains several gripper and non-gripper commands.
+        Invalid blend radii are set to test if execution of sequence is still possible.
         """
         start_joint_values = [0, 0.5, 0.5, 0, 0, 0]
         self.robot.move(Ptp(goal=start_joint_values))
 
-        gripper_open = 0.02
         gripper_totally_open = 0.029
 
         seq = Sequence()
-        seq.append(Gripper(goal=gripper_open))
+        seq.append(Gripper(goal=self._GRIPPER_POSE_OPEN), blend_radius=1.0)
 
         seq.append(Lin(goal=Pose(position=Point(0.2, 0, 0.7))), blend_radius=0.01)
-        seq.append(Lin(goal=Pose(position=Point(0.2, 0.1, 0.7))))
+        seq.append(Lin(goal=Pose(position=Point(0.2, 0.1, 0.7))), blend_radius=1.0)
 
-        seq.append(Gripper(goal=self._GRIPPER_POSE_CLOSED))
+        seq.append(Gripper(goal=self._GRIPPER_POSE_CLOSED), blend_radius=1.0)
         seq.append(Gripper(goal=gripper_totally_open))
 
         self.robot.move(seq)

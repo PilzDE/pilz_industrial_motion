@@ -128,9 +128,6 @@ TEST_P(IntegrationTestCommandListManager, TestExceptionErrorCodeMapping)
 
   PlanningPipelineException pp_ex("");
   EXPECT_EQ(pp_ex.getErrorCode(), moveit_msgs::MoveItErrorCodes::FAILURE);
-
-  EndEffectorBlendingException eeb_ex("");
-  EXPECT_EQ(eeb_ex.getErrorCode(), moveit_msgs::MoveItErrorCodes::INVALID_MOTION_PLAN);
 }
 
 /**
@@ -539,10 +536,11 @@ TEST_P(IntegrationTestCommandListManager, TestDifferentGroups)
 }
 
 /**
- * @brief Checks that exception is thrown if two gripper commands are blended.
+ * @brief Checks that no exception is thrown if two gripper commands are
+ * blended.
  *
  */
-TEST_P(IntegrationTestCommandListManager, TestPureGripperBlending)
+TEST_P(IntegrationTestCommandListManager, TestGripperCmdBlending)
 {
   Sequence seq {data_loader_->getSequence("PureGripperSequence")};
   ASSERT_GE(seq.size(), 2);
@@ -551,7 +549,8 @@ TEST_P(IntegrationTestCommandListManager, TestPureGripperBlending)
 
   // Ensure that blending is requested for gripper commands.
   seq.setBlendRadii(0, 1.0);
-  EXPECT_THROW(manager_->solve(scene_, seq.toRequest()), EndEffectorBlendingException);
+  RobotTrajVec_t res_vec {manager_->solve(scene_, seq.toRequest())};
+  EXPECT_EQ(res_vec.size(), 1);
 }
 
 /**

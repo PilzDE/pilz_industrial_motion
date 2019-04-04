@@ -40,7 +40,6 @@ CREATE_MOVEIT_ERROR_CODE_EXCEPTION(LastBlendRadiusNotZeroException, moveit_msgs:
 CREATE_MOVEIT_ERROR_CODE_EXCEPTION(StartStateSetException, moveit_msgs::MoveItErrorCodes::INVALID_ROBOT_STATE);
 CREATE_MOVEIT_ERROR_CODE_EXCEPTION(OverlappingBlendRadiiException, moveit_msgs::MoveItErrorCodes::INVALID_MOTION_PLAN);
 CREATE_MOVEIT_ERROR_CODE_EXCEPTION(PlanningPipelineException, moveit_msgs::MoveItErrorCodes::FAILURE);
-CREATE_MOVEIT_ERROR_CODE_EXCEPTION(EndEffectorBlendingException, moveit_msgs::MoveItErrorCodes::INVALID_MOTION_PLAN);
 
 /**
  * @brief This class orchestrates the planning of single commands and
@@ -107,18 +106,12 @@ private:
   /**
    * @return TRUE if the blending radii of specified trajectories overlap,
    * otherwise FALSE. The functions returns FALSE if both trajectories are from
-   * different groups.
+   * different groups or if both trajectories are end-effector groups.
    */
   bool checkRadiiForOverlap(const robot_trajectory::RobotTrajectory& traj_A,
                             const double radii_A,
                             const robot_trajectory::RobotTrajectory& traj_B,
                             const double radii_B) const;
-
-  /**
-   * @brief Checks if the requests consists of items requesting to blend
-   * two end-effector trajectories.
-   */
-  void checkForEndEffectorBlending(const pilz_msgs::MotionSequenceRequest &req_list);
 
 private:
   /**
@@ -138,8 +131,24 @@ private:
 
   /**
    * @return Container of radii extracted from the specified request list.
+   *
+   * Please note:
+   * This functions sets invalid blend radii to zero. Invalid blend radii are:
+   * - blend radii between end-effectors and
+   * - blend raddi between different groups.
    */
-  static RadiiCont getRadii(const pilz_msgs::MotionSequenceRequest &req_list);
+  static RadiiCont extractBlendRadii(const moveit::core::RobotModel &model,
+                                     const pilz_msgs::MotionSequenceRequest &req_list);
+
+  /**
+   * @return True in case of an invalid blend radii between specified
+   * command A and B, otherwise False. Invalid blend radii are:
+   * - blend radii between end-effectors and
+   * - blend raddi between different groups.
+   */
+  static bool isInvalidBlendRadii(const moveit::core::RobotModel &model,
+                                  const pilz_msgs::MotionSequenceItem& item_A,
+                                  const pilz_msgs::MotionSequenceItem& item_B);
 
   /**
    * @brief Checks that all blend radii are greater or equal to zero.

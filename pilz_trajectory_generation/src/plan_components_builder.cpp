@@ -109,7 +109,7 @@ void PlanComponentsBuilder::append(robot_trajectory::RobotTrajectoryPtr other,
   }
 
   // No blending
-  if(blend_radius <= 0.0)
+  if (blend_radius <= 0.0)
   {
     appendWithStrictTimeIncrease(*(traj_cont_.back()), *traj_tail_);
     traj_tail_ = other;
