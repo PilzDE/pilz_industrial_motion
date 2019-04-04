@@ -2,6 +2,12 @@
 Changelog for package pilz_industrial_motion_testutils
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
+Forthcoming
+-----------
+* update package dependencies
+* Add missing intialization
+* Add getter for CircJointInterimCart in XMLTestdataLoader
+
 0.4.2 (2019-03-13)
 ------------------
 

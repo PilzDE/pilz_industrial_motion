@@ -170,7 +170,7 @@ INSTANTIATE_TEST_CASE_P(InstantiationName, TrajectoryBlenderTransitionWindowTest
  */
 TEST_P(TrajectoryBlenderTransitionWindowTest, testInvalidGroupName)
 {
-  Sequence seq {data_loader_->getSequence("TestBlend")};
+  Sequence seq {data_loader_->getSequence("SimpleSequence")};
 
   std::vector<planning_interface::MotionPlanResponse> res {generateLinTrajs(seq, 2)};
 
@@ -199,7 +199,7 @@ TEST_P(TrajectoryBlenderTransitionWindowTest, testInvalidGroupName)
  */
 TEST_P(TrajectoryBlenderTransitionWindowTest, testInvalidTargetLink)
 {
-  Sequence seq {data_loader_->getSequence("TestBlend")};
+  Sequence seq {data_loader_->getSequence("SimpleSequence")};
 
   std::vector<planning_interface::MotionPlanResponse> res {generateLinTrajs(seq, 2)};
 
@@ -228,7 +228,7 @@ TEST_P(TrajectoryBlenderTransitionWindowTest, testInvalidTargetLink)
  */
 TEST_P(TrajectoryBlenderTransitionWindowTest, testNegativeRadius)
 {
-  Sequence seq {data_loader_->getSequence("TestBlend")};
+  Sequence seq {data_loader_->getSequence("SimpleSequence")};
 
   std::vector<planning_interface::MotionPlanResponse> res {generateLinTrajs(seq, 2)};
 
@@ -257,7 +257,7 @@ TEST_P(TrajectoryBlenderTransitionWindowTest, testNegativeRadius)
  */
 TEST_P(TrajectoryBlenderTransitionWindowTest, testZeroRadius)
 {
-  Sequence seq {data_loader_->getSequence("TestBlend")};
+  Sequence seq {data_loader_->getSequence("SimpleSequence")};
 
   std::vector<planning_interface::MotionPlanResponse> res {generateLinTrajs(seq, 2)};
 
@@ -286,7 +286,7 @@ TEST_P(TrajectoryBlenderTransitionWindowTest, testZeroRadius)
  */
 TEST_P(TrajectoryBlenderTransitionWindowTest, testDifferentSamplingTimes)
 {
-  Sequence seq {data_loader_->getSequence("TestBlend")};
+  Sequence seq {data_loader_->getSequence("SimpleSequence")};
 
   // perform lin trajectory generation and modify sampling time
   std::size_t num_cmds {2};
@@ -336,7 +336,7 @@ TEST_P(TrajectoryBlenderTransitionWindowTest, testDifferentSamplingTimes)
  */
 TEST_P(TrajectoryBlenderTransitionWindowTest, testNonUniformSamplingTime)
 {
-  Sequence seq {data_loader_->getSequence("TestBlend")};
+  Sequence seq {data_loader_->getSequence("SimpleSequence")};
 
   std::vector<planning_interface::MotionPlanResponse> res {generateLinTrajs(seq, 2)};
 
@@ -370,7 +370,7 @@ TEST_P(TrajectoryBlenderTransitionWindowTest, testNonUniformSamplingTime)
  */
 TEST_P(TrajectoryBlenderTransitionWindowTest, testNotIntersectingTrajectories)
 {
-  Sequence seq {data_loader_->getSequence("TestBlend")};
+  Sequence seq {data_loader_->getSequence("SimpleSequence")};
 
   std::vector<planning_interface::MotionPlanResponse> res {generateLinTrajs(seq, 2)};
 
@@ -400,7 +400,7 @@ TEST_P(TrajectoryBlenderTransitionWindowTest, testNotIntersectingTrajectories)
  */
 TEST_P(TrajectoryBlenderTransitionWindowTest, testNonStationaryPoint)
 {
-  Sequence seq {data_loader_->getSequence("TestBlend")};
+  Sequence seq {data_loader_->getSequence("SimpleSequence")};
 
   std::vector<planning_interface::MotionPlanResponse> res {generateLinTrajs(seq, 2)};
 
@@ -436,7 +436,7 @@ TEST_P(TrajectoryBlenderTransitionWindowTest, testNonStationaryPoint)
  */
 TEST_P(TrajectoryBlenderTransitionWindowTest, testTraj1InsideBlendRadius)
 {
-  Sequence seq {data_loader_->getSequence("TestBlend")};
+  Sequence seq {data_loader_->getSequence("SimpleSequence")};
 
   std::vector<planning_interface::MotionPlanResponse> res {generateLinTrajs(seq, 2)};
 
@@ -508,7 +508,7 @@ TEST_P(TrajectoryBlenderTransitionWindowTest, testTraj2InsideBlendRadius)
  */
 TEST_P(TrajectoryBlenderTransitionWindowTest, testLinLinBlending)
 {
-  Sequence seq {data_loader_->getSequence("TestBlend")};
+  Sequence seq {data_loader_->getSequence("SimpleSequence")};
 
   std::vector<planning_interface::MotionPlanResponse> res {generateLinTrajs(seq, 2)};
 
@@ -539,8 +539,7 @@ TEST_P(TrajectoryBlenderTransitionWindowTest, testLinLinBlending)
  * the trajectories exactly lie on top of each other.
  *
  * Test Sequence:
- *    1. Generate two linear trajectories from the test data set,
- *        such that the second one is the reversed first one.
+ *    1. Generate two linear trajectories from the test data set. Set goal of second traj to start of first traj.
  *    2. Generate blending trajectory.
  *    3. Check blending trajectory:
  *      - for position, velocity, and acceleration bounds,
@@ -555,7 +554,9 @@ TEST_P(TrajectoryBlenderTransitionWindowTest, testLinLinBlending)
  */
 TEST_P(TrajectoryBlenderTransitionWindowTest, testOverlappingBlendTrajectories)
 {
-  Sequence seq {data_loader_->getSequence("TestBlendOverlap")};
+  Sequence seq {data_loader_->getSequence("SimpleSequence")};
+  // Set goal of second traj to start of first traj.
+  seq.getCmd<LinCart>(1).setGoalConfiguration(seq.getCmd<LinCart>(0).getStartConfiguration());
 
   std::vector<planning_interface::MotionPlanResponse> res {generateLinTrajs(seq, 2)};
 
@@ -606,7 +607,7 @@ TEST_P(TrajectoryBlenderTransitionWindowTest, testNonLinearBlending)
   const double SINE_SCALING_FACTOR {0.01};
   const double TIME_SCALING_FACTOR {10};
 
-  Sequence seq {data_loader_->getSequence("TestBlend")};
+  Sequence seq {data_loader_->getSequence("SimpleSequence")};
 
   std::vector<planning_interface::MotionPlanResponse> res {generateLinTrajs(seq, 2)};
 

@@ -43,6 +43,8 @@ namespace testutils
 const std::string JOINT_NAME_PREFIX("prbt_joint_");
 
 static constexpr int32_t DEFAULT_SERVICE_TIMEOUT(10);
+static constexpr double DEFAULT_ACCELERATION_EQUALITY_TOLERANCE {1e-6};
+static constexpr double DEFAULT_ROTATION_AXIS_EQUALITY_TOLERANCE {1e-8};
 
 /**
    * @brief Convert degree to rad.
@@ -58,33 +60,9 @@ inline std::string getJointName(size_t joint_number, std::string joint_prefix)
 }
 
 /**
-   * @brief Create limits for tests to avoid the need to get the from the parameter server
-   * @param joint_number
-   * @return
+   * @brief Create limits for tests to avoid the need to get the limits from the parameter server
    */
-inline pilz::JointLimitsContainer createFakeLimits(size_t joint_number,
-                                                   std::string joint_prefix = testutils::JOINT_NAME_PREFIX)
-{
-  pilz::JointLimitsContainer container;
-
-  for(size_t i = 0; i < joint_number; ++i)
-  {
-    pilz_extensions::JointLimit limit;
-    limit.has_position_limits = true;
-    limit.max_position = 2.967;
-    limit.min_position = -2.967;
-    limit.has_velocity_limits = true;
-    limit.max_velocity = 1;
-    limit.has_acceleration_limits = true;
-    limit.max_acceleration = 0.5;
-    limit.has_deceleration_limits = true;
-    limit.max_deceleration = -1;
-
-    container.addLimit(getJointName(i+1, joint_prefix), limit);
-  }
-
-  return container;
-}
+pilz::JointLimitsContainer createFakeLimits(const std::vector<std::string>& joint_names);
 
 
 inline std::string demangel(char const * name)
@@ -494,6 +472,39 @@ void generateRequestMsgFromBlendTestData(const moveit::core::RobotModelConstPtr 
 void checkRobotModel(const moveit::core::RobotModelConstPtr &robot_model,
                      const std::string& group_name,
                      const std::string& link_name);
+
+/** @brief Check that a given vector of accelerations represents a trapezoid velocity profile
+ * @param acc_tol: tolerance for comparing acceleration values
+ */
+::testing::AssertionResult hasTrapezoidVelocity(std::vector<double> accelerations, const double acc_tol);
+
+/**
+ * @brief Check that the translational path of a given trajectory has a trapezoid velocity profile
+ * @param acc_tol: tolerance for comparing acceleration values
+ */
+::testing::AssertionResult checkCartesianTranslationalPath(robot_trajectory::RobotTrajectoryConstPtr trajectory,
+                                                           const std::string &link_name,
+                                                           const double acc_tol = DEFAULT_ACCELERATION_EQUALITY_TOLERANCE);
+
+/**
+ * @brief Check that the rotational path of a given trajectory is a quaternion slerp.
+ * @param rot_axis_tol: tolerance for comparing rotation axes (in the L2 norm)
+ * @param acc_tol: tolerance for comparing angular acceleration values
+ */
+::testing::AssertionResult checkCartesianRotationalPath(robot_trajectory::RobotTrajectoryConstPtr trajectory,
+                                                        const std::string &link_name,
+                                                        const double rot_axis_tol = DEFAULT_ROTATION_AXIS_EQUALITY_TOLERANCE,
+                                                        const double acc_tol = DEFAULT_ACCELERATION_EQUALITY_TOLERANCE);
+
+inline bool isMonotonouslyDecreasing(const std::vector<double> &vec, const double &tol)
+{
+  return std::is_sorted(vec.begin(),
+                        vec.end(),
+                        [tol](double a, double b){
+                        return !(std::abs(a - b) < tol || a < b); // true -> a is ordered before b -> list is not sorted
+                        });
 }
+
+} // namespace testutils
 
 #endif // TEST_UTILS_H

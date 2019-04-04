@@ -23,7 +23,6 @@ find_package(catkin REQUIRED COMPONENTS
   moveit_ros_move_group
   moveit_ros_planning_interface
   pilz_industrial_motion_testutils
-  pilz_testutils
   kdl_conversions
 )
 
@@ -183,6 +182,11 @@ install(TARGETS
 if(CATKIN_ENABLE_TESTING)
   find_package(rostest REQUIRED)
   find_package(code_coverage REQUIRED)
+  find_package(pilz_testutils REQUIRED)
+
+  include_directories(
+    ${pilz_testutils_INCLUDE_DIRS}
+  )
 
   if(ENABLE_COVERAGE_TESTING)
     include(CodeCoverage)
@@ -231,14 +235,14 @@ add_rostest_gmock(integrationtest_sequence_action_capability
 )
 
 target_link_libraries(integrationtest_sequence_action_capability
-   ${catkin_LIBRARIES} ${PROJECT_NAME}_test)
+   ${catkin_LIBRARIES} ${pilz_testutils_LIBRARIES} ${PROJECT_NAME}_test)
 
 add_rostest_gmock(integrationtest_sequence_action_capability_with_gripper
   test/integrationtest_sequence_action_capability_with_gripper.test
   test/integrationtest_sequence_action_capability.cpp
 )
 target_link_libraries(integrationtest_sequence_action_capability_with_gripper
-   ${catkin_LIBRARIES} ${PROJECT_NAME}_test)
+   ${catkin_LIBRARIES} ${pilz_testutils_LIBRARIES} ${PROJECT_NAME}_test)
 
 # Tests with other robots only for kinetic (for now)
 
@@ -247,14 +251,14 @@ target_link_libraries(integrationtest_sequence_action_capability_with_gripper
 #  test/integrationtest_sequence_action_capability.cpp
 #)
 #target_link_libraries(integrationtest_sequence_action_capability_abb_irb2400
-#  ${catkin_LIBRARIES} ${PROJECT_NAME}_test)
+#  ${catkin_LIBRARIES} ${pilz_testutils_LIBRARIES} ${PROJECT_NAME}_test)
 
 #add_rostest_gmock(integrationtest_sequence_action_capability_frankaemika_panda
 #  test/integrationtest_sequence_action_capability_frankaemika_panda.test
 #  test/integrationtest_sequence_action_capability.cpp
 #)
 #target_link_libraries(integrationtest_sequence_action_capability_frankaemika_panda
-#  ${catkin_LIBRARIES} ${PROJECT_NAME}_test)
+#  ${catkin_LIBRARIES} ${pilz_testutils_LIBRARIES} ${PROJECT_NAME}_test)
 
 add_rostest_gtest(integrationtest_sequence_service_capability
   test/integrationtest_sequence_service_capability.test

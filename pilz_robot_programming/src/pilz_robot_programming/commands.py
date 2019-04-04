@@ -59,7 +59,8 @@ _DEFAULT_BASE_LINK = "prbt_base"
 
 class _AbstractCmd(object):
     """Base class for all commands."""
-    def __init__(self):
+    def __init__(self, *args, **kwargs):
+        super(_AbstractCmd, self).__init__(*args, **kwargs)
         # set robot state as empty diff in planning scene to start with current planning scene
         self._planning_options = PlanningOptions()
         self._planning_options.planning_scene_diff.robot_state.is_diff = True
@@ -129,11 +130,54 @@ class _AbstractCmd(object):
 
 
 class _BaseCmd(_AbstractCmd):
-    """Base class for all single commands (gripper command excluded)."""
+    """Base class for all single commands.
+
+    :param goal: The goal of the motion, which can be given in joint (list of float, in the order of active joints in
+        the planning group) or Cartesian space (geometry_msgs/Pose).
+
+    :note:
+        The geometry_msgs/Pose consists of position and orientation (quaternion). When creating an instance of
+        geometry_msgs/Pose, the position and orientation can be left as uninitialized. The uninitialized position is
+        considered as zero position. The uninitialized orientation is considered as keeping the current orientation
+        unchanged. This difference is because uninitialized position can not be recognized when comparing with a zero
+        position but uninitialized orientation can.
+
+    :param planning_group: Name of the planning group, default as "manipulator".
+
+    :param target_link: Name of the target link if Cartesian goal is given, default as "prbt_tcp"
+
+    :param relative: Has to be set to:
+
+            * :py:obj:`False` if the goal states the target position as absolute position with regard to base coordinate
+                              system.
+            * :py:obj:`True` if the goal states the target position as offset relative to the current robot position.
+
+            The orientation is added as offset to the euler-angles.
+            The offset has to be stated with regard to the base coordinate system.
+            E.g. to move the robot 0.1m up and tilt it 10degrees around the global z-axis use:
+            ::
+
+                Ptp(goal=Pose(position=Point(0., 0., 0.1), orientation=from_euler(math.radians(10), 0., 0.)), vel_scale=0.4)
+
+
+            Note the gimbal lock, if you pass a relative rotation to this function: If b==0, the values for a and c
+            depend on each other and may thus give arbitrary euler angles, when converting back from quaternion to
+            euler internally.
+            The function assumes, you want to take the shorter rotation distance, so you should only pass
+            rotations smaller than 180 degrees for relative movements.
+
+    :param reference_frame: The frame of reference parameter allows to change the reference coordinate system for the
+        passed goal position and orientation.
+        Any published tf can be used as frame by reference. The reference_frame has to be a valid tf id string.
+        Setting no reference_frame will use "prbt_base" as default.
+
+    :type relative: bool
+    :type reference_frame: string
+    """
     def __init__(self, goal=None, planning_group=_DEFAULT_PLANNING_GROUP, target_link=_DEFAULT_TARGET_LINK,
                  vel_scale=_DEFAULT_VEL_SCALE, acc_scale=_DEFAULT_ACC_SCALE, relative=False,
-                 reference_frame=_DEFAULT_BASE_LINK):
-        _AbstractCmd.__init__(self)
+                 reference_frame=_DEFAULT_BASE_LINK, *args, **kwargs):
+        super(_BaseCmd, self).__init__(*args, **kwargs)
 
         # Needs to be set by derived classes
         self._planner_id = None
@@ -258,20 +302,6 @@ class Ptp(_BaseCmd):
     in space (goal). The trajectory taken to reach the goal is defined by the underlying planning
     algorithms and cannot not be defined by the user.
 
-    :param goal: The goal of the motion, which can be given in joint (list of float, in the order of active joints in
-        the planning group) or Cartesian space (geometry_msgs/Pose).
-
-    :note:
-        The geometry_msgs/Pose consists of position and orientation (quaternion). When creating an instance of
-        geometry_msgs/Pose, the position and orientation can be left as uninitialized. The uninitialized position is
-        considered as zero position. The uninitialized orientation is considered as keeping the current orientation
-        unchanged. This difference is because uninitialized position can not be recognized when comparing with a zero
-        position but uninitialized orientation can.
-
-    :param planning_group: Name of the planning group, default as "manipulator".
-
-    :param target_link: Name of the target link if Cartesian goal is given, default as "prbt_tcp"
-
     :param vel_scale: The velocity scaling factor allows to limit the highest possible axis velocity.
         The velocity scaling factor is a scalar. The value is applied to all axes.
         The value is given in percentage of the maximal velocity of an axis and has to be
@@ -289,49 +319,12 @@ class Ptp(_BaseCmd):
         If no acceleration scaling factor is given, the acceleration scaling factor is set as follows:
 
             acc_scale = vel_scale * vel_scale
-
-    :param relative: Has to be set to:
-
-            * :py:obj:`False` if the goal states the target position as absolute position with regard to base coordinate
-                              system.
-            * :py:obj:`True` if the goal states the target position as offset relative to the current robot position.
-
-            The orientation is added as offset to the euler-angles.
-            The offset has to be stated with regard to the base coordinate system.
-            E.g. to move the robot 0.1m up and tilt it 10degrees around the global z-axis use:
-            ::
-
-                Ptp(goal=Pose(position=Point(0., 0., 0.1), orientation=from_euler(math.radians(10), 0., 0.)), vel_scale=0.4)
-
-
-            Note the gimbal lock, if you pass a relative rotation to this function: If b==0, the values for a and c
-            depend on each other and may thus give arbitrary euler angles, when converting back from quaternion to
-            euler internally.
-            The function assumes, you want to take the shorter rotation distance, so you should only pass
-            rotations smaller than 180 degrees for relative movements.
-
-    :param reference_frame: The frame of reference parameter allows to change the reference coordinate system for the
-        passed goal position and orientation.
-        Any published tf can be used as frame by reference. The reference_frame has to be a valid tf id string.
-        Setting no reference_frame will use "prbt_base" as default.
-
-    :type relative: bool
-    :type reference_frame: string
-
     """
-    def __init__(self, goal=None,
-                 planning_group=_DEFAULT_PLANNING_GROUP,
-                 target_link=_DEFAULT_TARGET_LINK,
-                 vel_scale=_MAX_VEL_SCALE,
-                 acc_scale=None,
-                 relative=False,
-                 reference_frame=_DEFAULT_BASE_LINK):
-
+    def __init__(self, vel_scale=_MAX_VEL_SCALE, acc_scale=None, *args, **kwargs):
+      
         acc_scale_final = acc_scale if acc_scale is not None else Ptp._calc_acc_scale(vel_scale)
-
-        _BaseCmd.__init__(self, goal=goal, planning_group=planning_group, target_link=target_link,
-                          vel_scale=vel_scale, acc_scale=acc_scale_final, relative=relative,
-                          reference_frame=reference_frame)
+        
+        super(Ptp, self).__init__(vel_scale=vel_scale, acc_scale=acc_scale_final, *args, **kwargs)
 
         self._planner_id = "PTP"
 
@@ -357,20 +350,6 @@ class Lin(_BaseCmd):
     A :py:class:`Lin` command allows the user to move the robot from its current position to a specified point
     in space (goal). The trajectory taken to reach the goal is a straight line (in Cartesian space).
 
-    :param goal: The goal of the motion, which can be given in joint (list of float, in the order of active joints in
-        the planning group) or Cartesian space (geometry_msgs/Pose).
-
-    :note:
-        The geometry_msgs/Pose consists of position and orientation (quaternion). When creating an instance of
-        geometry_msgs/Pose, the position and orientation can be left as uninitialized. The uninitialized position is
-        considered as zero position. The uninitialized orientation is considered as keeping the current orientation
-        unchanged. This difference is because uninitialized position can not be recognized when comparing with a zero
-        position but uninitialized orientation can.
-
-    :param planning_group: Name of the planning group, default as "manipulator".
-
-    :param target_link: Name of the target link if Cartesian goal is given, default as "prbt_tcp"
-
     :param vel_scale: The velocity scaling factor allows to limit the highest possible cartesian velocity
         of the TCP frame. The velocity scaling factor is a scalar value.
         The value is given in percentage of the maximal allowed cartesian velocity and has to be
@@ -388,47 +367,12 @@ class Lin(_BaseCmd):
         If no acceleration scaling factor is given, the acceleration scaling factor is set as follows:
 
             acc_scale = vel_scale
-
-    :param relative: Has to be set to:
-
-            * :py:obj:`False` if the goal states the target position as absolute position with regard to
-                base coordinate system.
-            * :py:obj:`True` if the goal states the target position as offset relative to the current robot position.
-
-            The orientation is added as offset to the euler-angles.
-            (The offset has to be stated with regard to the base coordinate system.)
-            E.g. to move the robot 0.1m up and tilt it 10degrees around the global z-axis use:
-            ::
-
-                Lin(goal=Pose(position=Point(0., 0., 0.1), orientation=from_euler(math.radians(10), 0., 0.)))
-
-            Note the gimbal lock, if you pass a relative rotation to this function: If b==0, the values for a and c
-            depend on each other and may thus give arbitrary euler angles, when converting back from quaternion to
-            euler internally.
-            The function assumes, you want to take the shorter rotation distance, so you should only pass
-            rotations smaller than 180 degrees for relative movements.
-
-    :param reference_frame: The frame of reference parameter allows to change the reference coordinate system for the
-        passed goal position and orientation.
-        Any published tf can be used as frame by reference. The reference_frame has to be a valid tf id string.
-        Setting no reference_frame will use "prbt_base" as default.
-
-    :type relative: bool
-    :type reference_frame: string
     """
-    def __init__(self, goal=None,
-                 planning_group=_DEFAULT_PLANNING_GROUP,
-                 target_link=_DEFAULT_TARGET_LINK,
-                 vel_scale=_DEFAULT_VEL_SCALE,
-                 acc_scale=None,
-                 relative=False,
-                 reference_frame=_DEFAULT_BASE_LINK):
+    def __init__(self, vel_scale=_DEFAULT_VEL_SCALE, acc_scale=None, *args, **kwargs):
 
         acc_scale_final = acc_scale if acc_scale is not None else Lin._calc_acc_scale(vel_scale)
 
-        _BaseCmd.__init__(self, goal=goal, planning_group=planning_group, target_link=target_link,
-                          vel_scale=vel_scale, acc_scale=acc_scale_final, relative=relative,
-                          reference_frame=reference_frame)
+        super(Lin, self).__init__(vel_scale=vel_scale, acc_scale=acc_scale_final, *args, **kwargs)
 
         self._planner_id = "LIN"
 
@@ -459,20 +403,7 @@ class Circ(_BaseCmd):
         The circle can be completely defined by stating a interim `or` an center position.
         However, only one of both should be stated.
 
-    :param goal: The goal of the motion stated in Cartesian space (geometry_msgs/Pose).
-
-    :note:
-        The geometry_msgs/Pose consists of position and orientation (quaternion). When creating an instance of
-        geometry_msgs/Pose, the position and orientation can be left as uninitialized. The uninitialized position is
-        considered as zero position. The uninitialized orientation is considered as keeping the current orientation
-        unchanged. This difference is because uninitialized position can not be recognized when comparing with a zero
-        position but uninitialized orientation can.
-
-    :param planning_group: Name of the planning group, default as "manipulator".
-
-    :param target_link: Name of the target link if Cartesian goal is given, default as "prbt_tcp"
-
-    :param interim: Position in cartesian space (geometry_msgs/Position),
+    :param interim: Position in cartesian space (geometry_msgs/Point),
         which lies on the circle on which the robot is supposed to move.
         The position has to lie between the current position of the robot and the goal position.
         The interim position indicates in which direction of the circle the robot is supposed to move.
@@ -497,27 +428,12 @@ class Circ(_BaseCmd):
         If no acceleration scaling factor is given, the acceleration scaling factor is set as follows:
 
             acc_scale = vel_scale
-
-    :param reference_frame: The frame of reference parameter allows to change the reference coordinate system for the
-        passed goal position and orientation.
-        Any published tf can be used as frame by reference. The reference_frame has to be a valid tf id string.
-        Setting no reference_frame will use "prbt_base" as default.
-
-    :type reference_frame: string
-
     """
-    def __init__(self, goal=None, interim=None, center=None,
-                 planning_group=_DEFAULT_PLANNING_GROUP,
-                 target_link=_DEFAULT_TARGET_LINK,
-                 vel_scale=_DEFAULT_VEL_SCALE,
-                 acc_scale=None,
-                 reference_frame=_DEFAULT_BASE_LINK):
+    def __init__(self, interim=None, center=None, vel_scale=_DEFAULT_VEL_SCALE, acc_scale=None, *args, **kwargs):
 
         acc_scale_final = acc_scale if acc_scale is not None else Circ._calc_acc_scale(vel_scale)
 
-        _BaseCmd.__init__(self, goal=goal, planning_group=planning_group, target_link=target_link,
-                          vel_scale=vel_scale, acc_scale=acc_scale_final, relative=False,
-                          reference_frame=reference_frame)
+        super(Circ, self).__init__(vel_scale=vel_scale, acc_scale=acc_scale_final, *args, **kwargs)
 
         self._planner_id = "CIRC"
         self._interim = interim
@@ -592,8 +508,8 @@ class Sequence(_AbstractCmd):
      :note: Currently, blending is only supported for :py:class:`Lin` commands.
 
     """
-    def __init__(self):
-        _AbstractCmd.__init__(self)
+    def __init__(self, *args, **kwargs):
+        super(Sequence, self).__init__(*args, **kwargs)
         # List of tuples containing commands and blend radii
         self.items = []
 
@@ -661,9 +577,9 @@ class Gripper(_BaseCmd):
 
             allowed axis velocity = vel_scale * maximal axis velocity
     """
-    def __init__(self, goal, vel_scale=_DEFAULT_VEL_SCALE):
-        _BaseCmd.__init__(self, goal=goal, planning_group=_DEFAULT_GRIPPER_PLANNING_GROUP,
-                          vel_scale=vel_scale, relative=False)
+    def __init__(self, goal, vel_scale=_DEFAULT_VEL_SCALE, *args, **kwargs):
+        super(Gripper, self).__init__(goal=goal, planning_group=_DEFAULT_GRIPPER_PLANNING_GROUP,
+                                      vel_scale=vel_scale, relative=False, *args, **kwargs)
 
     def __str__(self):
         out_str = _AbstractCmd.__str__(self)

@@ -39,8 +39,10 @@ std::unique_ptr<KDL::Path> PathCircleGenerator::circleFromCenter(
   double alpha = cosines(a,b,c);
 
   KDL::RotationalInterpolation* rot_interpo = new KDL::RotationalInterpolation_SingleAxis();
+  double old_kdl_epsilon = KDL::epsilon;
   try
   {
+    KDL::epsilon = MAX_COLINEAR_NORM;
     return std::unique_ptr<KDL::Path>(new KDL::Path_Circle(start_pose,
                                            center_point,
                                            goal_pose.p,
@@ -49,10 +51,12 @@ std::unique_ptr<KDL::Path> PathCircleGenerator::circleFromCenter(
                                            rot_interpo,
                                            eqradius,
                                            true /* take ownership of RotationalInterpolation */));
+    KDL::epsilon = old_kdl_epsilon;
   }
   catch(KDL::Error_MotionPlanning &)
   {
     delete rot_interpo; // in case we could not construct the Path object, avoid a memory leak
+    KDL::epsilon = old_kdl_epsilon;
     throw; // and pass the exception on to the caller
   }
 }
@@ -80,17 +84,28 @@ std::unique_ptr<KDL::Path> PathCircleGenerator::circleFromInterim(
   const KDL::Vector center_point = start_pose.p + (u*dot(t,t)*dot(u,v) - t*dot(u,u)*dot(t,v))* 0.5/pow(w.Norm(),2);
 
   // compute the rotation angle
-  double interim_angle = cosines(t.Norm(), v.Norm(), u.Norm());
-  double a = (start_pose.p - center_point).Norm();
-  double b = (goal_pose.p - center_point).Norm();
-  double c = (start_pose.p - goal_pose.p).Norm();
-  // compute the rotation angle
+  // triangle edges
+  const KDL::Vector t_center = center_point - start_pose.p;
+  const KDL::Vector v_center = goal_pose.p - center_point;
+  double a = t_center.Norm();
+  double b = v_center.Norm();
+  double c = u.Norm();
   double alpha = cosines(a,b,c);
-  // rotation angle is an acute angle
-  //rotation angle is an obtuse angle
+
+  KDL::Vector kdl_aux_point(interim_point);
+
+  // if the angle at the interim is an acute angle (<90deg), rotation angle is an obtuse angle (>90deg)
+  // in this case using the interim as auxiliary point for KDL::Path_Circle can lead to a path in the wrong direction
+  double interim_angle = cosines(t.Norm(), v.Norm(), u.Norm());
   if(interim_angle < M_PI/2)
   {
     alpha = 2*M_PI - alpha;
+
+    // exclude that the goal is not colinear with start and center, then use the opposite of the goal as auxiliary point
+    if ((t_center*v_center).Norm() > MAX_COLINEAR_NORM)
+    {
+      kdl_aux_point = 2*center_point - goal_pose.p;
+    }
   }
 
   KDL::RotationalInterpolation* rot_interpo = new KDL::RotationalInterpolation_SingleAxis();
@@ -98,7 +113,7 @@ std::unique_ptr<KDL::Path> PathCircleGenerator::circleFromInterim(
   {
     return std::unique_ptr<KDL::Path>(new KDL::Path_Circle(start_pose,
                                                   center_point,
-                                                  interim_point,
+                                                  kdl_aux_point,
                                                   goal_pose.M,
                                                   alpha,
                                                   rot_interpo,

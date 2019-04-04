@@ -20,141 +20,77 @@
 #include "ros/ros.h"
 #include <stdexcept>
 
-bool pilz::JointLimitsContainer::addLimit(const std::string &joint_name, pilz_extensions::JointLimit joint_limit)
+namespace pilz
+{
+
+bool JointLimitsContainer::addLimit(const std::string &joint_name, pilz_extensions::JointLimit joint_limit)
 {
   if(joint_limit.has_deceleration_limits && joint_limit.max_deceleration >= 0)
   {
     ROS_ERROR_STREAM("joint_limit.max_deceleration MUST be negative!");
     return false;
   }
-  else
+  const auto& insertion_result { container_.insert(std::pair<std::string, pilz_extensions::JointLimit>(joint_name,
+                                                                                                       joint_limit)) };
+  if (!insertion_result.second)
   {
-    container_.insert(std::pair<std::string, pilz_extensions::JointLimit>(joint_name, joint_limit));
-    return true;
+    ROS_ERROR_STREAM("joint_limit for joint " << joint_name << " already contained.");
+    return false;
   }
-
+  return true;
 }
 
-bool pilz::JointLimitsContainer::hasLimit(const std::string &joint_name) const
+bool JointLimitsContainer::hasLimit(const std::string &joint_name) const
 {
   return container_.find(joint_name) != container_.end();
 }
 
-size_t pilz::JointLimitsContainer::getCount() const
+size_t JointLimitsContainer::getCount() const
 {
   return container_.size();
 }
 
-bool pilz::JointLimitsContainer::empty() const
+bool JointLimitsContainer::empty() const
 {
   return container_.empty();
 }
 
-pilz_extensions::JointLimit pilz::JointLimitsContainer::getCommonLimit() const
+pilz_extensions::JointLimit JointLimitsContainer::getCommonLimit() const
 {
   pilz_extensions::JointLimit common_limit;
-
-  if(container_.empty())
+  for(auto it = container_.begin(); it != container_.end(); ++it)
   {
-    common_limit.has_position_limits = false;
-    common_limit.min_position = 0;
-    common_limit.max_position = 0;
-    common_limit.has_velocity_limits = false;
-    common_limit.max_velocity = 0;
-    common_limit.has_acceleration_limits = false;
-    common_limit.max_acceleration = 0;
-    common_limit.has_deceleration_limits = false;
-    common_limit.max_deceleration = 0;
-    return common_limit;
+    updateCommonLimit(it->second, common_limit);
   }
-
-  common_limit = container_.begin()->second;
-
-  for(auto it = std::next(container_.begin()); it != container_.end(); ++it)
-  {
-
-    // If this limit has position limits
-    if(it->second.has_position_limits)
-    {
-      // Merge if common_limit has allready limit
-      if(common_limit.has_position_limits)
-      {
-        common_limit.min_position = std::max(common_limit.min_position, it->second.min_position);
-        common_limit.max_position = std::min(common_limit.max_position, it->second.max_position);
-      }
-      else
-      {
-        common_limit.has_position_limits = true;
-        common_limit.min_position = it->second.min_position;
-        common_limit.max_position = it->second.max_position;
-      }
-    }
-
-    // If this limit has velocity limits
-    if(it->second.has_velocity_limits)
-    {
-      // Merge if common_limit has allready limit
-      if(common_limit.has_velocity_limits)
-      {
-        common_limit.max_velocity = std::min(common_limit.max_velocity, it->second.max_velocity);
-      }
-      else
-      {
-        common_limit.has_velocity_limits = true;
-        common_limit.max_velocity = it->second.max_velocity;
-      }
-    }
-
-    // If this limit has acceleration limits
-    if(it->second.has_acceleration_limits)
-    {
-      // Merge if common_limit has allready limit
-      if(common_limit.has_acceleration_limits)
-      {
-        common_limit.max_acceleration = std::min(common_limit.max_acceleration, it->second.max_acceleration);
-      }
-      else
-      {
-        common_limit.has_acceleration_limits = true;
-        common_limit.max_acceleration = it->second.max_acceleration;
-      }
-    }
-
-    // If this limit has deceleration limits
-    if(it->second.has_deceleration_limits)
-    {
-      // Merge if common_limit has allready limit
-      if(common_limit.has_deceleration_limits)
-      {
-        common_limit.max_deceleration = std::max(common_limit.max_deceleration, it->second.max_deceleration);
-      }
-      else
-      {
-        common_limit.has_deceleration_limits = true;
-        common_limit.max_deceleration = it->second.max_deceleration;
-      }
-    }
-  }
-
   return common_limit;
 }
 
-pilz_extensions::JointLimit pilz::JointLimitsContainer::getLimit(const std::string &joint_name) const
+pilz_extensions::JointLimit JointLimitsContainer::getCommonLimit(const std::vector<std::string> &joint_names) const
+{
+  pilz_extensions::JointLimit common_limit;
+  for(const auto& joint_name : joint_names)
+  {
+    updateCommonLimit(container_.at(joint_name), common_limit);
+  }
+  return common_limit;
+}
+
+pilz_extensions::JointLimit JointLimitsContainer::getLimit(const std::string &joint_name) const
 {
   return container_.at(joint_name);
 }
 
-std::map<std::string, pilz_extensions::JointLimit>::const_iterator pilz::JointLimitsContainer::begin() const
+std::map<std::string, pilz_extensions::JointLimit>::const_iterator JointLimitsContainer::begin() const
 {
   return container_.begin();
 }
 
-std::map<std::string, pilz_extensions::JointLimit>::const_iterator pilz::JointLimitsContainer::end() const
+std::map<std::string, pilz_extensions::JointLimit>::const_iterator JointLimitsContainer::end() const
 {
   return container_.end();
 }
 
-bool pilz::JointLimitsContainer::verifyVelocityLimit(const std::string &joint_name,
+bool JointLimitsContainer::verifyVelocityLimit(const std::string &joint_name,
                                                      const double &joint_velocity) const
 {
   return (!(hasLimit(joint_name)
@@ -163,7 +99,7 @@ bool pilz::JointLimitsContainer::verifyVelocityLimit(const std::string &joint_na
 }
 
 
-bool pilz::JointLimitsContainer::verifyPositionLimit(const std::string &joint_name,
+bool JointLimitsContainer::verifyPositionLimit(const std::string &joint_name,
                                                      const double &joint_position) const
 {
   return (!( hasLimit(joint_name)
@@ -173,7 +109,7 @@ bool pilz::JointLimitsContainer::verifyPositionLimit(const std::string &joint_na
 }
 
 
-bool pilz::JointLimitsContainer::verifyPositionLimits(const std::vector<std::string> &joint_names,
+bool JointLimitsContainer::verifyPositionLimits(const std::vector<std::string> &joint_names,
                                                     const std::vector<double> &joint_positions) const
 {
   if(joint_names.size() != joint_positions.size())
@@ -191,3 +127,51 @@ bool pilz::JointLimitsContainer::verifyPositionLimits(const std::vector<std::str
 
   return true;
 }
+
+void JointLimitsContainer::updateCommonLimit(const pilz_extensions::JointLimit& joint_limit,
+                                                   pilz_extensions::JointLimit& common_limit)
+{
+  // check position limits
+  if(joint_limit.has_position_limits)
+  {
+    double min_position = joint_limit.min_position;
+    double max_position = joint_limit.max_position;
+
+    common_limit.min_position = (!common_limit.has_position_limits) ? min_position
+                                                                    : std::max(common_limit.min_position, min_position);
+    common_limit.max_position = (!common_limit.has_position_limits) ? max_position
+                                                                    : std::min(common_limit.max_position, max_position);
+    common_limit.has_position_limits = true;
+  }
+
+  // check velocity limits
+  if(joint_limit.has_velocity_limits)
+  {
+    double max_velocity = joint_limit.max_velocity;
+    common_limit.max_velocity = (!common_limit.has_velocity_limits) ? max_velocity
+                                                                    : std::min(common_limit.max_velocity, max_velocity);
+    common_limit.has_velocity_limits = true;
+  }
+
+  // check acceleration limits
+  if(joint_limit.has_acceleration_limits)
+  {
+    double max_acc = joint_limit.max_acceleration;
+    common_limit.max_acceleration = (!common_limit.has_acceleration_limits) ? max_acc
+                                                                            : std::min(common_limit.max_acceleration,
+                                                                                       max_acc);
+    common_limit.has_acceleration_limits = true;
+  }
+
+  // check deceleration limits
+  if(joint_limit.has_deceleration_limits)
+  {
+    double max_dec = joint_limit.max_deceleration;
+    common_limit.max_deceleration = (!common_limit.has_deceleration_limits) ? max_dec
+                                                                            : std::max(common_limit.max_deceleration,
+                                                                                       max_dec);
+    common_limit.has_deceleration_limits = true;
+  }
+}
+
+}  // namespace pilz

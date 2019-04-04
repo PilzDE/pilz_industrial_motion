@@ -2,12 +2,22 @@
 Changelog for package pilz_trajectory_generation
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
+Forthcoming
+-----------
+* update dependencies of trajectory_generation
+* fix CIRC path generator and increase test coverage
+* adopt strictest limits in ptp planner (refactor JointLimitsContainer and TrajectoryGeneratorPTP)
+* Contributors: Pilz GmbH and Co. KG
+
 0.4.2 (2019-03-13)
 ------------------
 * re-adapt to new RobotState API: remove #attempts
 * Contributors: Pilz GmbH and Co. KG
 
 0.4.1 (2019-02-27)
+------------------
+
+0.3.6 (2019-02-26)
 ------------------
 * refactor the testdataloader
 * adapt to new RobotState API: remove #attempts

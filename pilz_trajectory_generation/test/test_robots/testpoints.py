@@ -24,14 +24,15 @@ __REQUIRED_API_VERSION__ = "1"
 
 robot_configs = {}
 robot_configs['prbt'] = {
-        'initJointPose': [0,0,0,0,0,0],
+        'initJointPose': [0.0, 0.0, math.radians(-25), 0.0, -1.57, 0],
         'L': 0.2,
         'M': 0.1,
         'planning_group': 'manipulator',
         'target_link': 'prbt_tcp',
         'reference_frame': 'prbt_base',
         'default_or': from_euler(0, math.radians(180), math.radians(90)),
-        'P1_position': Point(0.3, 0.0, 0.5)
+        'P1_position': Point(0.3, 0.0, 0.5),
+        'P1_orientation': from_euler(0, math.radians(180), math.radians(135))
 }
 
 robot_configs['abb'] = {
@@ -62,10 +63,12 @@ def start_program(robot_name):
 
     test_sequence(**robot_configs[robot_name])
 
-def test_sequence(initJointPose, L, M, planning_group, target_link, reference_frame, default_or, P1_position):
+def test_sequence(initJointPose, L, M, planning_group, target_link, reference_frame, default_or, P1_position, P1_orientation):
     r = Robot(__REQUIRED_API_VERSION__)
 
-    P1 = Pose(position=P1_position, orientation=default_or)
+    r.move(Ptp(goal=initJointPose, planning_group=planning_group))
+
+    P1 = Pose(position=P1_position, orientation=P1_orientation)
 
 
     P2 = Pose(position=Point(P1.position.x+L, P1.position.y+L, P1.position.z-M), orientation=default_or)

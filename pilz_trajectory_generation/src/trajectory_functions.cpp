@@ -47,11 +47,10 @@ bool pilz::computePoseIK(const moveit::core::RobotModelConstPtr &robot_model,
     return false;
   }
 
-  // create robot state
   robot_state::RobotState rstate(robot_model);
+  // By setting the robot state to default values, we basically allow
+  // the user of this function to supply an incomplete or even empty seed.
   rstate.setToDefaultValues();
-
-  // set the seed
   rstate.setVariablePositions(seed);
 
   moveit::core::GroupStateValidityCallbackFn ik_constraint_function;

@@ -120,7 +120,7 @@ TEST_P(PlanningContextLoadersTest, LoadContext)
   EXPECT_EQ(false, res) << "Context returned even when no limits where set";
 
   // After setting the limits this should work
-  pilz::JointLimitsContainer joint_limits = testutils::createFakeLimits(6);
+  pilz::JointLimitsContainer joint_limits = testutils::createFakeLimits(robot_model_->getVariableNames());
   pilz::LimitsContainer limits;
   limits.setJointLimits(joint_limits);
   pilz::CartesianLimit cart_limits;

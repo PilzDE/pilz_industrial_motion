@@ -61,6 +61,7 @@ public:
   void setLinkName(const std::string& link_name);
   const std::string& getLinkName() const;
 
+  void setPose(const geometry_msgs::Pose& pose);
   const geometry_msgs::Pose &getPose() const;
   geometry_msgs::Pose &getPose();
 
@@ -106,6 +107,11 @@ inline void CartesianConfiguration::setLinkName(const std::string& link_name)
 inline const std::string& CartesianConfiguration::getLinkName() const
 {
   return link_name_;
+}
+
+inline void CartesianConfiguration::setPose(const geometry_msgs::Pose& pose)
+{
+  pose_ = pose;
 }
 
 inline const geometry_msgs::Pose& CartesianConfiguration::getPose() const

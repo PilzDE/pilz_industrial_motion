@@ -60,18 +60,30 @@ public:
   bool empty() const;
 
   /**
-   * @brief Returns joint limit fusion of all(position, velocity, acceleration, deceleration) limits
-   * There are cases where the common limits of all is needed. This function calculate and return a joint_limit
-   * which respects all limits of the container.
-   * @return fused joint_limit
-   * if there are no limits, the flag has_[position|velocity|...]_limits is set to false.
+   * @brief Returns joint limit fusion of all(position, velocity, acceleration, deceleration) limits for all joint.
+   * There are cases where the most strict limit of all limits is needed.
+   * If there are no matching limits, the flag has_[position|velocity|...]_limits is set to false.
+   *
+   * @return joint limit
    */
   pilz_extensions::JointLimit getCommonLimit() const;
 
   /**
-   * @brief getLimit get the limit with the name,
+   * @brief Returns joint limit fusion of all(position, velocity, acceleration, deceleration) limits for given joints.
+   * There are cases where the most strict limit of all limits is needed.
+   * If there are no matching limits, the flag has_[position|velocity|...]_limits is set to false.
+   *
+   * @param joint_names
+   * @return joint limit
+   * @throws std::out_of_range if a joint limit with this name does not exist
+   */
+  pilz_extensions::JointLimit getCommonLimit(const std::vector<std::string> &joint_names) const;
+
+  /**
+   * @brief getLimit get the limit for the given joint name
    * @param joint_name
-   * @return joint_limit, throws std::out_of_range if a joint limit with this name does not exist
+   * @return joint limit
+   * @throws std::out_of_range if a joint limit with this name does not exist
    */
   pilz_extensions::JointLimit getLimit(const std::string& joint_name) const;
 
@@ -114,6 +126,15 @@ public:
    */
   bool verifyPositionLimits(const std::vector<std::string> &joint_names,
                             const std::vector<double> &joint_positions) const;
+
+private:
+  /**
+   * @brief update the most strict limit with given joint limit
+   * @param joint_limit
+   * @param common_limit the current most strict limit
+   */
+  static void updateCommonLimit(const pilz_extensions::JointLimit& joint_limit,
+                                pilz_extensions::JointLimit& common_limit);
 
 protected:
   /// Actual container object containing the data

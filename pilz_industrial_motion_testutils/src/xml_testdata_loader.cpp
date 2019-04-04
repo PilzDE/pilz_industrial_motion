@@ -68,6 +68,7 @@ XmlTestdataLoader::XmlTestdataLoader(const std::string &path_filename)
 
   cmd_getter_funcs_["circ_center_cart"] = AbstractCmdGetterUPtr(new CmdGetterAdapter<CircCenterCart>(std::bind(&XmlTestdataLoader::getCircCartCenterCart, this, _1)));
   cmd_getter_funcs_["circ_interim_cart"] = AbstractCmdGetterUPtr(new CmdGetterAdapter<CircInterimCart>(std::bind(&XmlTestdataLoader::getCircCartInterimCart, this, _1)));
+  cmd_getter_funcs_["circ_joint_interim_cart"] = AbstractCmdGetterUPtr(new CmdGetterAdapter<CircJointInterimCart>(std::bind(&XmlTestdataLoader::getCircJointInterimCart, this, _1)));
 }
 
 XmlTestdataLoader::XmlTestdataLoader(const std::string &path_filename,
@@ -626,7 +627,7 @@ CircCenterCart XmlTestdataLoader::getCircCartCenterCart(const std::string &cmd_n
   if(!getCmd(CIRCS_PATH_STR, cmd_name, planning_group, target_link,
              start_pos_name, goal_pos_name, vel_scale, acc_scale))
   {
-    throw TestDataLoaderReadingException("Did not \"" + cmd_name +  "\"");
+    throw TestDataLoaderReadingException("Did not find \"" + cmd_name +  "\"");
   }
 
   CircCenterCart cmd;
@@ -648,7 +649,7 @@ CircInterimCart XmlTestdataLoader::getCircCartInterimCart(const std::string &cmd
   if(!getCmd(CIRCS_PATH_STR, cmd_name, planning_group, target_link,
              start_pos_name, goal_pos_name, vel_scale, acc_scale))
   {
-    throw TestDataLoaderReadingException("Did not \"" + cmd_name +  "\"");
+    throw TestDataLoaderReadingException("Did not find \"" + cmd_name +  "\"");
   }
 
   CircInterimCart cmd;
@@ -663,6 +664,28 @@ CircInterimCart XmlTestdataLoader::getCircCartInterimCart(const std::string &cmd
   return cmd;
 }
 
+CircJointInterimCart XmlTestdataLoader::getCircJointInterimCart(const std::string &cmd_name) const
+{
+  std::string start_pos_name, goal_pos_name, planning_group, target_link;
+  double vel_scale, acc_scale;
+  if(!getCmd(CIRCS_PATH_STR, cmd_name, planning_group, target_link,
+             start_pos_name, goal_pos_name, vel_scale, acc_scale))
+  {
+    throw TestDataLoaderReadingException("Did not find \"" + cmd_name +  "\"");
+  }
+
+  CircJointInterimCart cmd;
+  cmd.setPlanningGroup(planning_group);
+  cmd.setVelocityScale(vel_scale);
+  cmd.setAccelerationScale(acc_scale);
+
+  cmd.setStartConfiguration(getJoints(start_pos_name, planning_group));
+  cmd.setAuxiliaryConfiguration(getCartesianInterim(cmd_name, planning_group));
+  cmd.setGoalConfiguration(getJoints(goal_pos_name, planning_group));
+
+  return cmd;
+}
+
 CircJointCenterCart XmlTestdataLoader::getCircJointCenterCart(const std::string &cmd_name) const
 {
   std::string start_pos_name, goal_pos_name, planning_group, target_link;
@@ -670,7 +693,7 @@ CircJointCenterCart XmlTestdataLoader::getCircJointCenterCart(const std::string 
   if(!getCmd(CIRCS_PATH_STR, cmd_name, planning_group, target_link,
              start_pos_name, goal_pos_name, vel_scale, acc_scale))
   {
-    throw TestDataLoaderReadingException("Did not \"" + cmd_name +  "\"");
+    throw TestDataLoaderReadingException("Did not find \"" + cmd_name +  "\"");
   }
 
   CircJointCenterCart cmd;

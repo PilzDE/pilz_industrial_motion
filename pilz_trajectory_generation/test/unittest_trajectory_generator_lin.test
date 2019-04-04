@@ -21,15 +21,15 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
   <!-- Parametrized test running with and without gripper! -->
 
   <!-- Load the context with and without the pg70 -->
-  <include file="$(find prbt_moveit_config)/launch/test_context.launch" />
-  <include file="$(find prbt_moveit_config)/launch/test_context.launch">
+  <include file="$(find pilz_trajectory_generation)/test/test_robots/prbt/launch/test_context.launch" />
+  <include file="$(find pilz_trajectory_generation)/test/test_robots/prbt/launch/test_context.launch">
     <arg name="gripper" value="pg70" />
   </include>
 
   <!-- run test -->
   <test pkg="pilz_trajectory_generation" test-name="unittest_trajectory_generator_lin"
   type="unittest_trajectory_generator_lin">
-    <param name="testdata_file_name" value="$(find pilz_trajectory_generation)/test/test_robots/prbt/test_data/testdata_deprecated.xml" />
+    <param name="testdata_file_name" value="$(find pilz_trajectory_generation)/test/test_robots/prbt/test_data/testdata_sequence.xml" />
     <param name="planning_group" value="manipulator" />
     <param name="target_link_hand_computed_data" value="prbt_flange" />
     <param name="random_trial_number" value="100" />

@@ -84,7 +84,7 @@ protected:
     ASSERT_TRUE(ph_.getParam(PARAM_PLANNING_GROUP_NAME, planning_group_));
     ASSERT_TRUE(ph_.getParam(PARAM_TARGET_LINK_NAME, target_link_));
 
-    pilz::JointLimitsContainer joint_limits = testutils::createFakeLimits(6);
+    pilz::JointLimitsContainer joint_limits = testutils::createFakeLimits(robot_model_->getVariableNames());
     pilz::CartesianLimit cartesian_limit;
     cartesian_limit.setMaxRotationalVelocity(1.0*M_PI);
     cartesian_limit.setMaxTranslationalAcceleration(1.0*M_PI);

@@ -21,6 +21,7 @@
 #include "moveit/robot_state/conversions.h"
 
 #include <iostream>
+#include <sstream>
 
 namespace pilz {
 
@@ -35,37 +36,32 @@ TrajectoryGeneratorPTP::TrajectoryGeneratorPTP(const robot_model::RobotModelCons
   }
 
   joint_limits_ = planner_limits_.getJointLimitContainer();
-  mostStrictLimit_ = joint_limits_.getCommonLimit();
 
-  if(mostStrictLimit_.has_velocity_limits &&
-     mostStrictLimit_.has_acceleration_limits &&
-     mostStrictLimit_.has_deceleration_limits)
+  // collect most strict joint limits for each group in robot model
+  for(const auto& jmg : robot_model->getJointModelGroups())
   {
-    ROS_INFO("Initialized Point-to-Point Trajectory Generator.");
-    ROS_DEBUG_STREAM("CommontLimit: " << "\n\t PositionLimits[" << mostStrictLimit_.min_position
-                     << " ," << mostStrictLimit_.max_position << "]"
-                     << "\n\t MaxVelocity " << mostStrictLimit_.max_velocity
-                     << "\n\t MaxAcceleration" << mostStrictLimit_.max_acceleration
-                     << "\n\t MaxDeceleration " << mostStrictLimit_.max_deceleration);
+    pilz_extensions::JointLimit most_strict_limit = joint_limits_.getCommonLimit(jmg->getActiveJointModelNames());
+
+    if(!most_strict_limit.has_velocity_limits)
+    {
+      ROS_ERROR_STREAM("velocity limit not set for group " << jmg->getName());
+      throw TrajectoryGeneratorInvalidLimitsException("velocity limit not set for group " + jmg->getName());
+    }
+    if(!most_strict_limit.has_acceleration_limits)
+    {
+      ROS_ERROR_STREAM("acceleration limit not set for group " << jmg->getName());
+      throw TrajectoryGeneratorInvalidLimitsException("acceleration limit not set for group " + jmg->getName());
+    }
+    if(!most_strict_limit.has_deceleration_limits)
+    {
+      ROS_ERROR_STREAM("deceleration limit not set for group " << jmg->getName());
+      throw TrajectoryGeneratorInvalidLimitsException("deceleration limit not set for group " + jmg->getName());
+    }
+
+    most_strict_limits_.insert(std::pair<std::string, pilz_extensions::JointLimit>(jmg->getName(), most_strict_limit));
   }
-  else
-  {
-    if(!mostStrictLimit_.has_velocity_limits)
-    {
-      ROS_ERROR("velocity limit not set");
-      throw TrajectoryGeneratorInvalidLimitsException("velocity limit not set");
-    }
-    if(!mostStrictLimit_.has_acceleration_limits)
-    {
-      ROS_ERROR("acceleration limit not set");
-      throw TrajectoryGeneratorInvalidLimitsException("acceleration limit not set");
-    }
-    if(!mostStrictLimit_.has_deceleration_limits)
-    {
-      ROS_ERROR("deceleration limit not set");
-      throw TrajectoryGeneratorInvalidLimitsException("deceleartion limit not set");
-    }
-  }
+
+  ROS_INFO("Initialized Point-to-Point Trajectory Generator.");
 }
 
 TrajectoryGeneratorPTP::~TrajectoryGeneratorPTP()
@@ -103,7 +99,7 @@ bool TrajectoryGeneratorPTP::generate(const planning_interface::MotionPlanReques
 
   // plan the ptp trajectory
   trajectory_msgs::JointTrajectory joint_trajectory;
-  planPTP(plan_info.start_joint_position, plan_info.goal_joint_position, joint_trajectory,
+  planPTP(plan_info.start_joint_position, plan_info.goal_joint_position, joint_trajectory, plan_info.group_name,
           req.max_velocity_scaling_factor, req.max_acceleration_scaling_factor, sampling_time);
 
   ROS_INFO_STREAM("PTP Trajectory with " << joint_trajectory.points.size() << " Points generated. Took "
@@ -118,6 +114,7 @@ bool TrajectoryGeneratorPTP::generate(const planning_interface::MotionPlanReques
 void TrajectoryGeneratorPTP::planPTP(const std::map<std::string, double>& start_pos,
                                      const std::map<std::string, double>& goal_pos,
                                      trajectory_msgs::JointTrajectory &joint_trajectory,
+                                     const std::string &group_name,
                                      const double &velocity_scaling_factor,
                                      const double &acceleration_scaling_factor,
                                      const double &sampling_time)
@@ -163,14 +160,13 @@ void TrajectoryGeneratorPTP::planPTP(const std::map<std::string, double>& start_
   std::map<std::string, VelocityProfile_ATrap> velocity_profile;
   for(const auto& joint_name : joint_trajectory.joint_names)
   {
-
     // create vecocity profile if necessary
     velocity_profile.insert(std::make_pair(
                               joint_name,
                               VelocityProfile_ATrap(
-                                velocity_scaling_factor*joint_limits_.getLimit(joint_name).max_velocity,
-                                acceleration_scaling_factor*joint_limits_.getLimit(joint_name).max_acceleration,
-                                acceleration_scaling_factor*joint_limits_.getLimit(joint_name).max_deceleration)));
+                                velocity_scaling_factor * most_strict_limits_.at(group_name).max_velocity,
+                                acceleration_scaling_factor * most_strict_limits_.at(group_name).max_acceleration,
+                                acceleration_scaling_factor * most_strict_limits_.at(group_name).max_deceleration)));
 
     velocity_profile.at(joint_name).SetProfile(start_pos.at(joint_name), goal_pos.at(joint_name));
     if(velocity_profile.at(joint_name).Duration() > max_duration)
@@ -180,16 +176,8 @@ void TrajectoryGeneratorPTP::planPTP(const std::map<std::string, double>& start_
     }
   }
 
-  // TODO throw exception?
-  if(max_duration<=0)
-  {
-    ROS_ERROR("Trajectory duration is zero. It should not happen here.");
-    joint_trajectory.points.clear();
-    return;
-  }
-
   // Full Synchronization
-  // TODO!!! we assume all axes have same max_vel, max_acc, max_dec values
+  // This should only work if all axes have same max_vel, max_acc, max_dec values
   // reset the velocity profile for other joints
   double acc_time = velocity_profile.at(leading_axis).FirstPhaseDuration();
   double const_time = velocity_profile.at(leading_axis).SecondPhaseDuration();
@@ -200,8 +188,18 @@ void TrajectoryGeneratorPTP::planPTP(const std::map<std::string, double>& start_
     if(joint_name != leading_axis)
     {
       // make full synchronization
-      velocity_profile.at(joint_name).SetProfileAllDurations(start_pos.at(joint_name), goal_pos.at(joint_name),
-                                                             acc_time,const_time,dec_time);
+      // causes the program to terminate if acc_time<=0 or dec_time<=0 (should be prevented by goal_reached block above)
+      // by using the most strict limit, the following should always return true
+      if (!velocity_profile.at(joint_name).SetProfileAllDurations(start_pos.at(joint_name), goal_pos.at(joint_name),
+                                                                  acc_time,const_time,dec_time))
+      // LCOV_EXCL_START
+      {
+        std::stringstream error_str;
+        error_str << "TrajectoryGeneratorPTP::planPTP(): Can not synchronize velocity profile of axis " << joint_name
+               << " with leading axis " << leading_axis;
+        throw TrajectoryGeneratorException(error_str.str());
+      }
+      // LCOV_EXCL_STOP
     }
   }
 

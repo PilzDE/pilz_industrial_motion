@@ -144,6 +144,7 @@ public:
   virtual CircCenterCart getCircCartCenterCart(const std::string &cmd_name) const = 0;
   virtual CircJointCenterCart getCircJointCenterCart(const std::string &cmd_name) const = 0;
   virtual CircInterimCart getCircCartInterimCart(const std::string &cmd_name) const = 0;
+  virtual CircJointInterimCart getCircJointInterimCart(const std::string &cmd_name) const = 0;
 
   /**
    * @brief Returns the command with the specified name from the test data.
