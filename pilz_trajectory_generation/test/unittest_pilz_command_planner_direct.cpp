@@ -14,11 +14,22 @@
  * You should have received a copy of the GNU Lesser General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
+
+#include <memory>
+
 #include <gtest/gtest.h>
 
 #include <pilz_trajectory_generation/pilz_command_planner.h>
 #include <pilz_trajectory_generation/planning_context_loader_ptp.h>
 #include <pilz_trajectory_generation/planning_exceptions.h>
+
+using namespace pilz;
+
+TEST(CommandPlannerTestDirect, ExceptionCoverage)
+{
+  std::shared_ptr<PlanningException> p_ex {new PlanningException("")};
+  std::shared_ptr<ContextLoaderRegistrationException> clr_ex {new ContextLoaderRegistrationException("")};
+}
 
 /**
   *  This test uses pilz::CommandPlanner directly and is thus seperated from unittest_pilz_command_planner.cpp
