@@ -20,6 +20,7 @@
 #include <stdexcept>
 #include <vector>
 #include <utility>
+#include <typeinfo>
 
 #include <pilz_msgs/MotionSequenceRequest.h>
 
