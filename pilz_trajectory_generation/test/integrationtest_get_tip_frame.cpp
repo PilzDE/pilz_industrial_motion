@@ -15,6 +15,8 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
+#include <memory>
+
 #include <gtest/gtest.h>
 
 #include <ros/ros.h>
@@ -40,6 +42,15 @@ void IntegrationGetTipFrame::SetUp()
   {
     FAIL() << "Robot model could not be loaded.";
   }
+}
+
+TEST_F(IntegrationGetTipFrame, TestExceptionErrorCodeMapping)
+{
+  std::shared_ptr<EndEffectorException> ee_ex {new EndEffectorException("")};
+  EXPECT_EQ(ee_ex->getErrorCode(), moveit_msgs::MoveItErrorCodes::FAILURE);
+
+  std::shared_ptr<NoSolverException> nse_ex {new NoSolverException("")};
+  EXPECT_EQ(nse_ex->getErrorCode(), moveit_msgs::MoveItErrorCodes::FAILURE);
 }
 
 /**
