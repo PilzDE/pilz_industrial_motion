@@ -67,7 +67,6 @@ inline std::string RobotConfiguration::getGroupName() const
   return group_name_;
 }
 
-
 inline void RobotConfiguration::clearModel()
 {
   robot_model_ = nullptr;
