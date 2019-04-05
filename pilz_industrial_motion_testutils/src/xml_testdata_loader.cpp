@@ -79,16 +79,12 @@ inline std::string CmdReader::getEndPoseName() const
 
 inline double CmdReader::getVelocityScale() const
 {
-  return cmd_node_.second.get_optional<double>(VEL_STR) ?
-        cmd_node_.second.get_optional<double>(VEL_STR).value():
-        default_velocity_scale_;
+  return cmd_node_.second.get<double>(VEL_STR, default_velocity_scale_);
 }
 
 inline double CmdReader::getAccelerationScale() const
 {
-  return cmd_node_.second.get_optional<double>(ACC_STR) ?
-        cmd_node_.second.get_optional<double>(ACC_STR).value():
-        default_acceleration_scale_;
+  return cmd_node_.second.get<double>(ACC_STR, default_acceleration_scale_);
 }
 
 inline CmdReader& CmdReader::setDefaultVelocityScale(double scale)
