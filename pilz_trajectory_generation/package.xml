@@ -40,6 +40,7 @@
   <test_depend>pilz_industrial_motion_testutils</test_depend>
   <test_depend>prbt_moveit_config</test_depend>
   <test_depend>prbt_support</test_depend>
+  <test_depend>pilz_control</test_depend>
   <test_depend>prbt_pg70_support</test_depend>
   <test_depend>panda_moveit_config</test_depend>
   <test_depend>abb_irb2400_moveit_config</test_depend>
