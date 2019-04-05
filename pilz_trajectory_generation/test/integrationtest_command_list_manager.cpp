@@ -40,6 +40,7 @@
 #include "test_utils.h"
 
 #include "pilz_trajectory_generation/command_list_manager.h"
+#include "pilz_trajectory_generation/tip_frame_getter.h"
 
 const std::string ROBOT_DESCRIPTION_STR {"robot_description"};
 const std::string EMPTY_VALUE {""};
@@ -589,6 +590,16 @@ TEST_P(IntegrationTestCommandListManager, TestGroupSpecificStartState)
   RobotTrajVec_t res_vec {manager_->solve(scene_, seq.toRequest())};
   EXPECT_GE(res_vec.size(), 1);
   EXPECT_GT(res_vec.front()->getWayPointCount(), 0u);
+}
+
+/**
+ * @brief Checks that exception is thrown if Tip-Frame is requested for
+ * an end-effector.
+ */
+TEST_P(IntegrationTestCommandListManager, TestTipFrameNoEndEffector)
+{
+  Gripper gripper_cmd {data_loader_->getGripper("open_gripper")};
+  EXPECT_THROW(getTipFrame(robot_model_->getJointModelGroup(gripper_cmd.getPlanningGroup())), EndEffectorException);
 }
 
 int main(int argc, char **argv)
