@@ -83,10 +83,6 @@ private:
   moveit_msgs::Constraints toGoalConstraintsWithModel() const;
 
 private:
-  static std::string createJointName(const std::string& joint_prefix,
-                                     const size_t& joint_number);
-
-private:
   //! Joint positions
   std::vector<double> joints_;
 
@@ -94,12 +90,6 @@ private:
 };
 
 std::ostream& operator<<(std::ostream&, const JointConfiguration&);
-
-inline std::string JointConfiguration::createJointName(const std::string& joint_prefix,
-                                                       const size_t& joint_number)
-{
-  return joint_prefix + std::to_string(joint_number);
-}
 
 inline moveit_msgs::Constraints JointConfiguration::toGoalConstraints() const
 {
