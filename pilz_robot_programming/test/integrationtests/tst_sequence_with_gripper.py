@@ -24,7 +24,6 @@ from pilz_robot_programming.robot import *
 from pilz_robot_programming.commands import *
 
 from pilz_industrial_motion_testutils.integration_test_utils import *
-from pilz_industrial_motion_testutils.robot_motion_observer import RobotMotionObserver
 
 API_VERSION = "1"
 
@@ -43,7 +42,6 @@ class TestSequenceWithGripper(unittest.TestCase):
             global ros_init_done
 
         self.robot = Robot(API_VERSION)
-        self.robot_motion_observer = RobotMotionObserver(group_name=self._GRIPPER_GROUP_NAME)
         self.robot.move(Gripper(goal=self._GRIPPER_POSE_CLOSED))
 
     def tearDown(self):
