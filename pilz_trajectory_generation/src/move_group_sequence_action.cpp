@@ -180,7 +180,7 @@ void MoveGroupSequenceAction::executeMoveCallback_PlanOnly(const pilz_msgs::Move
         lscene->diff(goal->planning_options.planning_scene_diff);
 
   ros::Time planning_start = ros::Time::now();
-  RobotTrajVec_t traj_vec;
+  RobotTrajCont traj_vec;
   try
   {
     traj_vec = command_list_manager_->solve(the_scene, goal->request);
@@ -203,7 +203,7 @@ void MoveGroupSequenceAction::executeMoveCallback_PlanOnly(const pilz_msgs::Move
 
   res.trajectory_start.resize(traj_vec.size());
   res.planned_trajectory.resize(traj_vec.size());
-  for(RobotTrajVec_t::size_type i = 0; i < traj_vec.size(); ++i)
+  for(RobotTrajCont::size_type i = 0; i < traj_vec.size(); ++i)
   {
     move_group::MoveGroupCapability::convertToMsg(traj_vec.at(i),
                                                   res.trajectory_start.at(i),
@@ -219,7 +219,7 @@ bool MoveGroupSequenceAction::planUsingSequenceManager(const pilz_msgs::MotionSe
   setMoveState(move_group::PLANNING);
 
   planning_scene_monitor::LockedPlanningSceneRO lscene(plan.planning_scene_monitor_);
-  RobotTrajVec_t traj_vec;
+  RobotTrajCont traj_vec;
   try { traj_vec = command_list_manager_->solve(plan.planning_scene_, req); }
   catch(const MoveItErrorCodeException& ex)
   {

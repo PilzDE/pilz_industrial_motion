@@ -35,7 +35,7 @@ const std::string EMPTY_VALUE {""};
 using namespace pilz;
 using namespace pilz_trajectory_generation;
 
-class IntegrationTestPlanComponentBuilder : public testing::TestWithParam<std::string>
+class IntegrationTestPlanComponentBuilder : public testing::Test
 {
 protected:
   virtual void SetUp();
@@ -52,22 +52,18 @@ void IntegrationTestPlanComponentBuilder::SetUp()
 {
   if(!robot_model_)
   {
-    FAIL() << "Robot model could not be loaded. Maybe the robot_description(\"" <<GetParam() << "\") is missing.";
+    FAIL() << "Robot model could not be loaded.";
   }
 
   ASSERT_TRUE(ph_.getParam(PARAM_PLANNING_GROUP_NAME, planning_group_));
 }
-
-// Instantiate the test cases for robot model with and without gripper
-INSTANTIATE_TEST_CASE_P( InstantiationName, IntegrationTestPlanComponentBuilder,
-                         ::testing::Values(EMPTY_VALUE) );
 
 /**
  * @brief Checks that each derived MoveItErrorCodeException contains the correct
  * error code.
  *
  */
-TEST_P(IntegrationTestPlanComponentBuilder, TestExceptionErrorCodeMapping)
+TEST_F(IntegrationTestPlanComponentBuilder, TestExceptionErrorCodeMapping)
 {
   std::shared_ptr<NoBlenderSetException> nbs_ex {new NoBlenderSetException("")};
   EXPECT_EQ(nbs_ex->getErrorCode(), moveit_msgs::MoveItErrorCodes::FAILURE);
@@ -86,7 +82,7 @@ TEST_P(IntegrationTestPlanComponentBuilder, TestExceptionErrorCodeMapping)
  * @brief Checks that exception is thrown if no robot model is set.
  *
  */
-TEST_P(IntegrationTestPlanComponentBuilder, TestModelSet)
+TEST_F(IntegrationTestPlanComponentBuilder, TestModelSet)
 {
   robot_trajectory::RobotTrajectoryPtr traj {new robot_trajectory::RobotTrajectory(robot_model_, planning_group_)};
   PlanComponentsBuilder builder;
@@ -98,7 +94,7 @@ TEST_P(IntegrationTestPlanComponentBuilder, TestModelSet)
  * @brief Checks that exception is thrown if no blender is set.
  *
  */
-TEST_P(IntegrationTestPlanComponentBuilder, TestNoBlenderSet)
+TEST_F(IntegrationTestPlanComponentBuilder, TestNoBlenderSet)
 {
   robot_trajectory::RobotTrajectoryPtr traj {new robot_trajectory::RobotTrajectory(robot_model_, planning_group_)};
   PlanComponentsBuilder builder;

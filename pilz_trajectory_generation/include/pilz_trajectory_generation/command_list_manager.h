@@ -32,7 +32,7 @@
 namespace pilz_trajectory_generation
 {
 
-using RobotTrajVec_t = std::vector<robot_trajectory::RobotTrajectoryPtr>;
+using RobotTrajCont = std::vector<robot_trajectory::RobotTrajectoryPtr>;
 
 // List of exceptions which can be thrown by the CommandListManager class.
 CREATE_MOVEIT_ERROR_CODE_EXCEPTION(NegativeBlendRadiusException, moveit_msgs::MoveItErrorCodes::INVALID_MOTION_PLAN);
@@ -58,7 +58,7 @@ public:
    * simply attached to each other, given that the blend_radius is zero.
    * - If two consecutive trajectories are from the same group, they are
    * blended together, given that the blend_radius is GREATER than zero.
-   * - If two consecutive trajectories are from a different groups, then
+   * - If two consecutive trajectories are from different groups, then
    * the second trajectory is added as new element to the result container.
    * All following trajectories are then attached to the new trajectory
    * element (until all requests are processed or until the next group change).
@@ -69,11 +69,18 @@ public:
    * Please note: A request is only valid if:
    *    - All blending radii are non negative.
    *    - The blending radius of the last request is 0.
-   *    - Only the first request has a start state.
+   *    - Only the first request of each group has a start state.
+   *    - Non of the blending radii overlapp each other.
+   *
+   * Please note:
+   * Starts states do not need to state the joints of all groups.
+   * It is sufficient if a start state states only the joints of the group
+   * which it belongs to. Starts states can even be incomplete. In this case
+   * default values are set for the unset joints.
    *
    * @return Contains the calculated/generated trajectories.
    */
-  RobotTrajVec_t solve(const planning_scene::PlanningSceneConstPtr& planning_scene,
+  RobotTrajCont solve(const planning_scene::PlanningSceneConstPtr& planning_scene,
                        const pilz_msgs::MotionSequenceRequest& req_list);
 
 private:

@@ -34,7 +34,7 @@
 namespace pilz_trajectory_generation
 {
 
-static const std::string PARAM_NAMESPACE_LIMTS = "robot_description_planning";
+static const std::string PARAM_NAMESPACE_LIMITS = "robot_description_planning";
 
 CommandListManager::CommandListManager(const ros::NodeHandle &nh, const moveit::core::RobotModelConstPtr &model):
   nh_(nh),
@@ -44,11 +44,11 @@ CommandListManager::CommandListManager(const ros::NodeHandle &nh, const moveit::
   pilz::JointLimitsContainer aggregated_limit_active_joints;
 
   aggregated_limit_active_joints = pilz::JointLimitsAggregator::getAggregatedLimits(
-        ros::NodeHandle(PARAM_NAMESPACE_LIMTS),model_->getActiveJointModels());
+        ros::NodeHandle(PARAM_NAMESPACE_LIMITS),model_->getActiveJointModels());
 
 
   // Obtain cartesian limits
-  pilz::CartesianLimit cartesian_limit = pilz::CartesianLimitsAggregator::getAggregatedLimits(ros::NodeHandle(PARAM_NAMESPACE_LIMTS));
+  pilz::CartesianLimit cartesian_limit = pilz::CartesianLimitsAggregator::getAggregatedLimits(ros::NodeHandle(PARAM_NAMESPACE_LIMITS));
 
   pilz::LimitsContainer limits;
   limits.setJointLimits(aggregated_limit_active_joints);
@@ -58,12 +58,12 @@ CommandListManager::CommandListManager(const ros::NodeHandle &nh, const moveit::
   plan_comp_builder_.setBlender(std::unique_ptr<pilz::TrajectoryBlender>(new pilz::TrajectoryBlenderTransitionWindow(limits)));
 }
 
-RobotTrajVec_t CommandListManager::solve(const planning_scene::PlanningSceneConstPtr& planning_scene,
+RobotTrajCont CommandListManager::solve(const planning_scene::PlanningSceneConstPtr& planning_scene,
                                          const pilz_msgs::MotionSequenceRequest& req_list)
 {
   if(req_list.items.empty())
   {
-    return RobotTrajVec_t();
+    return RobotTrajCont();
   }
 
   checkForNegativeRadii(req_list);

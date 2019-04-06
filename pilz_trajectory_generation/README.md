@@ -199,6 +199,8 @@ This reduces the planning overhead and allows to follow a pre-desribed path with
 **Please note:** In case the planning of a command in a sequence fails,
 non of the commands in the sequence are executed.
 
+**Please note:** Sequences commands are allowed to contain commands for multiple groups (e.g. "Manipulator", "Gripper")
+
 ## User interface sequence capability
 A specialized MoveIt! capability takes a
 `pilz_msgs::MotionSequenceRequest` as input. The request contains a list of subsequent goals as described above and an additional

@@ -68,7 +68,7 @@ static std::string createGripperJointName(const size_t& joint_number)
   throw std::runtime_error("Could not create gripper joint name");
 }
 
-class IntegrationTestCommandListManager : public testing::TestWithParam<std::string>
+class IntegrationTestCommandListManager : public testing::Test
 {
 protected:
   virtual void SetUp();
@@ -89,7 +89,7 @@ void IntegrationTestCommandListManager::SetUp()
   // get necessary parameters
   if(!robot_model_)
   {
-    FAIL() << "Robot model could not be loaded. Maybe the robot_description(\"" <<GetParam() << "\") is missing.";
+    FAIL() << "Robot model could not be loaded.";
   }
 
   std::string test_data_file_name;
@@ -104,16 +104,12 @@ void IntegrationTestCommandListManager::SetUp()
   manager_ = std::make_shared<pilz_trajectory_generation::CommandListManager>(ph_, robot_model_);
 }
 
-// Instantiate the test cases for robot model with and without gripper
-INSTANTIATE_TEST_CASE_P( InstantiationName, IntegrationTestCommandListManager,
-                         ::testing::Values(EMPTY_VALUE) );
-
 /**
  * @brief Checks that each derived MoveItErrorCodeException contains the correct
  * error code.
  *
  */
-TEST_P(IntegrationTestCommandListManager, TestExceptionErrorCodeMapping)
+TEST_F(IntegrationTestCommandListManager, TestExceptionErrorCodeMapping)
 {
   std::shared_ptr<NegativeBlendRadiusException> nbr_ex {new NegativeBlendRadiusException("")};
   EXPECT_EQ(nbr_ex->getErrorCode(), moveit_msgs::MoveItErrorCodes::INVALID_MOTION_PLAN);
@@ -151,14 +147,14 @@ TEST_P(IntegrationTestCommandListManager, TestExceptionErrorCodeMapping)
  *       All time steps of resulting trajectory are strictly positive
  *       resulting duration in step1 is approximately step2 + step3 + step4
  */
-TEST_P(IntegrationTestCommandListManager, concatThreeSegments)
+TEST_F(IntegrationTestCommandListManager, concatThreeSegments)
 {
   Sequence seq {data_loader_->getSequence("ComplexSequence")};
   ASSERT_GE(seq.size(), 3u);
   seq.erase(3, seq.size());
   seq.setAllBlendRadiiToZero();
 
-  RobotTrajVec_t res123_vec {manager_->solve(scene_, seq.toRequest())};
+  RobotTrajCont res123_vec {manager_->solve(scene_, seq.toRequest())};
   EXPECT_EQ(res123_vec.size(), 1);
   EXPECT_GT(res123_vec.front()->getWayPointCount(), 0u);
   EXPECT_TRUE(hasStrictlyIncreasingTime(res123_vec.front())) << "Time steps not strictly positively increasing";
@@ -168,7 +164,7 @@ TEST_P(IntegrationTestCommandListManager, concatThreeSegments)
   req_1.items.resize(1);
   req_1.items.at(0).req = seq.getCmd(0).toRequest();
   req_1.items.at(0).blend_radius = 0.;
-  RobotTrajVec_t res1_vec {manager_->solve(scene_, req_1)};
+  RobotTrajCont res1_vec {manager_->solve(scene_, req_1)};
   EXPECT_EQ(res1_vec.size(), 1);
   EXPECT_GT(res1_vec.front()->getWayPointCount(), 0u);
   EXPECT_EQ(res1_vec.front()->getFirstWayPoint().getVariableCount(),
@@ -179,7 +175,7 @@ TEST_P(IntegrationTestCommandListManager, concatThreeSegments)
   req_2.items.resize(1);
   req_2.items.at(0).req = seq.getCmd(1).toRequest();
   req_2.items.at(0).blend_radius = 0.;
-  RobotTrajVec_t res2_vec {manager_->solve(scene_, req_2)};
+  RobotTrajCont res2_vec {manager_->solve(scene_, req_2)};
   EXPECT_EQ(res2_vec.size(), 1);
   EXPECT_GT(res2_vec.front()->getWayPointCount(), 0u);
   EXPECT_EQ(res2_vec.front()->getFirstWayPoint().getVariableCount(),
@@ -191,7 +187,7 @@ TEST_P(IntegrationTestCommandListManager, concatThreeSegments)
   req_3.items.resize(1);
   req_3.items.at(0).req = seq.getCmd(2).toRequest();
   req_3.items.at(0).blend_radius = 0.;
-  RobotTrajVec_t res3_vec {manager_->solve(scene_, req_3)};
+  RobotTrajCont res3_vec {manager_->solve(scene_, req_3)};
   EXPECT_EQ(res3_vec.size(), 1);
   EXPECT_GT(res3_vec.front()->getWayPointCount(), 0u);
   EXPECT_EQ(res3_vec.front()->getFirstWayPoint().getVariableCount(),
@@ -217,13 +213,13 @@ TEST_P(IntegrationTestCommandListManager, concatThreeSegments)
  *    1. Generation of concatenated trajectory is successful.
  *       All time steps of resulting trajectory are strictly positive.
  */
-TEST_P(IntegrationTestCommandListManager, concatTwoPtpSegments)
+TEST_F(IntegrationTestCommandListManager, concatTwoPtpSegments)
 {
   Sequence seq {data_loader_->getSequence("PtpPtpSequence")};
   ASSERT_GE(seq.size(), 2u);
   seq.setAllBlendRadiiToZero();
 
-  RobotTrajVec_t res_vec {manager_->solve(scene_, seq.toRequest())};
+  RobotTrajCont res_vec {manager_->solve(scene_, seq.toRequest())};
   EXPECT_EQ(res_vec.size(), 1);
   EXPECT_GT(res_vec.front()->getWayPointCount(), 0u);
   EXPECT_TRUE(hasStrictlyIncreasingTime(res_vec.front()));
@@ -239,13 +235,13 @@ TEST_P(IntegrationTestCommandListManager, concatTwoPtpSegments)
  *    1. Generation of concatenated trajectory is successful.
  *       All time steps of resulting trajectory are strictly positive.
  */
-TEST_P(IntegrationTestCommandListManager, concatPtpAndLinSegments)
+TEST_F(IntegrationTestCommandListManager, concatPtpAndLinSegments)
 {
   Sequence seq {data_loader_->getSequence("PtpLinSequence")};
   ASSERT_GE(seq.size(), 2u);
   seq.setAllBlendRadiiToZero();
 
-  RobotTrajVec_t res_vec {manager_->solve(scene_, seq.toRequest())};
+  RobotTrajCont res_vec {manager_->solve(scene_, seq.toRequest())};
   EXPECT_EQ(res_vec.size(), 1);
   EXPECT_GT(res_vec.front()->getWayPointCount(), 0u);
   EXPECT_TRUE(hasStrictlyIncreasingTime(res_vec.front()));
@@ -261,13 +257,13 @@ TEST_P(IntegrationTestCommandListManager, concatPtpAndLinSegments)
  *    1. Generation of concatenated trajectory is successful.
  *       All time steps of resulting trajectory are strictly positive.
  */
-TEST_P(IntegrationTestCommandListManager, concatLinAndPtpSegments)
+TEST_F(IntegrationTestCommandListManager, concatLinAndPtpSegments)
 {
   Sequence seq {data_loader_->getSequence("LinPtpSequence")};
   ASSERT_GE(seq.size(), 2u);
   seq.setAllBlendRadiiToZero();
 
-  RobotTrajVec_t res_vec {manager_->solve(scene_, seq.toRequest())};
+  RobotTrajCont res_vec {manager_->solve(scene_, seq.toRequest())};
   EXPECT_EQ(res_vec.size(), 1);
   EXPECT_GT(res_vec.front()->getWayPointCount(), 0u);
   EXPECT_TRUE(hasStrictlyIncreasingTime(res_vec.front()));
@@ -282,12 +278,12 @@ TEST_P(IntegrationTestCommandListManager, concatLinAndPtpSegments)
  *  - Expected Results:
  *    1. blending is successful, result trajectory is not empty
  */
-TEST_P(IntegrationTestCommandListManager, blendTwoSegments)
+TEST_F(IntegrationTestCommandListManager, blendTwoSegments)
 {
   Sequence seq {data_loader_->getSequence("SimpleSequence")};
   ASSERT_EQ(seq.size(), 2u);
   pilz_msgs::MotionSequenceRequest req {seq.toRequest()};
-  RobotTrajVec_t res_vec {manager_->solve(scene_, req)};
+  RobotTrajCont res_vec {manager_->solve(scene_, req)};
   EXPECT_EQ(res_vec.size(), 1);
   EXPECT_GT(res_vec.front()->getWayPointCount(), 0u);
   EXPECT_EQ(res_vec.front()->getFirstWayPoint().getVariableCount(),
@@ -319,10 +315,10 @@ TEST_P(IntegrationTestCommandListManager, blendTwoSegments)
  * Expected Results:
  *    1. blending is successful, result trajectory container is empty
  */
-TEST_P(IntegrationTestCommandListManager, emptyList)
+TEST_F(IntegrationTestCommandListManager, emptyList)
 {
   pilz_msgs::MotionSequenceRequest empty_list;
-  RobotTrajVec_t res_vec {manager_->solve(scene_, empty_list)};
+  RobotTrajCont res_vec {manager_->solve(scene_, empty_list)};
   EXPECT_TRUE(res_vec.empty());
 }
 
@@ -335,7 +331,7 @@ TEST_P(IntegrationTestCommandListManager, emptyList)
  * Expected Results:
  *    1. Exception is thrown.
  */
-TEST_P(IntegrationTestCommandListManager, firstGoalNotReachable)
+TEST_F(IntegrationTestCommandListManager, firstGoalNotReachable)
 {
   Sequence seq {data_loader_->getSequence("SimpleSequence")};
   ASSERT_GE(seq.size(), 2u);
@@ -353,7 +349,7 @@ TEST_P(IntegrationTestCommandListManager, firstGoalNotReachable)
  * Expected Results:
  *    1. Exception is thrown.
  */
-TEST_P(IntegrationTestCommandListManager, startStateNotFirstGoal)
+TEST_F(IntegrationTestCommandListManager, startStateNotFirstGoal)
 {
   Sequence seq {data_loader_->getSequence("SimpleSequence")};
   ASSERT_GE(seq.size(), 2u);
@@ -373,7 +369,7 @@ TEST_P(IntegrationTestCommandListManager, startStateNotFirstGoal)
  *  Expected Results:
  *    1. Exception is thrown.
  */
-TEST_P(IntegrationTestCommandListManager, blendingRadiusNegative)
+TEST_F(IntegrationTestCommandListManager, blendingRadiusNegative)
 {
   Sequence seq {data_loader_->getSequence("SimpleSequence")};
   ASSERT_GE(seq.size(), 2u);
@@ -391,7 +387,7 @@ TEST_P(IntegrationTestCommandListManager, blendingRadiusNegative)
  * Expected Results:
  *    1. Exception is thrown.
  */
-TEST_P(IntegrationTestCommandListManager, lastBlendingRadiusNonZero)
+TEST_F(IntegrationTestCommandListManager, lastBlendingRadiusNonZero)
 {
   Sequence seq {data_loader_->getSequence("SimpleSequence")};
   ASSERT_EQ(seq.size(), 2u);
@@ -410,7 +406,7 @@ TEST_P(IntegrationTestCommandListManager, lastBlendingRadiusNonZero)
  * Expected Results:
  *    2. Exception is thrown.
  */
-TEST_P(IntegrationTestCommandListManager, blendRadiusGreaterThanSegment)
+TEST_F(IntegrationTestCommandListManager, blendRadiusGreaterThanSegment)
 {
   Sequence seq {data_loader_->getSequence("SimpleSequence")};
   ASSERT_GE(seq.size(), 2u);
@@ -430,13 +426,13 @@ TEST_P(IntegrationTestCommandListManager, blendRadiusGreaterThanSegment)
  *    1. blending succeeds, result trajectory is not empty
  *    2. Exception is thrown.
  */
-TEST_P(IntegrationTestCommandListManager, blendingRadiusOverlapping)
+TEST_F(IntegrationTestCommandListManager, blendingRadiusOverlapping)
 {
   Sequence seq {data_loader_->getSequence("ComplexSequence")};
   ASSERT_GE(seq.size(), 3u);
   seq.erase(3, seq.size());
 
-  RobotTrajVec_t res_valid_vec {manager_->solve(scene_, seq.toRequest())};
+  RobotTrajCont res_valid_vec {manager_->solve(scene_, seq.toRequest())};
   EXPECT_EQ(res_valid_vec.size(), 1);
   EXPECT_GT(res_valid_vec.front()->getWayPointCount(), 0u);
 
@@ -466,11 +462,11 @@ TEST_P(IntegrationTestCommandListManager, blendingRadiusOverlapping)
  *    2. Blending succeeds, planned execution time should be approx N times
  *       the single planned execution time.
  */
-TEST_P(IntegrationTestCommandListManager, TestExecutionTime)
+TEST_F(IntegrationTestCommandListManager, TestExecutionTime)
 {
   Sequence seq {data_loader_->getSequence("ComplexSequence")};
   ASSERT_GE(seq.size(), 2u);
-  RobotTrajVec_t res_single_vec {manager_->solve(scene_, seq.toRequest())};
+  RobotTrajCont res_single_vec {manager_->solve(scene_, seq.toRequest())};
   EXPECT_EQ(res_single_vec.size(), 1);
   EXPECT_GT(res_single_vec.front()->getWayPointCount(), 0u);
 
@@ -490,7 +486,7 @@ TEST_P(IntegrationTestCommandListManager, TestExecutionTime)
     req.items.push_back(item);
   }
 
-  RobotTrajVec_t res_n_vec {manager_->solve(scene_, req)};
+  RobotTrajCont res_n_vec {manager_->solve(scene_, req)};
   EXPECT_EQ(res_n_vec.size(), 1);
   EXPECT_GT(res_n_vec.front()->getWayPointCount(), 0u);
 
@@ -512,7 +508,7 @@ TEST_P(IntegrationTestCommandListManager, TestExecutionTime)
  * group and group change there exists a calculated trajectory.
  *
  */
-TEST_P(IntegrationTestCommandListManager, TestDifferentGroups)
+TEST_F(IntegrationTestCommandListManager, TestDifferentGroups)
 {
   Sequence seq {data_loader_->getSequence("ComplexSequenceWithGripper")};
   ASSERT_GE(seq.size(), 1);
@@ -528,9 +524,9 @@ TEST_P(IntegrationTestCommandListManager, TestDifferentGroups)
     }
   }
 
-  RobotTrajVec_t res_single_vec {manager_->solve(scene_, seq.toRequest())};
+  RobotTrajCont res_single_vec {manager_->solve(scene_, seq.toRequest())};
   EXPECT_EQ(res_single_vec.size(), num_groups);
-  for(RobotTrajVec_t::size_type i = 0; i<res_single_vec.size(); ++i)
+  for(RobotTrajCont::size_type i = 0; i<res_single_vec.size(); ++i)
   {
     EXPECT_GT(res_single_vec.at(i)->getWayPointCount(), 0u);
   }
@@ -541,7 +537,7 @@ TEST_P(IntegrationTestCommandListManager, TestDifferentGroups)
  * blended.
  *
  */
-TEST_P(IntegrationTestCommandListManager, TestGripperCmdBlending)
+TEST_F(IntegrationTestCommandListManager, TestGripperCmdBlending)
 {
   Sequence seq {data_loader_->getSequence("PureGripperSequence")};
   ASSERT_GE(seq.size(), 2);
@@ -550,7 +546,7 @@ TEST_P(IntegrationTestCommandListManager, TestGripperCmdBlending)
 
   // Ensure that blending is requested for gripper commands.
   seq.setBlendRadii(0, 1.0);
-  RobotTrajVec_t res_vec {manager_->solve(scene_, seq.toRequest())};
+  RobotTrajCont res_vec {manager_->solve(scene_, seq.toRequest())};
   EXPECT_EQ(res_vec.size(), 1);
 }
 
@@ -567,7 +563,7 @@ TEST_P(IntegrationTestCommandListManager, TestGripperCmdBlending)
  *
  *
  */
-TEST_P(IntegrationTestCommandListManager, TestGroupSpecificStartState)
+TEST_F(IntegrationTestCommandListManager, TestGroupSpecificStartState)
 {
   using std::placeholders::_1;
 
@@ -587,7 +583,7 @@ TEST_P(IntegrationTestCommandListManager, TestGroupSpecificStartState)
   // of joints of the manipulator group without the gripper
   ptp.getStartConfiguration().clearModel();
 
-  RobotTrajVec_t res_vec {manager_->solve(scene_, seq.toRequest())};
+  RobotTrajCont res_vec {manager_->solve(scene_, seq.toRequest())};
   EXPECT_GE(res_vec.size(), 1);
   EXPECT_GT(res_vec.front()->getWayPointCount(), 0u);
 }
@@ -596,7 +592,7 @@ TEST_P(IntegrationTestCommandListManager, TestGroupSpecificStartState)
  * @brief Checks that exception is thrown if Tip-Frame is requested for
  * an end-effector.
  */
-TEST_P(IntegrationTestCommandListManager, TestTipFrameNoEndEffector)
+TEST_F(IntegrationTestCommandListManager, TestTipFrameNoEndEffector)
 {
   Gripper gripper_cmd {data_loader_->getGripper("open_gripper")};
   EXPECT_THROW(getTipFrame(robot_model_->getJointModelGroup(gripper_cmd.getPlanningGroup())), EndEffectorException);

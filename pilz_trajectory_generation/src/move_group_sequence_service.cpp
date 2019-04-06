@@ -70,7 +70,7 @@ bool MoveGroupSequenceService::plan(pilz_msgs::GetMotionSequence::Request& req,
   planning_scene_monitor::LockedPlanningSceneRO ps(context_->planning_scene_monitor_);
 
   ros::Time planning_start = ros::Time::now();
-  RobotTrajVec_t traj_vec;
+  RobotTrajCont traj_vec;
   try { traj_vec = command_list_manager_->solve(ps, req.commands); }
   catch(const MoveItErrorCodeException& ex)
   {
@@ -90,7 +90,7 @@ bool MoveGroupSequenceService::plan(pilz_msgs::GetMotionSequence::Request& req,
 
   res.trajectory_start.resize(traj_vec.size());
   res.planned_trajectory.resize(traj_vec.size());
-  for (RobotTrajVec_t::size_type i = 0; i < traj_vec.size(); ++i)
+  for (RobotTrajCont::size_type i = 0; i < traj_vec.size(); ++i)
   {
     move_group::MoveGroupCapability::convertToMsg(traj_vec.at(i),
                                                   res.trajectory_start.at(i),
