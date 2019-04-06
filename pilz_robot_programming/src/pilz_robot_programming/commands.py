@@ -500,12 +500,22 @@ class _SequenceSubCmd(object):
 
 
 class Sequence(_AbstractCmd):
-    """ Represents an overall Sequence command. Each :py:class:`Sequence` command consists of two or more
-     robot motion commands. :py:class:`Sequence` commands allow the user to define a robot motion consisting of
-     two or more robot motion commands which are planned and executed together.
+    """ Represents an overall Sequence command. A :py:class:`Sequence` consists of one or more
+     robot motion commands. All commands in a sequence are planned first. After all
+     commands in a sequence are planned, they are executed.
 
-     :note: In case the blend radius is zero, the robot will stop between commands. The robot also stops between
-     gripper and non-gripper commands.
+     If the blending radius between two or more commands is greater than zero, the commands are blended
+     together, in other words, the robot will not stop at the end of each command. To allow a smooth transition from
+     one trajectory to the next (in case of blending), the original trajectories are altered slightly
+     within the sphere defined by the blending radius.
+
+     :note: In case the blend radius is zero, the robot executes the robot motion commands as if they are sent separately.
+
+     :note: The robot always stops between gripper and non-gripper commands.
+
+     :note: Gripper commands cannot be blended together.
+
+     :note: In case the planning of a command in a sequence fails, non of the commands in the sequence are executed.
 
     """
     def __init__(self, *args, **kwargs):
@@ -518,7 +528,7 @@ class Sequence(_AbstractCmd):
 
         :param cmd: The robot motion command which has to be added to the sequence.
             The blending happens between the specified command and the command following the specified command
-            if a non-zero blend_radius is defined. Otherwise, if the blend radius is 0, the commands will
+            if a non-zero blend_radius is defined. Otherwise, if the blend radius is zero, the commands will
             execute consecutively.
             The blend radius preceding a gripper command is always ignored. The blend radius stated with a gripper
             command is also ignored.
