@@ -106,7 +106,8 @@ class TestSequenceWithGripper(unittest.TestCase):
         seq.append(Gripper(goal=self._GRIPPER_POSE_OPEN), blend_radius=1.0)
 
         seq.append(Lin(goal=Pose(position=Point(0.2, 0, 0.7))), blend_radius=0.01)
-        seq.append(Lin(goal=Pose(position=Point(0.2, 0.1, 0.7))), blend_radius=1.0)
+        expected_pos = Point(0.2, 0.1, 0.7)
+        seq.append(Lin(goal=Pose(position=expected_pos)), blend_radius=1.0)
 
         seq.append(Gripper(goal=self._GRIPPER_POSE_CLOSED), blend_radius=1.0)
         seq.append(Gripper(goal=gripper_totally_open))
@@ -117,9 +118,15 @@ class TestSequenceWithGripper(unittest.TestCase):
         curr_gripper_joints = self.robot.get_current_joint_states(self._GRIPPER_GROUP_NAME)
         self.assertEqual(1, len(curr_gripper_joints))
         self.assertAlmostEqual(gripper_totally_open, curr_gripper_joints[0])
+
         # Check that robot has moved
-        self.assertFalse(numpy.allclose(self.robot.get_current_joint_states(),
-                                        start_joint_values, atol=self._TOLERANCE_POSITION_COMPARE))
+        curr_position = self.robot.get_current_pose().position
+        self.assertTrue(numpy.allclose(curr_position.x,
+                                       expected_pos.x, atol=self._TOLERANCE_POSITION_COMPARE))
+        self.assertTrue(numpy.allclose(curr_position.y,
+                                       expected_pos.y, atol=self._TOLERANCE_POSITION_COMPARE))
+        self.assertTrue(numpy.allclose(curr_position.z,
+                                       expected_pos.z, atol=self._TOLERANCE_POSITION_COMPARE))
 
 
 if __name__ == '__main__':
