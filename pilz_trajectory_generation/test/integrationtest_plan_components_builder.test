@@ -1,5 +1,5 @@
 <!--
-Copyright (c) 2018 Pilz GmbH & Co. KG
+Copyright (c) 2019 Pilz GmbH & Co. KG
 
 This program is free software: you can redistribute it and/or modify
 it under the terms of the GNU Lesser General Public License as published by
@@ -35,16 +35,13 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
         type="plot_display_trajectory_msg.py"
         args="/my_planned_path"  />
 
-  <include ns="integrationtest_command_list_manager" file="$(find prbt_moveit_config)/launch/planning_pipeline.launch.xml">
+  <include ns="integrationtest_plan_components_builder" file="$(find prbt_moveit_config)/launch/planning_pipeline.launch.xml">
     <arg name="pipeline" value="pilz_command_planner" />
   </include>
 
   <!-- run test -->
-  <!--test pkg="pilz_trajectory_generation" test-name="integrationtest_command_list_manager" type="integrationtest_command_list_manager"
-  time-limit="885.0" launch-prefix="xterm -e gdb - -args" -->
-  <test pkg="pilz_trajectory_generation" test-name="integrationtest_command_list_manager" type="integrationtest_command_list_manager"
-  time-limit="885.0" >
-    <param name="testdata_file_name" value="$(find pilz_trajectory_generation)/test/test_robots/prbt/test_data/testdata_sequence.xml" />
+  <test pkg="pilz_trajectory_generation" test-name="integrationtest_plan_components_builder" type="integrationtest_plan_components_builder">
+    <param name="planning_group" value="manipulator"/>
   </test>
   <!--launch-prefix="xterm -e gdb - -args"-->
 

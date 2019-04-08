@@ -46,7 +46,7 @@ private:
 
 private:
   ros::ServiceServer sequence_service_;
-  std::unique_ptr<CommandListManager> sequence_manager_ ;
+  std::unique_ptr<CommandListManager> command_list_manager_ ;
 
 };
 

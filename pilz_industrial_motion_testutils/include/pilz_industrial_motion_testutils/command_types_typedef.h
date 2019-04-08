@@ -22,6 +22,7 @@
 #include "ptp.h"
 #include "lin.h"
 #include "circ.h"
+#include "gripper.h"
 #include "jointconfiguration.h"
 #include "cartesianconfiguration.h"
 #include "circ_auxiliary_types.h"
@@ -47,7 +48,8 @@ typedef boost::variant<
 PtpJoint, PtpJointCart, PtpCart,
 LinJoint, LinCart,
 CircCenterCart, CircInterimCart,
-CircJointCenterCart, CircJointInterimCart > CmdVariant;
+CircJointCenterCart, CircJointInterimCart,
+Gripper> CmdVariant;
 
 }
 

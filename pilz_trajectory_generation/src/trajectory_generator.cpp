@@ -124,7 +124,7 @@ bool TrajectoryGenerator::validateRequest(const planning_interface::MotionPlanRe
       // verify the joint limit in goal constraint
       if(!planner_limits_.getJointLimitContainer().verifyPositionLimit(joint_constraint.joint_name, joint_constraint.position))
       {
-        ROS_ERROR("Joint limits violated in goal constraints.");
+        ROS_ERROR_STREAM("Joint \"" << joint_constraint.joint_name << "\" violates joint limits in goal constraints.");
         error_code.val = moveit_msgs::MoveItErrorCodes::INVALID_GOAL_CONSTRAINTS;
         return false;
       }

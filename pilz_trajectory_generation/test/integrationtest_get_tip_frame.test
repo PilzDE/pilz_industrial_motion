@@ -1,0 +1,35 @@
+<!--
+Copyright (c) 2019 Pilz GmbH & Co. KG
+
+This program is free software: you can redistribute it and/or modify
+it under the terms of the GNU Lesser General Public License as published by
+the Free Software Foundation, either version 3 of the License, or
+(at your option) any later version.
+
+This program is distributed in the hope that it will be useful,
+but WITHOUT ANY WARRANTY; without even the implied warranty of
+MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+GNU Lesser General Public License for more details.
+
+You should have received a copy of the GNU Lesser General Public License
+along with this program.  If not, see <http://www.gnu.org/licenses/>.
+-->
+
+<launch>
+  <!-- The name of the parameter under which the URDF is loaded -->
+  <arg name="robot_description" default="robot_description"/>
+
+  <!-- send urdf to param server -->
+  <param name="$(arg robot_description)" textfile="$(find pilz_trajectory_generation)/test/test_robots/robot_mock/robot_mock.urdf"/>
+
+  <!-- The semantic description that corresponds to the URDF -->
+  <param name="$(arg robot_description)_semantic" command="$(find xacro)/xacro --inorder
+  $(find pilz_trajectory_generation)/test/test_robots/robot_mock/robot_mock.srdf.xacro" />
+
+  <!-- run test -->
+  <test pkg="pilz_trajectory_generation" test-name="integrationtest_get_tip_frame" type="integrationtest_get_tip_frame"
+  time-limit="120.0" >
+  </test>
+  <!--launch-prefix="xterm -e gdb - -args"-->
+
+</launch>

@@ -7,6 +7,7 @@ Forthcoming
 * update dependencies of trajectory_generation
 * fix CIRC path generator and increase test coverage
 * adopt strictest limits in ptp planner (refactor JointLimitsContainer and TrajectoryGeneratorPTP)
+* Enable gripper commands inside a sequence
 * Contributors: Pilz GmbH and Co. KG
 
 0.3.6 (2019-02-26)

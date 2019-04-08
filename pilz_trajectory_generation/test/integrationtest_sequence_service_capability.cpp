@@ -20,6 +20,7 @@
 #include <memory>
 #include <string>
 #include <vector>
+#include <functional>
 
 #include <ros/ros.h>
 #include <moveit_msgs/Constraints.h>
@@ -45,6 +46,11 @@
 const std::string TEST_DATA_FILE_NAME("testdata_file_name");
 
 using namespace pilz_industrial_motion_testutils;
+
+static std::string createJointName(const size_t& joint_number)
+{
+ return std::string("prbt_joint_") + std::to_string(joint_number + 1);
+}
 
 class IntegrationTestSequenceService : public ::testing::Test
 {
@@ -97,9 +103,8 @@ TEST_F(IntegrationTestSequenceService, TestSendingOfEmptySequence)
 
   ASSERT_TRUE(client_.call(srv));
 
-  const moveit_msgs::MotionPlanResponse& response {srv.response.plan_response};
-  EXPECT_EQ(moveit_msgs::MoveItErrorCodes::SUCCESS, response.error_code.val) << "Planning failed.";
-  EXPECT_EQ(0u, response.trajectory.joint_trajectory.points.size()) << "Trajectory should not contain any points.";
+  EXPECT_EQ(moveit_msgs::MoveItErrorCodes::SUCCESS, srv.response.error_code.val) << "Planning failed.";
+  EXPECT_TRUE(srv.response.planned_trajectory.empty());
 }
 
 /**
@@ -124,9 +129,8 @@ TEST_F(IntegrationTestSequenceService, TestDifferingGroupNames)
 
   ASSERT_TRUE(client_.call(srv));
 
-  const moveit_msgs::MotionPlanResponse& response {srv.response.plan_response};
-  EXPECT_EQ(moveit_msgs::MoveItErrorCodes::INVALID_GROUP_NAME, response.error_code.val) << "Planning should have failed but did not.";
-  EXPECT_EQ(0u, response.trajectory.joint_trajectory.points.size()) << "Trajectory should not contain any points.";
+  EXPECT_EQ(moveit_msgs::MoveItErrorCodes::INVALID_GROUP_NAME, srv.response.error_code.val) << "Planning should have failed but did not.";
+  EXPECT_TRUE(srv.response.planned_trajectory.empty());
 }
 
 /**
@@ -150,9 +154,8 @@ TEST_F(IntegrationTestSequenceService, TestNegativeBlendRadius)
 
   ASSERT_TRUE(client_.call(srv));
 
-  const moveit_msgs::MotionPlanResponse& response {srv.response.plan_response};
-  EXPECT_EQ(moveit_msgs::MoveItErrorCodes::INVALID_MOTION_PLAN, response.error_code.val) << "Planning should have failed but did not.";
-  EXPECT_EQ(0u, response.trajectory.joint_trajectory.points.size()) << "Trajectory should not contain any points.";
+  EXPECT_EQ(moveit_msgs::MoveItErrorCodes::INVALID_MOTION_PLAN, srv.response.error_code.val) << "Planning should have failed but did not.";
+  EXPECT_TRUE(srv.response.planned_trajectory.empty());
 }
 
 /**
@@ -176,9 +179,8 @@ TEST_F(IntegrationTestSequenceService, TestOverlappingBlendRadii)
 
   ASSERT_TRUE(client_.call(srv));
 
-  const moveit_msgs::MotionPlanResponse& response {srv.response.plan_response};
-  EXPECT_EQ(moveit_msgs::MoveItErrorCodes::INVALID_MOTION_PLAN, response.error_code.val) << "Incorrect error code";
-  EXPECT_EQ(0u, response.trajectory.joint_trajectory.points.size()) << "Planned trajectory not empty.";
+  EXPECT_EQ(moveit_msgs::MoveItErrorCodes::INVALID_MOTION_PLAN, srv.response.error_code.val) << "Incorrect error code";
+  EXPECT_TRUE(srv.response.planned_trajectory.empty());
 }
 
 /**
@@ -203,9 +205,8 @@ TEST_F(IntegrationTestSequenceService, TestTooLargeBlendRadii)
 
   ASSERT_TRUE(client_.call(srv));
 
-  const moveit_msgs::MotionPlanResponse& response {srv.response.plan_response};
-  EXPECT_EQ(moveit_msgs::MoveItErrorCodes::FAILURE, response.error_code.val) << "Incorrect error code";
-  EXPECT_EQ(0u, response.trajectory.joint_trajectory.points.size()) << "Planned trajectory not empty.";
+  EXPECT_EQ(moveit_msgs::MoveItErrorCodes::FAILURE, srv.response.error_code.val) << "Incorrect error code";
+  EXPECT_TRUE(srv.response.planned_trajectory.empty());
 }
 
 /**
@@ -226,8 +227,9 @@ TEST_F(IntegrationTestSequenceService, TestSecondTrajInvalidStartState)
   pilz_msgs::MotionSequenceRequest req_list {seq.toRequest()};
 
   // Set start state
-  JointConfiguration config {"MyGroupName", {-1., 2., -3., 4., -5., 0.} };
-  config.setJointPrefix("prbt_joint_");
+  using std::placeholders::_1;
+  JointConfiguration config {"MyGroupName", {-1., 2., -3., 4., -5., 0.},
+                            std::bind(&createJointName, _1)};
   req_list.items[1].req.start_state.joint_state = config.toSensorMsg();
 
   pilz_msgs::GetMotionSequence srv;
@@ -235,9 +237,8 @@ TEST_F(IntegrationTestSequenceService, TestSecondTrajInvalidStartState)
 
   ASSERT_TRUE(client_.call(srv));
 
-  const moveit_msgs::MotionPlanResponse& response {srv.response.plan_response};
-  EXPECT_EQ(moveit_msgs::MoveItErrorCodes::INVALID_ROBOT_STATE, response.error_code.val) << "Incorrect error code.";
-  EXPECT_EQ(0u, response.trajectory.joint_trajectory.points.size()) << "Planned trajectory should not contain any points.";
+  EXPECT_EQ(moveit_msgs::MoveItErrorCodes::INVALID_ROBOT_STATE, srv.response.error_code.val) << "Incorrect error code.";
+  EXPECT_TRUE(srv.response.planned_trajectory.empty());
 }
 
 /**
@@ -263,9 +264,8 @@ TEST_F(IntegrationTestSequenceService, TestFirstGoalNotReachable)
 
   ASSERT_TRUE(client_.call(srv));
 
-  const moveit_msgs::MotionPlanResponse& response {srv.response.plan_response};
-  EXPECT_EQ(moveit_msgs::MoveItErrorCodes::NO_IK_SOLUTION, response.error_code.val) << "Incorrect error code.";
-  EXPECT_EQ(0u, response.trajectory.joint_trajectory.points.size()) << "Trajectory should not contain any points.";
+  EXPECT_EQ(moveit_msgs::MoveItErrorCodes::NO_IK_SOLUTION, srv.response.error_code.val) << "Incorrect error code.";
+  EXPECT_TRUE(srv.response.planned_trajectory.empty());
 }
 
 /**
@@ -293,9 +293,8 @@ TEST_F(IntegrationTestSequenceService, TestInvalidLinkName)
 
   ASSERT_TRUE(client_.call(srv));
 
-  const moveit_msgs::MotionPlanResponse& response {srv.response.plan_response};
-  EXPECT_NE(moveit_msgs::MoveItErrorCodes::SUCCESS, response.error_code.val) << "Incorrect error code.";
-  EXPECT_EQ(0u, response.trajectory.joint_trajectory.points.size()) << "Planned trajectory not empty.";
+  EXPECT_NE(moveit_msgs::MoveItErrorCodes::SUCCESS, srv.response.error_code.val) << "Incorrect error code.";
+  EXPECT_TRUE(srv.response.planned_trajectory.empty());
 }
 
 /**
@@ -334,9 +333,9 @@ TEST_F(IntegrationTestSequenceService, TestLargeRequest)
 
   ASSERT_TRUE(client_.call(srv));
 
-  const moveit_msgs::MotionPlanResponse& response {srv.response.plan_response};
-  EXPECT_EQ(moveit_msgs::MoveItErrorCodes::SUCCESS, response.error_code.val) << "Incorrect error code.";
-  EXPECT_GT(response.trajectory.joint_trajectory.points.size(), 0u) << "Trajectory should contain points.";
+  EXPECT_EQ(moveit_msgs::MoveItErrorCodes::SUCCESS, srv.response.error_code.val) << "Incorrect error code.";
+  EXPECT_EQ(srv.response.planned_trajectory.size(), 1);
+  EXPECT_GT(srv.response.planned_trajectory.front().joint_trajectory.points.size(), 0u) << "Trajectory should contain points.";
 }
 
 /**
@@ -362,9 +361,9 @@ TEST_F(IntegrationTestSequenceService, TestComplexSequenceWithoutBlending)
 
   ASSERT_TRUE(client_.call(srv));
 
-  const moveit_msgs::MotionPlanResponse& response {srv.response.plan_response};
-  EXPECT_EQ(moveit_msgs::MoveItErrorCodes::SUCCESS, response.error_code.val) << "Incorrect error code.";
-  EXPECT_GT(response.trajectory.joint_trajectory.points.size(), 0u) << "Trajectory should contain points.";
+  EXPECT_EQ(moveit_msgs::MoveItErrorCodes::SUCCESS, srv.response.error_code.val) << "Incorrect error code.";
+  EXPECT_EQ(srv.response.planned_trajectory.size(), 1);
+  EXPECT_GT(srv.response.planned_trajectory.front().joint_trajectory.points.size(), 0u) << "Trajectory should contain points.";
 }
 
 /**
@@ -388,9 +387,9 @@ TEST_F(IntegrationTestSequenceService, TestComplexSequenceWithBlending)
 
   ASSERT_TRUE(client_.call(srv));
 
-  const moveit_msgs::MotionPlanResponse& response {srv.response.plan_response};
-  EXPECT_EQ(moveit_msgs::MoveItErrorCodes::SUCCESS, response.error_code.val) << "Incorrect error code.";
-  EXPECT_GT(response.trajectory.joint_trajectory.points.size(), 0u) << "Trajectory should contain points.";
+  EXPECT_EQ(moveit_msgs::MoveItErrorCodes::SUCCESS, srv.response.error_code.val) << "Incorrect error code.";
+  EXPECT_EQ(srv.response.planned_trajectory.size(), 1);
+  EXPECT_GT(srv.response.planned_trajectory.front().joint_trajectory.points.size(), 0u) << "Trajectory should contain points.";
 }
 
 int main(int argc, char **argv)

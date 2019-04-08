@@ -38,6 +38,7 @@ public:
 
 public:
   void setPlanningGroup(const std::string &planning_group);
+  const std::string& getPlanningGroup() const;
 
   void setVelocityScale(double velocity_scale);
   void setAccelerationScale(double acceleration_scale);
@@ -53,6 +54,11 @@ protected:
 inline void MotionCmd::setPlanningGroup(const std::string &planning_group)
 {
   planning_group_ = planning_group;
+}
+
+inline const std::string& MotionCmd::getPlanningGroup() const
+{
+  return planning_group_;
 }
 
 inline void MotionCmd::setVelocityScale(double velocity_scale)

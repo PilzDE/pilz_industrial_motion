@@ -1,5 +1,5 @@
 <!--
-Copyright (c) 2018 Pilz GmbH & Co. KG
+Copyright (c) 2019 Pilz GmbH & Co. KG
 
 This program is free software: you can redistribute it and/or modify
 it under the terms of the GNU Lesser General Public License as published by
@@ -17,8 +17,12 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 <launch>
 
-  <node pkg="rosbag" type="record" name="rosbag_log" args="record rosout -o $(find pilz_trajectory_generation)/integrationtest_sequence_service_capability_log"/>
+  <arg name="debug" default="false"/>
+  <arg name="gripper" default="pg70"/>
+  <arg name="coverage" default="false"/>
+  <arg name="pythontest_launch_prefix" value="$(eval 'python-coverage run -p' if arg('coverage') else '')"/>
 
+  <!-- Start MoveIt Configuration -->
   <node name="joint_state_publisher" pkg="joint_state_publisher" type="joint_state_publisher">
     <param name="/use_gui" value="false"/>
     <rosparam param="/source_list">[/move_group/fake_controller_joint_states]</rosparam>
@@ -26,18 +30,18 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
   <node name="robot_state_publisher" pkg="robot_state_publisher" type="robot_state_publisher" respawn="true" output="screen" />
 
-  <arg name="debug" default="false"/>
   <include file="$(find prbt_moveit_config)/launch/move_group.launch">
     <arg name="allow_trajectory_execution" value="true"/>
     <arg name="fake_execution" value="true"/>
     <arg name="info" value="true"/>
     <arg name="debug" value="$(arg debug)"/>
+    <arg name="gripper" value="$(arg gripper)"/>
     <arg name="pipeline" value="pilz_command_planner" />
   </include>
 
-  <!-- run test -->
-  <test pkg="pilz_trajectory_generation" test-name="integrationtest_sequence_service_capability" type="integrationtest_sequence_service_capability" time-limit="300.0" > <!-- launch-prefix="xterm -e gdb -args"-->
-    <param name="testdata_file_name" value="$(find pilz_trajectory_generation)/test/test_robots/prbt/test_data/testdata_sequence.xml" />
-  </test>
+  <!-- test node -->
+  <test test-name="test_sequence_with_gripper" pkg="pilz_robot_programming"
+    type="tst_sequence_with_gripper.py" time-limit="300"
+    launch-prefix="$(arg pythontest_launch_prefix)"/>
 
 </launch>

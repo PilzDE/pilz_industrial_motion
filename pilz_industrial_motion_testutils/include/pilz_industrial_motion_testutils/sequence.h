@@ -20,6 +20,7 @@
 #include <stdexcept>
 #include <vector>
 #include <utility>
+#include <typeinfo>
 
 #include <pilz_msgs/MotionSequenceRequest.h>
 
@@ -34,10 +35,6 @@ namespace pilz_industrial_motion_testutils
  */
 class Sequence
 {
-public:
-  Sequence()
-  {}
-
 public:
   /**
    * @brief Adds a command to the end of the sequence.
@@ -55,6 +52,13 @@ public:
 
   template<class T>
   const T& getCmd(const size_t index_cmd) const;
+
+  /**
+   * @return TRUE if the specified command is of the specified type,
+   * otherwise FALSE.
+   */
+  template<class T>
+  bool cmdIsOfType(const size_t index_cmd) const;
 
   /**
    * @brief Returns the specific command as base class reference.
@@ -114,6 +118,12 @@ inline void Sequence::setBlendRadii(const size_t index_cmd, const double blend_r
 inline void Sequence::setAllBlendRadiiToZero()
 {
   std::for_each(cmds_.begin(), cmds_.end(), [](TCmdRadiiPair &cmd){ cmd.second = 0.; });
+}
+
+template<class T>
+inline bool Sequence::cmdIsOfType(const size_t index_cmd) const
+{
+  return cmds_.at(index_cmd).first.type() == typeid(T);
 }
 
 }

@@ -16,10 +16,16 @@
  */
 
 #include "pilz_trajectory_generation/trajectory_generator_lin.h"
-#include "ros/ros.h"
-#include "eigen_conversions/eigen_msg.h"
-#include "moveit/robot_state/conversions.h"
+
+#include <ros/ros.h>
+#include <time.h>
+#include <cassert>
+
+#include <eigen_conversions/eigen_msg.h>
 #include <eigen_conversions/eigen_kdl.h>
+
+#include <moveit/robot_state/conversions.h>
+
 #include <kdl/path_line.hpp>
 #include <kdl/utilities/error.h>
 #include <kdl/trajectory_segment.hpp>
@@ -148,14 +154,18 @@ bool TrajectoryGeneratorLIN::extractMotionPlanInfo(const planning_interface::Mot
     tf::poseMsgToEigen(goal_pose_msg, info.goal_pose);
   }
 
-  // copy start state only with the joint
-  robot_state::RobotState start_state(robot_model_);
-  start_state.setToDefaultValues();
-  moveit::core::robotStateMsgToRobotState(req.start_state, start_state, false);
-
+  assert(req.start_state.joint_state.name.size() == req.start_state.joint_state.position.size());
   for(const auto& joint_name : robot_model_->getJointModelGroup(req.group_name)->getActiveJointModelNames())
   {
-    info.start_joint_position[joint_name] = start_state.getVariablePosition(joint_name);
+    auto it {std::find(req.start_state.joint_state.name.cbegin(), req.start_state.joint_state.name.cend(), joint_name)};
+    if (it == req.start_state.joint_state.name.cend())
+    {
+      ROS_ERROR_STREAM("Could not find joint \"" << joint_name << "\" of group \"" << req.group_name << "\" in start state of request");
+      error_code.val = moveit_msgs::MoveItErrorCodes::INVALID_ROBOT_STATE;
+      return false;
+    }
+    size_t index = it - req.start_state.joint_state.name.cbegin();
+    info.start_joint_position[joint_name] = req.start_state.joint_state.position[index];
   }
 
   // Ignored return value because at this point the function should always return 'true'.

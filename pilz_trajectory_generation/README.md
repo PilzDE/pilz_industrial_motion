@@ -196,6 +196,11 @@ An example showing the cartesian limits which have to be defined can be found
 To concatenate multiple trajectories and plan the trajectory at once, you can use the sequence capability.
 This reduces the planning overhead and allows to follow a pre-desribed path without stopping at intermediate points.
 
+**Please note:** In case the planning of a command in a sequence fails,
+non of the commands in the sequence are executed.
+
+**Please note:** Sequences commands are allowed to contain commands for multiple groups (e.g. "Manipulator", "Gripper")
+
 ## User interface sequence capability
 A specialized MoveIt! capability takes a
 `pilz_msgs::MotionSequenceRequest` as input. The request contains a list of subsequent goals as described above and an additional
