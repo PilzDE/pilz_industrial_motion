@@ -21,7 +21,6 @@
 #include "pilz_trajectory_generation/joint_limits_aggregator.h"
 #include "test_utils.h"
 #include "pilz_industrial_motion_testutils/xml_testdata_loader.h"
-#include "pilz_industrial_motion_testutils/motion_plan_request_director.h"
 
 #include <moveit/robot_model_loader/robot_model_loader.h>
 #include <moveit/robot_model/robot_model.h>
@@ -77,8 +76,6 @@ protected:
   std::unique_ptr<TrajectoryGenerator> lin_;
   // test data provider
   std::unique_ptr<pilz_industrial_motion_testutils::TestdataLoader> tdp_;
-  // motion plan request director
-  pilz_industrial_motion_testutils::MotionPlanRequestDirector req_director_;
 
   // test parameters from parameter server
   std::string planning_group_, target_link_hcd_, test_data_file_name_;

@@ -208,8 +208,6 @@ if(CATKIN_ENABLE_TESTING)
       src/limits_container.cpp
       src/joint_limits_container.cpp
       src/cartesian_limit.cpp
-      test/motion_plan_request_builder.cpp
-      test/motion_sequence_request_builder.cpp
       src/command_list_manager.cpp
       src/trajectory_blender_transition_window.cpp
       src/cartesian_limits_aggregator.cpp
