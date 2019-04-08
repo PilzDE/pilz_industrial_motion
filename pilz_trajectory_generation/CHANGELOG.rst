@@ -2,8 +2,8 @@
 Changelog for package pilz_trajectory_generation
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
-Forthcoming
------------
+0.4.3 (2019-04-08)
+------------------
 * update dependencies of trajectory_generation
 * fix CIRC path generator and increase test coverage
 * adopt strictest limits in ptp planner (refactor JointLimitsContainer and TrajectoryGeneratorPTP)
