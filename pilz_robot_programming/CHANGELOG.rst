@@ -4,6 +4,8 @@ Changelog for package pilz_robot_programming
 
 Forthcoming
 -----------
+* Fix transformation of goal pose in robot API
+* Contributors: Pilz GmbH and Co. KG
 
 0.3.6 (2019-02-26)
 ------------------

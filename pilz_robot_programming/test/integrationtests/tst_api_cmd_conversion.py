@@ -852,12 +852,14 @@ class TestAPICmdConversion(unittest.TestCase):
 
         self.assertRaises(RobotCurrentStateError, ptp_no_tf._cmd_to_request, self.robot)
 
-        # no rotation assigned: should interpret the rotation as Quaternion(0, 0, 0, 1)
-        no_rot = Ptp(goal=Pose(position=Point(0, 0, 1)), reference_frame=BASE_LINK_NAME)
+        # no rotation assigned: should insert current orientation in reference frame correctly
+        exp_goal_pose = Pose(position=Point(0, 0, 1), orientation=Quaternion(0, 0, 0, 1))
+        self.robot.move(Ptp(goal=Pose(position=goal_pose_bf.position, orientation=exp_goal_pose.orientation)))
+
+        no_rot = Ptp(goal=Pose(position=exp_goal_pose.position), reference_frame=BASE_LINK_NAME)
         no_rot_req = no_rot._cmd_to_request(self.robot)
 
-        self._analyze_request_pose(TARGET_LINK_NAME, Pose(position=Point(0, 0, 1), orientation=Quaternion(0, 0, 0, 1)),
-                                   no_rot_req)
+        self._analyze_request_pose(TARGET_LINK_NAME, exp_goal_pose, no_rot_req)
 
     def test_custom_reference_relative_move(self):
         """ Test if relative moves work with custom reference frame as expected

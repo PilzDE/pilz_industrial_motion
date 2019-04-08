@@ -273,17 +273,17 @@ class _BaseCmd(_AbstractCmd):
         """Determines the goal pose for the given command."""
         current_pose = robot.get_current_pose(target_link=self._target_link, base=self._reference_frame)
 
-        if self._relative:
-            self._goal = _pose_relative_to_absolute(current_pose, self._goal)
-
-        if not self._reference_frame == _DEFAULT_BASE_LINK:
-            return _to_robot_reference(robot, self._reference_frame, self._goal)
+        goal_pose = self._goal
 
         # in case of uninitialized orientation, set the goal orientation as current
-        if _is_quaternion_initialized(self._goal.orientation):
-            return self._goal
-        else:
-            return Pose(position=self._goal.position, orientation=current_pose.orientation)
+        identity_quat = Quaternion(w=1.0)
+        if not _is_quaternion_initialized(goal_pose.orientation):
+            goal_pose.orientation = identity_quat if self._relative else current_pose.orientation
+
+        if self._relative:
+            goal_pose = _pose_relative_to_absolute(current_pose, goal_pose)
+
+        return _to_robot_reference(robot, self._reference_frame, goal_pose)
 
     def _get_joint_pose(self, robot):
         """Determines the joint goal for the given command."""
@@ -649,9 +649,6 @@ def _to_robot_reference(robot, pose_frame, goal_pose_custom_ref):
     assert isinstance(goal_pose_custom_ref, Pose)
 
     robot_ref = robot._robot_commander.get_planning_frame()
-
-    if not _is_quaternion_initialized(goal_pose_custom_ref.orientation):
-        goal_pose_custom_ref.orientation.w = 1
 
     if pose_frame == robot_ref:
         return goal_pose_custom_ref
