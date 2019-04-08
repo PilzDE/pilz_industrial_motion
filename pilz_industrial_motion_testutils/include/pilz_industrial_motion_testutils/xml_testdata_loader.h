@@ -25,10 +25,7 @@
 
 #include <boost/property_tree/ptree.hpp>
 
-#include <moveit/robot_model/robot_model.h>
-
 #include "pilz_industrial_motion_testutils/testdata_loader.h"
-#include "sequence.h"
 
 namespace pt = boost::property_tree;
 namespace pilz_industrial_motion_testutils
@@ -112,16 +109,8 @@ public:
   ~XmlTestdataLoader();
 
 public:
-  //! @deprecated Use function using higher level abstraction data class instead.
-  virtual bool getJoints(const std::string &pos_name, const std::string &group_name,
-                         std::vector<double> &dVec) const override;
-
   virtual JointConfiguration getJoints(const std::string &pos_name,
                                        const std::string &group_name) const override;
-
-  //! @deprecated Use function using higher level abstraction data class instead.
-  virtual bool getPose(const std::string &pos_name, const std::string &group_name,
-                       std::vector<double> &dVec) const override;
 
   virtual CartesianConfiguration getPose(const std::string &pos_name,
                                          const std::string &group_name) const override;
@@ -130,16 +119,9 @@ public:
   virtual PtpCart getPtpCart(const std::string& cmd_name) const override;
   virtual PtpJointCart getPtpJointCart(const std::string& cmd_name) const override;
 
-  //! @deprecated Use function using higher level abstraction data class instead.
-  virtual bool getLin(const std::string& cmd_name, STestMotionCommand& cmd) const override;
-
   virtual LinJoint getLinJoint(const std::string& cmd_name) const override;
   virtual LinCart getLinCart(const std::string& cmd_name) const override;
   virtual LinJointCart getLinJointCart(const std::string& cmd_name) const override;
-
-
-  //! @deprecated Use function using higher level abstraction data class instead.
-  virtual bool getCirc(const std::string& cmd_name, STestMotionCommand& cmd) const override;
 
   virtual CircCenterCart getCircCartCenterCart(const std::string &cmd_name) const override;
   virtual CircInterimCart getCircCartInterimCart(const std::string &cmd_name) const override;
@@ -152,49 +134,23 @@ public:
 
 private:
   /**
-   * @deprecated Use function using higher level abstraction data class instead.
-   *
-   * @brief Use this function to search for a node (like an pos or cmd) with a given name.
+   * @brief Use this function to search for a node (like an pos or cmd)
+   * with a given name.
    *
    * @param tree Tree containing the node.
    * @param name Name of node to look for.
-   *
-   * @param ok States if the node with the given name was found or not.
-   * @return The node which we are looking for, or empty node if node with
-   * given name was not found.
    */
-  const pt::ptree::value_type &findNodeWithName(const boost::property_tree::ptree &tree,
-                                                const std::string &name,
-                                                bool &ok) const;
-
   const pt::ptree::value_type &findNodeWithName(const boost::property_tree::ptree &tree,
                                                 const std::string &name,
                                                 const std::string &key,
                                                 const std::string &path = "") const;
 
   /**
-   * @deprecated Use function using higher level abstraction data class instead.
-   *
    * @brief Use this function to search for a cmd-node with a given name.
-   *
-   * @param cmd_name Name of the cmd.
-   * @param cmd_type Type of the cmd (ptp, lin, circ, etc.)
-   *
-   * @param ok States if the cmd-node with the given name was found or not.
-   * @return The cmd-node which we are looking for, or empty node if node with
-   * given name was not found.
    */
-  const pt::ptree::value_type &findCmd(const std::string &cmd_name,
-                                       const std::string &cmd_type, bool &ok) const;
-
   const pt::ptree::value_type &findCmd(const std::string &cmd_name,
                                        const std::string& cmd_path,
                                        const std::string &cmd_key) const;
-
-  bool getCmd(const std::string &path2cmd, const std::string &cmd_name,
-              std::string &group_name, std::string &target_link,
-              std::string& start_pos_name, std::string& end_pos_name,
-              double &vel, double &acc) const;
 
   CartesianCenter getCartesianCenter(const std::string &cmd_name,
                                      const std::string &planning_group) const;
@@ -207,10 +163,9 @@ private:
                                const std::string &group_name) const;
 
 private:
-  //! @deprecated Use function using higher level abstraction data class instead.
-  //! @brief Converts string vector to double vector.
-  inline static void strVec2doubleVec(std::vector<std::string> &strVec, std::vector<double> &dVec);
-
+  /**
+   * @brief Converts string vector to double vector.
+   */
   inline static std::vector<double> strVec2doubleVec(std::vector<std::string> &strVec);
 
 private:
@@ -242,15 +197,6 @@ private:
   const pt::ptree::value_type empty_value_type_ {};
   const pt::ptree empty_tree_ {};
 };
-
-void XmlTestdataLoader::strVec2doubleVec(std::vector<std::string> &strVec, std::vector<double> &dVec)
-{
-  dVec.resize(strVec.size());
-  std::transform(strVec.begin(), strVec.end(), dVec.begin(), [](const std::string& val)
-  {
-    return std::stod(val);
-  });
-}
 
 std::vector<double> XmlTestdataLoader::strVec2doubleVec(std::vector<std::string> &strVec)
 {
