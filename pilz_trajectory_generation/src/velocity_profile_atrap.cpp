@@ -132,7 +132,7 @@ bool VelocityProfile_ATrap::SetProfileAllDurations(double pos1, double pos2, dou
   assert(duration3>0);
 
   // cannot be faster
-  if(Duration() > (duration1 + duration2 + duration3))
+  if(Duration() - (duration1 + duration2 + duration3) > KDL::epsilon)
   {
     return false;
   }
@@ -144,7 +144,9 @@ bool VelocityProfile_ATrap::SetProfileAllDurations(double pos1, double pos2, dou
   double new_vel = s*dis/(duration2 + duration1/2.0 + duration3/2.0);
   double new_acc = new_vel/duration1;
   double new_dec = -new_vel/duration3;
-  if((fabs(new_vel)>max_vel_) || (fabs(new_acc)>max_acc_) || (fabs(new_dec)>max_dec_))
+  if((fabs(new_vel)-max_vel_ > KDL::epsilon) ||
+     (fabs(new_acc)-max_acc_ > KDL::epsilon) ||
+     (fabs(new_dec)-max_dec_ > KDL::epsilon))
   {
     return false;
   }
