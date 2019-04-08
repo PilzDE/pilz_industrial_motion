@@ -39,9 +39,6 @@
 #include "pilz_msgs/MotionSequenceRequest.h"
 #include "pilz_trajectory_generation/capability_names.h"
 
-#include "motion_plan_request_builder.h"
-#include "motion_sequence_request_builder.h"
-
 // Parameters from parameter server
 const std::string TEST_DATA_FILE_NAME("testdata_file_name");
 

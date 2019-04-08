@@ -35,7 +35,6 @@
 #include <moveit/robot_model_loader/robot_model_loader.h>
 
 #include <pilz_industrial_motion_testutils/xml_testdata_loader.h>
-#include <pilz_industrial_motion_testutils/motion_plan_request_director.h>
 #include <pilz_industrial_motion_testutils/command_types_typedef.h>
 
 #include "test_utils.h"
