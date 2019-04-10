@@ -15,6 +15,8 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
+#include <memory>
+
 #include <gtest/gtest.h>
 
 #include "pilz_trajectory_generation/trajectory_generator_circ.h"
@@ -188,6 +190,46 @@ void TrajectoryGeneratorCIRCTest::getCircCenter(const planning_interface::Motion
 
     circCenter = start + (u*t.dot(t)*u.dot(v) - t*u.dot(u)*t.dot(v)) * 0.5/pow(w.norm(),2);
   }
+}
+
+/**
+ * @brief Checks that each derived MoveItErrorCodeException contains the correct
+ * error code.
+ */
+TEST(TrajectoryGeneratorCIRCTest, TestExceptionErrorCodeMapping)
+{
+  std::shared_ptr<CircleNoPlane> cnp_ex {new CircleNoPlane("")};
+  EXPECT_EQ(cnp_ex->getErrorCode(), moveit_msgs::MoveItErrorCodes::INVALID_MOTION_PLAN);
+
+  std::shared_ptr<CircleToSmall> cts_ex {new CircleToSmall("")};
+  EXPECT_EQ(cts_ex->getErrorCode(), moveit_msgs::MoveItErrorCodes::INVALID_MOTION_PLAN);
+
+  std::shared_ptr<CenterPointDifferentRadius> cpdr_ex {new CenterPointDifferentRadius("")};
+  EXPECT_EQ(cpdr_ex->getErrorCode(), moveit_msgs::MoveItErrorCodes::INVALID_MOTION_PLAN);
+
+  std::shared_ptr<CircTrajectoryConversionFailure> ctcf_ex {new CircTrajectoryConversionFailure("")};
+  EXPECT_EQ(ctcf_ex->getErrorCode(), moveit_msgs::MoveItErrorCodes::INVALID_MOTION_PLAN);
+
+  std::shared_ptr<UnknownPathConstraintName> upcn_ex {new UnknownPathConstraintName("")};
+  EXPECT_EQ(upcn_ex->getErrorCode(), moveit_msgs::MoveItErrorCodes::INVALID_MOTION_PLAN);
+
+  std::shared_ptr<NoPositionConstraints> npc_ex {new NoPositionConstraints("")};
+  EXPECT_EQ(npc_ex->getErrorCode(), moveit_msgs::MoveItErrorCodes::INVALID_MOTION_PLAN);
+
+  std::shared_ptr<NoPrimitivePose> npp_ex {new NoPrimitivePose("")};
+  EXPECT_EQ(npp_ex->getErrorCode(), moveit_msgs::MoveItErrorCodes::INVALID_MOTION_PLAN);
+
+  std::shared_ptr<UnknownLinkNameOfAuxiliaryPoint> ulnoap_ex {new UnknownLinkNameOfAuxiliaryPoint("")};
+  EXPECT_EQ(ulnoap_ex->getErrorCode(), moveit_msgs::MoveItErrorCodes::INVALID_LINK_NAME);
+
+  std::shared_ptr<NumberOfConstraintsMismatch> nocm_ex {new NumberOfConstraintsMismatch("")};
+  EXPECT_EQ(nocm_ex->getErrorCode(), moveit_msgs::MoveItErrorCodes::INVALID_GOAL_CONSTRAINTS);
+
+  std::shared_ptr<CircJointMissingInStartState> cjmiss_ex {new CircJointMissingInStartState("")};
+  EXPECT_EQ(cjmiss_ex->getErrorCode(), moveit_msgs::MoveItErrorCodes::INVALID_ROBOT_STATE);
+
+  std::shared_ptr<CircInverseForGoalIncalculable> cifgi_ex {new CircInverseForGoalIncalculable("")};
+  EXPECT_EQ(cifgi_ex->getErrorCode(), moveit_msgs::MoveItErrorCodes::NO_IK_SOLUTION);
 }
 
 // Instantiate the test cases for robot model with and without gripper
