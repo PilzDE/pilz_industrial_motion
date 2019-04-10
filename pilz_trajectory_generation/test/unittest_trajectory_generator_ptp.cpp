@@ -15,6 +15,8 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
+#include <memory>
+
 #include <gtest/gtest.h>
 
 #include "pilz_trajectory_generation/trajectory_generator_ptp.h"
@@ -127,6 +129,19 @@ bool TrajectoryGeneratorPTPTest::checkTrajectory(const trajectory_msgs::JointTra
           testutils::isPositionBounded(trajectory,joint_limits) &&
           testutils::isVelocityBounded(trajectory,joint_limits) &&
           testutils::isAccelerationBounded(trajectory,joint_limits));
+}
+
+/**
+ * @brief Checks that each derived MoveItErrorCodeException contains the correct
+ * error code.
+ */
+TEST(TrajectoryGeneratorPTPTest, TestExceptionErrorCodeMapping)
+{
+  std::shared_ptr<PtpVelocityProfileSyncFailed> pvpsf_ex {new PtpVelocityProfileSyncFailed("")};
+  EXPECT_EQ(pvpsf_ex->getErrorCode(), moveit_msgs::MoveItErrorCodes::FAILURE);
+
+  std::shared_ptr<PtpNoIkSolutionForGoalPose> pnisfgp_ex {new PtpNoIkSolutionForGoalPose("")};
+  EXPECT_EQ(pnisfgp_ex->getErrorCode(), moveit_msgs::MoveItErrorCodes::NO_IK_SOLUTION);
 }
 
 // Instantiate the test cases for robot model with and without gripper

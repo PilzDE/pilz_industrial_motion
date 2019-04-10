@@ -334,6 +334,11 @@ ${catkin_LIBRARIES} ${PROJECT_NAME}_test)
   target_link_libraries(unittest_velocity_profile_atrap
     ${catkin_LIBRARIES} ${PROJECT_NAME}_test)
 
+  catkin_add_gtest(unittest_trajectory_generator
+                   test/unittest_trajectory_generator.cpp)
+  target_link_libraries(unittest_trajectory_generator
+    ${PROJECT_NAME} ${catkin_LIBRARIES} ${PROJECT_NAME}_test)
+
   # Trajectory Generator Unit Test
   add_rostest_gtest(unittest_trajectory_functions
     test/unittest_trajectory_functions.test

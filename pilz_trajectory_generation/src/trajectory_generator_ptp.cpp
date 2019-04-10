@@ -64,53 +64,6 @@ TrajectoryGeneratorPTP::TrajectoryGeneratorPTP(const robot_model::RobotModelCons
   ROS_INFO("Initialized Point-to-Point Trajectory Generator.");
 }
 
-TrajectoryGeneratorPTP::~TrajectoryGeneratorPTP()
-{
-}
-
-bool TrajectoryGeneratorPTP::generate(const planning_interface::MotionPlanRequest &req,
-                                      planning_interface::MotionPlanResponse& res,
-                                      double sampling_time)
-{
-  ROS_INFO("Starting generation of PTP Trajectory!");
-
-  // planning data
-  ros::Time planning_begin = ros::Time::now();
-  MotionPlanInfo plan_info;
-  moveit_msgs::MoveItErrorCodes error_code;
-
-
-  // validate the common requirements of motion plan request
-  if(!validateRequest(req, error_code) )
-  {
-    trajectory_msgs::JointTrajectory joint_trajectory_empty;
-    setResponse(req, res, joint_trajectory_empty, error_code, planning_begin);
-    return false;
-  }
-
-  // extract planning information from the motion plan request
-  if(!extractMotionPlanInfo(req, plan_info, error_code))
-  {
-    res.error_code_ = error_code;
-    trajectory_msgs::JointTrajectory joint_trajectory_empty;
-    setResponse(req, res, joint_trajectory_empty, error_code, planning_begin);
-    return false;
-  }
-
-  // plan the ptp trajectory
-  trajectory_msgs::JointTrajectory joint_trajectory;
-  planPTP(plan_info.start_joint_position, plan_info.goal_joint_position, joint_trajectory, plan_info.group_name,
-          req.max_velocity_scaling_factor, req.max_acceleration_scaling_factor, sampling_time);
-
-  ROS_INFO_STREAM("PTP Trajectory with " << joint_trajectory.points.size() << " Points generated. Took "
-                  << (ros::Time::now() - planning_begin).toSec() * 1000 << " ms.");
-
-  error_code.val = moveit_msgs::MoveItErrorCodes::SUCCESS;
-  setResponse(req, res, joint_trajectory, error_code, planning_begin);
-  return true;
-}
-
-
 void TrajectoryGeneratorPTP::planPTP(const std::map<std::string, double>& start_pos,
                                      const std::map<std::string, double>& goal_pos,
                                      trajectory_msgs::JointTrajectory &joint_trajectory,
@@ -192,12 +145,12 @@ void TrajectoryGeneratorPTP::planPTP(const std::map<std::string, double>& start_
       // by using the most strict limit, the following should always return true
       if (!velocity_profile.at(joint_name).SetProfileAllDurations(start_pos.at(joint_name), goal_pos.at(joint_name),
                                                                   acc_time,const_time,dec_time))
-      // LCOV_EXCL_START
+        // LCOV_EXCL_START
       {
         std::stringstream error_str;
         error_str << "TrajectoryGeneratorPTP::planPTP(): Can not synchronize velocity profile of axis " << joint_name
-               << " with leading axis " << leading_axis;
-        throw TrajectoryGeneratorException(error_str.str());
+                  << " with leading axis " << leading_axis;
+        throw PtpVelocityProfileSyncFailed(error_str.str());
       }
       // LCOV_EXCL_STOP
     }
@@ -236,9 +189,8 @@ void TrajectoryGeneratorPTP::planPTP(const std::map<std::string, double>& start_
 }
 
 
-bool TrajectoryGeneratorPTP::extractMotionPlanInfo(const planning_interface::MotionPlanRequest& req,
-                                                   MotionPlanInfo& info,
-                                                   moveit_msgs::MoveItErrorCodes& error_code) const
+void TrajectoryGeneratorPTP::extractMotionPlanInfo(const planning_interface::MotionPlanRequest& req,
+                                                   MotionPlanInfo& info) const
 {
   info.group_name = req.group_name;
 
@@ -282,13 +234,19 @@ bool TrajectoryGeneratorPTP::extractMotionPlanInfo(const planning_interface::Mot
                       info.start_joint_position,
                       info.goal_joint_position))
     {
-      ROS_ERROR("No IK solution for goal pose.");
-      error_code.val =  moveit_msgs::MoveItErrorCodes::NO_IK_SOLUTION;
-      return false;
+      throw PtpNoIkSolutionForGoalPose("No IK solution for goal pose");
     }
   }
+}
 
-  return true;
+void TrajectoryGeneratorPTP::plan(const planning_interface::MotionPlanRequest &req,
+                                  const MotionPlanInfo& plan_info,
+                                  const double& sampling_time,
+                                  trajectory_msgs::JointTrajectory& joint_trajectory)
+{
+  // plan the ptp trajectory
+  planPTP(plan_info.start_joint_position, plan_info.goal_joint_position, joint_trajectory, plan_info.group_name,
+          req.max_velocity_scaling_factor, req.max_acceleration_scaling_factor, sampling_time);
 }
 
 }
