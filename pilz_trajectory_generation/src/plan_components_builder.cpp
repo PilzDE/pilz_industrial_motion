@@ -76,7 +76,7 @@ void PlanComponentsBuilder::blend(robot_trajectory::RobotTrajectoryPtr other,
   }
 
   // Append the new trajectory elements
-  traj_cont_.back()->append(*blend_response.first_trajectory, 0.0);
+  appendWithStrictTimeIncrease(*(traj_cont_.back()),*blend_response.first_trajectory);
   traj_cont_.back()->append(*blend_response.blend_trajectory, 0.0);
   // Store the last new trajectory element for future processing
   traj_tail_ = blend_response.second_trajectory; // first for next blending segment
