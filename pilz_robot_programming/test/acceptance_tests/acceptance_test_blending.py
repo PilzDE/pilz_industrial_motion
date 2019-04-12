@@ -45,6 +45,8 @@ def start_program():
 
     _testUnreachableFirstPose(robot)
 
+    _testBlendRadiusOnSecondCommand(robot)
+
 # Tests a sequence which contains Lin motions commanded in joint space
 # instead of cartesian space.
 #
@@ -275,6 +277,38 @@ def _testLinLinBlendWithOriChange(robot):
         return
     _linLinBlend(robot, 1.57)
     _askSuccess(_testLinLinBlendWithOriChange.__name__)
+
+# Tests the blending of three motions where only the second has a radius.
+# 
+# Test Sequence:
+#   1. Move to start position.
+#   2. Execute two blended motions.
+#
+#
+# Expected Results:
+#   1. Robot moves to start position.
+#   2. Robot executes a trajectory which consists of two blended motions.
+#       a. Robot reached goal pose of third trajectory.
+#       b. Robot performed continuous motion (without stop).
+#       c. Robot performed continuous orientation change (continuous rotational velocity).
+#       d. Robot makes smooth curve between into last trajectory.
+#
+def _testBlendRadiusOnSecondCommand(robot):
+    if (_askPermission(_testBlendRadiusOnSecondCommand.__name__) == 0):
+        return
+
+    robot.move(Ptp(goal=Pose(position=Point(0.0, 0.0, 0.9), orientation=from_euler(0,0,0)), 
+                   vel_scale=DEFAULT_PTP_VEL))
+    seq1 = Sequence()
+    seq1.append(Ptp(goal=Pose(position=Point(0.2, 0.0, 0.9), orientation=from_euler(0,0,0)), 
+                    vel_scale=DEFAULT_PTP_VEL, acc_scale=DEFAULT_PTP_ACC))
+    seq1.append(Ptp(goal=Pose(position=Point(0.2, 0.2, 0.9), orientation=from_euler(0,0,0)), 
+                    vel_scale=DEFAULT_PTP_VEL, acc_scale=DEFAULT_PTP_ACC), blend_radius=.1)
+    seq1.append(Ptp(goal=Pose(position=Point(0.0, 0.2, 0.9), orientation=from_euler(0,0,0)), 
+                    vel_scale=DEFAULT_PTP_VEL, acc_scale=DEFAULT_PTP_ACC))
+    robot.move(seq1)
+
+    _askSuccess(_testBlendRadiusOnSecondCommand.__name__)
 
 # Tests the blending of two lin motions.
 # Both lin goals have different orientations (difference in euler angle A, B
