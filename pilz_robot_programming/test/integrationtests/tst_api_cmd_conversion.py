@@ -30,7 +30,7 @@ _TEST_DATA_FILE_NAME = RosPack().get_path("pilz_industrial_motion_testutils") + 
 PLANNING_GROUP_NAME = "manipulator"
 TARGET_LINK_NAME = "prbt_tcp"
 BASE_LINK_NAME = "prbt_base"
-API_VERSION = "1"
+API_VERSION = "2"
 
 EXP_VEL_SCALE = 0.7
 EXP_ACC_SCALE = 0.5

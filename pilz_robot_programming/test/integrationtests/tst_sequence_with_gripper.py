@@ -25,7 +25,7 @@ from pilz_robot_programming.commands import *
 
 from pilz_industrial_motion_testutils.integration_test_utils import *
 
-API_VERSION = "1"
+API_VERSION = "2"
 
 
 class TestSequenceWithGripper(unittest.TestCase):
