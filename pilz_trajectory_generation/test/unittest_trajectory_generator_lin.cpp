@@ -361,6 +361,43 @@ TEST_P(TrajectoryGeneratorLINTest, IncorrectJointNumber)
   EXPECT_TRUE(res.error_code_.val == moveit_msgs::MoveItErrorCodes::INVALID_GOAL_CONSTRAINTS);
 }
 
+/**
+ * @brief test invalid motion plan request with incomplete start state and cartesian goal
+ */
+TEST_P(TrajectoryGeneratorLINTest, cartGoalIncompleteStartState)
+{
+  // construct motion plan request
+  moveit_msgs::MotionPlanRequest lin_cart_req {tdp_->getLinCart("lin2").toRequest()};
+  EXPECT_GT(lin_cart_req.start_state.joint_state.name.size(), 1u);
+  lin_cart_req.start_state.joint_state.name.resize(1);
+  lin_cart_req.start_state.joint_state.position.resize(1); // prevent failing check for equal sizes
+
+  // generate lin trajectory
+  planning_interface::MotionPlanResponse res;
+  EXPECT_FALSE(lin_->generate(lin_cart_req, res));
+  EXPECT_EQ(res.error_code_.val, moveit_msgs::MoveItErrorCodes::INVALID_ROBOT_STATE);
+}
+
+/**
+ * @brief Set a frame id in goal constraint with cartesian goal on both position and orientation constraints
+ */
+TEST_P(TrajectoryGeneratorLINTest, cartGoalFrameIdBothConstraints)
+{
+  // construct motion plan request
+  moveit_msgs::MotionPlanRequest lin_cart_req {tdp_->getLinCart("lin2").toRequest()};
+
+  lin_cart_req.goal_constraints.front().position_constraints.front().header.frame_id = robot_model_->getModelFrame();
+  lin_cart_req.goal_constraints.front().orientation_constraints.front().header.frame_id = robot_model_->getModelFrame();
+
+  // generate lin trajectory
+  planning_interface::MotionPlanResponse res;
+  ASSERT_TRUE(lin_->generate(lin_cart_req, res));
+  EXPECT_TRUE(res.error_code_.val == moveit_msgs::MoveItErrorCodes::SUCCESS);
+
+  // check the resulted trajectory
+  EXPECT_TRUE(checkLinResponse(lin_cart_req, res));
+}
+
 int main(int argc, char **argv)
 {
   ros::init(argc, argv, "unittest_trajectory_generator_lin");
