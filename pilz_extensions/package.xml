@@ -1,5 +1,5 @@
 <?xml version="1.0"?>
-<package>
+<package format="2">
   <name>pilz_extensions</name>
   <version>0.3.6</version>
   <description>
@@ -18,12 +18,13 @@
   <url type="repository">https://github.com/PilzDE/pilz_industrial_motion</url>
 
   <build_depend>roscpp</build_depend>
-  <build_depend>joint_limits_interface</build_depend>
+  
+  <depend>joint_limits_interface</depend>
 
   <test_depend>rostest</test_depend>
   <test_depend>rosunit</test_depend>
   <test_depend>code_coverage</test_depend>
-  <run_depend>prbt_support</run_depend>
+  <test_depend>prbt_support</test_depend>
 
   <buildtool_depend>catkin</buildtool_depend>
 </package>
