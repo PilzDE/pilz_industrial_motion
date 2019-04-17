@@ -203,6 +203,40 @@ TEST_F(IntegrationTestCommandListManager, concatThreeSegments)
   EXPECT_LT(fabs((t1_2_3-t1-t2-t3)), 0.4);
 }
 
+
+/**
+ * @brief Tests if times are strictly increasing with selective blending
+ *
+ * Test Sequence:
+ *    1. Generate request with three trajectories where only the first has a blend radius.
+ *    1. Generate request with three trajectories where only the second has a blend radius.
+ *
+ * Expected Results:
+ *    1. Generation of concatenated trajectory is successful.
+ *       All time steps of resulting trajectory are strictly increasing in time
+ *    2. Generation of concatenated trajectory is successful.
+ *       All time steps of resulting trajectory are strictly increasing in time
+ */
+TEST_F(IntegrationTestCommandListManager, concatSegmentsSelectiveBlending)
+{
+  Sequence seq {data_loader_->getSequence("ComplexSequence")};
+  ASSERT_GE(seq.size(), 3u);
+  seq.erase(3, seq.size());
+  seq.setAllBlendRadiiToZero();
+  seq.setBlendRadii(0, 0.1);
+  RobotTrajCont res1 {manager_->solve(scene_, seq.toRequest())};
+  EXPECT_EQ(res1.size(), 1);
+  EXPECT_GT(res1.front()->getWayPointCount(), 0u);
+  EXPECT_TRUE(hasStrictlyIncreasingTime(res1.front())) << "Time steps not strictly positively increasing";
+
+  seq.setAllBlendRadiiToZero();
+  seq.setBlendRadii(1, 0.1);
+  RobotTrajCont res2 {manager_->solve(scene_, seq.toRequest())};
+  EXPECT_EQ(res2.size(), 1);
+  EXPECT_GT(res2.front()->getWayPointCount(), 0u);
+  EXPECT_TRUE(hasStrictlyIncreasingTime(res2.front())) << "Time steps not strictly positively increasing";
+}
+
 /**
  * @brief Tests the concatenation of two ptp commands
  *
