@@ -68,7 +68,7 @@ public:
   MotionCmd &getCmd(const size_t index_cmd);
 
   void setAllBlendRadiiToZero();
-  void setBlendRadii(const size_t index_cmd, const double blend_radius);
+  void setBlendRadius(const size_t index_cmd, const double blend_radius);
   double getBlendRadius(const size_t index_cmd) const;
 
   /**
@@ -110,7 +110,7 @@ inline double Sequence::getBlendRadius(const size_t index_cmd) const
   return cmds_.at(index_cmd).second;
 }
 
-inline void Sequence::setBlendRadii(const size_t index_cmd, const double blend_radius)
+inline void Sequence::setBlendRadius(const size_t index_cmd, const double blend_radius)
 {
   cmds_.at(index_cmd).second = blend_radius;
 }

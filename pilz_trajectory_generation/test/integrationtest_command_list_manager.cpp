@@ -223,14 +223,14 @@ TEST_F(IntegrationTestCommandListManager, concatSegmentsSelectiveBlending)
   ASSERT_GE(seq.size(), 3u);
   seq.erase(3, seq.size());
   seq.setAllBlendRadiiToZero();
-  seq.setBlendRadii(0, 0.1);
+  seq.setBlendRadius(0, 0.1);
   RobotTrajCont res1 {manager_->solve(scene_, seq.toRequest())};
   EXPECT_EQ(res1.size(), 1);
   EXPECT_GT(res1.front()->getWayPointCount(), 0u);
   EXPECT_TRUE(hasStrictlyIncreasingTime(res1.front())) << "Time steps not strictly positively increasing";
 
   seq.setAllBlendRadiiToZero();
-  seq.setBlendRadii(1, 0.1);
+  seq.setBlendRadius(1, 0.1);
   RobotTrajCont res2 {manager_->solve(scene_, seq.toRequest())};
   EXPECT_EQ(res2.size(), 1);
   EXPECT_GT(res2.front()->getWayPointCount(), 0u);
@@ -407,7 +407,7 @@ TEST_F(IntegrationTestCommandListManager, blendingRadiusNegative)
 {
   Sequence seq {data_loader_->getSequence("SimpleSequence")};
   ASSERT_GE(seq.size(), 2u);
-  seq.setBlendRadii(0,-0.3);
+  seq.setBlendRadius(0,-0.3);
   EXPECT_THROW(manager_->solve(scene_, seq.toRequest()), NegativeBlendRadiusException);
 }
 
@@ -425,7 +425,7 @@ TEST_F(IntegrationTestCommandListManager, lastBlendingRadiusNonZero)
 {
   Sequence seq {data_loader_->getSequence("SimpleSequence")};
   ASSERT_EQ(seq.size(), 2u);
-  seq.setBlendRadii(1, 0.03);
+  seq.setBlendRadius(1, 0.03);
   EXPECT_THROW(manager_->solve(scene_, seq.toRequest()), LastBlendRadiusNotZeroException);
 }
 
@@ -444,7 +444,7 @@ TEST_F(IntegrationTestCommandListManager, blendRadiusGreaterThanSegment)
 {
   Sequence seq {data_loader_->getSequence("SimpleSequence")};
   ASSERT_GE(seq.size(), 2u);
-  seq.setBlendRadii(0, 42.0);
+  seq.setBlendRadius(0, 42.0);
   EXPECT_THROW(manager_->solve(scene_, seq.toRequest()), BlendingFailedException);
 }
 
@@ -478,7 +478,7 @@ TEST_F(IntegrationTestCommandListManager, blendingRadiusOverlapping)
   tf2::fromMsg(circ.getGoalConfiguration().getPose(), p2);
   auto distance = (p2.translation()-p1.translation()).norm();
 
-  seq.setBlendRadii(1, (distance - seq.getBlendRadius(0) + 0.01) ); // overlapping radii
+  seq.setBlendRadius(1, (distance - seq.getBlendRadius(0) + 0.01) ); // overlapping radii
   EXPECT_THROW(manager_->solve(scene_, seq.toRequest()), OverlappingBlendRadiiException);
 }
 
@@ -579,7 +579,7 @@ TEST_F(IntegrationTestCommandListManager, TestGripperCmdBlending)
   ASSERT_TRUE(seq.cmdIsOfType<Gripper>(1));
 
   // Ensure that blending is requested for gripper commands.
-  seq.setBlendRadii(0, 1.0);
+  seq.setBlendRadius(0, 1.0);
   RobotTrajCont res_vec {manager_->solve(scene_, seq.toRequest())};
   EXPECT_EQ(res_vec.size(), 1);
 }
