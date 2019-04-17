@@ -13,8 +13,8 @@ The FTP is implemented by Pilz GmbH & Co. KG.
 
 
 ### Note to Developers:
-`kinetic-devel` is considered to be the active development branch.
-Changes are merged into `melodic-devel` with every release or on demand.
+`melodic-devel` is considered to be the active development branch.
+Relevant changes are cherry-picked into `kinetic-devel` on a case-by-case basis.
 
 ## Package: pilz_trajectory_generation
 Provides the generators to create LIN, PTP and CIRC trajectories. All of these commands can be combined and
