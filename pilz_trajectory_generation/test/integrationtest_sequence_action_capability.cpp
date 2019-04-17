@@ -184,7 +184,7 @@ TEST_F(IntegrationTestSequenceAction, TestDifferingGroupNames)
 TEST_F(IntegrationTestSequenceAction, TestNegativeBlendRadius)
 {
   Sequence seq {data_loader_->getSequence("ComplexSequence")};
-  seq.setBlendRadii(0, -1.0);
+  seq.setBlendRadius(0, -1.0);
 
   pilz_msgs::MoveGroupSequenceGoal seq_goal;
   seq_goal.request = seq.toRequest();
@@ -213,7 +213,7 @@ TEST_F(IntegrationTestSequenceAction, TestNegativeBlendRadius)
 TEST_F(IntegrationTestSequenceAction, TestOverlappingBlendRadii)
 {
   Sequence seq {data_loader_->getSequence("ComplexSequence")};
-  seq.setBlendRadii(0, 10*seq.getBlendRadius(0));
+  seq.setBlendRadius(0, 10*seq.getBlendRadius(0));
 
   pilz_msgs::MoveGroupSequenceGoal seq_goal;
   seq_goal.request = seq.toRequest();
@@ -243,7 +243,7 @@ TEST_F(IntegrationTestSequenceAction, TestTooLargeBlendRadii)
 {
   Sequence seq {data_loader_->getSequence("ComplexSequence")};
   seq.erase(2, seq.size());
-  seq.setBlendRadii(0, 10*seq.getBlendRadius(seq.size()-2));
+  seq.setBlendRadius(0, 10*seq.getBlendRadius(seq.size()-2));
 
   pilz_msgs::MoveGroupSequenceGoal seq_goal;
   seq_goal.request = seq.toRequest();
@@ -492,7 +492,7 @@ TEST_F(IntegrationTestSequenceAction, TestIgnoreRobotStateForPlanOnly)
 TEST_F(IntegrationTestSequenceAction, TestNegativeBlendRadiusForPlanOnly)
 {
   Sequence seq {data_loader_->getSequence("ComplexSequence")};
-  seq.setBlendRadii(0, -1.0);
+  seq.setBlendRadius(0, -1.0);
 
   pilz_msgs::MoveGroupSequenceGoal seq_goal;
   seq_goal.request = seq.toRequest();

@@ -144,7 +144,7 @@ TEST_F(IntegrationTestSequenceService, TestDifferingGroupNames)
 TEST_F(IntegrationTestSequenceService, TestNegativeBlendRadius)
 {
   Sequence seq {data_loader_->getSequence("ComplexSequence")};
-  seq.setBlendRadii(0, -1.0);
+  seq.setBlendRadius(0, -1.0);
 
   pilz_msgs::GetMotionSequence srv;
   srv.request.commands = seq.toRequest();
@@ -169,7 +169,7 @@ TEST_F(IntegrationTestSequenceService, TestNegativeBlendRadius)
 TEST_F(IntegrationTestSequenceService, TestOverlappingBlendRadii)
 {
   Sequence seq {data_loader_->getSequence("ComplexSequence")};
-  seq.setBlendRadii(0, 10*seq.getBlendRadius(0));
+  seq.setBlendRadius(0, 10*seq.getBlendRadius(0));
 
   pilz_msgs::GetMotionSequence srv;
   srv.request.commands = seq.toRequest();
@@ -195,7 +195,7 @@ TEST_F(IntegrationTestSequenceService, TestTooLargeBlendRadii)
 {
   Sequence seq {data_loader_->getSequence("ComplexSequence")};
   seq.erase(2, seq.size());
-  seq.setBlendRadii(0, 10*seq.getBlendRadius(seq.size()-2));
+  seq.setBlendRadius(0, 10*seq.getBlendRadius(seq.size()-2));
 
   pilz_msgs::GetMotionSequence srv;
   srv.request.commands = seq.toRequest();
