@@ -190,7 +190,7 @@ The limits are expected to be under the namespace `<robot_description>_planning`
 E.g. if the urdf was loaded into `/robot_description` the cartesian limits have to be defined at `/robot_description_planning`.
 
 An example showing the cartesian limits which have to be defined can be found
-![here](https://github.com/PilzDE/pilz_robots/blob/kinetic-devel/prbt_moveit_config/config/cartesian_limits.yaml).
+![here](https://github.com/PilzDE/pilz_robots/blob/melodic-devel/prbt_moveit_config/config/cartesian_limits.yaml).
 
 # Sequence of multiple segments
 To concatenate multiple trajectories and plan the trajectory at once, you can use the sequence capability.
