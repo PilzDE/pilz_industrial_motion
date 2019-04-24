@@ -176,16 +176,13 @@ void TrajectoryGeneratorCIRC::plan(const planning_interface::MotionPlanRequest &
                                    const double& sampling_time,
                                    trajectory_msgs::JointTrajectory& joint_trajectory)
 {
-  // create Cartesian path for circle
-  std::unique_ptr<KDL::Path> path(setPathCIRC(plan_info));
-
-  // create velocity profile
-  std::unique_ptr<KDL::VelocityProfile> vp(cartesianTrapVelocityProfile(req.max_velocity_scaling_factor, req.max_acceleration_scaling_factor, path));
+  std::unique_ptr<KDL::Path> cart_path(setPathCIRC(plan_info));
+  std::unique_ptr<KDL::VelocityProfile> vel_profile(cartesianTrapVelocityProfile(req.max_velocity_scaling_factor, req.max_acceleration_scaling_factor, cart_path));
 
   // combine path and velocity profile into Cartesian trajectory
   // with the third parameter set to false, KDL::Trajectory_Segment does not take
   // the ownship of Path and Velocity Profile
-  KDL::Trajectory_Segment cart_trajectory(path.get(), vp.get(), false);
+  KDL::Trajectory_Segment cart_trajectory(cart_path.get(), vel_profile.get(), false);
 
   moveit_msgs::MoveItErrorCodes error_code;
   // sample the Cartesian trajectory and compute joint trajectory using inverse kinematics

@@ -168,18 +168,26 @@ bool TrajectoryGeneratorLINTest::checkLinResponse(const planning_interface::Moti
  */
 TEST(TrajectoryGeneratorLINTest, TestExceptionErrorCodeMapping)
 {
-  std::shared_ptr<LinTrajectoryConversionFailure> ltcf_ex {new LinTrajectoryConversionFailure("")};
-  EXPECT_EQ(ltcf_ex->getErrorCode(), moveit_msgs::MoveItErrorCodes::FAILURE);
+  {
+    std::shared_ptr<LinTrajectoryConversionFailure> ltcf_ex {new LinTrajectoryConversionFailure("")};
+    EXPECT_EQ(ltcf_ex->getErrorCode(), moveit_msgs::MoveItErrorCodes::FAILURE);
+  }
 
 
-  std::shared_ptr<JointNumberMismatch> jnm_ex {new JointNumberMismatch("")};
-  EXPECT_EQ(jnm_ex->getErrorCode(), moveit_msgs::MoveItErrorCodes::INVALID_GOAL_CONSTRAINTS);
+  {
+    std::shared_ptr<JointNumberMismatch> jnm_ex {new JointNumberMismatch("")};
+    EXPECT_EQ(jnm_ex->getErrorCode(), moveit_msgs::MoveItErrorCodes::INVALID_GOAL_CONSTRAINTS);
+  }
 
-  std::shared_ptr<LinJointMissingInStartState> ljmiss_ex {new LinJointMissingInStartState("")};
-  EXPECT_EQ(ljmiss_ex->getErrorCode(), moveit_msgs::MoveItErrorCodes::INVALID_GOAL_CONSTRAINTS);
+  {
+    std::shared_ptr<LinJointMissingInStartState> ljmiss_ex {new LinJointMissingInStartState("")};
+    EXPECT_EQ(ljmiss_ex->getErrorCode(), moveit_msgs::MoveItErrorCodes::INVALID_GOAL_CONSTRAINTS);
+  }
 
-  std::shared_ptr<LinInverseForGoalIncalculable> lifgi_ex {new LinInverseForGoalIncalculable("")};
-  EXPECT_EQ(lifgi_ex->getErrorCode(), moveit_msgs::MoveItErrorCodes::NO_IK_SOLUTION);
+  {
+    std::shared_ptr<LinInverseForGoalIncalculable> lifgi_ex {new LinInverseForGoalIncalculable("")};
+    EXPECT_EQ(lifgi_ex->getErrorCode(), moveit_msgs::MoveItErrorCodes::NO_IK_SOLUTION);
+  }
 }
 
 // Instantiate the test cases for robot model with and without gripper
@@ -229,7 +237,7 @@ TEST_P(TrajectoryGeneratorLINTest, jointSpaceGoalNearZeroStartVelocity)
 
   // Set velocity near zero
   lin_joint_req.start_state.joint_state.velocity
-    = std::vector<double>(lin_joint_req.start_state.joint_state.position.size(), 1e-16);
+      = std::vector<double>(lin_joint_req.start_state.joint_state.position.size(), 1e-16);
 
   // generate the LIN trajectory
   planning_interface::MotionPlanResponse res;
@@ -327,7 +335,7 @@ TEST_P(TrajectoryGeneratorLINTest, LinStartEqualsGoal)
   for(size_t i = 0; i < lin_joint_req.goal_constraints.at(0).joint_constraints.size(); i++)
   {
     lin_joint_req.goal_constraints.at(0).joint_constraints.at(i).position
-      = start_state.getVariablePosition(lin_joint_req.goal_constraints.at(0).joint_constraints.at(i).joint_name);
+        = start_state.getVariablePosition(lin_joint_req.goal_constraints.at(0).joint_constraints.at(i).joint_name);
   }
 
   // generate the LIN trajectory
