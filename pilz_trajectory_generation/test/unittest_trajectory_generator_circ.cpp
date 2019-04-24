@@ -79,7 +79,7 @@ protected:
   std::string planning_group_, target_link_, test_data_file_name_;
   int random_trial_num_;
   double cartesian_position_tolerance_, angular_acc_tolerance_, rot_axis_norm_tolerance_, acceleration_tolerance_,
-         other_tolerance_;
+  other_tolerance_;
   LimitsContainer planner_limits_;
 };
 
@@ -198,44 +198,66 @@ void TrajectoryGeneratorCIRCTest::getCircCenter(const planning_interface::Motion
  */
 TEST(TrajectoryGeneratorCIRCTest, TestExceptionErrorCodeMapping)
 {
-  std::shared_ptr<CircleNoPlane> cnp_ex {new CircleNoPlane("")};
-  EXPECT_EQ(cnp_ex->getErrorCode(), moveit_msgs::MoveItErrorCodes::INVALID_MOTION_PLAN);
+  {
+    std::shared_ptr<CircleNoPlane> cnp_ex {new CircleNoPlane("")};
+    EXPECT_EQ(cnp_ex->getErrorCode(), moveit_msgs::MoveItErrorCodes::INVALID_MOTION_PLAN);
+  }
 
-  std::shared_ptr<CircleToSmall> cts_ex {new CircleToSmall("")};
-  EXPECT_EQ(cts_ex->getErrorCode(), moveit_msgs::MoveItErrorCodes::INVALID_MOTION_PLAN);
+  {
+    std::shared_ptr<CircleToSmall> cts_ex {new CircleToSmall("")};
+    EXPECT_EQ(cts_ex->getErrorCode(), moveit_msgs::MoveItErrorCodes::INVALID_MOTION_PLAN);
+  }
 
-  std::shared_ptr<CenterPointDifferentRadius> cpdr_ex {new CenterPointDifferentRadius("")};
-  EXPECT_EQ(cpdr_ex->getErrorCode(), moveit_msgs::MoveItErrorCodes::INVALID_MOTION_PLAN);
+  {
+    std::shared_ptr<CenterPointDifferentRadius> cpdr_ex {new CenterPointDifferentRadius("")};
+    EXPECT_EQ(cpdr_ex->getErrorCode(), moveit_msgs::MoveItErrorCodes::INVALID_MOTION_PLAN);
+  }
 
-  std::shared_ptr<CircTrajectoryConversionFailure> ctcf_ex {new CircTrajectoryConversionFailure("")};
-  EXPECT_EQ(ctcf_ex->getErrorCode(), moveit_msgs::MoveItErrorCodes::INVALID_MOTION_PLAN);
+  {
+    std::shared_ptr<CircTrajectoryConversionFailure> ctcf_ex {new CircTrajectoryConversionFailure("")};
+    EXPECT_EQ(ctcf_ex->getErrorCode(), moveit_msgs::MoveItErrorCodes::INVALID_MOTION_PLAN);
+  }
 
-  std::shared_ptr<UnknownPathConstraintName> upcn_ex {new UnknownPathConstraintName("")};
-  EXPECT_EQ(upcn_ex->getErrorCode(), moveit_msgs::MoveItErrorCodes::INVALID_MOTION_PLAN);
+  {
+    std::shared_ptr<UnknownPathConstraintName> upcn_ex {new UnknownPathConstraintName("")};
+    EXPECT_EQ(upcn_ex->getErrorCode(), moveit_msgs::MoveItErrorCodes::INVALID_MOTION_PLAN);
+  }
 
-  std::shared_ptr<NoPositionConstraints> npc_ex {new NoPositionConstraints("")};
-  EXPECT_EQ(npc_ex->getErrorCode(), moveit_msgs::MoveItErrorCodes::INVALID_MOTION_PLAN);
+  {
+    std::shared_ptr<NoPositionConstraints> npc_ex {new NoPositionConstraints("")};
+    EXPECT_EQ(npc_ex->getErrorCode(), moveit_msgs::MoveItErrorCodes::INVALID_MOTION_PLAN);
+  }
 
-  std::shared_ptr<NoPrimitivePose> npp_ex {new NoPrimitivePose("")};
-  EXPECT_EQ(npp_ex->getErrorCode(), moveit_msgs::MoveItErrorCodes::INVALID_MOTION_PLAN);
+  {
+    std::shared_ptr<NoPrimitivePose> npp_ex {new NoPrimitivePose("")};
+    EXPECT_EQ(npp_ex->getErrorCode(), moveit_msgs::MoveItErrorCodes::INVALID_MOTION_PLAN);
+  }
 
-  std::shared_ptr<UnknownLinkNameOfAuxiliaryPoint> ulnoap_ex {new UnknownLinkNameOfAuxiliaryPoint("")};
-  EXPECT_EQ(ulnoap_ex->getErrorCode(), moveit_msgs::MoveItErrorCodes::INVALID_LINK_NAME);
+  {
+    std::shared_ptr<UnknownLinkNameOfAuxiliaryPoint> ulnoap_ex {new UnknownLinkNameOfAuxiliaryPoint("")};
+    EXPECT_EQ(ulnoap_ex->getErrorCode(), moveit_msgs::MoveItErrorCodes::INVALID_LINK_NAME);
+  }
 
-  std::shared_ptr<NumberOfConstraintsMismatch> nocm_ex {new NumberOfConstraintsMismatch("")};
-  EXPECT_EQ(nocm_ex->getErrorCode(), moveit_msgs::MoveItErrorCodes::INVALID_GOAL_CONSTRAINTS);
+  {
+    std::shared_ptr<NumberOfConstraintsMismatch> nocm_ex {new NumberOfConstraintsMismatch("")};
+    EXPECT_EQ(nocm_ex->getErrorCode(), moveit_msgs::MoveItErrorCodes::INVALID_GOAL_CONSTRAINTS);
+  }
 
-  std::shared_ptr<CircJointMissingInStartState> cjmiss_ex {new CircJointMissingInStartState("")};
-  EXPECT_EQ(cjmiss_ex->getErrorCode(), moveit_msgs::MoveItErrorCodes::INVALID_ROBOT_STATE);
+  {
+    std::shared_ptr<CircJointMissingInStartState> cjmiss_ex {new CircJointMissingInStartState("")};
+    EXPECT_EQ(cjmiss_ex->getErrorCode(), moveit_msgs::MoveItErrorCodes::INVALID_ROBOT_STATE);
+  }
 
-  std::shared_ptr<CircInverseForGoalIncalculable> cifgi_ex {new CircInverseForGoalIncalculable("")};
-  EXPECT_EQ(cifgi_ex->getErrorCode(), moveit_msgs::MoveItErrorCodes::NO_IK_SOLUTION);
+  {
+    std::shared_ptr<CircInverseForGoalIncalculable> cifgi_ex {new CircInverseForGoalIncalculable("")};
+    EXPECT_EQ(cifgi_ex->getErrorCode(), moveit_msgs::MoveItErrorCodes::NO_IK_SOLUTION);
+  }
 }
 
 // Instantiate the test cases for robot model with and without gripper
 INSTANTIATE_TEST_CASE_P(InstantiationName, TrajectoryGeneratorCIRCTest, ::testing::Values(
-                        PARAM_MODEL_NO_GRIPPER_NAME,
-                        PARAM_MODEL_WITH_GRIPPER_NAME
+                          PARAM_MODEL_NO_GRIPPER_NAME,
+                          PARAM_MODEL_WITH_GRIPPER_NAME
                           ));
 
 
@@ -549,7 +571,7 @@ TEST_P(TrajectoryGeneratorCIRCTest, centerPointJointGoal)
 {
   SKIP_IF_GRIPPER
 
-  auto circ {tdp_->getCircJointCenterCart("circ1_center_2")};
+      auto circ {tdp_->getCircJointCenterCart("circ1_center_2")};
   moveit_msgs::MotionPlanRequest req = circ.toRequest();
 
   planning_interface::MotionPlanResponse res;
@@ -679,7 +701,7 @@ TEST_P(TrajectoryGeneratorCIRCTest, InterimPointJointGoal)
 {
   SKIP_IF_GRIPPER
 
-  auto circ {tdp_->getCircJointInterimCart("circ3_interim")};
+      auto circ {tdp_->getCircJointInterimCart("circ3_interim")};
 
   moveit_msgs::MotionPlanRequest req = circ.toRequest();
 
@@ -698,7 +720,7 @@ TEST_P(TrajectoryGeneratorCIRCTest, InterimPointJointGoalStartVelNearZero)
 {
   SKIP_IF_GRIPPER
 
-  auto circ {tdp_->getCircJointInterimCart("circ3_interim")};
+      auto circ {tdp_->getCircJointInterimCart("circ3_interim")};
 
   moveit_msgs::MotionPlanRequest req = circ.toRequest();
 

@@ -52,10 +52,12 @@ class TrajectoryGeneratorCIRC : public TrajectoryGenerator
 {
 public:
   /**
-   * @brief Constructor of CIRC Trajectory Generator
+   * @brief Constructor of CIRC Trajectory Generator.
+   *
+   * @param planner_limits Limits in joint and Cartesian spaces
+   *
    * @throw TrajectoryGeneratorInvalidLimitsException
-   * @param model: robot model
-   * @param planner_limits: limits in joint and Cartesian spaces
+   *
    */
   TrajectoryGeneratorCIRC(const robot_model::RobotModelConstPtr& robot_model,
                           const pilz::LimitsContainer& planner_limits);
@@ -74,9 +76,17 @@ private:
                     trajectory_msgs::JointTrajectory& joint_trajectory) override;
 
   /**
-   * @brief construct a KDL::Path object for a Cartesian path of an arc
-   * @param req: motion plan request
-   * @return a unique pointer of the path object. null_ptr in case of an error.
+   * @brief Construct a KDL::Path object for a Cartesian path of an arc.
+   *
+   * @return A unique pointer of the path object, null_ptr in case of an error.
+   *
+   * @throws CircleNoPlane if the plane in which the circle resides,
+   * could not be determined.
+   *
+   * @throws CircleToSmall if the specified circ radius is to small.
+   *
+   * @throws CenterPointDifferentRadius if the distances between start-center
+   * and goal-center are different.
    */
   std::unique_ptr<KDL::Path> setPathCIRC(const MotionPlanInfo &info) const;
 
