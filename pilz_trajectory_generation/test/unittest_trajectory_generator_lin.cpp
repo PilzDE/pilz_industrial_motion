@@ -181,7 +181,7 @@ TEST(TrajectoryGeneratorLINTest, TestExceptionErrorCodeMapping)
 
   {
     std::shared_ptr<LinJointMissingInStartState> ljmiss_ex {new LinJointMissingInStartState("")};
-    EXPECT_EQ(ljmiss_ex->getErrorCode(), moveit_msgs::MoveItErrorCodes::INVALID_GOAL_CONSTRAINTS);
+    EXPECT_EQ(ljmiss_ex->getErrorCode(), moveit_msgs::MoveItErrorCodes::INVALID_ROBOT_STATE);
   }
 
   {
