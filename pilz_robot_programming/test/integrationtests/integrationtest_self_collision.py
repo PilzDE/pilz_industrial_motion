@@ -24,7 +24,7 @@ from pilz_robot_programming.commands import *
 from visualization_msgs.msg import Marker
 from visualization_msgs.msg import MarkerArray
 
-API_VERSION = "1"
+API_VERSION = "2"
 COLLISION_TOPIC = "/move_group/display_contacts"
 
 

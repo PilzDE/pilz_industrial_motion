@@ -22,7 +22,7 @@ from pilz_robot_programming.commands import *
 
 _TEST_DATA_FILE_NAME = RosPack().get_path("pilz_industrial_motion_testutils") + "/test_data/testdata_deprecated.xml"
 PLANNING_GROUP_NAME = "manipulator"
-API_VERSION = "1"
+API_VERSION = "2"
 COMPARE_PRECISION = 6
 
 

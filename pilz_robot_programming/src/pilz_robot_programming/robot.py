@@ -34,7 +34,7 @@ from .exceptions import *
 from geometry_msgs.msg import Quaternion, PoseStamped, Pose
 from std_msgs.msg import Header
 
-__version__ = '1.0.0'
+__version__ = '2.0.0'
 
 # Due to bug in actionlib we have to take care about validity of transitions when cancelling
 _VALID_GOAL_STATUS_FOR_CANCEL = [GoalStatus.PENDING, GoalStatus.ACTIVE]

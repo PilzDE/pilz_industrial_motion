@@ -26,7 +26,7 @@ from pilz_robot_programming.robot import *
 
 _TEST_DATA_FILE_NAME = RosPack().get_path("pilz_industrial_motion_testutils") + "/test_data/testdata_deprecated.xml"
 _GROUP_NAME = "manipulator"
-_API_VERSION = "1"
+_API_VERSION = "2"
 
 
 class TestAPIProgramTermination(unittest.TestCase):

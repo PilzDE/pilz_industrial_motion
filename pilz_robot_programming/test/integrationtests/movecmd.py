@@ -56,7 +56,7 @@ from docopt import docopt
 from pilz_robot_programming.robot import *
 from pilz_robot_programming.commands import *
 
-__REQUIRED_API_VERSION__ = "1"
+__REQUIRED_API_VERSION__ = "2"
 
 
 def goal_from_args(goal_args):
