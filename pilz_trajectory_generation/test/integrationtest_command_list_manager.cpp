@@ -626,12 +626,12 @@ TEST_F(IntegrationTestCommandListManager, TestGroupSpecificStartState)
 
 /**
  * @brief Checks that exception is thrown if Tip-Frame is requested for
- * an end-effector.
+ * a group without a solver.
  */
-TEST_F(IntegrationTestCommandListManager, TestTipFrameNoEndEffector)
+TEST_F(IntegrationTestCommandListManager, TestGetSolverTipFrameForSolverlessGroup)
 {
   Gripper gripper_cmd {data_loader_->getGripper("open_gripper")};
-  EXPECT_THROW(getTipFrame(robot_model_->getJointModelGroup(gripper_cmd.getPlanningGroup())), EndEffectorException);
+  EXPECT_THROW(getSolverTipFrame(robot_model_->getJointModelGroup(gripper_cmd.getPlanningGroup())), NoSolverException);
 }
 
 int main(int argc, char **argv)
