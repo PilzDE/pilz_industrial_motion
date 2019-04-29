@@ -109,7 +109,7 @@ bool CommandListManager::checkRadiiForOverlap(const robot_trajectory::RobotTraje
     return false;
   }
 
-  const std::string& blend_frame {getTipFrame(model_->getJointModelGroup(traj_A.getGroupName()))};
+  const std::string& blend_frame {getSolverTipFrame(model_->getJointModelGroup(traj_A.getGroupName()))};
   auto distance_endpoints = (traj_A.getLastWayPoint().getFrameTransform(blend_frame).translation() -
                              traj_B.getLastWayPoint().getFrameTransform(blend_frame).translation()).norm();
   return distance_endpoints <= sum_radii;
@@ -176,10 +176,10 @@ bool CommandListManager::isInvalidBlendRadii(const moveit::core::RobotModel &mod
     return true;
   }
 
-  // No blending between end-effectors
-  if (model.getJointModelGroup(item_A.req.group_name)->isEndEffector())
+  // No blending for groups without solver
+  if(!hasSolver(model.getJointModelGroup(item_A.req.group_name)))
   {
-    ROS_WARN_STREAM("Blending between end-effector commands not allowed");
+    ROS_WARN_STREAM("Blending for groups without solver not allowed");
     return true;
   }
 
