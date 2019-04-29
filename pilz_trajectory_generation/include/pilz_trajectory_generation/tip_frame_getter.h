@@ -3,6 +3,7 @@
 
 #include <string>
 #include <cassert>
+#include <stdexcept>
 
 #include <moveit/robot_model/joint_model_group.h>
 
@@ -11,27 +12,36 @@
 namespace pilz_trajectory_generation
 {
 
-CREATE_MOVEIT_ERROR_CODE_EXCEPTION(EndEffectorException, moveit_msgs::MoveItErrorCodes::FAILURE);
 CREATE_MOVEIT_ERROR_CODE_EXCEPTION(NoSolverException, moveit_msgs::MoveItErrorCodes::FAILURE);
 
 /**
- * @return The name of the tip frame (link) of the specified group. An
- * exception is thrown if the group is an end-effector or if no solver for
- * the group could be found.
+ * @returns true if the JointModelGroup has a solver, false otherwise.
+ *
+ * @throws exception in case group is null.
  */
-static const std::string& getTipFrame(const moveit::core::JointModelGroup* group)
+static bool hasSolver(const moveit::core::JointModelGroup* group)
 {
-  if (group->isEndEffector())
+  if (group == nullptr)
   {
-    throw EndEffectorException("Given group is an end-effector which is not allowed | group: " + group->getName());
+    throw std::invalid_argument("Group must not be null");
   }
+  return group->getSolverInstance() != nullptr;
+}
 
-  auto solver {group->getSolverInstance()};
-  if(solver == nullptr)
+/**
+ * @return The name of the tip frame (link) of the specified group
+ * returned by the solver. An exception is thrown if no solver for
+ * the group could be found.
+ *
+ * @throws exception in case the solver has no solver.
+ */
+static const std::string& getSolverTipFrame(const moveit::core::JointModelGroup* group)
+{
+  if( !hasSolver(group) )
   {
     throw NoSolverException("No solver for group " + group->getName());
   }
-  return solver->getTipFrame();
+  return group->getSolverInstance()->getTipFrame();
 }
 
 }

@@ -16,6 +16,7 @@
  */
 
 #include <memory>
+#include <stdexcept>
 
 #include <gtest/gtest.h>
 
@@ -46,9 +47,6 @@ void IntegrationGetTipFrame::SetUp()
 
 TEST_F(IntegrationGetTipFrame, TestExceptionErrorCodeMapping)
 {
-  std::shared_ptr<EndEffectorException> ee_ex {new EndEffectorException("")};
-  EXPECT_EQ(ee_ex->getErrorCode(), moveit_msgs::MoveItErrorCodes::FAILURE);
-
   std::shared_ptr<NoSolverException> nse_ex {new NoSolverException("")};
   EXPECT_EQ(nse_ex->getErrorCode(), moveit_msgs::MoveItErrorCodes::FAILURE);
 }
@@ -59,7 +57,16 @@ TEST_F(IntegrationGetTipFrame, TestExceptionErrorCodeMapping)
  */
 TEST_F(IntegrationGetTipFrame, TestExceptionNoSolver)
 {
-  EXPECT_THROW(getTipFrame(robot_model_->getJointModelGroup("fake_group")), NoSolverException);
+  EXPECT_THROW(getSolverTipFrame(robot_model_->getJointModelGroup("fake_group")), NoSolverException);
+}
+
+/**
+ * @brief Checks that an exceptions is thrown in case a nullptr is
+ * specified as JointModelGroup.
+ */
+TEST_F(IntegrationGetTipFrame, NullptrJointGroup)
+{
+  EXPECT_THROW(hasSolver(nullptr), std::invalid_argument);
 }
 
 int main(int argc, char **argv)
