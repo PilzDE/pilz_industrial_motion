@@ -15,6 +15,8 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
+#include <memory>
+
 #include <gtest/gtest.h>
 
 #include "pilz_trajectory_generation/trajectory_generator_ptp.h"
@@ -109,30 +111,47 @@ void TrajectoryGeneratorPTPTest::SetUp()
     }
   }
 
-   // create the trajectory generator
+  // create the trajectory generator
   planner_limits_.setJointLimits(joint_limits);
   ptp_.reset(new TrajectoryGeneratorPTP(robot_model_, planner_limits_));
   ASSERT_NE(nullptr, ptp_);
 }
 
 bool TrajectoryGeneratorPTPTest::checkTrajectory(const trajectory_msgs::JointTrajectory& trajectory,
-                     const planning_interface::MotionPlanRequest& req,
-                     const pilz::JointLimitsContainer& joint_limits)
+                                                 const planning_interface::MotionPlanRequest& req,
+                                                 const pilz::JointLimitsContainer& joint_limits)
 {
   return (testutils::isTrajectoryConsistent(trajectory) &&
           testutils::isGoalReached(trajectory,
-                                      req.goal_constraints.front().joint_constraints,
-                                      joint_position_tolerance_,
-                                      joint_velocity_tolerance_) &&
+                                   req.goal_constraints.front().joint_constraints,
+                                   joint_position_tolerance_,
+                                   joint_velocity_tolerance_) &&
           testutils::isPositionBounded(trajectory,joint_limits) &&
           testutils::isVelocityBounded(trajectory,joint_limits) &&
           testutils::isAccelerationBounded(trajectory,joint_limits));
 }
 
+/**
+ * @brief Checks that each derived MoveItErrorCodeException contains the correct
+ * error code.
+ */
+TEST(TrajectoryGeneratorPTPTest, TestExceptionErrorCodeMapping)
+{
+  {
+    std::shared_ptr<PtpVelocityProfileSyncFailed> pvpsf_ex {new PtpVelocityProfileSyncFailed("")};
+    EXPECT_EQ(pvpsf_ex->getErrorCode(), moveit_msgs::MoveItErrorCodes::FAILURE);
+  }
+
+  {
+    std::shared_ptr<PtpNoIkSolutionForGoalPose> pnisfgp_ex {new PtpNoIkSolutionForGoalPose("")};
+    EXPECT_EQ(pnisfgp_ex->getErrorCode(), moveit_msgs::MoveItErrorCodes::NO_IK_SOLUTION);
+  }
+}
+
 // Instantiate the test cases for robot model with and without gripper
 INSTANTIATE_TEST_CASE_P(InstantiationName, TrajectoryGeneratorPTPTest, ::testing::Values(
-                        PARAM_MODEL_NO_GRIPPER_NAME,
-                        PARAM_MODEL_WITH_GRIPPER_NAME
+                          PARAM_MODEL_NO_GRIPPER_NAME,
+                          PARAM_MODEL_WITH_GRIPPER_NAME
                           ));
 /**
  * @brief Construct a TrajectoryGeneratorPTP with no limits given
@@ -252,7 +271,7 @@ TEST_P(TrajectoryGeneratorPTPTest, testInsufficientLimit)
   for(const auto& joint_model : joint_models)
   {
     ASSERT_TRUE(insufficient_joint_limits.addLimit(joint_model->getName(), insufficient_limit))
-      << "Failed to add the limits for joint " << joint_model->getName();
+        << "Failed to add the limits for joint " << joint_model->getName();
   }
   LimitsContainer insufficient_planner_limits;
   insufficient_planner_limits.setJointLimits(insufficient_joint_limits);
@@ -284,12 +303,12 @@ TEST_P(TrajectoryGeneratorPTPTest, testInsufficientLimit)
     const auto& joint_names {jmg->getActiveJointModelNames()};
     ASSERT_FALSE(joint_names.empty());
     ASSERT_TRUE(sufficient_joint_limits.addLimit(joint_names.front(), sufficient_limit))
-      << "Failed to add the limits for joint " << joint_names.front();
+        << "Failed to add the limits for joint " << joint_names.front();
 
     for(auto it = std::next(joint_names.begin()); it != joint_names.end(); ++it)
     {
       ASSERT_TRUE(sufficient_joint_limits.addLimit((*it), insufficient_limit))
-        << "Failed to add the limits for joint " << (*it);
+          << "Failed to add the limits for joint " << (*it);
     }
   }
   LimitsContainer sufficient_planner_limits;

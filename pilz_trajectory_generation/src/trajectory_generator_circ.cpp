@@ -19,6 +19,7 @@
 #include "pilz_trajectory_generation/path_circle_generator.h"
 
 #include <cassert>
+#include <sstream>
 
 #include <ros/ros.h>
 #include <eigen_conversions/eigen_msg.h>
@@ -30,7 +31,8 @@
 #include <kdl/trajectory_segment.hpp>
 #include <kdl/rotational_interpolation_sa.hpp>
 
-namespace pilz {
+namespace pilz
+{
 
 TrajectoryGeneratorCIRC::TrajectoryGeneratorCIRC(const moveit::core::RobotModelConstPtr &robot_model,
                                                  const LimitsContainer &planner_limits)
@@ -42,111 +44,29 @@ TrajectoryGeneratorCIRC::TrajectoryGeneratorCIRC(const moveit::core::RobotModelC
   }
 }
 
-TrajectoryGeneratorCIRC::~TrajectoryGeneratorCIRC()
+void TrajectoryGeneratorCIRC::cmdSpecificRequestValidation(const planning_interface::MotionPlanRequest &req) const
 {
-
-}
-
-bool TrajectoryGeneratorCIRC::generate(const planning_interface::MotionPlanRequest &req,
-                                       planning_interface::MotionPlanResponse &res,
-                                       double sampling_time)
-{
-  ROS_INFO("Start generation of CIRC trajectory!");
-
-  ros::Time planning_begin = ros::Time::now();
-  moveit_msgs::MoveItErrorCodes error_code;
-  MotionPlanInfo plan_info;
-  trajectory_msgs::JointTrajectory joint_trajectory;
-
-  // validate the common requirements of motion plan request
-  if(!validateRequest(req, error_code))
-  {
-    ROS_ERROR("Failed to validate the planning request of a CIRC command.");
-    return setResponse(req, res, joint_trajectory, error_code, planning_begin);
-  }
-  // extract planning information from the motion plan request
-  if(!extractMotionPlanInfo(req, plan_info, error_code))
-  {
-    ROS_ERROR("Cannot extract needed information from motion plan request.");
-    return setResponse(req, res, joint_trajectory, error_code, planning_begin);
-  }
-
-  // create Cartesian path for circle
-  std::unique_ptr<KDL::Path> path(setPathCIRC(plan_info, error_code));
-  if(!path)
-  {
-    ROS_ERROR("Failed to set Cartesian path of the circle.");
-    return setResponse(req, res, joint_trajectory, error_code, planning_begin);
-  }
-
-  // create velocity profile
-  std::unique_ptr<KDL::VelocityProfile> vp(cartesianTrapVelocityProfile(req, plan_info, path));
-
-  // combine path and velocity profile into Cartesian trajectory
-  // with the third parameter set to false, KDL::Trajectory_Segment does not take
-  // the ownship of Path and Velocity Profile
-  KDL::Trajectory_Segment cart_trajectory(path.get(), vp.get(), false);
-
-  // sample the Cartesian trajectory and compute joint trajectory using inverse kinematics
-  if(!generateJointTrajectory(robot_model_,
-                              planner_limits_.getJointLimitContainer(),
-                              cart_trajectory,
-                              plan_info.group_name,
-                              plan_info.link_name,
-                              plan_info.start_joint_position,
-                              sampling_time,
-                              joint_trajectory,
-                              error_code))
-  {
-    ROS_ERROR("Failed to generate valid joint trajectory from the Cartesian path.");
-  }
-  else
-  {
-    ROS_INFO_STREAM("CIRC Trajectory with " << joint_trajectory.points.size() << " Points generated. Took "
-                    << (ros::Time::now() - planning_begin).toSec() * 1000 << " ms.");
-  }
-
-
-  return setResponse(req, res, joint_trajectory, error_code, planning_begin);
-}
-
-bool TrajectoryGeneratorCIRC::validateRequest(const planning_interface::MotionPlanRequest &req,
-                                              moveit_msgs::MoveItErrorCodes &error_code) const
-{
-
-  if(!TrajectoryGenerator::validateRequest(req, error_code))
-  {
-    return false;
-  }
-
-  // CIRC needs one position constraint as interim or center point
   if(! (req.path_constraints.name == "interim" ||
         req.path_constraints.name == "center") )
   {
-    ROS_ERROR_STREAM("Undefined path constraint with the name: " << req.path_constraints.name << " for CIRC motion."
-                     << "Only interim/center point is allowed.");
-    error_code.val = moveit_msgs::MoveItErrorCodes::INVALID_MOTION_PLAN;
-    return false;
+    std::ostringstream os;
+    os << "No path constraint named \"interim\" or \"center\" found (found unknown constraint: " << "\"req.path_constraints.name\"" << " instead)";
+    throw UnknownPathConstraintName(os.str());
   }
+
   if(req.path_constraints.position_constraints.size() != 1)
   {
-    ROS_ERROR("CIRC Trajectory Generator needs a valid path constraint.");
-    error_code.val = moveit_msgs::MoveItErrorCodes::INVALID_MOTION_PLAN;
-    return false;
+    throw NoPositionConstraints("CIRC trajectory generator needs valid a position constraint");
   }
+
   if(req.path_constraints.position_constraints.front().constraint_region.primitive_poses.size() != 1)
   {
-    ROS_ERROR("CIRC Trajectory Generator needs a valid path constraint.");
-    error_code.val = moveit_msgs::MoveItErrorCodes::INVALID_MOTION_PLAN;
-    return false;
+    throw NoPrimitivePose("CIRC trajectory generator needs valid a primitive pose");
   }
-
-  return true;
 }
 
-bool TrajectoryGeneratorCIRC::extractMotionPlanInfo(const planning_interface::MotionPlanRequest &req,
-                                                    TrajectoryGenerator::MotionPlanInfo &info,
-                                                    moveit_msgs::MoveItErrorCodes &error_code) const
+void TrajectoryGeneratorCIRC::extractMotionPlanInfo(const planning_interface::MotionPlanRequest &req,
+                                                    TrajectoryGenerator::MotionPlanInfo &info) const
 {
   ROS_DEBUG("Extract necessary information from motion plan request.");
 
@@ -160,18 +80,17 @@ bool TrajectoryGeneratorCIRC::extractMotionPlanInfo(const planning_interface::Mo
     info.link_name = req.path_constraints.position_constraints.front().link_name;
     if(!robot_model_->hasLinkModel(info.link_name))
     {
-      ROS_ERROR("Unknown link name of CIRC help point.");
-      error_code.val = moveit_msgs::MoveItErrorCodes::INVALID_LINK_NAME;
-      return false;
+      throw UnknownLinkNameOfAuxiliaryPoint("Unknown link name of CIRC auxiliary point");
     }
-
 
     if(req.goal_constraints.front().joint_constraints.size() !=
        robot_model_->getJointModelGroup(req.group_name)->getActiveJointModelNames().size())
     {
-      ROS_ERROR_STREAM("Number of joint constraint is not equal to the active joints in the planning group");
-      error_code.val = moveit_msgs::MoveItErrorCodes::INVALID_GOAL_CONSTRAINTS;
-      return false;
+      std::ostringstream os;
+      os << "Number of joint constraint = " << req.goal_constraints.front().joint_constraints.size()
+         << " not equal to active joints of group = "
+         << robot_model_->getJointModelGroup(req.group_name)->getActiveJointModelNames().size();
+      throw NumberOfConstraintsMismatch(os.str());
     }
 
     for(const auto &joint_item : req.goal_constraints.front().joint_constraints)
@@ -179,12 +98,10 @@ bool TrajectoryGeneratorCIRC::extractMotionPlanInfo(const planning_interface::Mo
       info.goal_joint_position[joint_item.joint_name] = joint_item.position;
     }
 
-
     computeLinkFK(robot_model_,
                   info.link_name,
                   info.goal_joint_position,
                   info.goal_pose);
-
   }
   // goal given in Cartesian space
   else
@@ -214,9 +131,10 @@ bool TrajectoryGeneratorCIRC::extractMotionPlanInfo(const planning_interface::Mo
     auto it {std::find(req.start_state.joint_state.name.cbegin(), req.start_state.joint_state.name.cend(), joint_name)};
     if (it == req.start_state.joint_state.name.cend())
     {
-      ROS_ERROR_STREAM("Could not find joint \"" << joint_name << "\" of group \"" << req.group_name << "\" in start state of request");
-      error_code.val = moveit_msgs::MoveItErrorCodes::INVALID_ROBOT_STATE;
-      return false;
+      std::ostringstream os;
+      os << "Could not find joint \"" << joint_name << "\" of group \""
+         << req.group_name << "\" in start state of request";
+      throw CircJointMissingInStartState(os.str());
     }
     size_t index = it - req.start_state.joint_state.name.cbegin();
     info.start_joint_position[joint_name] = req.start_state.joint_state.position[index];
@@ -238,9 +156,9 @@ bool TrajectoryGeneratorCIRC::extractMotionPlanInfo(const planning_interface::Mo
                     ik_solution))
   {
     // LCOV_EXCL_START
-    ROS_ERROR_STREAM("Failed to compute inverse kinematics for link: " << info.link_name << " of goal pose.");
-    error_code.val = moveit_msgs::MoveItErrorCodes::NO_IK_SOLUTION;
-    return false;
+    std::ostringstream os;
+    os << "Failed to compute inverse kinematics for link: " << info.link_name << " of goal pose";
+    throw CircInverseForGoalIncalculable(os.str());
     // LCOV_EXCL_STOP // not able to trigger here since lots of checks before are in place
   }
 
@@ -251,12 +169,39 @@ bool TrajectoryGeneratorCIRC::extractMotionPlanInfo(const planning_interface::Mo
 
   info.circ_path_point.first = req.path_constraints.name;
   info.circ_path_point.second = circ_path_point;
-
-  return true;
 }
 
-std::unique_ptr<KDL::Path> TrajectoryGeneratorCIRC::setPathCIRC(const MotionPlanInfo &info,
-                                                                moveit_msgs::MoveItErrorCodes &error_code) const
+void TrajectoryGeneratorCIRC::plan(const planning_interface::MotionPlanRequest &req,
+                                   const MotionPlanInfo& plan_info,
+                                   const double& sampling_time,
+                                   trajectory_msgs::JointTrajectory& joint_trajectory)
+{
+  std::unique_ptr<KDL::Path> cart_path(setPathCIRC(plan_info));
+  std::unique_ptr<KDL::VelocityProfile> vel_profile(cartesianTrapVelocityProfile(req.max_velocity_scaling_factor, req.max_acceleration_scaling_factor, cart_path));
+
+  // combine path and velocity profile into Cartesian trajectory
+  // with the third parameter set to false, KDL::Trajectory_Segment does not take
+  // the ownship of Path and Velocity Profile
+  KDL::Trajectory_Segment cart_trajectory(cart_path.get(), vel_profile.get(), false);
+
+  moveit_msgs::MoveItErrorCodes error_code;
+  // sample the Cartesian trajectory and compute joint trajectory using inverse kinematics
+  if(!generateJointTrajectory(robot_model_,
+                              planner_limits_.getJointLimitContainer(),
+                              cart_trajectory,
+                              plan_info.group_name,
+                              plan_info.link_name,
+                              plan_info.start_joint_position,
+                              sampling_time,
+                              joint_trajectory,
+                              error_code))
+  {
+    throw CircTrajectoryConversionFailure("Failed to generate valid joint trajectory from the Cartesian path",
+                                          error_code.val);
+  }
+}
+
+std::unique_ptr<KDL::Path> TrajectoryGeneratorCIRC::setPathCIRC(const MotionPlanInfo &info) const
 {
   ROS_DEBUG("Set Cartesian path for CIRC command.");
 
@@ -287,22 +232,24 @@ std::unique_ptr<KDL::Path> TrajectoryGeneratorCIRC::setPathCIRC(const MotionPlan
   }
   catch(KDL::Error_MotionPlanning_Circle_No_Plane &e)
   {
-    ROS_ERROR_STREAM("Failed to create path object for circle. " << e.Description());
-    error_code.val = moveit_msgs::MoveItErrorCodes::INVALID_MOTION_PLAN;
-    return nullptr;
+    std::ostringstream os;
+    os << "Failed to create path object for circle." << e.Description();
+    throw CircleNoPlane(os.str());
   }
   catch(KDL::Error_MotionPlanning_Circle_ToSmall &e)
   {
-    ROS_ERROR_STREAM("Failed to create path object for circle. " << e.Description());
-    error_code.val = moveit_msgs::MoveItErrorCodes::INVALID_MOTION_PLAN;
-    return nullptr;
+    std::ostringstream os;
+    os << "Failed to create path object for circle." << e.Description();
+    throw CircleToSmall(os.str());
   }
   catch(Error_MotionPlanning_CenterPointDifferentRadius &e)
   {
-    ROS_ERROR_STREAM("Failed to create path object for circle. " << e.Description());
-    error_code.val = moveit_msgs::MoveItErrorCodes::INVALID_MOTION_PLAN;
-    return nullptr;
+    std::ostringstream os;
+    os << "Failed to create path object for circle." << e.Description();
+    throw CenterPointDifferentRadius(os.str());
   }
+
+  return nullptr;
 }
 
 }
