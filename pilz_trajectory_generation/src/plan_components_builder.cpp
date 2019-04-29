@@ -67,7 +67,7 @@ void PlanComponentsBuilder::blend(robot_trajectory::RobotTrajectoryPtr other,
   blend_request.second_trajectory = other;
   blend_request.blend_radius = blend_radius;
   blend_request.group_name = traj_tail_->getGroupName();
-  blend_request.link_name = getTipFrame(model_->getJointModelGroup(blend_request.group_name));
+  blend_request.link_name = getSolverTipFrame(model_->getJointModelGroup(blend_request.group_name));
 
   pilz::TrajectoryBlendResponse blend_response;
   if (!blender_->blend(blend_request, blend_response))
