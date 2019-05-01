@@ -57,7 +57,7 @@ The planner is able to handle all the different commands. Just put "PTP", "LIN" 
 the motion request.
 
 ## The PTP motion command
-This planner generates full synchronized point to point trajectories with trapezoid joint velocity profile. All joints
+This planner generates full synchronized point to point trajectories with trapezoidal joint velocity profile. All joints
 are assumed to have the same maximal joint velocity/acceleration/deceleration limits. If not, the strictest limits are
 adopted. The axis with the longest time to reach the goal is selected as the lead axis.
 Other axes are decelerated so that they share the same acceleration/constant velocity/deceleration phases
@@ -135,7 +135,7 @@ This planner generates a circular arc trajectory in Cartesian space between goal
  - an *interim* point on the arc: The generated trajectory always goes through the interim point. The planner cannot generate a full circle.
 
 The Cartesian limits, namely translational/rotational velocity/acceleration/deceleration need to be set
-and the planner uses these limits to generate a trapezoid velocity profile in Cartesian space. The rotational motion is
+and the planner uses these limits to generate a trapezoidal velocity profile in Cartesian space. The rotational motion is
 quaternion slerp between start and goal orientation. The translational and rotational motion is synchronized in time.
 This planner only accepts start state with zero velocity. Planning result is a joint trajectory. The user needs to adapt
 the Cartesian velocity/acceleration scaling factor if motion plan fails due to violation of joint limits.
