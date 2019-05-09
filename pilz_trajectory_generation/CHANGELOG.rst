@@ -2,8 +2,8 @@
 Changelog for package pilz_trajectory_generation
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
-Forthcoming
------------
+0.3.7 (2019-05-09)
+------------------
 * fixed an error that led to trajectories not strictly increasing in time
 * update dependencies of trajectory_generation
 * fix CIRC path generator and increase test coverage
