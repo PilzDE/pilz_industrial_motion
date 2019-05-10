@@ -16,23 +16,24 @@
 """API for easy usage of Pilz robot commands."""
 
 from __future__ import absolute_import
-
-import rospy
-from pilz_msgs.msg import MoveGroupSequenceAction
-from actionlib import SimpleActionClient, GoalStatus
-from moveit_commander import RobotCommander, MoveItCommanderException
-from moveit_msgs.msg import MoveItErrorCodes, MoveGroupAction
+import psutil
 import time
 import threading
+
+from actionlib import SimpleActionClient, GoalStatus
+from geometry_msgs.msg import Quaternion, PoseStamped, Pose
+from moveit_commander import RobotCommander, MoveItCommanderException
+from moveit_msgs.msg import MoveItErrorCodes, MoveGroupAction
+import rospy
+from std_msgs.msg import Header
 from std_srvs.srv import Trigger
 import tf
-import psutil
 
+from pilz_msgs.msg import MoveGroupSequenceAction
+from prbt_hardware_support.srv import IsBrakeTestRequired
 from .move_control_request import _MoveControlState, MoveControlAction,_MoveControlStateMachine
 from .commands import _AbstractCmd, _DEFAULT_PLANNING_GROUP, _DEFAULT_TARGET_LINK, _DEFAULT_BASE_LINK, Sequence
 from .exceptions import *
-from geometry_msgs.msg import Quaternion, PoseStamped, Pose
-from std_msgs.msg import Header
 
 __version__ = '1.0.0'
 
@@ -273,6 +274,25 @@ class Robot(object):
         """
         rospy.loginfo("Resume called.")
         self._move_ctrl_sm.switch(MoveControlAction.RESUME)
+
+    def is_brake_test_required(self, timeout=None):
+        """The checks whether a brake test is currently required.
+
+        :param timeout: specify (in seconds) how long to wait for service availability
+
+        :note:
+            Function blocks until an answer is available or timeout has passed.
+        """
+        SERVICE_NAME = "/prbt/is_brake_test_required"
+        rospy.loginfo("Checking whether brake test is required.")
+        rospy.wait_for_service(SERVICE_NAME, timeout)
+        try:
+            is_brake_test_required_client = rospy.ServiceProxy(SERVICE_NAME, IsBrakeTestRequired)
+            resp = is_brake_test_required_client()
+            return resp.result
+        except rospy.ServiceException, e:
+            rospy.logerr("Service call failed: %s"%e)
+            raise e
 
     def _move_execution_loop(self, cmd):
         continue_execution_of_cmd = True
