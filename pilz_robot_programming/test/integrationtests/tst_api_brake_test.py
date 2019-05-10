@@ -15,12 +15,12 @@
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 import unittest
-from threading import Thread
 
 import rospy
 
 from pilz_robot_programming.robot import Robot
 from brake_test_mock import BrakeTestMock
+from prbt_hardware_support.srv import BrakeTestResponse
 
 API_VERSION = "1"
 
@@ -38,9 +38,9 @@ class TestAPIBrakeTest(unittest.TestCase):
             self.robot._release()
             self.robot = None
 
-    def test_timeout(self):
+    def test_required_timeout(self):
         """
-        If method is called without service beeing available we expect a
+        If method is called without service being available we expect a
         ROSException("timeout exceeded while waiting for service").
         """
         self.assertRaises(
@@ -56,13 +56,15 @@ class TestAPIBrakeTest(unittest.TestCase):
         """
         mock = BrakeTestMock()
         mock.start()
-        mock.advertise_service()
+        mock.advertise_brake_test_required_service()
 
-        mock.set_is_braketest_required(True)
+        mock.set_is_brake_test_required(True)
+        res = None
         try:
-            res = self.robot.is_brake_test_required()
+            res = self.robot.is_brake_test_required(1)
         except Exception as e:
-            print(e)
+            rospy.logerr(e)
+            raise e
         self.assertTrue(res)
 
         mock.stop()
@@ -74,14 +76,54 @@ class TestAPIBrakeTest(unittest.TestCase):
         """
         mock = BrakeTestMock()
         mock.start()
-        mock.advertise_service()
+        mock.advertise_brake_test_required_service()
 
-        mock.set_is_braketest_required(False)
+        mock.set_is_brake_test_required(False)
+        res = None
         try:
-            res = self.robot.is_brake_test_required()
+            res = self.robot.is_brake_test_required(1)
         except Exception as e:
-            print(e)
+            rospy.logerr(e)
+            raise e
         self.assertFalse(res)
+
+        mock.stop()
+        mock.join()
+
+    def test_execute_success(self):
+        """Execute a successful brake test"""
+        mock = BrakeTestMock()
+        mock.start()
+        mock.advertise_brake_test_execute_service()
+
+        mock.set_brake_test_execute_result(BrakeTestResponse.SUCCESS)
+        res = None
+        try:
+            res = self.robot.execute_brake_test(1)
+        except Exception as e:
+            rospy.logerr(e)
+            raise e
+        self.assertEqual(res, BrakeTestResponse.SUCCESS)
+        # TODO: this feels like a self fulfilling prophecy. Can we test something more useful?!
+
+        mock.stop()
+        mock.join()
+
+    def test_execute_failure(self):
+        """Execute a failing brake test"""
+        mock = BrakeTestMock()
+        mock.start()
+        mock.advertise_brake_test_execute_service()
+
+        mock.set_brake_test_execute_result(BrakeTestResponse.FAILURE)
+        res = None
+        try:
+            res = self.robot.execute_brake_test(1)
+        except Exception as e:
+            rospy.logerr(e)
+            raise e
+        self.assertEqual(res, BrakeTestResponse.FAILURE)
+        # TODO: this feels like a self fulfilling prophecy. Can we test something more useful?!
 
         mock.stop()
         mock.join()

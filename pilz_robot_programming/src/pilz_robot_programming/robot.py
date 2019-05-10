@@ -30,7 +30,7 @@ from std_srvs.srv import Trigger
 import tf
 
 from pilz_msgs.msg import MoveGroupSequenceAction
-from prbt_hardware_support.srv import IsBrakeTestRequired
+from prbt_hardware_support.srv import IsBrakeTestRequired, BrakeTest
 from .move_control_request import _MoveControlState, MoveControlAction,_MoveControlStateMachine
 from .commands import _AbstractCmd, _DEFAULT_PLANNING_GROUP, _DEFAULT_TARGET_LINK, _DEFAULT_BASE_LINK, Sequence
 from .exceptions import *
@@ -284,12 +284,44 @@ class Robot(object):
             Function blocks until an answer is available or timeout has passed.
         """
         SERVICE_NAME = "/prbt/is_brake_test_required"
-        rospy.loginfo("Checking whether brake test is required.")
+        rospy.loginfo("Checking whether brake test is required: >")
         rospy.wait_for_service(SERVICE_NAME, timeout)
         try:
-            is_brake_test_required_client = rospy.ServiceProxy(SERVICE_NAME, IsBrakeTestRequired)
+            is_brake_test_required_client = rospy.ServiceProxy(
+                SERVICE_NAME,
+                IsBrakeTestRequired)
             resp = is_brake_test_required_client()
+            if resp.result:
+                rospy.loginfo("< it is.")
+            else:
+                rospy.loginfo("< it is not.")
             return resp.result
+        except rospy.ServiceException, e:
+            rospy.logerr("Service call failed: %s"%e)
+            raise e
+
+    def execute_brake_test(self, timeout=None):
+        """Execute a brake test and return the result
+
+        :param timeout: specify (in seconds) how long to wait for service availability
+
+        :note:
+            Function blocks until an answer is available or timeout has passed.
+        """
+        SERVICE_NAME = "/prbt/execute_brake_test"
+        rospy.loginfo("Executing brake test")
+        rospy.wait_for_service(SERVICE_NAME, timeout)
+        try:
+            execute_brake_test_client = rospy.ServiceProxy(
+                SERVICE_NAME,
+                BrakeTest
+            )
+            resp = execute_brake_test_client()
+            rospy.loginfo("Brake Test Result: %d, msg: %s"%(
+                resp.result,
+                resp.msg
+            ))
+            return resp.result #TODO: is this the desired behaviour or do we want to throw specific exceptions?
         except rospy.ServiceException, e:
             rospy.logerr("Service call failed: %s"%e)
             raise e

@@ -18,9 +18,14 @@ from threading import Thread
 
 import rospy
 
-from prbt_hardware_support.srv import IsBrakeTestRequired, IsBrakeTestRequiredResponse
+from prbt_hardware_support.srv import \
+    BrakeTest, \
+    BrakeTestResponse, \
+    IsBrakeTestRequired, \
+    IsBrakeTestRequiredResponse
 
 BRAKE_TEST_REQUIRED_SERVICE_NAME = "/prbt/is_brake_test_required"
+BRAKE_TEST_EXECUTE_SERVICE_NAME = "/prbt/execute_brake_test"
 
 class BrakeTestMock(Thread):
     """
@@ -31,21 +36,41 @@ class BrakeTestMock(Thread):
         """Default Constructor"""
         super(BrakeTestMock, self).__init__()
         rospy.loginfo("Mocking Brake Test")
-        self._is_braketest_required_service_mock = None
-        self._is_braketest_required = False
+        self._is_brake_test_required_service_mock = None
+        self._brake_test_execute_service_mock = None
+        self._is_brake_test_required = False
+        self._brake_test_execute_duration_s = .1
+        self._brake_test_execute_result = BrakeTestResponse.SUCCESS
+        self._brake_test_execute_msg = "Test Message"
         self._running = True
 
-    def _is_brake_test_required_server_handler(self, req):
+    def _is_brake_test_required_server_handler(self, _):
         res = IsBrakeTestRequiredResponse()
-        res.result = self._is_braketest_required
+        res.result = self._is_brake_test_required
         return res
 
-    def advertise_service(self):
-        """Method to manually advertise the service, when necessary"""
-        self._is_braketest_required_service_mock = rospy.Service(
+    def _brake_test_execute_server_handler(self, _):
+        # Sleeping ot simulate execution of brake test
+        rospy.sleep(self._brake_test_execute_duration_s)
+        res = BrakeTestResponse()
+        res.result = self._brake_test_execute_result
+        res.msg = self._brake_test_execute_msg
+        return res
+
+    def advertise_brake_test_required_service(self):
+        """Method to manually advertise brake_test_required the service, when necessary"""
+        self._is_brake_test_required_service_mock = rospy.Service(
             name=BRAKE_TEST_REQUIRED_SERVICE_NAME,
             service_class=IsBrakeTestRequired,
             handler=self._is_brake_test_required_server_handler
+        )
+
+    def advertise_brake_test_execute_service(self):
+        """Method to manually advertise brake_test_execute the service, when necessary"""
+        self._brake_test_execute_service_mock = rospy.Service(
+            name=BRAKE_TEST_EXECUTE_SERVICE_NAME,
+            service_class=BrakeTest,
+            handler=self._brake_test_execute_server_handler
         )
 
     def run(self):
@@ -56,13 +81,29 @@ class BrakeTestMock(Thread):
 
     def stop(self):
         """Method to stop the sleep loop in run()"""
-        if self._is_braketest_required_service_mock:
-            self._is_braketest_required_service_mock.shutdown()
+        if self._is_brake_test_required_service_mock is not None:
+            self._is_brake_test_required_service_mock.shutdown()
+        if self._brake_test_execute_service_mock is not None:
+            self._brake_test_execute_service_mock.shutdown()
         self._running = False
 
-    def set_is_braketest_required(self, state):
+    def set_is_brake_test_required(self, state):
         """Set the status that the service should return.
 
         :param state: status that the service should return
         """
-        self._is_braketest_required = state
+        self._is_brake_test_required = state
+
+    def set_brake_test_execute_duration_s(self, duration):
+        """Set the duration of the simulated brake test
+
+        :param duration: desired duration in seconds
+        """
+        self._brake_test_execute_duration_s = duration
+
+    def set_brake_test_execute_result(self, result):
+        """Set the result that the simulated brake test should return
+
+        :param result: desired result
+        """
+        self._brake_test_execute_result = result
