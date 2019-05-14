@@ -433,6 +433,12 @@ class Robot(object):
             rospy.logdebug("Delete single instance parameter from parameter server.")
             rospy.delete_param(self._INSTANCE_PARAM)
 
+    def __enter__(self):
+        return self
+
+    def __exit__(self, exc_type, exc_val, exc_tb):
+        self.__del__()
+
     def __del__(self):
         rospy.logdebug("Dtor called")
         self._release()
