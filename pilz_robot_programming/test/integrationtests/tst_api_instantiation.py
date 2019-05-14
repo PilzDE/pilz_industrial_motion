@@ -41,7 +41,7 @@ class TestAPIInstantiation(unittest.TestCase):
         except RobotVersionError:
             pass
         else:
-            del r
+            r._release()
             self.fail('Robot instance can be created with wrong version.')
 
     def test_none_version(self):
@@ -59,11 +59,11 @@ class TestAPIInstantiation(unittest.TestCase):
         except RobotVersionError:
             pass
         else:
-            del r
+            r._release()
             self.fail('Robot instance can be created with wrong version.')
 
     def test_multiple_instances(self):
-        """ Check that multiple instances of Robot can not created.
+        """ Check that multiple instances of Robot can not be created.
 
             Test sequence:
                 1. Create another instance of Robot.
@@ -75,11 +75,50 @@ class TestAPIInstantiation(unittest.TestCase):
         try:
             r2 = Robot(API_VERSION)
         except RobotMultiInstancesError:
-            del r1
+            r1._release()
         else:
-            del r1, r2
+            r1._release()
+            r2._release()
             self.fail('Multiple robot instances does not throw exception.')
 
+    def test_with_statement(self):
+        """ Check that proper usage of "with" statement is possible.
+
+            Test sequence:
+                1. Create several instances of Robot with the help
+                of the "with"-statement
+
+            Test Results:
+                1. Creation successful
+        """
+        for i in range(0, 7):
+            with Robot(API_VERSION) as rob:
+                # Dummy function to simulate that something is done with robot
+                rob.get_current_joint_states()
+
+
+    def test_with_statement_fail(self):
+        """ Check that new Robot instance cannot be created within
+            "with" statement.
+
+            Test sequence:
+                1. Create instances of Robot within "with" statement
+                of the "with"-statement
+
+            Test Results:
+                1. Creation failed with RobotMultiInstancesError.
+        """
+        for i in range(0, 7):
+          try:
+              with Robot(API_VERSION) as rob:
+                  # Dummy function to simulate that something is done with robot
+                  rob.get_current_joint_states()
+                  r2 = Robot(API_VERSION)
+          except RobotMultiInstancesError:
+              pass
+          else:
+              r2._release()
+              self.fail('Multiple robot instances does not throw exception.')
 
 if __name__ == '__main__':
     import rostest
