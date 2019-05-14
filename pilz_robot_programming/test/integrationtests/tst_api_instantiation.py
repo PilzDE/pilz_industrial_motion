@@ -41,7 +41,7 @@ class TestAPIInstantiation(unittest.TestCase):
         except RobotVersionError:
             pass
         else:
-            del r
+            r._release()
             self.fail('Robot instance can be created with wrong version.')
 
     def test_none_version(self):
@@ -59,7 +59,7 @@ class TestAPIInstantiation(unittest.TestCase):
         except RobotVersionError:
             pass
         else:
-            del r
+            r._release()
             self.fail('Robot instance can be created with wrong version.')
 
     def test_multiple_instances(self):
@@ -75,9 +75,10 @@ class TestAPIInstantiation(unittest.TestCase):
         try:
             r2 = Robot(API_VERSION)
         except RobotMultiInstancesError:
-            del r1
+            r1._release()
         else:
-            del r1, r2
+            r1._release()
+            r2._release()
             self.fail('Multiple robot instances does not throw exception.')
 
     def test_with_statement(self):
@@ -90,7 +91,7 @@ class TestAPIInstantiation(unittest.TestCase):
             Test Results:
                 1. Creation successful
         """
-        for i in range(0, 1):
+        for i in range(0, 7):
             with Robot(API_VERSION) as rob:
                 # Dummy function to simulate that something is done with robot
                 rob.get_current_joint_states()
@@ -116,7 +117,7 @@ class TestAPIInstantiation(unittest.TestCase):
           except RobotMultiInstancesError:
               pass
           else:
-              del r2
+              r2._release()
               self.fail('Multiple robot instances does not throw exception.')
 
 if __name__ == '__main__':
