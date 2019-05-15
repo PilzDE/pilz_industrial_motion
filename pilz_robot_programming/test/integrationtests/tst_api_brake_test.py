@@ -40,18 +40,6 @@ class TestAPIBrakeTest(unittest.TestCase):
             self.robot._release()
             self.robot = None
 
-    def test_required_timeout(self):
-        """
-        If method is called without service being available we expect a
-        ROSException("timeout exceeded while waiting for service").
-        """
-        self.assertRaises(
-            rospy.ROSException,
-            Robot.is_brake_test_required,
-            self.robot,
-            1
-        )
-
     def test_required(self):
         """
         We expect the method to return true, if the brake test is required.
@@ -63,7 +51,7 @@ class TestAPIBrakeTest(unittest.TestCase):
         mock.set_is_brake_test_required(True)
         res = None
         try:
-            res = self.robot.is_brake_test_required(1)
+            res = self.robot.is_brake_test_required()
         except Exception as e:
             rospy.logerr(e)
             raise e
@@ -83,7 +71,7 @@ class TestAPIBrakeTest(unittest.TestCase):
         mock.set_is_brake_test_required(False)
         res = None
         try:
-            res = self.robot.is_brake_test_required(1)
+            res = self.robot.is_brake_test_required()
         except Exception as e:
             rospy.logerr(e)
             raise e
@@ -99,7 +87,7 @@ class TestAPIBrakeTest(unittest.TestCase):
         mock.advertise_brake_test_execute_service()
 
         mock.set_brake_test_execute_result(BrakeTestResponse.SUCCESS)
-        self.robot.execute_brake_test(1)
+        self.robot.execute_brake_test()
 
         mock.stop()
         mock.join()

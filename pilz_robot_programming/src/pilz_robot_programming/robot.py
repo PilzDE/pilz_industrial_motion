@@ -95,16 +95,21 @@ class Robot(object):
     # Something went wrong while executing the command
     _FAILURE = 99999
 
-    # Topic names
+    # Topic / Service names
     _PAUSE_TOPIC_NAME = "pause_movement"
     _RESUME_TOPIC_NAME = "resume_movement"
     _STOP_TOPIC_NAME = "stop_movement"
     _SEQUENCE_TOPIC = "sequence_move_group"
+    _BRAKE_TEST_EXECUTE_SRV = "/prbt/execute_brake_test"
+    _BRAKE_TEST_REQUIRED_SRV = "/prbt/is_brake_test_required"
     _INSTANCE_PARAM = "/robot_api_instance"
 
     # string constants
     _PID_STRING = "pid"
     _PROCESS_CREATE_TIME_STRING = "create_time"
+
+    # time constant
+    _SERVICE_CALL_TIMEOUT_S = 5
 
     def __init__(self, version=None, *args, **kwargs):
         super(Robot, self).__init__(*args, **kwargs)
@@ -275,20 +280,17 @@ class Robot(object):
         rospy.loginfo("Resume called.")
         self._move_ctrl_sm.switch(MoveControlAction.RESUME)
 
-    def is_brake_test_required(self, timeout=None):
+    def is_brake_test_required(self):
         """The checks whether a brake test is currently required.
-
-        :param timeout: specify (in seconds) how long to wait for service availability
 
         :note:
             Function blocks until an answer is available or timeout has passed.
         """
-        SERVICE_NAME = "/prbt/is_brake_test_required"
         rospy.loginfo("Checking whether brake test is required: >")
-        rospy.wait_for_service(SERVICE_NAME, timeout)
+        rospy.wait_for_service(self._BRAKE_TEST_REQUIRED_SRV, self._SERVICE_CALL_TIMEOUT_S)
         try:
             is_brake_test_required_client = rospy.ServiceProxy(
-                SERVICE_NAME,
+                self._BRAKE_TEST_REQUIRED_SRV,
                 IsBrakeTestRequired)
             resp = is_brake_test_required_client()
             if resp.result:
@@ -297,34 +299,31 @@ class Robot(object):
                 rospy.loginfo("< it is not.")
             return resp.result
         except rospy.ServiceException, e:
-            rospy.logerr("Service call failed: %s"%e)
+            rospy.logerr("Service call failed: {0}".format(e))
             raise e
 
-    def execute_brake_test(self, timeout=None):
+    def execute_brake_test(self):
         """Execute a brake test and return the result
-
-        :param timeout: specify (in seconds) how long to wait for service availability
 
         :note:
             Function blocks until an answer is available or timeout has passed.
         """
-        SERVICE_NAME = "/prbt/execute_brake_test"
         rospy.loginfo("Executing brake test")
-        rospy.wait_for_service(SERVICE_NAME, timeout)
+        rospy.wait_for_service(self._BRAKE_TEST_EXECUTE_SRV, self._SERVICE_CALL_TIMEOUT_S)
         try:
             execute_brake_test_client = rospy.ServiceProxy(
-                SERVICE_NAME,
+                self._BRAKE_TEST_EXECUTE_SRV,
                 BrakeTest
             )
             resp = execute_brake_test_client()
-            rospy.loginfo("Brake Test Result: %d, msg: %s"%(
+            rospy.loginfo("Brake Test Result: {0}, msg: {1}".format(
                 resp.result,
                 resp.msg
             ))
             if resp.result != BrakeTestResponse.SUCCESS:
                 raise RobotBrakeTestException(resp.result, resp.msg)
         except rospy.ServiceException, e:
-            rospy.logerr("Service call failed: {0}"%e)
+            rospy.logerr("Service call failed: {0}".format(e))
             raise e
 
     def _move_execution_loop(self, cmd):

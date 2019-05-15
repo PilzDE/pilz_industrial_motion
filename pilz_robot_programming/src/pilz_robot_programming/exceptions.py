@@ -47,7 +47,7 @@ class RobotCurrentStateError(Exception):
 
 class RobotBrakeTestException(Exception):
     def __init__(self, result, message):
-        _message = "%d:%s, %s " % (
+        _message = "{0}:{1}, msg: {2} ".format(
             result,
             self._result_nr_to_description(result),
             message)
