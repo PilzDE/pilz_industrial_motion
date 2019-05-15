@@ -29,17 +29,17 @@ def start_program():
 
 
 def _test_wait_until_required(robot):
-    """Tests stopping a robot motion.
+    """Tests the brake test required.
 
         Test Sequence:
-            1. Start robot motion and wait for the motion to start.
-            2. Trigger stop.
-            3. Start robot motion with different goal.
+            1. Start robot motion.
+            2. Emulate brake test required = True.
+            3. Observe performed brake test.
 
         Expected Results:
-            1. Robot moves.
-            2. Robot stops motion before reaching goal.
-            3. Robot starts motion and moves to the other goal.
+            1. Robot stopped and prints to the console that no brake test is required.
+            2. Robot starts brake test
+            3. Brake test is successful.
     """
 
     while not robot.is_brake_test_required():
