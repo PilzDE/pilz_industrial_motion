@@ -25,7 +25,7 @@ from prbt_hardware_support.srv import \
     IsBrakeTestRequiredResponse
 
 BRAKE_TEST_REQUIRED_SERVICE_NAME = "/prbt/is_brake_test_required"
-BRAKE_TEST_EXECUTE_SERVICE_NAME = "/prbt/execute_brake_test"
+BRAKE_TEST_EXECUTE_SERVICE_NAME = "/prbt/brake_test_executor_node/execute_braketest"
 
 class BrakeTestMock(Thread):
     """

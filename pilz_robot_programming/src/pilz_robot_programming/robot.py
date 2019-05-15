@@ -100,7 +100,7 @@ class Robot(object):
     _RESUME_TOPIC_NAME = "resume_movement"
     _STOP_TOPIC_NAME = "stop_movement"
     _SEQUENCE_TOPIC = "sequence_move_group"
-    _BRAKE_TEST_EXECUTE_SRV = "/prbt/execute_brake_test"
+    _BRAKE_TEST_EXECUTE_SRV = "/prbt/brake_test_executor_node/execute_braketest"
     _BRAKE_TEST_REQUIRED_SRV = "/prbt/is_brake_test_required"
     _INSTANCE_PARAM = "/robot_api_instance"
 
@@ -109,7 +109,7 @@ class Robot(object):
     _PROCESS_CREATE_TIME_STRING = "create_time"
 
     # time constant
-    _SERVICE_CALL_TIMEOUT_S = 5
+    _SERVICE_WAIT_TIMEOUT_S = 1
 
     def __init__(self, version=None, *args, **kwargs):
         super(Robot, self).__init__(*args, **kwargs)
@@ -287,7 +287,7 @@ class Robot(object):
             Function blocks until an answer is available or timeout has passed.
         """
         rospy.loginfo("Checking whether brake test is required: >")
-        rospy.wait_for_service(self._BRAKE_TEST_REQUIRED_SRV, self._SERVICE_CALL_TIMEOUT_S)
+        rospy.wait_for_service(self._BRAKE_TEST_REQUIRED_SRV, self._SERVICE_WAIT_TIMEOUT_S)
         try:
             is_brake_test_required_client = rospy.ServiceProxy(
                 self._BRAKE_TEST_REQUIRED_SRV,
@@ -309,7 +309,7 @@ class Robot(object):
             Function blocks until an answer is available or timeout has passed.
         """
         rospy.loginfo("Executing brake test")
-        rospy.wait_for_service(self._BRAKE_TEST_EXECUTE_SRV, self._SERVICE_CALL_TIMEOUT_S)
+        rospy.wait_for_service(self._BRAKE_TEST_EXECUTE_SRV, self._SERVICE_WAIT_TIMEOUT_S)
         try:
             execute_brake_test_client = rospy.ServiceProxy(
                 self._BRAKE_TEST_EXECUTE_SRV,
