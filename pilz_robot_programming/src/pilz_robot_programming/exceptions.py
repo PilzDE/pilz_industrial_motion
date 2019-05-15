@@ -15,6 +15,8 @@
 # You should have received a copy of the GNU Lesser General Public License
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
+from prbt_hardware_support.srv import BrakeTestResponse
+
 class RobotVersionError(Exception):
     pass
 
@@ -41,3 +43,19 @@ class RobotUnknownCommandType(Exception):
 
 class RobotCurrentStateError(Exception):
     pass
+
+
+class RobotBrakeTestException(Exception):
+    def __init__(self, result, message):
+        _message = "%d:%s, %s " % (
+            result,
+            self._result_nr_to_description(result),
+            message)
+        super(RobotBrakeTestException, self).__init__(_message)
+
+    def _result_nr_to_description(self, result):
+        for description in filter(str.isupper, BrakeTestResponse.__dict__.keys()):
+            if result == eval("BrakeTestResponse." + description):
+                return description
+
+

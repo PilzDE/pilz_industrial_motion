@@ -18,9 +18,11 @@ import unittest
 
 import rospy
 
+from pilz_robot_programming.exceptions import RobotBrakeTestException
 from pilz_robot_programming.robot import Robot
 from brake_test_mock import BrakeTestMock
 from prbt_hardware_support.srv import BrakeTestResponse
+
 
 API_VERSION = "1"
 
@@ -97,14 +99,7 @@ class TestAPIBrakeTest(unittest.TestCase):
         mock.advertise_brake_test_execute_service()
 
         mock.set_brake_test_execute_result(BrakeTestResponse.SUCCESS)
-        res = None
-        try:
-            res = self.robot.execute_brake_test(1)
-        except Exception as e:
-            rospy.logerr(e)
-            raise e
-        self.assertEqual(res, BrakeTestResponse.SUCCESS)
-        # TODO: this feels like a self fulfilling prophecy. Can we test something more useful?!
+        self.robot.execute_brake_test(1)
 
         mock.stop()
         mock.join()
@@ -117,14 +112,12 @@ class TestAPIBrakeTest(unittest.TestCase):
 
         mock.set_brake_test_execute_result(BrakeTestResponse.FAILURE)
         res = None
-        try:
-            res = self.robot.execute_brake_test(1)
-        except Exception as e:
-            rospy.logerr(e)
-            raise e
-        self.assertEqual(res, BrakeTestResponse.FAILURE)
-        # TODO: this feels like a self fulfilling prophecy. Can we test something more useful?!
 
+        self.assertRaises(
+            RobotBrakeTestException,
+            Robot.execute_brake_test,
+            self.robot
+        )
         mock.stop()
         mock.join()
 

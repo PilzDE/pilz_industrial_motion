@@ -30,7 +30,7 @@ from std_srvs.srv import Trigger
 import tf
 
 from pilz_msgs.msg import MoveGroupSequenceAction
-from prbt_hardware_support.srv import IsBrakeTestRequired, BrakeTest
+from prbt_hardware_support.srv import IsBrakeTestRequired, BrakeTest, BrakeTestResponse
 from .move_control_request import _MoveControlState, MoveControlAction,_MoveControlStateMachine
 from .commands import _AbstractCmd, _DEFAULT_PLANNING_GROUP, _DEFAULT_TARGET_LINK, _DEFAULT_BASE_LINK, Sequence
 from .exceptions import *
@@ -321,9 +321,10 @@ class Robot(object):
                 resp.result,
                 resp.msg
             ))
-            return resp.result #TODO: is this the desired behaviour or do we want to throw specific exceptions?
+            if resp.result != BrakeTestResponse.SUCCESS:
+                raise RobotBrakeTestException(resp.result, resp.msg)
         except rospy.ServiceException, e:
-            rospy.logerr("Service call failed: %s"%e)
+            rospy.logerr("Service call failed: {0}"%e)
             raise e
 
     def _move_execution_loop(self, cmd):
