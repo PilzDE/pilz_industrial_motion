@@ -281,12 +281,14 @@ class Robot(object):
         self._move_ctrl_sm.switch(MoveControlAction.RESUME)
 
     def is_brake_test_required(self):
-        """The checks whether a brake test is currently required.
+        """Checks whether a brake test is currently required.
+
+        :raises ServiceException: when the required ROS service is not available.
 
         :note:
-            Function blocks until an answer is available or timeout has passed.
+            Function blocks until an answer is available.
         """
-        rospy.loginfo("Checking whether brake test is required: >")
+        rospy.loginfo("Checking whether brake test is required ...")
         rospy.wait_for_service(self._BRAKE_TEST_REQUIRED_SRV, self._SERVICE_WAIT_TIMEOUT_S)
         try:
             is_brake_test_required_client = rospy.ServiceProxy(
@@ -294,19 +296,23 @@ class Robot(object):
                 IsBrakeTestRequired)
             resp = is_brake_test_required_client()
             if resp.result:
-                rospy.loginfo("< it is.")
+                rospy.loginfo("Brake Test REQUIRED")
             else:
-                rospy.loginfo("< it is not.")
+                rospy.loginfo("Brake Test NOT REQUIRED")
             return resp.result
         except rospy.ServiceException, e:
             rospy.logerr("Service call failed: {0}".format(e))
             raise e
 
     def execute_brake_test(self):
-        """Execute a brake test and return the result
+        """Execute a brake test. If successful, function exits without exception.
+
+        :raises RobotBrakeTestException: when brake test was not successful.
+            Will contain information about reason for failing of the brake test.
+        :raises ServiceException: when the required ROS service is not available.
 
         :note:
-            Function blocks until an answer is available or timeout has passed.
+            Function blocks until brake test is finished.
         """
         rospy.loginfo("Executing brake test")
         rospy.wait_for_service(self._BRAKE_TEST_EXECUTE_SRV, self._SERVICE_WAIT_TIMEOUT_S)
