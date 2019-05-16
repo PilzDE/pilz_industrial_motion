@@ -23,7 +23,7 @@ import threading
 from actionlib import SimpleActionClient, GoalStatus
 from geometry_msgs.msg import Quaternion, PoseStamped, Pose
 from moveit_commander import RobotCommander, MoveItCommanderException
-from moveit_msgs.msg import MoveItErrorCodes, MoveGroupAction
+from moveit_msgs.msg import MoveItErrorCodes
 import rospy
 from std_msgs.msg import Header
 from std_srvs.srv import Trigger
