@@ -96,7 +96,6 @@ class TestAPIInstantiation(unittest.TestCase):
                 # Dummy function to simulate that something is done with robot
                 rob.get_current_joint_states()
 
-
     def test_with_statement_fail(self):
         """ Check that new Robot instance cannot be created within
             "with" statement.
@@ -109,16 +108,17 @@ class TestAPIInstantiation(unittest.TestCase):
                 1. Creation failed with RobotMultiInstancesError.
         """
         for i in range(0, 7):
-          try:
-              with Robot(API_VERSION) as rob:
-                  # Dummy function to simulate that something is done with robot
-                  rob.get_current_joint_states()
-                  r2 = Robot(API_VERSION)
-          except RobotMultiInstancesError:
-              pass
-          else:
-              r2._release()
-              self.fail('Multiple robot instances does not throw exception.')
+            try:
+                with Robot(API_VERSION) as rob:
+                    # Dummy function to simulate that something is done with robot
+                    rob.get_current_joint_states()
+                    r2 = Robot(API_VERSION)
+            except RobotMultiInstancesError:
+                pass
+            else:
+                r2._release()
+                self.fail('Multiple robot instances does not throw exception.')
+
 
 if __name__ == '__main__':
     import rostest

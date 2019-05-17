@@ -28,7 +28,7 @@ from std_srvs.srv import Trigger
 import tf
 import psutil
 
-from .move_control_request import _MoveControlState, MoveControlAction,_MoveControlStateMachine
+from .move_control_request import _MoveControlState, MoveControlAction, _MoveControlStateMachine
 from .commands import _AbstractCmd, _DEFAULT_PLANNING_GROUP, _DEFAULT_TARGET_LINK, _DEFAULT_BASE_LINK, Sequence
 from .exceptions import *
 from geometry_msgs.msg import Quaternion, PoseStamped, Pose
@@ -70,8 +70,8 @@ class Robot(object):
         * sequence_move_group
 
     :note:
-        Currently the API does not support creating a new instance of :py:class:`.Robot` after deleting an old one in the
-        same program. However this can be realized by calling :py:meth:`_release` before the deletion.
+        Currently the API does not support creating a new instance of :py:class:`.Robot` after deleting an old one in
+        the same program. However this can be realized by calling :py:meth:`_release` before the deletion.
 
     :param version:
         To ensure that always the correct API version is used, it is necessary to state
@@ -242,7 +242,7 @@ class Robot(object):
         rospy.loginfo("Stop called.")
         self._move_ctrl_sm.switch(MoveControlAction.STOP)
 
-        with self._move_ctrl_sm: # wait, if _execute is just starting a send_goal()
+        with self._move_ctrl_sm:  # wait, if _execute is just starting a send_goal()
             actionclient_state = self._sequence_client.get_state()
             if actionclient_state in _VALID_GOAL_STATUS_FOR_CANCEL:
                 self._sequence_client.cancel_goal()
@@ -258,14 +258,14 @@ class Robot(object):
         rospy.loginfo("Pause called.")
         self._move_ctrl_sm.switch(MoveControlAction.PAUSE)
 
-        with self._move_ctrl_sm: # wait, if _execute is just starting a send_goal()
+        with self._move_ctrl_sm:  # wait, if _execute is just starting a send_goal()
             actionclient_state = self._sequence_client.get_state()
             if actionclient_state in _VALID_GOAL_STATUS_FOR_CANCEL:
                 self._sequence_client.cancel_goal()
 
     def resume(self):
-        """The function resumes a paused robot motion. If the motion command is not paused or no motion command is active,
-        it has no effects.
+        """The function resumes a paused robot motion. If the motion command is not paused or no motion command is
+        active, it has no effects.
 
         :note:
             Function calls to :py:meth:`move` and :py:meth:`resume` have to be performed from different threads because
@@ -282,9 +282,9 @@ class Robot(object):
             rospy.logdebug("Move execution loop.")
 
             # execute
-            if ((self._move_ctrl_sm.state == _MoveControlState.NO_REQUEST and first_iteration_flag)
-                or self._move_ctrl_sm.state == _MoveControlState.RESUME_REQUESTED) \
-                    and continue_execution_of_cmd:
+            if ((self._move_ctrl_sm.state == _MoveControlState.NO_REQUEST and first_iteration_flag) or
+                self._move_ctrl_sm.state == _MoveControlState.RESUME_REQUESTED) and \
+                    continue_execution_of_cmd:
                 rospy.logdebug("start execute")
 
                 # automatic switch to no request
@@ -335,12 +335,12 @@ class Robot(object):
             first_iteration_flag = False
 
     def _on_shutdown(self):
-        with self._move_ctrl_sm: # wait, if _execute is just starting a send_goal()
+        with self._move_ctrl_sm:  # wait, if _execute is just starting a send_goal()
             actionclient_state = self._sequence_client.get_state()
         # stop movement
-        if actionclient_state != GoalStatus.LOST: # is the client currently tracking a goal?
+        if actionclient_state != GoalStatus.LOST:  # is the client currently tracking a goal?
             self._sequence_client.cancel_goal()
-            self._sequence_client.wait_for_result(timeout = rospy.Duration(2.))
+            self._sequence_client.wait_for_result(timeout=rospy.Duration(2.))
 
     def _pause_service_callback(self, request):
         self.pause()
@@ -402,7 +402,7 @@ class Robot(object):
             if psutil.pid_exists(pid):
                 process = psutil.Process(pid)
 
-                if (process.create_time() == create_time):
+                if process.create_time() == create_time:
                     rospy.logerr("An instance of Robot class already exists (pid=" + str(pid) + ").")
                     return False
 

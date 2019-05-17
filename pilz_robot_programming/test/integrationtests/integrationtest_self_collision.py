@@ -29,8 +29,6 @@ COLLISION_TOPIC = "/move_group/display_contacts"
 
 
 class TestSelfCollision(unittest.TestCase):
-
-
     """
     Test if Execution is prohibited if during the execution a collision would occur.
     """
@@ -56,7 +54,6 @@ class TestSelfCollision(unittest.TestCase):
             self.condition.notifyAll()
 
     def test_self_collision(self):
-        
         """ Tests that self collision is detected.
             Test sequence:
                 1. Move out of zero position to a position where the gripper brackets almost touch the robot.

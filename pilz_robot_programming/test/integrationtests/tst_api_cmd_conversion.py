@@ -42,10 +42,10 @@ TF_QUATERNION_COMPARE_DELTA = 1e-4
 AXIS_SEQUENCE = "rzyz"
 EULER_SAMPLE_NUM = 10
 EULER_SAMPLES_RELATIVE_ROTATION = \
-                [[a, b, c] \
-                 for a in np.linspace(-pi, pi, EULER_SAMPLE_NUM) \
-                 for b in np.linspace(-pi, pi, EULER_SAMPLE_NUM) \
-                 for c in np.linspace(-pi, pi, EULER_SAMPLE_NUM)]
+    [[a, b, c]
+     for a in np.linspace(-pi, pi, EULER_SAMPLE_NUM)
+     for b in np.linspace(-pi, pi, EULER_SAMPLE_NUM)
+     for c in np.linspace(-pi, pi, EULER_SAMPLE_NUM)]
 
 
 class TestAPICmdConversion(unittest.TestCase):
@@ -93,8 +93,6 @@ class TestAPICmdConversion(unittest.TestCase):
         request_pose = Pose(position=pose_con.constraint_region.primitive_poses[0].position,
                             orientation=ori_con.orientation)
         self._analyze_pose(exp_pose, request_pose, position_delta, quat_delta)
-
-
 
     def _analyze_request_relative_pose(self, exp_relative_position, exp_relative_euler, req):
         current_pose = self.robot.get_current_pose()
@@ -237,7 +235,7 @@ class TestAPICmdConversion(unittest.TestCase):
         ptp_2 = Ptp(goal=exp_joint_values, vel_scale=EXP_VEL_SCALE, acc_scale=EXP_ACC_SCALE)
         self.assertRaises(IndexError, ptp_2._cmd_to_request, self.robot)
 
-        #3
+        # 3
         ptp_3 = Ptp(goal=object(), vel_scale=EXP_VEL_SCALE, acc_scale=EXP_ACC_SCALE)
         self.assertRaises(NotImplementedError, ptp_3._cmd_to_request, self.robot)
 
@@ -650,7 +648,8 @@ class TestAPICmdConversion(unittest.TestCase):
 
         ptp = Ptp(goal=exp_ptp_goal, vel_scale=EXP_VEL_SCALE, acc_scale=EXP_ACC_SCALE)
         lin = Lin(goal=exp_lin_goal, vel_scale=EXP_VEL_SCALE, acc_scale=EXP_ACC_SCALE)
-        circ = Circ(goal=exp_circ_goal, center=exp_circ_center.position, vel_scale=EXP_VEL_SCALE, acc_scale=EXP_ACC_SCALE)
+        circ = Circ(goal=exp_circ_goal, center=exp_circ_center.position, vel_scale=EXP_VEL_SCALE,
+                    acc_scale=EXP_ACC_SCALE)
 
         seq = Sequence()
         seq.append(ptp, exp_blend_radius_1)
@@ -977,14 +976,15 @@ class TestAPICmdConversion(unittest.TestCase):
             reference_frame=ref, vel_scale=0.2, acc_scale=0.2))
 
         str(Circ(goal=pose, interim=pose.position,
-             reference_frame=ref, vel_scale=0.2, acc_scale=0.2))
+                 reference_frame=ref, vel_scale=0.2, acc_scale=0.2))
         str(Circ(goal=pose, center=pose.position,
-             reference_frame=ref, vel_scale=0.2, acc_scale=0.2))
+                 reference_frame=ref, vel_scale=0.2, acc_scale=0.2))
 
         str(Lin(goal=pose, relative=True,
             reference_frame=ref, vel_scale=0.2, acc_scale=0.2))
         str(Lin(goal=[0, 0, 0, 0, 0, 0], relative=True,
             reference_frame=ref, vel_scale=0.2, acc_scale=0.2))
+
 
 if __name__ == '__main__':
     import rostest
