@@ -100,7 +100,7 @@ class Robot(object):
     _RESUME_TOPIC_NAME = "resume_movement"
     _STOP_TOPIC_NAME = "stop_movement"
     _SEQUENCE_TOPIC = "sequence_move_group"
-    _BRAKE_TEST_EXECUTE_SRV = "/prbt/brake_test_executor_node/execute_braketest"
+    _BRAKE_TEST_EXECUTE_SRV = "/prbt/execute_braketest"
     _BRAKE_TEST_REQUIRED_SRV = "/prbt/is_brake_test_required"
     _INSTANCE_PARAM = "/robot_api_instance"
 
@@ -325,12 +325,12 @@ class Robot(object):
                 BrakeTest
             )
             resp = execute_brake_test_client()
-            rospy.loginfo("Brake Test Result: {0}, msg: {1}".format(
-                resp.result,
-                resp.msg
+            rospy.loginfo("Brake Test Success: {0:b}, msg: {1}".format(
+                resp.success,
+                resp.error_msg
             ))
-            if resp.result != BrakeTestResponse.SUCCESS:
-                raise RobotBrakeTestException(resp.result, resp.msg)
+            if not resp.success:
+                raise RobotBrakeTestException(resp.error_code, resp.error_msg)
         except rospy.ServiceException, e:
             rospy.logerr("Service call failed: {0}".format(e))
             raise e

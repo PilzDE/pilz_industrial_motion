@@ -26,8 +26,7 @@ These acceptance tests check that the real robot system is able perform a brake 
 ## Starting the acceptance tests
 - Bringup can: `sudo ip link set can0 up type can bitrate 1000000`
 - Run `roslaunch prbt_moveit_config moveit_planning_execution.launch sim:=False pipeline:=pilz_command_planner`
-- Run `roslaunch prbt_hardware_support modbus_brake_test_announcer_node.launch safety_hw:=pnoz`
-- Run `roslaunch prbt_hardware_support brake_test_executor_node.launch`
+- Run `roslaunch prbt_hardware_support brake_test.launch safety_hw:=pnoz`
 - Run `rosrun pilz_robot_programming acceptance_test_brake_test.py`
 
 ## Test Precedure
