@@ -284,6 +284,9 @@ class Robot(object):
         """Checks whether a brake test is currently required.
 
         :raises ServiceException: when the required ROS service is not available.
+        :returns: `True`: if brake test is required,
+            `False`: otherwise
+
 
         :note:
             Function blocks until an answer is available.
