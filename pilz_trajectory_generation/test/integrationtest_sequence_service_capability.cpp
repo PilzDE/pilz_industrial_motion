@@ -331,7 +331,7 @@ TEST_F(IntegrationTestSequenceService, TestLargeRequest)
   ASSERT_TRUE(client_.call(srv));
 
   EXPECT_EQ(moveit_msgs::MoveItErrorCodes::SUCCESS, srv.response.error_code.val) << "Incorrect error code.";
-  EXPECT_EQ(srv.response.planned_trajectory.size(), 1);
+  EXPECT_EQ(srv.response.planned_trajectory.size(), 1u);
   EXPECT_GT(srv.response.planned_trajectory.front().joint_trajectory.points.size(), 0u) << "Trajectory should contain points.";
 }
 
@@ -359,7 +359,7 @@ TEST_F(IntegrationTestSequenceService, TestComplexSequenceWithoutBlending)
   ASSERT_TRUE(client_.call(srv));
 
   EXPECT_EQ(moveit_msgs::MoveItErrorCodes::SUCCESS, srv.response.error_code.val) << "Incorrect error code.";
-  EXPECT_EQ(srv.response.planned_trajectory.size(), 1);
+  EXPECT_EQ(srv.response.planned_trajectory.size(), 1u);
   EXPECT_GT(srv.response.planned_trajectory.front().joint_trajectory.points.size(), 0u) << "Trajectory should contain points.";
 }
 
@@ -385,7 +385,7 @@ TEST_F(IntegrationTestSequenceService, TestComplexSequenceWithBlending)
   ASSERT_TRUE(client_.call(srv));
 
   EXPECT_EQ(moveit_msgs::MoveItErrorCodes::SUCCESS, srv.response.error_code.val) << "Incorrect error code.";
-  EXPECT_EQ(srv.response.planned_trajectory.size(), 1);
+  EXPECT_EQ(srv.response.planned_trajectory.size(), 1u);
   EXPECT_GT(srv.response.planned_trajectory.front().joint_trajectory.points.size(), 0u) << "Trajectory should contain points.";
 }
 
