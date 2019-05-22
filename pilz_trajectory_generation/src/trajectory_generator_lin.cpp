@@ -16,10 +16,17 @@
  */
 
 #include "pilz_trajectory_generation/trajectory_generator_lin.h"
-#include "ros/ros.h"
-#include "eigen_conversions/eigen_msg.h"
-#include "moveit/robot_state/conversions.h"
+
+#include <ros/ros.h>
+#include <time.h>
+#include <cassert>
+#include <sstream>
+
+#include <eigen_conversions/eigen_msg.h>
 #include <eigen_conversions/eigen_kdl.h>
+
+#include <moveit/robot_state/conversions.h>
+
 #include <kdl/path_line.hpp>
 #include <kdl/utilities/error.h>
 #include <kdl/trajectory_segment.hpp>
@@ -37,68 +44,7 @@ TrajectoryGeneratorLIN::TrajectoryGeneratorLIN(const moveit::core::RobotModelCon
   }
 }
 
-TrajectoryGeneratorLIN::~TrajectoryGeneratorLIN()
-{
-
-}
-
-bool TrajectoryGeneratorLIN::generate(const planning_interface::MotionPlanRequest &req,
-                                      planning_interface::MotionPlanResponse &res,
-                                      double sampling_time)
-{
-  ROS_INFO("Starting generation of LIN Trajectory!");
-
-  ros::Time planning_begin = ros::Time::now();
-  moveit_msgs::MoveItErrorCodes error_code;
-  MotionPlanInfo plan_info;
-  trajectory_msgs::JointTrajectory joint_trajectory;
-
-  // validate the common requirements of motion plan request
-  if(!validateRequest(req, error_code))
-  {
-    ROS_ERROR("Failed to validate the planning request of a LIN command.");
-    return setResponse(req, res, joint_trajectory, error_code, planning_begin);
-  }
-  // extract planning information from the motion plan request
-  if(!extractMotionPlanInfo(req, plan_info, error_code))
-  {
-    ROS_ERROR("Failed to extract planning information of a LIN command.");
-    return setResponse(req, res, joint_trajectory, error_code, planning_begin);
-  }
-
-  // create Cartesian path for lin
-  std::unique_ptr<KDL::Path> path(setPathLIN(plan_info, error_code));
-
-  // create velocity profile
-  std::unique_ptr<KDL::VelocityProfile> vp(cartesianTrapVelocityProfile(req, plan_info, path));
-
-  // combine path and velocity profile into Cartesian trajectory
-  // with the third parameter set to false, KDL::Trajectory_Segment does not take
-  // the ownship of Path and Velocity Profile
-  KDL::Trajectory_Segment cart_trajectory(path.get(), vp.get(), false);
-
-  // sample the Cartesian trajectory and compute joint trajectory using inverse kinematics
-  if(!generateJointTrajectory(robot_model_,
-                              planner_limits_.getJointLimitContainer(),
-                              cart_trajectory,
-                              plan_info.group_name,
-                              plan_info.link_name,
-                              plan_info.start_joint_position,
-                              sampling_time,
-                              joint_trajectory,
-                              error_code))
-  {
-    ROS_ERROR("Failed to generate valid joint trajectory from the Cartesian path.");
-    return setResponse(req, res, joint_trajectory, error_code, planning_begin);
-  }
-
-  ROS_INFO_STREAM("LIN Trajectory with " << joint_trajectory.points.size() << " Points generated. Took "
-                  << (ros::Time::now() - planning_begin).toSec() * 1000 << " ms.");
-
-  return setResponse(req, res, joint_trajectory, error_code, planning_begin);
-}
-
-bool TrajectoryGeneratorLIN::extractMotionPlanInfo(const planning_interface::MotionPlanRequest &req, TrajectoryGenerator::MotionPlanInfo &info, moveit_msgs::MoveItErrorCodes &error_code) const
+void TrajectoryGeneratorLIN::extractMotionPlanInfo(const planning_interface::MotionPlanRequest &req, TrajectoryGenerator::MotionPlanInfo &info) const
 {
   ROS_DEBUG("Extract necessary information from motion plan request.");
 
@@ -113,9 +59,11 @@ bool TrajectoryGeneratorLIN::extractMotionPlanInfo(const planning_interface::Mot
     if(req.goal_constraints.front().joint_constraints.size() !=
        robot_model_->getJointModelGroup(req.group_name)->getActiveJointModelNames().size())
     {
-      ROS_ERROR_STREAM("Number of joint constraint is not equal to the active joints in the planning group");
-      error_code.val = moveit_msgs::MoveItErrorCodes::INVALID_GOAL_CONSTRAINTS;
-      return false;
+      std::ostringstream os;
+      os << "Number of joints in goal does not match number of joints of group (Number joints goal: "
+         << req.goal_constraints.front().joint_constraints.size() << " | Number of joints of group: "
+         << robot_model_->getJointModelGroup(req.group_name)->getActiveJointModelNames().size() << ")";
+      throw JointNumberMismatch(os.str());
     }
 
     for(const auto &joint_item : req.goal_constraints.front().joint_constraints)
@@ -148,14 +96,18 @@ bool TrajectoryGeneratorLIN::extractMotionPlanInfo(const planning_interface::Mot
     tf::poseMsgToEigen(goal_pose_msg, info.goal_pose);
   }
 
-  // copy start state only with the joint
-  robot_state::RobotState start_state(robot_model_);
-  start_state.setToDefaultValues();
-  moveit::core::robotStateMsgToRobotState(req.start_state, start_state, false);
-
+  assert(req.start_state.joint_state.name.size() == req.start_state.joint_state.position.size());
   for(const auto& joint_name : robot_model_->getJointModelGroup(req.group_name)->getActiveJointModelNames())
   {
-    info.start_joint_position[joint_name] = start_state.getVariablePosition(joint_name);
+    auto it {std::find(req.start_state.joint_state.name.cbegin(), req.start_state.joint_state.name.cend(), joint_name)};
+    if (it == req.start_state.joint_state.name.cend())
+    {
+      std::ostringstream os;
+      os << "Could not find joint \"" << joint_name << "\" of group \"" << req.group_name << "\" in start state of request";
+      throw LinJointMissingInStartState(os.str());
+    }
+    size_t index = it - req.start_state.joint_state.name.cbegin();
+    info.start_joint_position[joint_name] = req.start_state.joint_state.position[index];
   }
 
   // Ignored return value because at this point the function should always return 'true'.
@@ -171,28 +123,60 @@ bool TrajectoryGeneratorLIN::extractMotionPlanInfo(const planning_interface::Mot
                     info.start_joint_position,
                     ik_solution))
   {
-    ROS_ERROR_STREAM("Failed to compute inverse kinematics for link: " << info.link_name << " of goal pose.");
-    error_code.val = moveit_msgs::MoveItErrorCodes::NO_IK_SOLUTION;
-    return false;
+    std::ostringstream os;
+    os << "Failed to compute inverse kinematics for link: " << info.link_name << " of goal pose";
+    throw LinInverseForGoalIncalculable(os.str());
   }
-
-  return true;
 }
 
-std::unique_ptr<KDL::Path> TrajectoryGeneratorLIN::setPathLIN(const TrajectoryGenerator::MotionPlanInfo &info,
-                                                              moveit_msgs::MoveItErrorCodes &error_code) const
+void TrajectoryGeneratorLIN::plan(const planning_interface::MotionPlanRequest &req,
+                                  const MotionPlanInfo& plan_info,
+                                  const double& sampling_time,
+                                  trajectory_msgs::JointTrajectory& joint_trajectory)
+{
+  // create Cartesian path for lin
+  std::unique_ptr<KDL::Path> path( setPathLIN(plan_info.start_pose, plan_info.goal_pose) );
+
+  // create velocity profile
+  std::unique_ptr<KDL::VelocityProfile> vp(cartesianTrapVelocityProfile(req.max_velocity_scaling_factor, req.max_acceleration_scaling_factor, path));
+
+  // combine path and velocity profile into Cartesian trajectory
+  // with the third parameter set to false, KDL::Trajectory_Segment does not take
+  // the ownship of Path and Velocity Profile
+  KDL::Trajectory_Segment cart_trajectory(path.get(), vp.get(), false);
+
+  moveit_msgs::MoveItErrorCodes error_code;
+  // sample the Cartesian trajectory and compute joint trajectory using inverse kinematics
+  if(!generateJointTrajectory(robot_model_,
+                              planner_limits_.getJointLimitContainer(),
+                              cart_trajectory,
+                              plan_info.group_name,
+                              plan_info.link_name,
+                              plan_info.start_joint_position,
+                              sampling_time,
+                              joint_trajectory,
+                              error_code))
+  {
+    std::ostringstream os;
+    os << "Failed to generate valid joint trajectory from the Cartesian path";
+    throw LinTrajectoryConversionFailure(os.str(), error_code.val);
+  }
+}
+
+std::unique_ptr<KDL::Path> TrajectoryGeneratorLIN::setPathLIN(const Eigen::Affine3d& start_pose,
+                                                              const Eigen::Affine3d& goal_pose) const
 {
   ROS_DEBUG("Set Cartesian path for LIN command.");
 
-  KDL::Frame start_pose, goal_pose;
-  tf::transformEigenToKDL(info.start_pose, start_pose);
-  tf::transformEigenToKDL(info.goal_pose, goal_pose);
+  KDL::Frame kdl_start_pose, kdl_goal_pose;
+  tf::transformEigenToKDL(start_pose, kdl_start_pose);
+  tf::transformEigenToKDL(goal_pose, kdl_goal_pose);
   double eqradius = planner_limits_.getCartesianLimits().getMaxTranslationalVelocity()/
       planner_limits_.getCartesianLimits().getMaxRotationalVelocity();
   KDL::RotationalInterpolation* rot_interpo = new KDL::RotationalInterpolation_SingleAxis();
 
-  return std::unique_ptr<KDL::Path>(new KDL::Path_Line(start_pose,
-                                                       goal_pose,
+  return std::unique_ptr<KDL::Path>(new KDL::Path_Line(kdl_start_pose,
+                                                       kdl_goal_pose,
                                                        rot_interpo,
                                                        eqradius,
                                                        true));

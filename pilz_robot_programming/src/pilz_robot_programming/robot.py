@@ -29,7 +29,7 @@ import tf
 import psutil
 
 from .move_control_request import _MoveControlState, MoveControlAction,_MoveControlStateMachine
-from .commands import _AbstractCmd, _DEFAULT_PLANNING_GROUP, _DEFAULT_TARGET_LINK, _DEFAULT_BASE_LINK
+from .commands import _AbstractCmd, _DEFAULT_PLANNING_GROUP, _DEFAULT_TARGET_LINK, _DEFAULT_BASE_LINK, Sequence
 from .exceptions import *
 from geometry_msgs.msg import Quaternion, PoseStamped, Pose
 from std_msgs.msg import Header
@@ -275,7 +275,6 @@ class Robot(object):
         self._move_ctrl_sm.switch(MoveControlAction.RESUME)
 
     def _move_execution_loop(self, cmd):
-
         continue_execution_of_cmd = True
         first_iteration_flag = True
 
@@ -300,6 +299,12 @@ class Robot(object):
                     # need to wait for resume, or execute the motion again
                     if self._move_ctrl_sm.state == _MoveControlState.PAUSE_REQUESTED \
                             or self._move_ctrl_sm.state == _MoveControlState.RESUME_REQUESTED:
+                        # For now we make an exception for Sequence commands because
+                        # right now we are not able to properly handle pause requests during
+                        # blending.
+                        if isinstance(cmd, Sequence):
+                            rospy.logerr("Pause not implemented for sequence yet")
+                            raise RobotMoveFailed("Pause not implemented for sequence yet")
                         continue
                     # external stop
                     elif self._move_ctrl_sm.state == _MoveControlState.NO_REQUEST:

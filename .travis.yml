@@ -16,8 +16,8 @@ env:
   global:
     - AFTER_SCRIPT='apt list --installed | grep "^ros-"'
   matrix:
-    - ROS_DISTRO="melodic" ROS_REPO=ros CATKIN_LINT=true
-    - ROS_DISTRO="melodic" ROS_REPO=ros-shadow-fixed CATKIN_LINT=true
+    - ROS_DISTRO="melodic" ROS_REPO=ros CATKIN_LINT=true CATKIN_LINT_ARGS='--strict'
+    - ROS_DISTRO="melodic" ROS_REPO=ros-shadow-fixed CATKIN_LINT=true CATKIN_LINT_ARGS='--strict'
 install:
   - git clone --depth=1 https://github.com/ros-industrial/industrial_ci.git .industrial_ci
 script:

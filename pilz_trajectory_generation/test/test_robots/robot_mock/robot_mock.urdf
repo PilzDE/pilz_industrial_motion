@@ -1,5 +1,6 @@
+<?xml version="1.0"?>
 <!--
-Copyright (c) 2018 Pilz GmbH & Co. KG
+Copyright (c) 2019 Pilz GmbH & Co. KG
 
 This program is free software: you can redistribute it and/or modify
 it under the terms of the GNU Lesser General Public License as published by
@@ -15,15 +16,12 @@ You should have received a copy of the GNU Lesser General Public License
 along with this program.  If not, see <http://www.gnu.org/licenses/>.
 -->
 
-<launch>
-    <!-- Load the context -->
-    <include file="$(find pilz_trajectory_generation)/test/test_robots/prbt/launch/test_context.launch" />
+<robot name="robot_mock">
+  <link name="link1"/>
+  <link name="link2"/>
 
-    <!-- run test -->
-    <test pkg="pilz_trajectory_generation" test-name="unittest_trajectory_appender"
-    type="unittest_trajectory_appender">
-      <param name="planning_group" value="manipulator" />
-      <param name="target_link" value="prbt_tcp" />
-    </test>
-
-</launch>
+  <joint name="joint1" type="continuous">
+    <parent link="link1"/>
+    <child link="link2"/>
+  </joint>
+</robot>

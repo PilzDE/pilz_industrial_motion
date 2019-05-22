@@ -19,15 +19,24 @@ from pilz_robot_programming.commands import *
 
 __REQUIRED_API_VERSION__ = "1"
 
+# Gripper position in [m], stated for one finger,
+# i.e. opening width = 2*gripper_pos
+_GRIPPER_CLOSED = 0.0
+_GRIPPER_OPEN = 0.02
+
 
 def start_program():
     print("Executing " +__file__)
 
     r = Robot(__REQUIRED_API_VERSION__)
-    # Gripper position in [m], stated for one finger, 
-    # i.e. opening width = 2*gripper_pos
-    gripper_pos = 0.02
-    r.move(Gripper(goal=gripper_pos))
+
+    # Gripper command execution as single command
+    r.move(Gripper(goal=_GRIPPER_CLOSED))
+
+    # Gripper command execution in sequence
+    seq = Sequence()
+    seq.append(Gripper(goal=_GRIPPER_OPEN))
+    r.move(seq)
 
 
 if __name__ == "__main__":

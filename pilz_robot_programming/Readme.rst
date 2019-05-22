@@ -257,14 +257,19 @@ Sequence
 
     r.move(sequence)
 
-:py:class:`.Sequence` commands allow the user to define a robot motion consisting of
-two or more robot motion commands which are executed like a single robot motion command, in other words,
-without stop at the end of each command.
+To concatenate multiple trajectories and plan the trajectory at once, you can
+use the :py:class:`.Sequence` command.
+
+:note:
+    In case the planning of a command in a :py:class:`.Sequence` fails, non of the commands
+    in the :py:class:`.Sequence` are executed.
+
 
 As an optional argument, a blending radius can be given to the :py:class:`.Sequence` command. The blending radius
 states how much the robot trajectory can deviate from the original trajectory (trajectory without blending) to
-blend the robot motion from one trajectory to the next. Setting the blending radius to zero corresponds to a sequence
-without blending like above.
+blend the robot motion from one trajectory to the next. Setting the blending radius to zero corresponds to a :py:class:`.Sequence`
+without blending like above. If a blending radius greaten than zero is given,
+the robot will move from one trajectory to the next without stopping.
 
 .. code-block:: python
 
@@ -278,6 +283,10 @@ without blending like above.
 :note:
     The last command of the sequence has to have zero blending radius which can be achieved by omitting
     the blend radius argument.
+
+:note: The robot always stops between gripper and non-gripper commands.
+
+:note: Gripper commands cannot be blended together.
 
 Gripper
 ^^^^^^^

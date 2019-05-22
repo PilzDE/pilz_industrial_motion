@@ -16,6 +16,9 @@
  */
 
 #include "pilz_trajectory_generation/trajectory_generator.h"
+
+#include <cassert>
+
 #include <moveit/robot_state/conversions.h>
 #include <eigen_conversions/eigen_msg.h>
 #include <eigen_conversions/eigen_kdl.h>
@@ -23,245 +26,227 @@
 
 #include "pilz_trajectory_generation/limits_container.h"
 
-namespace pilz{
-
-bool TrajectoryGenerator::validateRequest(const planning_interface::MotionPlanRequest &req,
-                                          moveit_msgs::MoveItErrorCodes &error_code) const
+namespace pilz
 {
-  // check the scaling factor
-  if(req.max_velocity_scaling_factor > 1 || req.max_velocity_scaling_factor <= MIN_SCALING_FACTOR)
-  {
-    ROS_ERROR_STREAM("Velocity scaling factor of value " << req.max_velocity_scaling_factor
-                     << " is not allowed. It must be in the range of [0.0001, 1].");
-    error_code.val = moveit_msgs::MoveItErrorCodes::INVALID_MOTION_PLAN;
-    return false;
-  }
 
-  if(req.max_acceleration_scaling_factor > 1 || req.max_acceleration_scaling_factor <= MIN_SCALING_FACTOR)
-  {
-    ROS_ERROR_STREAM("Acceleration scaling factor of value " << req.max_acceleration_scaling_factor
-                     << " is not allowed. It must be in the range of [0.0001, 1].");
-    error_code.val = moveit_msgs::MoveItErrorCodes::INVALID_MOTION_PLAN;
-    return false;
-  }
-
-  // check planning group
-  if(!robot_model_->hasJointModelGroup(req.group_name))
-  {
-    ROS_ERROR_STREAM("Unknown planning group: " << req.group_name);
-    error_code.val = moveit_msgs::MoveItErrorCodes::INVALID_GROUP_NAME;
-    return false;
-  }
-
-  if(!validateStartState(req, error_code))
-  {
-    return false;
-  }
-
-  // check goal constraint
-  if(req.goal_constraints.size()==0)
-  {
-    ROS_ERROR("Empty Goal Constraints.");
-    error_code.val = moveit_msgs::MoveItErrorCodes::INVALID_GOAL_CONSTRAINTS;
-    return false;
-  }
-  if(req.goal_constraints.size()>1)
-  {
-    ROS_ERROR("Too many Goal Constraints. Only one is allowed.");
-    error_code.val = moveit_msgs::MoveItErrorCodes::INVALID_GOAL_CONSTRAINTS;
-    return false;
-  }
-
-  // no valid joint or Cartesian goal is given
-  if(req.goal_constraints.front().joint_constraints.size() == 0 &&
-     (req.goal_constraints.front().position_constraints.size() == 0 ||
-      req.goal_constraints.front().orientation_constraints.size() == 0))
-  {
-    ROS_ERROR("Too few constraints for goal. Need one joint or Cartesian (position and orientation) constraint.");
-    error_code.val = moveit_msgs::MoveItErrorCodes::INVALID_GOAL_CONSTRAINTS;
-    return false;
-  }
-
-  // too many goals
-  if(req.goal_constraints.front().position_constraints.size()>1 ||
-     req.goal_constraints.front().orientation_constraints.size()>1 ||
-     (req.goal_constraints.front().joint_constraints.size() !=0 &&
-      (req.goal_constraints.front().position_constraints.size() == 1 ||
-       req.goal_constraints.front().orientation_constraints.size() == 1)) )
-  {
-    ROS_ERROR("Too many joint/position/orientation constrains for goal. Only one joint constraint or one Cartesian"
-              " constraint (one position constraint and one orientation constraint) is allowed.");
-    error_code.val = moveit_msgs::MoveItErrorCodes::INVALID_GOAL_CONSTRAINTS;
-    return false;
-  }
-
-  // check goal in joint space
-  if(req.goal_constraints.front().joint_constraints.size() != 0)
-  {
-    //check the joint constraint
-    for(auto const &joint_constraint : req.goal_constraints.front().joint_constraints)
-    {
-      // check corresponding state state
-      if (std::find(req.start_state.joint_state.name.begin(),
-                    req.start_state.joint_state.name.end(),
-                    joint_constraint.joint_name) == req.start_state.joint_state.name.end())
-      {
-        ROS_ERROR_STREAM("Cannot find corresponding joint in start state for "
-                         << joint_constraint.joint_name
-                         << " in goal constraint.");
-        error_code.val = moveit_msgs::MoveItErrorCodes::INVALID_GOAL_CONSTRAINTS;
-        return false;
-      }
-
-      // check if the joint constraints are within this planning group
-      if (!robot_model_->getJointModelGroup(req.group_name)->hasJointModel(joint_constraint.joint_name))
-      {
-        ROS_ERROR_STREAM(joint_constraint.joint_name << " does not belong to the planning group: " << req.group_name);
-        error_code.val = moveit_msgs::MoveItErrorCodes::INVALID_GOAL_CONSTRAINTS;
-        return false;
-      }
-
-      // verify the joint limit in goal constraint
-      if(!planner_limits_.getJointLimitContainer().verifyPositionLimit(joint_constraint.joint_name, joint_constraint.position))
-      {
-        ROS_ERROR("Joint limits violated in goal constraints.");
-        error_code.val = moveit_msgs::MoveItErrorCodes::INVALID_GOAL_CONSTRAINTS;
-        return false;
-      }
-    }
-  }
-  //check the Cartesian space goal
-  else if(req.goal_constraints[0].position_constraints.size() == 1 &&
-          req.goal_constraints[0].orientation_constraints.size() == 1)
-  {
-    // check the link name
-    if(req.goal_constraints.front().position_constraints.front().link_name.empty())
-    {
-      ROS_ERROR_STREAM("Link name of position constraint is empty. " );
-      error_code.val = moveit_msgs::MoveItErrorCodes::INVALID_GOAL_CONSTRAINTS;
-      return false;
-    }
-    if(req.goal_constraints.front().orientation_constraints.front().link_name.empty())
-    {
-      ROS_ERROR_STREAM("Link name of orientation constraint is empty. " );
-      error_code.val = moveit_msgs::MoveItErrorCodes::INVALID_GOAL_CONSTRAINTS;
-      return false;
-    }
-    if(req.goal_constraints.front().position_constraints.front().link_name !=
-       req.goal_constraints.front().orientation_constraints.front().link_name)
-    {
-      ROS_ERROR_STREAM("Target link name of position constraint: "
-                       << req.goal_constraints.front().position_constraints.front().link_name
-                       << " and orientation constraint: "
-                       <<  req.goal_constraints.front().orientation_constraints.front().link_name
-                       << " are different." );
-      error_code.val = moveit_msgs::MoveItErrorCodes::INVALID_GOAL_CONSTRAINTS;
-      return false;
-    }
-    // check the link name can be solved by ik
-    if(!robot_model_->getJointModelGroup(req.group_name)->
-       canSetStateFromIK(req.goal_constraints.front().position_constraints.front().link_name))
-    {
-      ROS_ERROR_STREAM("No IK solver is available for link: "
-                       << req.goal_constraints.front().position_constraints.front().link_name
-                       <<". ");
-      error_code.val = moveit_msgs::MoveItErrorCodes::NO_IK_SOLUTION;
-      return false;
-    }
-    // check if the needed pose is set
-    if(req.goal_constraints.front().position_constraints.front().constraint_region.primitive_poses.size() == 0)
-    {
-      ROS_ERROR_STREAM("No primitive poses available in posiion constraints. ");
-      error_code.val = moveit_msgs::MoveItErrorCodes::INVALID_GOAL_CONSTRAINTS;
-      return false;
-    }
-  }
-
-  error_code.val = moveit_msgs::MoveItErrorCodes::SUCCESS;
-  return true;
-
+void TrajectoryGenerator::cmdSpecificRequestValidation(const planning_interface::MotionPlanRequest & /*req*/) const
+{
+  // Empty implementation, in case the derived class does not want
+  // to provide a command specific request validation.
 }
 
-bool TrajectoryGenerator::validateStartState(const planning_interface::MotionPlanRequest &req,
-                                             moveit_msgs::MoveItErrorCodes &error_code) const
+void TrajectoryGenerator::checkVelocityScaling(const double& scaling_factor)
 {
-  // check start state
-  if(req.start_state.joint_state.name.size() == 0)
+  if( !isScalingFactorValid(scaling_factor) )
   {
-    ROS_ERROR("Empty joint name of start state in planning request.");
-    error_code.val = moveit_msgs::MoveItErrorCodes::INVALID_ROBOT_STATE;
-    return false;
+    std::ostringstream os;
+    os << "Velocity scaling not in range ["
+       << MIN_SCALING_FACTOR << ", " << MAX_SCALING_FACTOR << "], "
+       << "actual value is: " << scaling_factor;
+    throw VelocityScalingIncorrect(os.str());
+  }
+}
+
+void TrajectoryGenerator::checkAccelerationScaling(const double& scaling_factor)
+{
+  if( !isScalingFactorValid(scaling_factor) )
+  {
+    std::ostringstream os;
+    os << "Acceleration scaling not in range ["
+       << MIN_SCALING_FACTOR << ", " << MAX_SCALING_FACTOR << "], "
+       << "actual value is: " << scaling_factor;
+    throw AccelerationScalingIncorrect(os.str());
+  }
+}
+
+void TrajectoryGenerator::checkForValidGroupName(const std::string& group_name) const
+{
+  if( !robot_model_->hasJointModelGroup(group_name) )
+  {
+    std::ostringstream os;
+    os << "Unknown planning group: " << group_name;
+    throw UnknownPlanningGroup(os.str());
+  }
+}
+
+void TrajectoryGenerator::checkStartState(const moveit_msgs::RobotState& start_state) const
+{
+  if(start_state.joint_state.name.size() == 0)
+  {
+    throw NoJointNamesInStartState("No joint names for state state given");
   }
 
-  if(req.start_state.joint_state.name.size() != req.start_state.joint_state.position.size())
+  if(start_state.joint_state.name.size() != start_state.joint_state.position.size())
   {
-    ROS_ERROR("Joint state name and position do not match in start state.");
-    error_code.val = moveit_msgs::MoveItErrorCodes::INVALID_ROBOT_STATE;
-    return false;
+    throw SizeMismatchInStartState("Joint state name and position do not match in start state");
   }
 
-  if(!planner_limits_.getJointLimitContainer().verifyPositionLimits(req.start_state.joint_state.name,
-                                                                    req.start_state.joint_state.position))
+  if(!planner_limits_.getJointLimitContainer().verifyPositionLimits(start_state.joint_state.name,
+                                                                    start_state.joint_state.position))
   {
-    ROS_ERROR("Joint state out of range in start state.") ;
-    error_code.val = moveit_msgs::MoveItErrorCodes::INVALID_ROBOT_STATE;
-    return false;
+    throw JointsOfStartStateOutOfRange("Joint state out of range in start state");
   }
 
   // does not allow start velocity
-  if(!std::all_of(req.start_state.joint_state.velocity.begin(), req.start_state.joint_state.velocity.end(),
+  if(!std::all_of(start_state.joint_state.velocity.begin(), start_state.joint_state.velocity.end(),
                   [this](double v) { return std::fabs(v) < this->VELOCITY_TOLERANCE; }))
   {
-    ROS_ERROR("Trajectory Generator does not allow non-zero start velocity.");
-    error_code.val = moveit_msgs::MoveItErrorCodes::INVALID_ROBOT_STATE;
-    return false;
+    throw NonZeroVelocityInStartState("Trajectory Generator does not allow non-zero start velocity");
   }
-
-  error_code.val = moveit_msgs::MoveItErrorCodes::SUCCESS;
-  return true;
 }
 
-bool TrajectoryGenerator::setResponse(const planning_interface::MotionPlanRequest &req,
-                                      planning_interface::MotionPlanResponse &res,
-                                      const trajectory_msgs::JointTrajectory &joint_trajectory,
-                                      const moveit_msgs::MoveItErrorCodes &err_code,
-                                      const ros::Time& planning_start) const
+void TrajectoryGenerator::checkJointGoalConstraint(const moveit_msgs::Constraints& constraint,
+                                                   const std::vector<std::string> &expected_joint_names,
+                                                   const std::string& group_name) const
 {
-  // if invalid, return empty trajectory
-  if(err_code.val != moveit_msgs::MoveItErrorCodes::SUCCESS)
+  for(auto const &joint_constraint : constraint.joint_constraints)
   {
-    res.error_code_.val = err_code.val;
-    if(res.trajectory_)
+    const std::string& curr_joint_name {joint_constraint.joint_name};
+    if (std::find(expected_joint_names.cbegin(), expected_joint_names.cend(),
+                  curr_joint_name) == expected_joint_names.cend())
     {
-      res.trajectory_->clear();
+      std::ostringstream os;
+      os << "Cannot find joint \"" <<  curr_joint_name << "\" from start state in goal constraint";
+      throw StartStateGoalStateMismatch(os.str());
     }
-    res.planning_time_ = (ros::Time::now() - planning_start).toSec();
-    return false;
+
+    if ( !robot_model_->getJointModelGroup(group_name)->hasJointModel(curr_joint_name) )
+    {
+      std::ostringstream os;
+      os << "Joint \"" << curr_joint_name
+         << "\" does not belong to group \"" << group_name << "\"";
+      throw JointConstraintDoesNotBelongToGroup(os.str());
+    }
+
+    if( !planner_limits_.getJointLimitContainer().verifyPositionLimit(curr_joint_name, joint_constraint.position) )
+    {
+      std::ostringstream os;
+      os << "Joint \"" << curr_joint_name << "\" violates joint limits in goal constraints";
+      throw JointsOfGoalOutOfRange(os.str());
+    }
+  }
+}
+
+void TrajectoryGenerator::checkCartesianGoalConstraint(const moveit_msgs::Constraints& constraint,
+                                                       const std::string& group_name) const
+{
+  assert(constraint.position_constraints.size() == 1);
+  assert(constraint.orientation_constraints.size() == 1);
+  const moveit_msgs::PositionConstraint& pos_constraint {constraint.position_constraints.front()};
+  const moveit_msgs::OrientationConstraint& ori_constraint {constraint.orientation_constraints.front()};
+
+  if(pos_constraint.link_name.empty())
+  {
+    throw PositionConstraintNameMissing("Link name of position constraint missing");
+  }
+
+  if(ori_constraint.link_name.empty())
+  {
+    throw OrientationConstraintNameMissing("Link name of orientation constraint missing");
+  }
+
+  if(pos_constraint.link_name != ori_constraint.link_name)
+  {
+    std::ostringstream os;
+    os << "Position and orientation constraint name do not match"
+       << "(Position constraint name: \"" << pos_constraint.link_name
+       << "\" | Orientation constraint name: \"" << ori_constraint.link_name << "\")";
+    throw PositionOrientationConstraintNameMismatch(os.str());
+  }
+
+  if( !robot_model_->getJointModelGroup(group_name)->canSetStateFromIK(pos_constraint.link_name) )
+  {
+    std::ostringstream os;
+    os << "No IK solver available for link: \"" << pos_constraint.link_name << "\"";
+    throw NoIKSolverAvailable(os.str());
+  }
+
+  if(pos_constraint.constraint_region.primitive_poses.empty())
+  {
+    throw NoPrimitivePoseGiven("Primitive pose in position constraints of goal missing");
+  }
+}
+
+void TrajectoryGenerator::checkGoalConstraints(const moveit_msgs::MotionPlanRequest::_goal_constraints_type& goal_constraints,
+                                               const std::vector<std::string> &expected_joint_names,
+                                               const std::string& group_name) const
+{
+  if (goal_constraints.size() != 1)
+  {
+    std::ostringstream os;
+    os << "Exaclty one goal constraint required, but "
+       << goal_constraints.size() << " goal constraints given";
+    throw NotExactlyOneGoalConstraintGiven(os.str());
+  }
+
+  const moveit_msgs::Constraints& goal_con {goal_constraints.front()};
+  if ( !isOnlyOneGoalTypeGiven(goal_con) )
+  {
+    throw OnlyOneGoalTypeAllowed("Only cartesian XOR joint goal allowed");
+  }
+
+  if ( isJointGoalGiven(goal_con) )
+  {
+    checkJointGoalConstraint(goal_con, expected_joint_names, group_name);
   }
   else
   {
-    // convert trajectory_msgs::JointTrajectory to robot_trajectory::RobotTrajectory
-    robot_trajectory::RobotTrajectoryPtr rt(new robot_trajectory::RobotTrajectory(robot_model_, req.group_name));
-    moveit::core::RobotState start_rs(robot_model_);
-    start_rs.setToDefaultValues();
-    moveit::core::robotStateMsgToRobotState(req.start_state, start_rs, false);
-    rt->setRobotTrajectoryMsg(start_rs,joint_trajectory);
-    res.trajectory_ = rt;
-    res.error_code_.val = err_code.val;
-    res.planning_time_ = (ros::Time::now() - planning_start).toSec();
-    return true;
+    checkCartesianGoalConstraint(goal_con, group_name);
   }
 }
 
+void TrajectoryGenerator::validateRequest(const planning_interface::MotionPlanRequest& req) const
+{
+  checkVelocityScaling(req.max_velocity_scaling_factor);
+  checkAccelerationScaling(req.max_acceleration_scaling_factor);
+  checkForValidGroupName(req.group_name);
+  checkStartState(req.start_state);
+  checkGoalConstraints(req.goal_constraints, req.start_state.joint_state.name, req.group_name);
+}
+
+void TrajectoryGenerator::convertToRobotTrajectory(const trajectory_msgs::JointTrajectory& joint_trajectory,
+                                                   const moveit_msgs::RobotState& start_state,
+                                                   robot_trajectory::RobotTrajectory& robot_trajectory) const
+{
+  moveit::core::RobotState start_rs(robot_model_);
+  start_rs.setToDefaultValues();
+  moveit::core::robotStateMsgToRobotState(start_state, start_rs, false);
+  robot_trajectory.setRobotTrajectoryMsg(start_rs,joint_trajectory);
+}
+
+void TrajectoryGenerator::setSuccessResponse(const std::string& group_name,
+                                             const moveit_msgs::RobotState& start_state,
+                                             const trajectory_msgs::JointTrajectory &joint_trajectory,
+                                             const ros::Time& planning_start,
+                                             planning_interface::MotionPlanResponse &res) const
+{
+  robot_trajectory::RobotTrajectoryPtr rt(new robot_trajectory::RobotTrajectory(robot_model_, group_name));
+  convertToRobotTrajectory(joint_trajectory, start_state, *rt);
+
+  res.trajectory_ = rt;
+  res.error_code_.val = moveit_msgs::MoveItErrorCodes::SUCCESS;
+  res.planning_time_ = (ros::Time::now() - planning_start).toSec();
+}
+
+void TrajectoryGenerator::setFailureResponse(const ros::Time &planning_start,
+                                             planning_interface::MotionPlanResponse& res) const
+{
+  if(res.trajectory_)
+  {
+    res.trajectory_->clear();
+  }
+  res.planning_time_ = (ros::Time::now() - planning_start).toSec();
+}
+
 std::unique_ptr<KDL::VelocityProfile> TrajectoryGenerator::cartesianTrapVelocityProfile(
-    const planning_interface::MotionPlanRequest &req,
-    const MotionPlanInfo& plan_info,
+    const double& max_velocity_scaling_factor,
+    const double& max_acceleration_scaling_factor,
     const std::unique_ptr<KDL::Path> &path) const
 {
   std::unique_ptr<KDL::VelocityProfile> vp_trans(
         new KDL::VelocityProfile_Trap(
-          req.max_velocity_scaling_factor*planner_limits_.getCartesianLimits().getMaxTranslationalVelocity(),
-          req.max_acceleration_scaling_factor*planner_limits_.getCartesianLimits().getMaxTranslationalAcceleration()));
+          max_velocity_scaling_factor*planner_limits_.getCartesianLimits().getMaxTranslationalVelocity(),
+          max_acceleration_scaling_factor*planner_limits_.getCartesianLimits().getMaxTranslationalAcceleration()));
 
   if(path->PathLength() > std::numeric_limits<double>::epsilon()) // avoid division by zero
   {
@@ -272,6 +257,68 @@ std::unique_ptr<KDL::VelocityProfile> TrajectoryGenerator::cartesianTrapVelocity
     vp_trans->SetProfile(0, std::numeric_limits<double>::epsilon());
   }
   return std::move(vp_trans);
+}
+
+bool TrajectoryGenerator::generate(const planning_interface::MotionPlanRequest& req,
+                                   planning_interface::MotionPlanResponse&  res,
+                                   double sampling_time)
+{
+  ROS_INFO_STREAM("Generating " << req.planner_id << " trajectory...");
+  ros::Time planning_begin = ros::Time::now();
+
+  try
+  {
+    validateRequest(req);
+  }
+  catch(const MoveItErrorCodeException& ex)
+  {
+    ROS_ERROR_STREAM(ex.what());
+    res.error_code_.val = ex.getErrorCode();
+    setFailureResponse(planning_begin, res);
+    return false;
+  }
+
+  try
+  {
+    cmdSpecificRequestValidation(req);
+  }
+  catch(const MoveItErrorCodeException& ex)
+  {
+    ROS_ERROR_STREAM(ex.what());
+    res.error_code_.val = ex.getErrorCode();
+    setFailureResponse(planning_begin, res);
+    return false;
+  }
+
+  MotionPlanInfo plan_info;
+  try
+  {
+    extractMotionPlanInfo(req, plan_info);
+  }
+  catch(const MoveItErrorCodeException& ex)
+  {
+    ROS_ERROR_STREAM(ex.what());
+    res.error_code_.val = ex.getErrorCode();
+    setFailureResponse(planning_begin, res);
+    return false;
+  }
+
+  trajectory_msgs::JointTrajectory joint_trajectory;
+  try
+  {
+    plan(req, plan_info, sampling_time, joint_trajectory);
+  }
+  catch(const MoveItErrorCodeException& ex)
+  {
+    ROS_ERROR_STREAM(ex.what());
+    res.error_code_.val = ex.getErrorCode();
+    setFailureResponse(planning_begin, res);
+    return false;
+  }
+
+  setSuccessResponse(req.group_name, req.start_state, joint_trajectory,
+                     planning_begin, res);
+  return true;
 }
 
 }

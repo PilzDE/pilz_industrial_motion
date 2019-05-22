@@ -16,9 +16,9 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 -->
 
 <launch>
-
+  <!--
   <node pkg="rosbag" type="record" name="rosbag_log" args="record rosout -o $(find pilz_trajectory_generation)/integrationtest_sequence_action_capability_log"/>
-
+  -->
   <node name="joint_state_publisher" pkg="joint_state_publisher" type="joint_state_publisher">
     <param name="/use_gui" value="false"/>
     <rosparam param="/source_list">[/move_group/fake_controller_joint_states]</rosparam>
