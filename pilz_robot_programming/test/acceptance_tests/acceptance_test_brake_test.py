@@ -18,8 +18,12 @@
 import rospy
 
 from pilz_robot_programming.robot import *
+from pilz_robot_programming.commands import Ptp
 
 _REQUIRED_API_VERSION = "1"
+_BRAKE_TEST_POSE=[-2.7, 0.3, -1, 0, -1.8, 0.4]
+_DEF_VEL_SCALE=.2
+_DEF_ACC_SCALE=.2
 
 
 def start_program():
@@ -41,11 +45,15 @@ def _test_wait_until_required(robot):
             2. Robot starts brake test
             3. Brake test is successful.
     """
-
+    pre_bt_pose = robot.get_current_joint_states()
+    print(pre_bt_pose)
     while not robot.is_brake_test_required():
         rospy.sleep(1)
+    # Brake test required
+    robot.move(Ptp(goal=_BRAKE_TEST_POSE, vel_scale=_DEF_VEL_SCALE, acc_scale=_DEF_ACC_SCALE))
     robot.execute_brake_test()
     rospy.loginfo("Brake Test executed.")
+    robot.move(Ptp(goal=pre_bt_pose, vel_scale=_DEF_VEL_SCALE, acc_scale=_DEF_ACC_SCALE))
 
 
 if __name__ == "__main__":

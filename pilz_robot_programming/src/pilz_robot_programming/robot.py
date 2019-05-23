@@ -101,7 +101,7 @@ class Robot(object):
     _STOP_TOPIC_NAME = "stop_movement"
     _SEQUENCE_TOPIC = "sequence_move_group"
     _BRAKE_TEST_EXECUTE_SRV = "/prbt/execute_braketest"
-    _BRAKE_TEST_REQUIRED_SRV = "/prbt/is_brake_test_required"
+    _BRAKE_TEST_REQUIRED_SRV = "/prbt/brake_test_required"
     _INSTANCE_PARAM = "/robot_api_instance"
 
     # string constants

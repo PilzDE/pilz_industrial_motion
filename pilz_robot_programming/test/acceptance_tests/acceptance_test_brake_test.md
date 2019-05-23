@@ -28,14 +28,17 @@ These acceptance tests check that the real robot system is able perform a brake 
 - Run `roslaunch prbt_moveit_config moveit_planning_execution.launch sim:=False pipeline:=pilz_command_planner`
 - Run `rosrun pilz_robot_programming acceptance_test_brake_test.py`
 
-## Test Precedure
-- Start test as described
+## Test Procedure
+- Start all nodes as described above
+- Wait for startup and robot checking the brake test required state
 - Emulate the brake test required flag (i.e. *pushing the button*)
-- Observe results
+- Robot moves to brake test pose
+- Robot performs brake test
+- Robot moves back to previous pose
 
 ## Expected Result
 - The programming is repeatedly checking the brake test required flag and is printing, that no brake test is required
 - If you push the *brake-test-required-emulation-button*: Brake test requirement is detected
-- Brake test is preformed
-- Brake test is **successful** (i.e. no exception is thrown)
-
+- Robot moves successfully to the brake test pose
+- Brake test is executed (Multiple *clicks* should be audible) and finished **successfully** (i.e. no exception is thrown)
+- Robot moves successfully back to the original pose
