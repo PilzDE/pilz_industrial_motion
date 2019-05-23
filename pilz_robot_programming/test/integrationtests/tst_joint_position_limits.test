@@ -41,6 +41,6 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
   <!-- test node -->
   <test test-name="test_joint_position_limits" pkg="pilz_robot_programming"
-    type="tst_joint_position_limits.py" launch-prefix="$(arg pythontest_launch_prefix)"/>
+    type="tst_joint_position_limits.py" launch-prefix="$(arg pythontest_launch_prefix)" time-limit="120.0"/>
 
 </launch>
