@@ -4,6 +4,10 @@ sudo: required
 dist: trusty
 language: generic
 
+cache:
+  directories:
+    - $HOME/.ccache
+
 notifications:
   email:
     on_failure: always
@@ -14,6 +18,7 @@ notifications:
 env:
   global:
     - AFTER_SCRIPT='apt list --installed | grep "^ros-"'
+    - CCACHE_DIR=$HOME/.ccache
   matrix:
     - ROS_DISTRO="kinetic" ROS_REPO=ros CATKIN_LINT=true CATKIN_LINT_ARGS='--strict'
     - ROS_DISTRO="kinetic" ROS_REPO=ros-shadow-fixed CATKIN_LINT=true CATKIN_LINT_ARGS='--strict'
