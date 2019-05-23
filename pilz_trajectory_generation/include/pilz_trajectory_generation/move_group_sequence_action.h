@@ -42,23 +42,36 @@ public:
   virtual void initialize() override;
 
 private:
+  using ExecutableTrajs = std::vector<plan_execution::ExecutableTrajectory>;
+
+  using StartStateMsgs = pilz_msgs::MoveGroupSequenceResult::_trajectory_start_type;
+  using PlannedTrajMsgs = pilz_msgs::MoveGroupSequenceResult::_planned_trajectory_type;
+
+private:
   void executeSequenceCallback(const pilz_msgs::MoveGroupSequenceGoalConstPtr &goal);
   void executeSequenceCallback_PlanAndExecute(const pilz_msgs::MoveGroupSequenceGoalConstPtr& goal,
-                                          pilz_msgs::MoveGroupSequenceResult& action_res);
+                                              pilz_msgs::MoveGroupSequenceResult& action_res);
   void executeMoveCallback_PlanOnly(const pilz_msgs::MoveGroupSequenceGoalConstPtr& goal,
-                                    pilz_msgs::MoveGroupSequenceResult& action_res);
+                                    pilz_msgs::MoveGroupSequenceResult& res);
   void startMoveExecutionCallback();
   void startMoveLookCallback();
   void preemptMoveCallback();
   void setMoveState(move_group::MoveGroupState state);
   bool planUsingSequenceManager(const pilz_msgs::MotionSequenceRequest &req,
-                                 plan_execution::ExecutableMotionPlan& plan);
+                                plan_execution::ExecutableMotionPlan& plan);
+
+private:
+  static void convertToMsg(const ExecutableTrajs& trajs,
+                           StartStateMsgs& startStatesMsgs,
+                           PlannedTrajMsgs& plannedTrajsMsgs);
+
 private:
   std::unique_ptr<actionlib::SimpleActionServer<pilz_msgs::MoveGroupSequenceAction> > move_action_server_;
   pilz_msgs::MoveGroupSequenceFeedback move_feedback_;
 
   move_group::MoveGroupState move_state_ {move_group::IDLE};
-  std::unique_ptr<pilz_trajectory_generation::CommandListManager> sequence_manager_;
+  std::unique_ptr<pilz_trajectory_generation::CommandListManager> command_list_manager_;
+
 };
 }
 

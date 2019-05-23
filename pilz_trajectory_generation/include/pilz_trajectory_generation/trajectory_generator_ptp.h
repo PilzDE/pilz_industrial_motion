@@ -21,10 +21,17 @@
 #include "eigen3/Eigen/Eigen"
 #include "pilz_trajectory_generation/trajectory_generator.h"
 #include "pilz_trajectory_generation/velocity_profile_atrap.h"
+#include "pilz_trajectory_generation/trajectory_generation_exceptions.h"
 
-namespace pilz {
+using namespace pilz_trajectory_generation;
+
+namespace pilz
+{
 
 //TODO date type of units
+
+CREATE_MOVEIT_ERROR_CODE_EXCEPTION(PtpVelocityProfileSyncFailed, moveit_msgs::MoveItErrorCodes::FAILURE);
+CREATE_MOVEIT_ERROR_CODE_EXCEPTION(PtpNoIkSolutionForGoalPose, moveit_msgs::MoveItErrorCodes::NO_IK_SOLUTION);
 
 /**
  * @brief This class implements a point-to-point trajectory generator based on
@@ -41,50 +48,12 @@ public:
   TrajectoryGeneratorPTP(const robot_model::RobotModelConstPtr& robot_model,
                          const pilz::LimitsContainer& planner_limits);
 
-  ~TrajectoryGeneratorPTP();
-
-  /**
-   * @brief generate ptp robot trajectory
-   * @param req: motion plan request
-   * following fields are used and need to be defined properly:
-   *   - start_state/joint_state/name
-   *   - start_state/joint_state/position
-   *   - start_state/joint_state/velocity (default 0)
-   *   - goal_constraints/(joint_constraints or (position_constraints and orientation_constraints) )
-   *   - group_name: name of the planning group
-   *   - max_velocity_scaling_factor: scaling factor of maximal joint velocity
-   *   - max_acceleration_scaling_factor: scaling factor of maximal joint acceleration/deceleration
-   *
-   * @param res: motion plan response
-   * following fields will be provided as planning result:
-   *   - trajectory_start/joint_state/(name, position and velocity)
-   *   - trajectory/joint_trajectory/joint_names
-   *   - trajectory/joint_trajectory/points/(positions, velocities, accelerations and time_from_start)
-   *   - group_name: name of the planning group
-   *   - planning_time
-   *   - error_code/val
-   *
-   * @param sampling_time: sampling time of the generate trajectory (default 8ms)
-   *
-   * @return motion plan succeed/fail, detailed information in motion plan responce/error_code
-   */
-  virtual bool generate(const planning_interface::MotionPlanRequest& req,
-                        planning_interface::MotionPlanResponse&  res,
-                        double sampling_time=0.1) override;
+  virtual ~TrajectoryGeneratorPTP() = default;
 
 private:
 
-  /**
-   * @brief Extract needed information from a motion plan request in order to simplify
-   * further usages.
-   * @param req: motion plan request
-   * @param info: information extracted from motion plan request which is necessary for the planning
-   * @param error_code: MoveItErrorCodes which indicates the detailed error
-   * @return: ture if planning information is successfully extracted
-   */
-  virtual bool extractMotionPlanInfo(const planning_interface::MotionPlanRequest& req,
-                                     MotionPlanInfo& info,
-                                     moveit_msgs::MoveItErrorCodes& error_code) const override;
+  virtual void extractMotionPlanInfo(const planning_interface::MotionPlanRequest& req,
+                                     MotionPlanInfo& info) const override;
 
   /**
    * @brief plan ptp joint trajectory with zero start velocity
@@ -103,6 +72,11 @@ private:
                const double& velocity_scaling_factor,
                const double& acceleration_scaling_factor,
                const double& sampling_time);
+
+  virtual void plan(const planning_interface::MotionPlanRequest &req,
+                    const MotionPlanInfo& plan_info,
+                    const double& sampling_time,
+                    trajectory_msgs::JointTrajectory& joint_trajectory) override;
 
 private:
   const double MIN_MOVEMENT = 0.001;

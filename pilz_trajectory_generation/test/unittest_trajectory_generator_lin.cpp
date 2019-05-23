@@ -15,13 +15,15 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
+#include <memory>
+
 #include <gtest/gtest.h>
 
 #include "pilz_trajectory_generation/trajectory_generator_lin.h"
 #include "pilz_trajectory_generation/joint_limits_aggregator.h"
 #include "test_utils.h"
 #include "pilz_industrial_motion_testutils/xml_testdata_loader.h"
-#include "pilz_industrial_motion_testutils/motion_plan_request_director.h"
+#include "pilz_industrial_motion_testutils/command_types_typedef.h"
 
 #include <moveit/robot_model_loader/robot_model_loader.h>
 #include <moveit/robot_model/robot_model.h>
@@ -48,6 +50,7 @@ const std::string VELOCITY_SCALING_FACTOR("velocity_scaling_factor");
 const std::string OTHER_TOLERANCE("other_tolerance");
 
 using namespace pilz;
+using namespace pilz_industrial_motion_testutils;
 
 /**
  * @brief Parameterized unittest of trajectory generator LIN to enable tests against
@@ -77,8 +80,6 @@ protected:
   std::unique_ptr<TrajectoryGenerator> lin_;
   // test data provider
   std::unique_ptr<pilz_industrial_motion_testutils::TestdataLoader> tdp_;
-  // motion plan request director
-  pilz_industrial_motion_testutils::MotionPlanRequestDirector req_director_;
 
   // test parameters from parameter server
   std::string planning_group_, target_link_hcd_, test_data_file_name_;
@@ -161,6 +162,33 @@ bool TrajectoryGeneratorLINTest::checkLinResponse(const planning_interface::Moti
   return true;
 }
 
+/**
+ * @brief Checks that each derived MoveItErrorCodeException contains the correct
+ * error code.
+ */
+TEST(TrajectoryGeneratorLINTest, TestExceptionErrorCodeMapping)
+{
+  {
+    std::shared_ptr<LinTrajectoryConversionFailure> ltcf_ex {new LinTrajectoryConversionFailure("")};
+    EXPECT_EQ(ltcf_ex->getErrorCode(), moveit_msgs::MoveItErrorCodes::FAILURE);
+  }
+
+
+  {
+    std::shared_ptr<JointNumberMismatch> jnm_ex {new JointNumberMismatch("")};
+    EXPECT_EQ(jnm_ex->getErrorCode(), moveit_msgs::MoveItErrorCodes::INVALID_GOAL_CONSTRAINTS);
+  }
+
+  {
+    std::shared_ptr<LinJointMissingInStartState> ljmiss_ex {new LinJointMissingInStartState("")};
+    EXPECT_EQ(ljmiss_ex->getErrorCode(), moveit_msgs::MoveItErrorCodes::INVALID_ROBOT_STATE);
+  }
+
+  {
+    std::shared_ptr<LinInverseForGoalIncalculable> lifgi_ex {new LinInverseForGoalIncalculable("")};
+    EXPECT_EQ(lifgi_ex->getErrorCode(), moveit_msgs::MoveItErrorCodes::NO_IK_SOLUTION);
+  }
+}
 
 // Instantiate the test cases for robot model with and without gripper
 INSTANTIATE_TEST_CASE_P(InstantiationName, TrajectoryGeneratorLINTest, ::testing::Values(
@@ -209,7 +237,7 @@ TEST_P(TrajectoryGeneratorLINTest, jointSpaceGoalNearZeroStartVelocity)
 
   // Set velocity near zero
   lin_joint_req.start_state.joint_state.velocity
-    = std::vector<double>(lin_joint_req.start_state.joint_state.position.size(), 1e-16);
+      = std::vector<double>(lin_joint_req.start_state.joint_state.position.size(), 1e-16);
 
   // generate the LIN trajectory
   planning_interface::MotionPlanResponse res;
@@ -279,15 +307,11 @@ TEST_P(TrajectoryGeneratorLINTest, cartesianTrapezoidProfile)
  */
 TEST_P(TrajectoryGeneratorLINTest, LinPlannerLimitViolation)
 {
-  // construct motion plan request
-  moveit_msgs::MotionPlanRequest lin_joint_req {tdp_->getLinJoint("lin2").toRequest()};
+  LinJoint lin {tdp_->getLinJoint("lin2")};
+  lin.setAccelerationScale(1.01);
 
-  // Increase the acceleration
-  lin_joint_req.max_acceleration_scaling_factor = 1.0;
-
-  // generate the LIN trajectory
   planning_interface::MotionPlanResponse res;
-  ASSERT_FALSE(lin_->generate(lin_joint_req, res));
+  ASSERT_FALSE(lin_->generate(lin.toRequest(), res));
 }
 
 /**
@@ -311,7 +335,7 @@ TEST_P(TrajectoryGeneratorLINTest, LinStartEqualsGoal)
   for(size_t i = 0; i < lin_joint_req.goal_constraints.at(0).joint_constraints.size(); i++)
   {
     lin_joint_req.goal_constraints.at(0).joint_constraints.at(i).position
-      = start_state.getVariablePosition(lin_joint_req.goal_constraints.at(0).joint_constraints.at(i).joint_name);
+        = start_state.getVariablePosition(lin_joint_req.goal_constraints.at(0).joint_constraints.at(i).joint_name);
   }
 
   // generate the LIN trajectory
@@ -362,6 +386,43 @@ TEST_P(TrajectoryGeneratorLINTest, IncorrectJointNumber)
   planning_interface::MotionPlanResponse res;
   ASSERT_FALSE(lin_->generate(lin_joint_req, res));
   EXPECT_TRUE(res.error_code_.val == moveit_msgs::MoveItErrorCodes::INVALID_GOAL_CONSTRAINTS);
+}
+
+/**
+ * @brief test invalid motion plan request with incomplete start state and cartesian goal
+ */
+TEST_P(TrajectoryGeneratorLINTest, cartGoalIncompleteStartState)
+{
+  // construct motion plan request
+  moveit_msgs::MotionPlanRequest lin_cart_req {tdp_->getLinCart("lin2").toRequest()};
+  EXPECT_GT(lin_cart_req.start_state.joint_state.name.size(), 1u);
+  lin_cart_req.start_state.joint_state.name.resize(1);
+  lin_cart_req.start_state.joint_state.position.resize(1); // prevent failing check for equal sizes
+
+  // generate lin trajectory
+  planning_interface::MotionPlanResponse res;
+  EXPECT_FALSE(lin_->generate(lin_cart_req, res));
+  EXPECT_EQ(res.error_code_.val, moveit_msgs::MoveItErrorCodes::INVALID_ROBOT_STATE);
+}
+
+/**
+ * @brief Set a frame id in goal constraint with cartesian goal on both position and orientation constraints
+ */
+TEST_P(TrajectoryGeneratorLINTest, cartGoalFrameIdBothConstraints)
+{
+  // construct motion plan request
+  moveit_msgs::MotionPlanRequest lin_cart_req {tdp_->getLinCart("lin2").toRequest()};
+
+  lin_cart_req.goal_constraints.front().position_constraints.front().header.frame_id = robot_model_->getModelFrame();
+  lin_cart_req.goal_constraints.front().orientation_constraints.front().header.frame_id = robot_model_->getModelFrame();
+
+  // generate lin trajectory
+  planning_interface::MotionPlanResponse res;
+  ASSERT_TRUE(lin_->generate(lin_cart_req, res));
+  EXPECT_TRUE(res.error_code_.val == moveit_msgs::MoveItErrorCodes::SUCCESS);
+
+  // check the resulted trajectory
+  EXPECT_TRUE(checkLinResponse(lin_cart_req, res));
 }
 
 int main(int argc, char **argv)

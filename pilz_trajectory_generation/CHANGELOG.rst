@@ -2,11 +2,17 @@
 Changelog for package pilz_trajectory_generation
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
+Forthcoming
+-----------
+* fixed an error that led to trajectories not strictly increasing in time
+* Contributors: Pilz GmbH and Co. KG
+
 0.4.3 (2019-04-08)
 ------------------
 * update dependencies of trajectory_generation
 * fix CIRC path generator and increase test coverage
 * adopt strictest limits in ptp planner (refactor JointLimitsContainer and TrajectoryGeneratorPTP)
+* Enable gripper commands inside a sequence
 * Contributors: Pilz GmbH and Co. KG
 
 0.4.2 (2019-03-13)

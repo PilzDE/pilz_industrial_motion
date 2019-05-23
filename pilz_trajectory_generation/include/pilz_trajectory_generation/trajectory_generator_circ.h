@@ -21,9 +21,27 @@
 #include <eigen3/Eigen/Eigen>
 #include <kdl/path.hpp>
 #include <kdl/velocityprofile.hpp>
+
 #include "pilz_trajectory_generation/trajectory_generator.h"
 
-namespace pilz {
+using namespace pilz_trajectory_generation;
+
+namespace pilz
+{
+
+CREATE_MOVEIT_ERROR_CODE_EXCEPTION(CircleNoPlane, moveit_msgs::MoveItErrorCodes::INVALID_MOTION_PLAN);
+CREATE_MOVEIT_ERROR_CODE_EXCEPTION(CircleToSmall, moveit_msgs::MoveItErrorCodes::INVALID_MOTION_PLAN);
+CREATE_MOVEIT_ERROR_CODE_EXCEPTION(CenterPointDifferentRadius, moveit_msgs::MoveItErrorCodes::INVALID_MOTION_PLAN);
+CREATE_MOVEIT_ERROR_CODE_EXCEPTION(CircTrajectoryConversionFailure, moveit_msgs::MoveItErrorCodes::INVALID_MOTION_PLAN);
+CREATE_MOVEIT_ERROR_CODE_EXCEPTION(UnknownPathConstraintName, moveit_msgs::MoveItErrorCodes::INVALID_MOTION_PLAN);
+CREATE_MOVEIT_ERROR_CODE_EXCEPTION(NoPositionConstraints, moveit_msgs::MoveItErrorCodes::INVALID_MOTION_PLAN);
+CREATE_MOVEIT_ERROR_CODE_EXCEPTION(NoPrimitivePose, moveit_msgs::MoveItErrorCodes::INVALID_MOTION_PLAN);
+
+CREATE_MOVEIT_ERROR_CODE_EXCEPTION(UnknownLinkNameOfAuxiliaryPoint, moveit_msgs::MoveItErrorCodes::INVALID_LINK_NAME);
+CREATE_MOVEIT_ERROR_CODE_EXCEPTION(NumberOfConstraintsMismatch, moveit_msgs::MoveItErrorCodes::INVALID_GOAL_CONSTRAINTS);
+CREATE_MOVEIT_ERROR_CODE_EXCEPTION(CircJointMissingInStartState, moveit_msgs::MoveItErrorCodes::INVALID_ROBOT_STATE);
+CREATE_MOVEIT_ERROR_CODE_EXCEPTION(CircInverseForGoalIncalculable, moveit_msgs::MoveItErrorCodes::NO_IK_SOLUTION);
+
 /**
  * @brief This class implements a trajectory generator of arcs in Cartesian space.
  * The arc is specified by a start pose, a goal pose and a interim point on the arc,
@@ -34,77 +52,43 @@ class TrajectoryGeneratorCIRC : public TrajectoryGenerator
 {
 public:
   /**
-   * @brief Constructor of CIRC Trajectory Generator
+   * @brief Constructor of CIRC Trajectory Generator.
+   *
+   * @param planner_limits Limits in joint and Cartesian spaces
+   *
    * @throw TrajectoryGeneratorInvalidLimitsException
-   * @param model: robot model
-   * @param planner_limits: limits in joint and Cartesian spaces
+   *
    */
   TrajectoryGeneratorCIRC(const robot_model::RobotModelConstPtr& robot_model,
                           const pilz::LimitsContainer& planner_limits);
 
-  ~TrajectoryGeneratorCIRC();
-
-  /**
-   * @brief generate CIRC robot trajectory
-   * @param req: motion plan request
-   * following fields are used and need to be defined properly:
-   *   - planner_id: CIRC
-   *   - group_name: name of the planning group
-   *   - max_velocity_scaling_factor: scaling factor of maximal Cartesian translational/rotational velocity
-   *   - max_acceleration_scaling_factor: scaling factor of maximal Cartesian translational/rotational acceleration/deceleration
-   *   - start_state/joint_state/name
-   *   - start_state/joint_state/position
-   *   - goal_constraints/(joint_constraints or (position_constraints and orientation_constraints) )
-   *   - path_constraints/name: interim/center
-   *   - path_constraints/position_constraints (link_name must be given)
-   *
-   * @param res: motion plan response
-   * following fields will be provided as planning result:
-   *   - group_name: name of the planning group
-   *   - planning_time
-   *   - error_code/val
-   *   - trajectory_start/joint_state/(name, position and velocity)
-   *   - trajectory/joint_trajectory/joint_names
-   *   - trajectory/joint_trajectory/points/(positions, velocities, accelerations and time_from_start)
-   *
-   * @param sampling_time: sampling time of the generate trajectory (default 8ms)
-   *
-   * @return motion plan succeed/fail, detailed information in motion plan responce/error_code
-   */
-  virtual bool generate(const planning_interface::MotionPlanRequest& req,
-                        planning_interface::MotionPlanResponse& res,
-                        double sampling_time=0.1) override;
+  virtual ~TrajectoryGeneratorCIRC() = default;
 
 private:
+  virtual void cmdSpecificRequestValidation(const planning_interface::MotionPlanRequest &req) const override;
+
+  virtual void extractMotionPlanInfo(const planning_interface::MotionPlanRequest &req,
+                                     MotionPlanInfo &info) const final override;
+
+  virtual void plan(const planning_interface::MotionPlanRequest &req,
+                    const MotionPlanInfo& plan_info,
+                    const double& sampling_time,
+                    trajectory_msgs::JointTrajectory& joint_trajectory) override;
 
   /**
-   * @brief validate the motion plan request of CIRC motion command
-   * @param req
-   * @param error_code
-   * @return
+   * @brief Construct a KDL::Path object for a Cartesian path of an arc.
+   *
+   * @return A unique pointer of the path object, null_ptr in case of an error.
+   *
+   * @throws CircleNoPlane if the plane in which the circle resides,
+   * could not be determined.
+   *
+   * @throws CircleToSmall if the specified circ radius is to small.
+   *
+   * @throws CenterPointDifferentRadius if the distances between start-center
+   * and goal-center are different.
    */
-  virtual bool validateRequest(const planning_interface::MotionPlanRequest &req,
-                               moveit_msgs::MoveItErrorCodes& error_code) const final;
-
-  /**
-   * @brief extractMotionPlanInfo
-   * @param req
-   * @param info
-   * @param error_code
-   * @return
-   */
-  virtual bool extractMotionPlanInfo(const planning_interface::MotionPlanRequest &req,
-                                     MotionPlanInfo &info,
-                                     moveit_msgs::MoveItErrorCodes &error_code) const final;
-
-  /**
-   * @brief construct a KDL::Path object for a Cartesian path of an arc
-   * @param req: motion plan request
-   * @param error_code: moveit error code
-   * @return a unique pointer of the path object. null_ptr in case of an error.
-   */
-  std::unique_ptr<KDL::Path> setPathCIRC(const MotionPlanInfo &info,
-                                         moveit_msgs::MoveItErrorCodes &error_code) const;
+  std::unique_ptr<KDL::Path> setPathCIRC(const MotionPlanInfo &info) const;
 
 
 };

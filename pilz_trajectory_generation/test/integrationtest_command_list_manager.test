@@ -16,11 +16,8 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 -->
 
 <launch>
-  <!-- Parametrized test running with and without gripper! -->
-
-  <!-- Load the context with and without the pg70 -->
-  <include file="$(find pilz_trajectory_generation)/test/test_robots/prbt/launch/test_context.launch" />
-  <include file="$(find pilz_trajectory_generation)/test/test_robots/prbt/launch/test_context.launch">
+  <!-- Load the context with the pg70 -->
+  <include file="$(find prbt_moveit_config)/launch/planning_context.launch" >
     <arg name="gripper" value="pg70" />
   </include>
 
@@ -47,8 +44,7 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
   time-limit="885.0" launch-prefix="xterm -e gdb - -args" -->
   <test pkg="pilz_trajectory_generation" test-name="integrationtest_command_list_manager" type="integrationtest_command_list_manager"
   time-limit="885.0" >
-    <param name="planning_group" value="manipulator" />
-    <param name="target_link" value="prbt_flange" />
+    <param name="testdata_file_name" value="$(find pilz_trajectory_generation)/test/test_robots/prbt/test_data/testdata_sequence.xml" />
   </test>
   <!--launch-prefix="xterm -e gdb - -args"-->
 

@@ -23,6 +23,7 @@
 #include <mutex>
 #include <condition_variable>
 #include <chrono>
+#include <stdexcept>
 
 #include <ros/ros.h>
 #include <moveit_msgs/Constraints.h>
@@ -114,7 +115,7 @@ void IntegrationTestSequenceAction::SetUp()
   move_group_->setJointValueTarget(rState);
   move_group_->move();
 
-  ASSERT_TRUE(isAtExpectedPosition(*(move_group_->getCurrentState()), rState, joint_position_tolerance_));
+  ASSERT_TRUE(isAtExpectedPosition(rState, *(move_group_->getCurrentState()), joint_position_tolerance_));
 }
 
 /**
@@ -135,7 +136,8 @@ TEST_F(IntegrationTestSequenceAction, TestSendingOfEmptySequence)
   ac_.sendGoalAndWait(seq_goal);
   pilz_msgs::MoveGroupSequenceResultConstPtr res = ac_.getResult();
   EXPECT_EQ(res->error_code.val, moveit_msgs::MoveItErrorCodes::SUCCESS) << "Execution of sequence failed.";
-  EXPECT_EQ(res->planned_trajectory.joint_trajectory.points.size(), 0u) << "Planned trajectory is not empty.";
+  EXPECT_TRUE(res->planned_trajectory.empty());
+  EXPECT_TRUE(res->trajectory_start.empty());
 }
 
 /**
@@ -161,7 +163,8 @@ TEST_F(IntegrationTestSequenceAction, TestDifferingGroupNames)
   ac_.sendGoalAndWait(seq_goal);
   pilz_msgs::MoveGroupSequenceResultConstPtr res = ac_.getResult();
   EXPECT_EQ(res->error_code.val, moveit_msgs::MoveItErrorCodes::INVALID_GROUP_NAME) << "Incorrect error code.";
-  EXPECT_EQ(res->planned_trajectory.joint_trajectory.points.size(), 0u) << "Planned trajectory is not empty.";
+  EXPECT_TRUE(res->planned_trajectory.empty());
+  EXPECT_TRUE(res->trajectory_start.empty());
 }
 
 /**
@@ -178,7 +181,7 @@ TEST_F(IntegrationTestSequenceAction, TestDifferingGroupNames)
 TEST_F(IntegrationTestSequenceAction, TestNegativeBlendRadius)
 {
   Sequence seq {data_loader_->getSequence("ComplexSequence")};
-  seq.setBlendRadii(0, -1.0);
+  seq.setBlendRadius(0, -1.0);
 
   pilz_msgs::MoveGroupSequenceGoal seq_goal;
   seq_goal.request = seq.toRequest();
@@ -187,7 +190,8 @@ TEST_F(IntegrationTestSequenceAction, TestNegativeBlendRadius)
 
   pilz_msgs::MoveGroupSequenceResultConstPtr res = ac_.getResult();
   EXPECT_EQ(res->error_code.val, moveit_msgs::MoveItErrorCodes::INVALID_MOTION_PLAN) << "Incorrect error code.";
-  EXPECT_EQ(res->planned_trajectory.joint_trajectory.points.size(), 0u) << "Planned trajectory not empty.";
+  EXPECT_TRUE(res->planned_trajectory.empty());
+  EXPECT_TRUE(res->trajectory_start.empty());
 }
 
 /**
@@ -206,7 +210,7 @@ TEST_F(IntegrationTestSequenceAction, TestNegativeBlendRadius)
 TEST_F(IntegrationTestSequenceAction, TestOverlappingBlendRadii)
 {
   Sequence seq {data_loader_->getSequence("ComplexSequence")};
-  seq.setBlendRadii(0, 10*seq.getBlendRadius(0));
+  seq.setBlendRadius(0, 10*seq.getBlendRadius(0));
 
   pilz_msgs::MoveGroupSequenceGoal seq_goal;
   seq_goal.request = seq.toRequest();
@@ -215,7 +219,8 @@ TEST_F(IntegrationTestSequenceAction, TestOverlappingBlendRadii)
 
   pilz_msgs::MoveGroupSequenceResultConstPtr res = ac_.getResult();
   EXPECT_EQ(res->error_code.val, moveit_msgs::MoveItErrorCodes::INVALID_MOTION_PLAN) << "Incorrect error code";
-  EXPECT_EQ(res->planned_trajectory.joint_trajectory.points.size(), 0u) << "Planned trajectory not empty.";
+  EXPECT_TRUE(res->planned_trajectory.empty());
+  EXPECT_TRUE(res->trajectory_start.empty());
 }
 
 /**
@@ -235,7 +240,7 @@ TEST_F(IntegrationTestSequenceAction, TestTooLargeBlendRadii)
 {
   Sequence seq {data_loader_->getSequence("ComplexSequence")};
   seq.erase(2, seq.size());
-  seq.setBlendRadii(0, 10*seq.getBlendRadius(seq.size()-2));
+  seq.setBlendRadius(0, 10*seq.getBlendRadius(seq.size()-2));
 
   pilz_msgs::MoveGroupSequenceGoal seq_goal;
   seq_goal.request = seq.toRequest();
@@ -244,7 +249,8 @@ TEST_F(IntegrationTestSequenceAction, TestTooLargeBlendRadii)
 
   pilz_msgs::MoveGroupSequenceResultConstPtr res = ac_.getResult();
   EXPECT_EQ(res->error_code.val, moveit_msgs::MoveItErrorCodes::FAILURE) << "Incorrect error code";
-  EXPECT_EQ(res->planned_trajectory.joint_trajectory.points.size(), 0u) << "Planned trajectory not empty.";
+  EXPECT_TRUE(res->planned_trajectory.empty());
+  EXPECT_TRUE(res->trajectory_start.empty());
 }
 
 /**
@@ -273,7 +279,8 @@ TEST_F(IntegrationTestSequenceAction, TestInvalidCmd)
   ac_.sendGoalAndWait(seq_goal);
   pilz_msgs::MoveGroupSequenceResultConstPtr res = ac_.getResult();
   EXPECT_NE(res->error_code.val, moveit_msgs::MoveItErrorCodes::SUCCESS) << "Incorrect error code.";
-  EXPECT_EQ(res->planned_trajectory.joint_trajectory.points.size(), 0u) << "Planned trajectory not empty.";
+  EXPECT_TRUE(res->planned_trajectory.empty());
+  EXPECT_TRUE(res->trajectory_start.empty());
 }
 
 /**
@@ -302,7 +309,8 @@ TEST_F(IntegrationTestSequenceAction, TestInvalidLinkName)
   ac_.sendGoalAndWait(seq_goal);
   pilz_msgs::MoveGroupSequenceResultConstPtr res = ac_.getResult();
   EXPECT_NE(res->error_code.val, moveit_msgs::MoveItErrorCodes::SUCCESS) << "Incorrect error code.";
-  EXPECT_EQ(res->planned_trajectory.joint_trajectory.points.size(), 0u) << "Planned trajectory not empty.";
+  EXPECT_TRUE(res->planned_trajectory.empty());
+  EXPECT_TRUE(res->trajectory_start.empty());
 }
 
 //*******************************************************
@@ -310,7 +318,7 @@ TEST_F(IntegrationTestSequenceAction, TestInvalidLinkName)
 //*******************************************************
 MATCHER_P(FeedbackStateEq, state, "") { return arg->state == state; }
 MATCHER(IsResultSuccess, "") { return arg->error_code.val == moveit_msgs::MoveItErrorCodes::SUCCESS; }
-MATCHER(IsResultNotEmpty, "") { return arg->planned_trajectory.joint_trajectory.points.size() > 0; }
+MATCHER(IsResultNotEmpty, "") { return !arg->planned_trajectory.empty() || !arg->trajectory_start.empty(); }
 
 /**
  * @brief Tests that action server callbacks are called correctly.
@@ -425,7 +433,8 @@ TEST_F(IntegrationTestSequenceAction, TestPlanOnlyFlag)
   ac_.sendGoalAndWait(seq_goal);
   pilz_msgs::MoveGroupSequenceResultConstPtr res = ac_.getResult();
   EXPECT_EQ(res->error_code.val, moveit_msgs::MoveItErrorCodes::SUCCESS) << "Sequence execution failed.";
-  EXPECT_NE(res->planned_trajectory.joint_trajectory.points.size(), 0u) << "Planned trajectory is empty.";
+  EXPECT_FALSE(res->planned_trajectory.empty()) << "Planned trajectory is empty";
+  EXPECT_FALSE(res->trajectory_start.empty()) << "No start states returned";
 
   ASSERT_TRUE(isAtExpectedPosition(*(move_group_->getCurrentState()), start_config.toRobotState(), joint_position_tolerance_)) << "Robot did move although \"PlanOnly\" flag set.";
 }
@@ -459,9 +468,39 @@ TEST_F(IntegrationTestSequenceAction, TestIgnoreRobotStateForPlanOnly)
   ac_.sendGoalAndWait(seq_goal);
   pilz_msgs::MoveGroupSequenceResultConstPtr res = ac_.getResult();
   EXPECT_EQ(res->error_code.val, moveit_msgs::MoveItErrorCodes::SUCCESS) << "Execution of sequence failed.";
-  EXPECT_NE(res->planned_trajectory.joint_trajectory.points.size(), 0u) << "Planned trajectory is empty.";
+  EXPECT_FALSE(res->planned_trajectory.empty()) << "Planned trajectory is empty";
+  EXPECT_FALSE(res->trajectory_start.empty()) << "No start states returned";
 
   ASSERT_TRUE(isAtExpectedPosition(*(move_group_->getCurrentState()), start_config.toRobotState(), joint_position_tolerance_)) << "Robot did move although \"PlanOnly\" flag set.";
+}
+
+/**
+ * @brief Tests that negative blend radii are detected
+ * (Mainly for full coverage) in case "plan only" flag is set.
+ *
+ * Test Sequence:
+ *    1. Send goal for planning and execution.
+ *    2. Evaluate the result.
+ *
+ * Expected Results:
+ *    1. Goal is sent to the action server.
+ *    2. Error code of the result is not success and the planned trajectory is empty.
+ */
+TEST_F(IntegrationTestSequenceAction, TestNegativeBlendRadiusForPlanOnly)
+{
+  Sequence seq {data_loader_->getSequence("ComplexSequence")};
+  seq.setBlendRadius(0, -1.0);
+
+  pilz_msgs::MoveGroupSequenceGoal seq_goal;
+  seq_goal.request = seq.toRequest();
+  seq_goal.planning_options.plan_only = true;
+
+  ac_.sendGoalAndWait(seq_goal);
+
+  pilz_msgs::MoveGroupSequenceResultConstPtr res = ac_.getResult();
+  EXPECT_EQ(res->error_code.val, moveit_msgs::MoveItErrorCodes::INVALID_MOTION_PLAN) << "Incorrect error code.";
+  EXPECT_TRUE(res->planned_trajectory.empty());
+  EXPECT_TRUE(res->trajectory_start.empty());
 }
 
 /**
@@ -491,7 +530,8 @@ TEST_F(IntegrationTestSequenceAction, TestIgnoreRobotState)
   ac_.sendGoalAndWait(seq_goal);
   pilz_msgs::MoveGroupSequenceResultConstPtr res = ac_.getResult();
   EXPECT_EQ(res->error_code.val, moveit_msgs::MoveItErrorCodes::SUCCESS) << "Execution of sequence failed.";
-  EXPECT_NE(res->planned_trajectory.joint_trajectory.points.size(), 0u) << "Planned trajectory is empty.";
+  EXPECT_FALSE(res->planned_trajectory.empty()) << "Planned trajectory is empty";
+  EXPECT_FALSE(res->trajectory_start.empty()) << "No start states returned";
 }
 
 /**
@@ -530,7 +570,8 @@ TEST_F(IntegrationTestSequenceAction, TestLargeRequest)
   ac_.sendGoalAndWait(seq_goal);
   pilz_msgs::MoveGroupSequenceResultConstPtr res = ac_.getResult();
   EXPECT_EQ(res->error_code.val, moveit_msgs::MoveItErrorCodes::SUCCESS) << "Incorrect error code.";
-  EXPECT_NE(res->planned_trajectory.joint_trajectory.points.size(), 0u) << "Planned trajectory empty.";
+  EXPECT_FALSE(res->planned_trajectory.empty()) << "Planned trajectory is empty";
+  EXPECT_FALSE(res->trajectory_start.empty()) << "No start states returned";
 }
 
 /**
@@ -557,8 +598,8 @@ TEST_F(IntegrationTestSequenceAction, TestComplexSequenceWithoutBlending)
   ac_.sendGoalAndWait(seq_goal);
   pilz_msgs::MoveGroupSequenceResultConstPtr res = ac_.getResult();
   EXPECT_EQ(res->error_code.val, moveit_msgs::MoveItErrorCodes::SUCCESS);
-  EXPECT_NE(res->planned_trajectory.joint_trajectory.points.size(), 0u)
-      << "Planned trajectory is empty.";
+  EXPECT_FALSE(res->planned_trajectory.empty()) << "Planned trajectory is empty";
+  EXPECT_FALSE(res->trajectory_start.empty()) << "No start states returned";
 
 }
 
@@ -584,11 +625,9 @@ TEST_F(IntegrationTestSequenceAction, TestComplexSequenceWithBlending)
   ac_.sendGoalAndWait(seq_goal);
   pilz_msgs::MoveGroupSequenceResultConstPtr res = ac_.getResult();
   EXPECT_EQ(res->error_code.val, moveit_msgs::MoveItErrorCodes::SUCCESS);
-  EXPECT_NE(res->planned_trajectory.joint_trajectory.points.size(), 0u)
-      << "Planned trajectory is empty.";
-
+  EXPECT_FALSE(res->planned_trajectory.empty()) << "Planned trajectory is empty";
+  EXPECT_FALSE(res->trajectory_start.empty()) << "No start states returned";
 }
-
 
 int main(int argc, char **argv)
 {

@@ -61,7 +61,7 @@ add_library(${PROJECT_NAME}
   src/cartesian_limit.cpp
   src/limits_container.cpp
   src/trajectory_functions.cpp
-  src/trajectory_appender.cpp
+  src/plan_components_builder.cpp
 )
 
 target_link_libraries(${PROJECT_NAME}
@@ -123,7 +123,7 @@ target_link_libraries(planning_context_loader_circ
 
 add_library(command_list_manager
             src/command_list_manager.cpp
-            src/trajectory_appender.cpp)
+            src/plan_components_builder.cpp)
 target_link_libraries(command_list_manager
             ${catkin_LIBRARIES})
 add_dependencies(command_list_manager
@@ -132,6 +132,7 @@ add_dependencies(command_list_manager
 add_library(sequence_capability
             src/move_group_sequence_action.cpp
             src/move_group_sequence_service.cpp
+            src/plan_components_builder.cpp
             src/command_list_manager.cpp
             src/trajectory_blender_transition_window.cpp
             src/joint_limits_aggregator.cpp  # do we need joint limits and cartesian_limit here?
@@ -139,7 +140,6 @@ add_library(sequence_capability
             src/limits_container.cpp
             src/cartesian_limit.cpp
             src/cartesian_limits_aggregator.cpp
-            src/trajectory_appender.cpp
             )
 target_link_libraries(sequence_capability
                       ${catkin_LIBRARIES}) # DO NOT LINK ${PROJECT_NAME} here!
@@ -208,13 +208,11 @@ if(CATKIN_ENABLE_TESTING)
       src/limits_container.cpp
       src/joint_limits_container.cpp
       src/cartesian_limit.cpp
-      test/motion_plan_request_builder.cpp
-      test/motion_sequence_request_builder.cpp
       src/command_list_manager.cpp
       src/trajectory_blender_transition_window.cpp
       src/cartesian_limits_aggregator.cpp
       src/planning_context_loader.cpp
-      src/trajectory_appender.cpp
+      src/plan_components_builder.cpp
   )
 
   target_link_libraries(${PROJECT_NAME}_test
@@ -309,6 +307,21 @@ add_rostest_gtest(integrationtest_command_list_manager
 target_link_libraries(integrationtest_command_list_manager
 ${catkin_LIBRARIES} ${PROJECT_NAME}_test)
 
+add_rostest_gtest(integrationtest_get_tip_frame
+  test/integrationtest_get_tip_frame.test
+  test/integrationtest_get_tip_frame.cpp
+)
+target_link_libraries(integrationtest_get_tip_frame
+${catkin_LIBRARIES} ${PROJECT_NAME}_test)
+
+add_rostest_gtest(integrationtest_plan_components_builder
+  test/integrationtest_plan_components_builder.test
+  test/integrationtest_plan_components_builder.cpp
+)
+target_link_libraries(integrationtest_plan_components_builder
+${catkin_LIBRARIES} ${PROJECT_NAME}_test)
+
+
 
 ##################
 ####Unit Tests####
@@ -326,6 +339,11 @@ ${catkin_LIBRARIES} ${PROJECT_NAME}_test)
                    test/unittest_velocity_profile_atrap.cpp)
   target_link_libraries(unittest_velocity_profile_atrap
     ${catkin_LIBRARIES} ${PROJECT_NAME}_test)
+
+  catkin_add_gtest(unittest_trajectory_generator
+                   test/unittest_trajectory_generator.cpp)
+  target_link_libraries(unittest_trajectory_generator
+    ${PROJECT_NAME} ${catkin_LIBRARIES} ${PROJECT_NAME}_test)
 
   # Trajectory Generator Unit Test
   add_rostest_gtest(unittest_trajectory_functions
@@ -443,15 +461,6 @@ ${catkin_LIBRARIES} ${PROJECT_NAME}_test)
 
   target_link_libraries(unittest_planning_context
      ${catkin_LIBRARIES} ${PROJECT_NAME}_test)
-
-  # RobotTrajectoryHelper Unit Test
-  add_rostest_gtest(unittest_trajectory_appender
-    test/unittest_trajectory_appender.test
-    test/unittest_trajectory_appender.cpp
-    src/trajectory_appender.cpp)
-
-  target_link_libraries(unittest_trajectory_appender
-    ${PROJECT_NAME} ${catkin_LIBRARIES} ${PROJECT_NAME}_test)
 
   # to run: catkin_make -DENABLE_COVERAGE_TESTING=ON package_name_coverage
   if(ENABLE_COVERAGE_TESTING)
