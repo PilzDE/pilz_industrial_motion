@@ -59,7 +59,8 @@ CommandListManager::CommandListManager(const ros::NodeHandle &nh, const moveit::
 }
 
 RobotTrajCont CommandListManager::solve(const planning_scene::PlanningSceneConstPtr& planning_scene,
-                                         const pilz_msgs::MotionSequenceRequest& req_list)
+                                        planning_pipeline::PlanningPipelinePtr planning_pipeline,
+                                        const pilz_msgs::MotionSequenceRequest& req_list)
 {
   if(req_list.items.empty())
   {
@@ -72,7 +73,7 @@ RobotTrajCont CommandListManager::solve(const planning_scene::PlanningSceneConst
 
   MotionResponseCont resp_cont
   {
-    solveSequenceItems(planning_scene, req_list)
+    solveSequenceItems(planning_scene, planning_pipeline, req_list)
   };
 
   assert(model_);
@@ -203,10 +204,10 @@ CommandListManager::RadiiCont CommandListManager::extractBlendRadii(const moveit
 
 CommandListManager::MotionResponseCont CommandListManager::solveSequenceItems(
     const planning_scene::PlanningSceneConstPtr& planning_scene,
+    planning_pipeline::PlanningPipelinePtr planning_pipeline,
     const pilz_msgs::MotionSequenceRequest &req_list) const
 {
   MotionResponseCont motion_plan_responses;
-  planning_pipeline::PlanningPipelinePtr planning_pipeline(new planning_pipeline::PlanningPipeline(model_, nh_));
   size_t curr_req_index {0};
   const size_t num_req {req_list.items.size()};
   for(const auto& seq_item : req_list.items)

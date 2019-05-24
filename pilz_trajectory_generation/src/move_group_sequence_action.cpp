@@ -61,6 +61,7 @@ MoveGroupSequenceAction::MoveGroupSequenceAction()
 void MoveGroupSequenceAction::initialize()
 {
   // start the move action server
+  ROS_INFO_STREAM("initialize move group sequence action");
   move_action_server_.reset( new actionlib::SimpleActionServer<pilz_msgs::MoveGroupSequenceAction>(
                                root_node_handle_, "sequence_move_group",
                                boost::bind(&MoveGroupSequenceAction::executeSequenceCallback, this, _1), false) );
@@ -183,7 +184,7 @@ void MoveGroupSequenceAction::executeMoveCallback_PlanOnly(const pilz_msgs::Move
   RobotTrajCont traj_vec;
   try
   {
-    traj_vec = command_list_manager_->solve(the_scene, goal->request);
+    traj_vec = command_list_manager_->solve(the_scene, context_->planning_pipeline_, goal->request);
   }
   catch(const MoveItErrorCodeException& ex)
   {
@@ -220,7 +221,7 @@ bool MoveGroupSequenceAction::planUsingSequenceManager(const pilz_msgs::MotionSe
 
   planning_scene_monitor::LockedPlanningSceneRO lscene(plan.planning_scene_monitor_);
   RobotTrajCont traj_vec;
-  try { traj_vec = command_list_manager_->solve(plan.planning_scene_, req); }
+  try { traj_vec = command_list_manager_->solve(plan.planning_scene_, context_->planning_pipeline_, req); }
   catch(const MoveItErrorCodeException& ex)
   {
     ROS_ERROR_STREAM("Planning pipeline threw an exception (error code: "

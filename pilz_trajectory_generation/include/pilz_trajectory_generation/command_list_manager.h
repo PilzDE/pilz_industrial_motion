@@ -22,6 +22,7 @@
 #include <boost/optional.hpp>
 
 #include <moveit/planning_interface/planning_interface.h>
+#include <moveit/planning_pipeline/planning_pipeline.h>
 #include <moveit_msgs/MotionPlanResponse.h>
 
 #include "pilz_msgs/MotionSequenceRequest.h"
@@ -81,7 +82,8 @@ public:
    * @return Contains the calculated/generated trajectories.
    */
   RobotTrajCont solve(const planning_scene::PlanningSceneConstPtr& planning_scene,
-                       const pilz_msgs::MotionSequenceRequest& req_list);
+                      planning_pipeline::PlanningPipelinePtr planning_pipeline,
+                      const pilz_msgs::MotionSequenceRequest& req_list);
 
 private:
   using MotionResponseCont = std::vector<planning_interface::MotionPlanResponse>;
@@ -108,6 +110,7 @@ private:
    * @return Container of generated trajectories.
    */
   MotionResponseCont solveSequenceItems(const planning_scene::PlanningSceneConstPtr& planning_scene,
+                                        planning_pipeline::PlanningPipelinePtr planning_pipeline,
                                         const pilz_msgs::MotionSequenceRequest &req_list) const;
 
   /**
