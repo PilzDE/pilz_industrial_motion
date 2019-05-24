@@ -71,7 +71,7 @@ bool MoveGroupSequenceService::plan(pilz_msgs::GetMotionSequence::Request& req,
 
   ros::Time planning_start = ros::Time::now();
   RobotTrajCont traj_vec;
-  try { traj_vec = command_list_manager_->solve(ps, req.commands); }
+  try { traj_vec = command_list_manager_->solve(ps, context_->planning_pipeline_, req.commands); }
   catch(const MoveItErrorCodeException& ex)
   {
     ROS_ERROR_STREAM("Planner threw an exception (error code: "
