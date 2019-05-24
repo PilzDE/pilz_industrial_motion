@@ -80,6 +80,7 @@ protected:
     robot_model_loader::RobotModelLoader(ROBOT_DESCRIPTION_STR).getModel() };
   std::shared_ptr<pilz_trajectory_generation::CommandListManager> manager_;
   planning_scene::PlanningScenePtr scene_;
+  planning_pipeline::PlanningPipelinePtr pipeline_;
 
   std::unique_ptr<pilz_industrial_motion_testutils::TestdataLoader> data_loader_;
 };
@@ -100,8 +101,9 @@ void IntegrationTestCommandListManager::SetUp()
   ASSERT_NE(nullptr, data_loader_) << "Failed to load test data by provider.";
 
   // Define and set the current scene and manager test object
-  scene_ = std::make_shared<planning_scene::PlanningScene>(robot_model_);
   manager_ = std::make_shared<pilz_trajectory_generation::CommandListManager>(ph_, robot_model_);
+  scene_ = std::make_shared<planning_scene::PlanningScene>(robot_model_);
+  pipeline_ = std::make_shared<planning_pipeline::PlanningPipeline>(robot_model_, ph_);
 }
 
 /**
@@ -154,8 +156,8 @@ TEST_F(IntegrationTestCommandListManager, concatThreeSegments)
   seq.erase(3, seq.size());
   seq.setAllBlendRadiiToZero();
 
-  RobotTrajCont res123_vec {manager_->solve(scene_, seq.toRequest())};
-  EXPECT_EQ(res123_vec.size(), 1);
+  RobotTrajCont res123_vec {manager_->solve(scene_, pipeline_, seq.toRequest())};
+  EXPECT_EQ(res123_vec.size(), 1u);
   EXPECT_GT(res123_vec.front()->getWayPointCount(), 0u);
   EXPECT_TRUE(hasStrictlyIncreasingTime(res123_vec.front())) << "Time steps not strictly positively increasing";
 
@@ -164,8 +166,8 @@ TEST_F(IntegrationTestCommandListManager, concatThreeSegments)
   req_1.items.resize(1);
   req_1.items.at(0).req = seq.getCmd(0).toRequest();
   req_1.items.at(0).blend_radius = 0.;
-  RobotTrajCont res1_vec {manager_->solve(scene_, req_1)};
-  EXPECT_EQ(res1_vec.size(), 1);
+  RobotTrajCont res1_vec {manager_->solve(scene_, pipeline_, req_1)};
+  EXPECT_EQ(res1_vec.size(), 1u);
   EXPECT_GT(res1_vec.front()->getWayPointCount(), 0u);
   EXPECT_EQ(res1_vec.front()->getFirstWayPoint().getVariableCount(),
             req_1.items.at(0).req.start_state.joint_state.name.size());
@@ -175,8 +177,8 @@ TEST_F(IntegrationTestCommandListManager, concatThreeSegments)
   req_2.items.resize(1);
   req_2.items.at(0).req = seq.getCmd(1).toRequest();
   req_2.items.at(0).blend_radius = 0.;
-  RobotTrajCont res2_vec {manager_->solve(scene_, req_2)};
-  EXPECT_EQ(res2_vec.size(), 1);
+  RobotTrajCont res2_vec {manager_->solve(scene_, pipeline_, req_2)};
+  EXPECT_EQ(res2_vec.size(), 1u);
   EXPECT_GT(res2_vec.front()->getWayPointCount(), 0u);
   EXPECT_EQ(res2_vec.front()->getFirstWayPoint().getVariableCount(),
             req_2.items.at(0).req.start_state.joint_state.name.size());
@@ -187,8 +189,8 @@ TEST_F(IntegrationTestCommandListManager, concatThreeSegments)
   req_3.items.resize(1);
   req_3.items.at(0).req = seq.getCmd(2).toRequest();
   req_3.items.at(0).blend_radius = 0.;
-  RobotTrajCont res3_vec {manager_->solve(scene_, req_3)};
-  EXPECT_EQ(res3_vec.size(), 1);
+  RobotTrajCont res3_vec {manager_->solve(scene_, pipeline_, req_3)};
+  EXPECT_EQ(res3_vec.size(), 1u);
   EXPECT_GT(res3_vec.front()->getWayPointCount(), 0u);
   EXPECT_EQ(res3_vec.front()->getFirstWayPoint().getVariableCount(),
             req_3.items.at(0).req.start_state.joint_state.name.size());
@@ -224,15 +226,15 @@ TEST_F(IntegrationTestCommandListManager, concatSegmentsSelectiveBlending)
   seq.erase(3, seq.size());
   seq.setAllBlendRadiiToZero();
   seq.setBlendRadius(0, 0.1);
-  RobotTrajCont res1 {manager_->solve(scene_, seq.toRequest())};
-  EXPECT_EQ(res1.size(), 1);
+  RobotTrajCont res1 {manager_->solve(scene_, pipeline_, seq.toRequest())};
+  EXPECT_EQ(res1.size(), 1u);
   EXPECT_GT(res1.front()->getWayPointCount(), 0u);
   EXPECT_TRUE(hasStrictlyIncreasingTime(res1.front())) << "Time steps not strictly positively increasing";
 
   seq.setAllBlendRadiiToZero();
   seq.setBlendRadius(1, 0.1);
-  RobotTrajCont res2 {manager_->solve(scene_, seq.toRequest())};
-  EXPECT_EQ(res2.size(), 1);
+  RobotTrajCont res2 {manager_->solve(scene_, pipeline_, seq.toRequest())};
+  EXPECT_EQ(res2.size(), 1u);
   EXPECT_GT(res2.front()->getWayPointCount(), 0u);
   EXPECT_TRUE(hasStrictlyIncreasingTime(res2.front())) << "Time steps not strictly positively increasing";
 }
@@ -253,8 +255,8 @@ TEST_F(IntegrationTestCommandListManager, concatTwoPtpSegments)
   ASSERT_GE(seq.size(), 2u);
   seq.setAllBlendRadiiToZero();
 
-  RobotTrajCont res_vec {manager_->solve(scene_, seq.toRequest())};
-  EXPECT_EQ(res_vec.size(), 1);
+  RobotTrajCont res_vec {manager_->solve(scene_, pipeline_, seq.toRequest())};
+  EXPECT_EQ(res_vec.size(), 1u);
   EXPECT_GT(res_vec.front()->getWayPointCount(), 0u);
   EXPECT_TRUE(hasStrictlyIncreasingTime(res_vec.front()));
 }
@@ -275,8 +277,8 @@ TEST_F(IntegrationTestCommandListManager, concatPtpAndLinSegments)
   ASSERT_GE(seq.size(), 2u);
   seq.setAllBlendRadiiToZero();
 
-  RobotTrajCont res_vec {manager_->solve(scene_, seq.toRequest())};
-  EXPECT_EQ(res_vec.size(), 1);
+  RobotTrajCont res_vec {manager_->solve(scene_, pipeline_, seq.toRequest())};
+  EXPECT_EQ(res_vec.size(), 1u);
   EXPECT_GT(res_vec.front()->getWayPointCount(), 0u);
   EXPECT_TRUE(hasStrictlyIncreasingTime(res_vec.front()));
 }
@@ -297,8 +299,8 @@ TEST_F(IntegrationTestCommandListManager, concatLinAndPtpSegments)
   ASSERT_GE(seq.size(), 2u);
   seq.setAllBlendRadiiToZero();
 
-  RobotTrajCont res_vec {manager_->solve(scene_, seq.toRequest())};
-  EXPECT_EQ(res_vec.size(), 1);
+  RobotTrajCont res_vec {manager_->solve(scene_, pipeline_, seq.toRequest())};
+  EXPECT_EQ(res_vec.size(), 1u);
   EXPECT_GT(res_vec.front()->getWayPointCount(), 0u);
   EXPECT_TRUE(hasStrictlyIncreasingTime(res_vec.front()));
 }
@@ -317,8 +319,8 @@ TEST_F(IntegrationTestCommandListManager, blendTwoSegments)
   Sequence seq {data_loader_->getSequence("SimpleSequence")};
   ASSERT_EQ(seq.size(), 2u);
   pilz_msgs::MotionSequenceRequest req {seq.toRequest()};
-  RobotTrajCont res_vec {manager_->solve(scene_, req)};
-  EXPECT_EQ(res_vec.size(), 1);
+  RobotTrajCont res_vec {manager_->solve(scene_, pipeline_, req)};
+  EXPECT_EQ(res_vec.size(), 1u);
   EXPECT_GT(res_vec.front()->getWayPointCount(), 0u);
   EXPECT_EQ(res_vec.front()->getFirstWayPoint().getVariableCount(),
             req.items.at(0).req.start_state.joint_state.name.size());
@@ -352,7 +354,7 @@ TEST_F(IntegrationTestCommandListManager, blendTwoSegments)
 TEST_F(IntegrationTestCommandListManager, emptyList)
 {
   pilz_msgs::MotionSequenceRequest empty_list;
-  RobotTrajCont res_vec {manager_->solve(scene_, empty_list)};
+  RobotTrajCont res_vec {manager_->solve(scene_, pipeline_, empty_list)};
   EXPECT_TRUE(res_vec.empty());
 }
 
@@ -371,7 +373,7 @@ TEST_F(IntegrationTestCommandListManager, firstGoalNotReachable)
   ASSERT_GE(seq.size(), 2u);
   LinCart& lin {seq.getCmd<LinCart>(0)};
   lin.getGoalConfiguration().getPose().position.y = 2700;
-  EXPECT_THROW(manager_->solve(scene_, seq.toRequest()), PlanningPipelineException);
+  EXPECT_THROW(manager_->solve(scene_, pipeline_, seq.toRequest()), PlanningPipelineException);
 }
 
 /**
@@ -390,7 +392,7 @@ TEST_F(IntegrationTestCommandListManager, startStateNotFirstGoal)
   const LinCart& lin {seq.getCmd<LinCart>(0)};
   pilz_msgs::MotionSequenceRequest req {seq.toRequest()};
   req.items.at(1).req.start_state = lin.getGoalConfiguration().toMoveitMsgsRobotState();
-  EXPECT_THROW(manager_->solve(scene_, req), StartStateSetException);
+  EXPECT_THROW(manager_->solve(scene_, pipeline_, req), StartStateSetException);
 }
 
 /**
@@ -408,7 +410,7 @@ TEST_F(IntegrationTestCommandListManager, blendingRadiusNegative)
   Sequence seq {data_loader_->getSequence("SimpleSequence")};
   ASSERT_GE(seq.size(), 2u);
   seq.setBlendRadius(0,-0.3);
-  EXPECT_THROW(manager_->solve(scene_, seq.toRequest()), NegativeBlendRadiusException);
+  EXPECT_THROW(manager_->solve(scene_, pipeline_, seq.toRequest()), NegativeBlendRadiusException);
 }
 
 /**
@@ -426,7 +428,7 @@ TEST_F(IntegrationTestCommandListManager, lastBlendingRadiusNonZero)
   Sequence seq {data_loader_->getSequence("SimpleSequence")};
   ASSERT_EQ(seq.size(), 2u);
   seq.setBlendRadius(1, 0.03);
-  EXPECT_THROW(manager_->solve(scene_, seq.toRequest()), LastBlendRadiusNotZeroException);
+  EXPECT_THROW(manager_->solve(scene_, pipeline_, seq.toRequest()), LastBlendRadiusNotZeroException);
 }
 
 /**
@@ -445,7 +447,7 @@ TEST_F(IntegrationTestCommandListManager, blendRadiusGreaterThanSegment)
   Sequence seq {data_loader_->getSequence("SimpleSequence")};
   ASSERT_GE(seq.size(), 2u);
   seq.setBlendRadius(0, 42.0);
-  EXPECT_THROW(manager_->solve(scene_, seq.toRequest()), BlendingFailedException);
+  EXPECT_THROW(manager_->solve(scene_, pipeline_, seq.toRequest()), BlendingFailedException);
 }
 
 /**
@@ -466,8 +468,8 @@ TEST_F(IntegrationTestCommandListManager, blendingRadiusOverlapping)
   ASSERT_GE(seq.size(), 3u);
   seq.erase(3, seq.size());
 
-  RobotTrajCont res_valid_vec {manager_->solve(scene_, seq.toRequest())};
-  EXPECT_EQ(res_valid_vec.size(), 1);
+  RobotTrajCont res_valid_vec {manager_->solve(scene_, pipeline_, seq.toRequest())};
+  EXPECT_EQ(res_valid_vec.size(), 1u);
   EXPECT_GT(res_valid_vec.front()->getWayPointCount(), 0u);
 
   // calculate distance from first to second goal
@@ -479,7 +481,7 @@ TEST_F(IntegrationTestCommandListManager, blendingRadiusOverlapping)
   auto distance = (p2.translation()-p1.translation()).norm();
 
   seq.setBlendRadius(1, (distance - seq.getBlendRadius(0) + 0.01) ); // overlapping radii
-  EXPECT_THROW(manager_->solve(scene_, seq.toRequest()), OverlappingBlendRadiiException);
+  EXPECT_THROW(manager_->solve(scene_, pipeline_, seq.toRequest()), OverlappingBlendRadiiException);
 }
 
 /**
@@ -500,8 +502,8 @@ TEST_F(IntegrationTestCommandListManager, TestExecutionTime)
 {
   Sequence seq {data_loader_->getSequence("ComplexSequence")};
   ASSERT_GE(seq.size(), 2u);
-  RobotTrajCont res_single_vec {manager_->solve(scene_, seq.toRequest())};
-  EXPECT_EQ(res_single_vec.size(), 1);
+  RobotTrajCont res_single_vec {manager_->solve(scene_, pipeline_, seq.toRequest())};
+  EXPECT_EQ(res_single_vec.size(), 1u);
   EXPECT_GT(res_single_vec.front()->getWayPointCount(), 0u);
 
   pilz_msgs::MotionSequenceRequest req {seq.toRequest()};
@@ -520,8 +522,8 @@ TEST_F(IntegrationTestCommandListManager, TestExecutionTime)
     req.items.push_back(item);
   }
 
-  RobotTrajCont res_n_vec {manager_->solve(scene_, req)};
-  EXPECT_EQ(res_n_vec.size(), 1);
+  RobotTrajCont res_n_vec {manager_->solve(scene_, pipeline_, req)};
+  EXPECT_EQ(res_n_vec.size(), 1u);
   EXPECT_GT(res_n_vec.front()->getWayPointCount(), 0u);
 
   const double trajectory_time_1 = res_single_vec.front()->getWayPointDurationFromStart(
@@ -558,7 +560,7 @@ TEST_F(IntegrationTestCommandListManager, TestDifferentGroups)
     }
   }
 
-  RobotTrajCont res_single_vec {manager_->solve(scene_, seq.toRequest())};
+  RobotTrajCont res_single_vec {manager_->solve(scene_, pipeline_, seq.toRequest())};
   EXPECT_EQ(res_single_vec.size(), num_groups);
   for(RobotTrajCont::size_type i = 0; i<res_single_vec.size(); ++i)
   {
@@ -580,8 +582,8 @@ TEST_F(IntegrationTestCommandListManager, TestGripperCmdBlending)
 
   // Ensure that blending is requested for gripper commands.
   seq.setBlendRadius(0, 1.0);
-  RobotTrajCont res_vec {manager_->solve(scene_, seq.toRequest())};
-  EXPECT_EQ(res_vec.size(), 1);
+  RobotTrajCont res_vec {manager_->solve(scene_, pipeline_, seq.toRequest())};
+  EXPECT_EQ(res_vec.size(), 1u);
 }
 
 /**
@@ -617,8 +619,8 @@ TEST_F(IntegrationTestCommandListManager, TestGroupSpecificStartState)
   // of joints of the manipulator group without the gripper
   ptp.getStartConfiguration().clearModel();
 
-  RobotTrajCont res_vec {manager_->solve(scene_, seq.toRequest())};
-  EXPECT_GE(res_vec.size(), 1);
+  RobotTrajCont res_vec {manager_->solve(scene_, pipeline_, seq.toRequest())};
+  EXPECT_GE(res_vec.size(), 1u);
   EXPECT_GT(res_vec.front()->getWayPointCount(), 0u);
 }
 
