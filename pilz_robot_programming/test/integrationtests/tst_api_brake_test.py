@@ -22,6 +22,7 @@ from pilz_robot_programming.exceptions import RobotBrakeTestException
 from pilz_robot_programming.robot import Robot
 from brake_test_mock import BrakeTestMock
 from prbt_hardware_support.srv import BrakeTestResponse
+from prbt_hardware_support.msg import BrakeTestErrorCodes
 
 
 API_VERSION = "1"
@@ -86,7 +87,7 @@ class TestAPIBrakeTest(unittest.TestCase):
         mock.start()
         mock.advertise_brake_test_execute_service()
 
-        mock.set_brake_test_execute_result(BrakeTestResponse.SUCCESS)
+        mock.set_brake_test_execute_result(BrakeTestErrorCodes.STATUS_SUCCESS)
         self.robot.execute_brake_test()
 
         mock.stop()
@@ -98,7 +99,7 @@ class TestAPIBrakeTest(unittest.TestCase):
         mock.start()
         mock.advertise_brake_test_execute_service()
 
-        mock.set_brake_test_execute_result(BrakeTestResponse.FAILURE)
+        mock.set_brake_test_execute_result(BrakeTestErrorCodes.FAILURE)
         res = None
 
         self.assertRaises(

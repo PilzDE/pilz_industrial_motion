@@ -24,7 +24,9 @@ from prbt_hardware_support.srv import \
     IsBrakeTestRequired, \
     IsBrakeTestRequiredResponse
 
-BRAKE_TEST_REQUIRED_SERVICE_NAME = "/prbt/is_brake_test_required"
+from prbt_hardware_support.msg import BrakeTestErrorCodes
+
+BRAKE_TEST_REQUIRED_SERVICE_NAME = "/prbt/brake_test_required"
 BRAKE_TEST_EXECUTE_SERVICE_NAME = "/prbt/execute_braketest"
 
 class BrakeTestMock(Thread):
@@ -40,7 +42,7 @@ class BrakeTestMock(Thread):
         self._brake_test_execute_service_mock = None
         self._is_brake_test_required = False
         self._brake_test_execute_duration_s = .1
-        self._brake_test_execute_result = BrakeTestResponse.SUCCESS
+        self._brake_test_execute_result = BrakeTestErrorCodes.STATUS_SUCCESS
         self._brake_test_execute_msg = "Test Message"
         self._running = True
 
@@ -53,8 +55,9 @@ class BrakeTestMock(Thread):
         # Sleeping ot simulate execution of brake test
         rospy.sleep(self._brake_test_execute_duration_s)
         res = BrakeTestResponse()
-        res.result = self._brake_test_execute_result
-        res.msg = self._brake_test_execute_msg
+        res.success = self._brake_test_execute_result == BrakeTestErrorCodes.STATUS_SUCCESS
+        res.error_code.value = self._brake_test_execute_result
+        res.error_msg = self._brake_test_execute_msg
         return res
 
     def advertise_brake_test_required_service(self):
@@ -64,6 +67,7 @@ class BrakeTestMock(Thread):
             service_class=IsBrakeTestRequired,
             handler=self._is_brake_test_required_server_handler
         )
+
 
     def advertise_brake_test_execute_service(self):
         """Method to manually advertise brake_test_execute the service, when necessary"""
