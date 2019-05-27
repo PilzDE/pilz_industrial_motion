@@ -135,6 +135,15 @@ bool pilz::TrajectoryBlenderTransitionWindow::validateRequest(const pilz::Trajec
     return false;
   }
 
+  // check link exists
+  if (!req.first_trajectory->getRobotModel()->hasLinkModel(req.link_name) &&
+      !req.first_trajectory->getLastWayPoint().hasAttachedBody(req.link_name))
+  {
+    ROS_ERROR_STREAM("Unknown link name: " << req.link_name);
+    error_code.val = moveit_msgs::MoveItErrorCodes::INVALID_LINK_NAME;
+    return false;
+  }
+
   if(req.blend_radius <=0 )
   {
     ROS_ERROR("Blending radius must be positive");
