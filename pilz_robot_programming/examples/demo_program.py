@@ -83,15 +83,6 @@ def start_program():
     except RobotMoveFailed:
         rospy.loginfo("Ptp command did fail as expected.")
 
-    # Execute a brake test if required
-    if r.is_brake_test_required():
-        try:
-            r.execute_brake_test()
-        except RobotBrakeTestException as e:
-            rospy.logerr(e)
-        except rospy.ROSException as e:
-            rospy.logerr("failed to call the service")
-
 
 if __name__ == "__main__":
     # Init a ros node
