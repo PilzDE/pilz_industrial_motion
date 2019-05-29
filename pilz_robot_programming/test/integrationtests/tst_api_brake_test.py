@@ -100,15 +100,32 @@ class TestAPIBrakeTest(unittest.TestCase):
         mock.advertise_brake_test_execute_service()
 
         mock.set_brake_test_execute_result(BrakeTestErrorCodes.FAILURE)
-        res = None
+
+        try:
+            self.robot.execute_brake_test()
+        except Exception as e:
+            # Testing wether it is the right exception
+            self.assertIsInstance(e, RobotBrakeTestException)
+            # Checking if the error code is resolved correctly in the exception message
+            self.assertIn("FAILURE", str(e))
+
+        mock.stop()
+        mock.join()
+
+    def test_service_call_fail(self):
+        """Checking calling the api methods with no service available
+        produces the expected Exception"""
+        self.assertRaises(
+            rospy.ROSException,
+            Robot.is_brake_test_required,
+            self.robot
+        )
 
         self.assertRaises(
-            RobotBrakeTestException,
+            rospy.ROSException,
             Robot.execute_brake_test,
             self.robot
         )
-        mock.stop()
-        mock.join()
 
 
 if __name__ == '__main__':

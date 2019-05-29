@@ -292,8 +292,8 @@ class Robot(object):
             Function blocks until an answer is available.
         """
         rospy.loginfo("Checking whether brake test is required ...")
-        rospy.wait_for_service(self._BRAKE_TEST_REQUIRED_SRV, self._SERVICE_WAIT_TIMEOUT_S)
         try:
+            rospy.wait_for_service(self._BRAKE_TEST_REQUIRED_SRV, self._SERVICE_WAIT_TIMEOUT_S)
             is_brake_test_required_client = rospy.ServiceProxy(
                 self._BRAKE_TEST_REQUIRED_SRV,
                 IsBrakeTestRequired)
@@ -303,7 +303,7 @@ class Robot(object):
             else:
                 rospy.loginfo("Brake Test NOT REQUIRED")
             return resp.result
-        except rospy.ServiceException, e:
+        except rospy.ROSException, e:
             rospy.logerr("Service call failed: {0}".format(e))
             raise e
 
@@ -318,8 +318,8 @@ class Robot(object):
             Function blocks until brake test is finished.
         """
         rospy.loginfo("Executing brake test")
-        rospy.wait_for_service(self._BRAKE_TEST_EXECUTE_SRV, self._SERVICE_WAIT_TIMEOUT_S)
         try:
+            rospy.wait_for_service(self._BRAKE_TEST_EXECUTE_SRV, self._SERVICE_WAIT_TIMEOUT_S)
             execute_brake_test_client = rospy.ServiceProxy(
                 self._BRAKE_TEST_EXECUTE_SRV,
                 BrakeTest
@@ -330,8 +330,10 @@ class Robot(object):
                 resp.error_msg
             ))
             if not resp.success:
-                raise RobotBrakeTestException(resp.error_code, resp.error_msg)
-        except rospy.ServiceException, e:
+                e = RobotBrakeTestException(resp.error_code, resp.error_msg)
+                rospy.logerr("Brake Test returned: " + str(e))
+                raise e
+        except rospy.ROSException, e:
             rospy.logerr("Service call failed: {0}".format(e))
             raise e
 
