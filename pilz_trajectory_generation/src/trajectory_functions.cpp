@@ -472,15 +472,6 @@ bool pilz::determineAndCheckSamplingTime(const robot_trajectory::RobotTrajectory
   return true;
 }
 
-bool pilz::isRobotStateEqual(const moveit::core::RobotStatePtr &state1,
-                             const moveit::core::RobotStatePtr &state2,
-                             const std::string &joint_group_name,
-                             double epsilon)
-{
-  ROS_WARN("This signature of isRobotStateEqual is deprecated. Please use the new one in the future.");
-  return isRobotStateEqual(*state1, *state2, joint_group_name, epsilon);
-}
-
 bool pilz::isRobotStateEqual(const moveit::core::RobotState &state1,
                              const moveit::core::RobotState &state2,
                              const std::string &joint_group_name,
@@ -525,18 +516,18 @@ bool pilz::isRobotStateEqual(const moveit::core::RobotState &state1,
   return true;
 }
 
-bool pilz::isRobotStateStationary(const moveit::core::RobotStatePtr &state,
+bool pilz::isRobotStateStationary(const moveit::core::RobotState &state,
                                   const std::string &group,
                                   double EPSILON)
 {
   Eigen::VectorXd joint_variable;
-  state->copyJointGroupVelocities(group, joint_variable);
+  state.copyJointGroupVelocities(group, joint_variable);
   if(joint_variable.norm() > EPSILON)
   {
     ROS_DEBUG("Joint velocities are not zero.");
     return false;
   }
-  state->copyJointGroupAccelerations(group, joint_variable);
+  state.copyJointGroupAccelerations(group, joint_variable);
   if(joint_variable.norm() > EPSILON)
   {
     ROS_DEBUG("Joint accelerations are not zero.");
