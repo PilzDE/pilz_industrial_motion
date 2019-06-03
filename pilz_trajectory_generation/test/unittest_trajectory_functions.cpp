@@ -854,14 +854,14 @@ TEST_P(TrajectoryFunctionsTestFlangeAndGripper, testDetermineAndCheckSamplingTim
  */
 TEST_P(TrajectoryFunctionsTestFlangeAndGripper, testIsRobotStateEqualPositionUnequal)
 {
-  robot_state::RobotStatePtr rstate_1 = std::make_shared<robot_state::RobotState>(robot_model_);
-  robot_state::RobotStatePtr rstate_2 = std::make_shared<robot_state::RobotState>(robot_model_);
+  robot_state::RobotState rstate_1 = robot_state::RobotState(robot_model_);
+  robot_state::RobotState rstate_2 = robot_state::RobotState(robot_model_);
 
   double default_joint_position [6] = {0.0, 0.0, 0.0, 0.0, 0.0, 0.0};
-  rstate_1->setJointGroupPositions(planning_group_, default_joint_position);
+  rstate_1.setJointGroupPositions(planning_group_, default_joint_position);
   // Ensure that the joint positions of both robot states are different
   default_joint_position[0] = default_joint_position[0] + 70.0;
-  rstate_2->setJointGroupPositions(planning_group_, default_joint_position);
+  rstate_2.setJointGroupPositions(planning_group_, default_joint_position);
 
   double epsilon {0.0001};
   EXPECT_FALSE( pilz::isRobotStateEqual(rstate_1, rstate_2, planning_group_, epsilon) );
@@ -880,19 +880,19 @@ TEST_P(TrajectoryFunctionsTestFlangeAndGripper, testIsRobotStateEqualPositionUne
  */
 TEST_P(TrajectoryFunctionsTestFlangeAndGripper, testIsRobotStateEqualVelocityUnequal)
 {
-  robot_state::RobotStatePtr rstate_1 = std::make_shared<robot_state::RobotState>(robot_model_);
-  robot_state::RobotStatePtr rstate_2 = std::make_shared<robot_state::RobotState>(robot_model_);
+  robot_state::RobotState rstate_1 = robot_state::RobotState(robot_model_);
+  robot_state::RobotState rstate_2 = robot_state::RobotState(robot_model_);
 
   // Ensure that the joint positions of both robot state are equal
   double default_joint_position [6] = {0.0, 0.0, 0.0, 0.0, 0.0, 0.0};
-  rstate_1->setJointGroupPositions(planning_group_, default_joint_position);
-  rstate_2->setJointGroupPositions(planning_group_, default_joint_position);
+  rstate_1.setJointGroupPositions(planning_group_, default_joint_position);
+  rstate_2.setJointGroupPositions(planning_group_, default_joint_position);
 
   double default_joint_velocity [6] = {0.0, 0.0, 0.0, 0.0, 0.0, 0.0};
-  rstate_1->setJointGroupVelocities(planning_group_, default_joint_velocity);
+  rstate_1.setJointGroupVelocities(planning_group_, default_joint_velocity);
   // Ensure that the joint velocites of both robot states are different
   default_joint_velocity[1]  = default_joint_velocity[1] + 10.0;
-  rstate_2->setJointGroupVelocities(planning_group_, default_joint_velocity);
+  rstate_2.setJointGroupVelocities(planning_group_, default_joint_velocity);
 
   double epsilon {0.0001};
   EXPECT_FALSE( pilz::isRobotStateEqual(rstate_1, rstate_2, planning_group_, epsilon) );
@@ -911,24 +911,24 @@ TEST_P(TrajectoryFunctionsTestFlangeAndGripper, testIsRobotStateEqualVelocityUne
  */
 TEST_P(TrajectoryFunctionsTestFlangeAndGripper, testIsRobotStateEqualAccelerationUnequal)
 {
-  robot_state::RobotStatePtr rstate_1 = std::make_shared<robot_state::RobotState>(robot_model_);
-  robot_state::RobotStatePtr rstate_2 = std::make_shared<robot_state::RobotState>(robot_model_);
+  robot_state::RobotState rstate_1 = robot_state::RobotState(robot_model_);
+  robot_state::RobotState rstate_2 = robot_state::RobotState(robot_model_);
 
   // Ensure that the joint positions of both robot state are equal
   double default_joint_position [6] = {0.0, 0.0, 0.0, 0.0, 0.0, 0.0};
-  rstate_1->setJointGroupPositions(planning_group_, default_joint_position);
-  rstate_2->setJointGroupPositions(planning_group_, default_joint_position);
+  rstate_1.setJointGroupPositions(planning_group_, default_joint_position);
+  rstate_2.setJointGroupPositions(planning_group_, default_joint_position);
 
   // Ensure that the joint velocities of both robot state are equal
   double default_joint_velocity [6] = {0.0, 0.0, 0.0, 0.0, 0.0, 0.0};
-  rstate_1->setJointGroupVelocities(planning_group_, default_joint_velocity);
-  rstate_2->setJointGroupVelocities(planning_group_, default_joint_velocity);
+  rstate_1.setJointGroupVelocities(planning_group_, default_joint_velocity);
+  rstate_2.setJointGroupVelocities(planning_group_, default_joint_velocity);
 
   double default_joint_acceleration[6] = {0.0, 0.0, 0.0, 0.0, 0.0, 0.0};
-  rstate_1->setJointGroupAccelerations(planning_group_, default_joint_acceleration);
+  rstate_1.setJointGroupAccelerations(planning_group_, default_joint_acceleration);
   // Ensure that the joint accelerations of both robot states are different
   default_joint_acceleration[1]  = default_joint_acceleration[1] + 10.0;
-  rstate_2->setJointGroupAccelerations(planning_group_, default_joint_acceleration);
+  rstate_2.setJointGroupAccelerations(planning_group_, default_joint_acceleration);
 
   double epsilon {0.0001};
   EXPECT_FALSE( pilz::isRobotStateEqual(rstate_1, rstate_2, planning_group_, epsilon) );
@@ -947,11 +947,11 @@ TEST_P(TrajectoryFunctionsTestFlangeAndGripper, testIsRobotStateEqualAcceleratio
  */
 TEST_P(TrajectoryFunctionsTestFlangeAndGripper, testIsRobotStateStationaryVelocityUnequal)
 {
-  robot_state::RobotStatePtr rstate_1 = std::make_shared<robot_state::RobotState>(robot_model_);
+  robot_state::RobotState rstate_1 = robot_state::RobotState(robot_model_);
 
   // Ensure that the joint velocities are NOT zero
   double default_joint_velocity [6] = {1.0, 0.0, 0.0, 0.0, 0.0, 0.0};
-  rstate_1->setJointGroupVelocities(planning_group_, default_joint_velocity);
+  rstate_1.setJointGroupVelocities(planning_group_, default_joint_velocity);
 
   double epsilon {0.0001};
   EXPECT_FALSE( pilz::isRobotStateStationary(rstate_1, planning_group_, epsilon) );
@@ -970,15 +970,15 @@ TEST_P(TrajectoryFunctionsTestFlangeAndGripper, testIsRobotStateStationaryVeloci
  */
 TEST_P(TrajectoryFunctionsTestFlangeAndGripper, testIsRobotStateStationaryAccelerationUnequal)
 {
-  robot_state::RobotStatePtr rstate_1 = std::make_shared<robot_state::RobotState>(robot_model_);
+  robot_state::RobotState rstate_1 = robot_state::RobotState(robot_model_);
 
   // Ensure that the joint velocities are zero
   double default_joint_velocity [6] = {0.0, 0.0, 0.0, 0.0, 0.0, 0.0};
-  rstate_1->setJointGroupVelocities(planning_group_, default_joint_velocity);
+  rstate_1.setJointGroupVelocities(planning_group_, default_joint_velocity);
 
   // Ensure that the joint acceleration are NOT zero
   double default_joint_acceleration [6] = {1.0, 0.0, 0.0, 0.0, 0.0, 0.0};
-  rstate_1->setJointGroupAccelerations(planning_group_, default_joint_acceleration);
+  rstate_1.setJointGroupAccelerations(planning_group_, default_joint_acceleration);
 
   double epsilon {0.0001};
   EXPECT_FALSE( pilz::isRobotStateStationary(rstate_1, planning_group_, epsilon) );
