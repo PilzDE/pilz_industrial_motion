@@ -35,7 +35,7 @@ from .move_control_request import _MoveControlState, MoveControlAction,_MoveCont
 from .commands import _AbstractCmd, _DEFAULT_PLANNING_GROUP, _DEFAULT_TARGET_LINK, _DEFAULT_BASE_LINK, Sequence
 from .exceptions import *
 
-__version__ = '1.0.0'
+__version__ = '1.1.0'
 
 # Due to bug in actionlib we have to take care about validity of transitions when cancelling
 _VALID_GOAL_STATUS_FOR_CANCEL = [GoalStatus.PENDING, GoalStatus.ACTIVE]
