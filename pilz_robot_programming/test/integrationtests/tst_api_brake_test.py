@@ -15,6 +15,7 @@
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 import unittest
+from mock import patch
 
 import rospy
 
@@ -126,6 +127,31 @@ class TestAPIBrakeTest(unittest.TestCase):
             Robot.execute_brake_test,
             self.robot
         )
+
+
+    # Fake method for mock a service call raising a ROSException
+    def fake_get_execute_brake_test_service(obj):
+        def fake_callable():
+            raise rospy.exceptions.ROSException("MOCK FAIL")
+        return fake_callable
+
+    @patch.object(Robot, '_get_execute_brake_test_service', fake_get_execute_brake_test_service)
+    def test_execute_service_call_failure(self):
+        """Execute a failing brake test"""
+        mock = BrakeTestMock()
+        mock.start()
+        mock.advertise_brake_test_execute_service()
+
+        try:
+            self.robot.execute_brake_test()
+        except Exception as e:
+            # Testing wether it is the right exception
+            self.assertIsInstance(e, rospy.ROSException)
+            # Checking that the Exception was caused by the mock
+            self.assertIn("MOCK FAIL", str(e))
+
+        mock.stop()
+        mock.join()
 
 
 if __name__ == '__main__':

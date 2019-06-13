@@ -318,24 +318,38 @@ class Robot(object):
             Function blocks until brake test is finished.
         """
         rospy.loginfo("Executing brake test")
+
+        execute_brake_test_client = self._get_execute_brake_test_service()
+
+        resp = BrakeTestResponse()
         try:
-            rospy.wait_for_service(self._BRAKE_TEST_EXECUTE_SRV, self._SERVICE_WAIT_TIMEOUT_S)
-            execute_brake_test_client = rospy.ServiceProxy(
-                self._BRAKE_TEST_EXECUTE_SRV,
-                BrakeTest
-            )
             resp = execute_brake_test_client()
-            rospy.loginfo("Brake Test Success: {0:b}, msg: {1}".format(
-                resp.success,
-                resp.error_msg
-            ))
-            if not resp.success:
-                e = RobotBrakeTestException(resp.error_code, resp.error_msg)
-                rospy.logerr("Brake Test returned: " + str(e))
-                raise e
         except rospy.ROSException, e:
             rospy.logerr("Failure during call of braketest execute service: {0}".format(e))
             raise e
+
+        rospy.loginfo("Brake Test Success: {0:b}, msg: {1}".format(
+                resp.success,
+                resp.error_msg
+            ))
+        if not resp.success:
+            e = RobotBrakeTestException(resp.error_code, resp.error_msg)
+            rospy.logerr("Brake Test returned: " + str(e))
+            raise e
+
+    def _get_execute_brake_test_service(self):
+        try:
+            rospy.wait_for_service(self._BRAKE_TEST_EXECUTE_SRV, self._SERVICE_WAIT_TIMEOUT_S)
+        except rospy.ROSException, e:
+            rospy.logerr("Unsuccessful waited for braketest execute service to come up: {0}".format(e))
+            raise e
+
+        execute_brake_test_client = rospy.ServiceProxy(
+            self._BRAKE_TEST_EXECUTE_SRV,
+            BrakeTest
+        )
+
+        return execute_brake_test_client
 
     def _move_execution_loop(self, cmd):
         continue_execution_of_cmd = True
