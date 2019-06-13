@@ -22,7 +22,6 @@ import rospy
 from pilz_robot_programming.exceptions import RobotBrakeTestException
 from pilz_robot_programming.robot import Robot
 from brake_test_mock import BrakeTestMock
-from prbt_hardware_support.srv import BrakeTestResponse
 from prbt_hardware_support.msg import BrakeTestErrorCodes
 
 
