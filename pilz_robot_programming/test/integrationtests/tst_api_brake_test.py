@@ -55,8 +55,11 @@ class TestAPIBrakeTest(unittest.TestCase):
         try:
             res = self.robot.is_brake_test_required()
         except Exception as e:
+            mock.stop()
+            mock.join()
             rospy.logerr(e)
             raise e
+
         self.assertTrue(res)
 
         mock.stop()
@@ -75,8 +78,11 @@ class TestAPIBrakeTest(unittest.TestCase):
         try:
             res = self.robot.is_brake_test_required()
         except Exception as e:
+            mock.stop()
+            mock.join()
             rospy.logerr(e)
             raise e
+
         self.assertFalse(res)
 
         mock.stop()
