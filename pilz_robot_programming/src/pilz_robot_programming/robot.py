@@ -304,7 +304,7 @@ class Robot(object):
                 rospy.loginfo("Brake Test NOT REQUIRED")
             return resp.result
         except rospy.ROSException, e:
-            rospy.logerr("Service call failed: {0}".format(e))
+            rospy.logerr("Failure during call of braketest required service: {0}".format(e))
             raise e
 
     def execute_brake_test(self):
@@ -334,7 +334,7 @@ class Robot(object):
                 rospy.logerr("Brake Test returned: " + str(e))
                 raise e
         except rospy.ROSException, e:
-            rospy.logerr("Service call failed: {0}".format(e))
+            rospy.logerr("Failure during call of braketest execute service: {0}".format(e))
             raise e
 
     def _move_execution_loop(self, cmd):
