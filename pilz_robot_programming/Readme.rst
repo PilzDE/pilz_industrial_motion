@@ -332,6 +332,22 @@ To do this, set the ``base`` argument, to the corresponding reference frame.
 
     tcp_pose_in_tf = r.get_current_pose(base="target_frame")
 
+Brake Test
+^^^^^^^^^^
+The method :py:meth:`.is_brake_test_required` will check whether the robot needs to perform a brake test.
+So place it in your program somewhere such that it is checked repeatedly.
+The method :py:meth:`.execute_brake_test` executes the brake test and throws an exception, should it fail.
+
+.. code-block:: python
+
+    if r.is_brake_test_required():
+        try:
+            r.execute_brake_test()
+        except RobotBrakeTestException as e:
+            rospy.logerr(e)
+        except rospy.ROSException as e:
+            rospy.logerr("failed to call the service")
+
 Move control orders
 -------------------
 The user can make service calls in order to control the movement of the robot.

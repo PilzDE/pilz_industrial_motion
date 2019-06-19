@@ -14,6 +14,7 @@ catkin_python_setup()
 catkin_install_python(PROGRAMS
    examples/demo_program.py
    examples/demo_gripper_program.py
+   examples/demo_brake_test_program.py
    DESTINATION ${CATKIN_PACKAGE_BIN_DESTINATION}
 )
 

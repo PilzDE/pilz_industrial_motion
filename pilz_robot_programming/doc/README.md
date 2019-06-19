@@ -18,3 +18,14 @@ The move control request "tells" the thread executing the move function:
 * to perform normally.  
 
 ![Move orders state diag](diag_state_move_orders.png)
+
+# Brake test
+The following diagram illustrates the component architecture that is required 
+to execute brake tests and how it is called by the Python-API.
+
+![Brake test component diag](diag_comp_brake_test_python_api.png)
+
+The remaining architecture is implemented in 
+[prbt_hardware_support](https://github.com/PilzDE/pilz_robots/tree/melodic-devel/prbt_hardware_support).
+
+
