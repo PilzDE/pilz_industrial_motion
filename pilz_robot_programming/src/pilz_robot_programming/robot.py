@@ -16,25 +16,26 @@
 """API for easy usage of Pilz robot commands."""
 
 from __future__ import absolute_import
-
-import rospy
-from pilz_msgs.msg import MoveGroupSequenceAction
-from actionlib import SimpleActionClient, GoalStatus
-from moveit_commander import RobotCommander, MoveItCommanderException
-from moveit_msgs.msg import MoveItErrorCodes, MoveGroupAction
+import psutil
 import time
 import threading
+
+from actionlib import SimpleActionClient, GoalStatus
+from geometry_msgs.msg import Quaternion, PoseStamped, Pose
+from moveit_commander import RobotCommander, MoveItCommanderException
+from moveit_msgs.msg import MoveItErrorCodes, MoveGroupAction
+import rospy
+from std_msgs.msg import Header
 from std_srvs.srv import Trigger
 import tf
-import psutil
 
+from pilz_msgs.msg import MoveGroupSequenceAction
+from prbt_hardware_support.srv import IsBrakeTestRequired, BrakeTest, BrakeTestResponse
 from .move_control_request import _MoveControlState, MoveControlAction,_MoveControlStateMachine
 from .commands import _AbstractCmd, _DEFAULT_PLANNING_GROUP, _DEFAULT_TARGET_LINK, _DEFAULT_BASE_LINK, Sequence
 from .exceptions import *
-from geometry_msgs.msg import Quaternion, PoseStamped, Pose
-from std_msgs.msg import Header
 
-__version__ = '1.0.0'
+__version__ = '1.1.0'
 
 # Due to bug in actionlib we have to take care about validity of transitions when cancelling
 _VALID_GOAL_STATUS_FOR_CANCEL = [GoalStatus.PENDING, GoalStatus.ACTIVE]
@@ -94,16 +95,21 @@ class Robot(object):
     # Something went wrong while executing the command
     _FAILURE = 99999
 
-    # Topic names
+    # Topic / Service names
     _PAUSE_TOPIC_NAME = "pause_movement"
     _RESUME_TOPIC_NAME = "resume_movement"
     _STOP_TOPIC_NAME = "stop_movement"
     _SEQUENCE_TOPIC = "sequence_move_group"
+    _BRAKE_TEST_EXECUTE_SRV = "/prbt/execute_braketest"
+    _BRAKE_TEST_REQUIRED_SRV = "/prbt/brake_test_required"
     _INSTANCE_PARAM = "/robot_api_instance"
 
     # string constants
     _PID_STRING = "pid"
     _PROCESS_CREATE_TIME_STRING = "create_time"
+
+    # time constant
+    _SERVICE_WAIT_TIMEOUT_S = 1
 
     def __init__(self, version=None, *args, **kwargs):
         super(Robot, self).__init__(*args, **kwargs)
@@ -273,6 +279,77 @@ class Robot(object):
         """
         rospy.loginfo("Resume called.")
         self._move_ctrl_sm.switch(MoveControlAction.RESUME)
+
+    def is_brake_test_required(self):
+        """Checks whether a brake test is currently required.
+
+        :raises ServiceException: when the required ROS service is not available.
+        :returns: `True`: if brake test is required,
+            `False`: otherwise
+
+
+        :note:
+            Function blocks until an answer is available.
+        """
+        rospy.loginfo("Checking whether brake test is required ...")
+        try:
+            rospy.wait_for_service(self._BRAKE_TEST_REQUIRED_SRV, self._SERVICE_WAIT_TIMEOUT_S)
+            is_brake_test_required_client = rospy.ServiceProxy(
+                self._BRAKE_TEST_REQUIRED_SRV,
+                IsBrakeTestRequired)
+            resp = is_brake_test_required_client()
+            if resp.result:
+                rospy.loginfo("Brake Test REQUIRED")
+            else:
+                rospy.loginfo("Brake Test NOT REQUIRED")
+            return resp.result
+        except rospy.ROSException, e:
+            rospy.logerr("Failure during call of braketest required service: {0}".format(e))
+            raise e
+
+    def execute_brake_test(self):
+        """Execute a brake test. If successful, function exits without exception.
+
+        :raises RobotBrakeTestException: when brake test was not successful.
+            Will contain information about reason for failing of the brake test.
+        :raises ServiceException: when the required ROS service is not available.
+
+        :note:
+            Function blocks until brake test is finished.
+        """
+        rospy.loginfo("Executing brake test")
+
+        execute_brake_test_client = self._get_execute_brake_test_service()
+
+        resp = BrakeTestResponse()
+        try:
+            resp = execute_brake_test_client()
+        except rospy.ROSException, e:
+            rospy.logerr("Failure during call of braketest execute service: {0}".format(e))
+            raise e
+
+        rospy.loginfo("Brake Test Success: {0:b}, msg: {1}".format(
+                resp.success,
+                resp.error_msg
+            ))
+        if not resp.success:
+            e = RobotBrakeTestException(resp.error_code, resp.error_msg)
+            rospy.logerr("Brake Test returned: " + str(e))
+            raise e
+
+    def _get_execute_brake_test_service(self):
+        try:
+            rospy.wait_for_service(self._BRAKE_TEST_EXECUTE_SRV, self._SERVICE_WAIT_TIMEOUT_S)
+        except rospy.ROSException, e:
+            rospy.logerr("Unsuccessful waited for braketest execute service to come up: {0}".format(e))
+            raise e
+
+        execute_brake_test_client = rospy.ServiceProxy(
+            self._BRAKE_TEST_EXECUTE_SRV,
+            BrakeTest
+        )
+
+        return execute_brake_test_client
 
     def _move_execution_loop(self, cmd):
         continue_execution_of_cmd = True
