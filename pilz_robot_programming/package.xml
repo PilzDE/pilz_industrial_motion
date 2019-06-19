@@ -31,5 +31,6 @@
   <test_depend>prbt_pg70_support</test_depend>
   <test_depend>pilz_industrial_motion_testutils</test_depend>
   <test_depend>python-coverage</test_depend>
+  <test_depend>python-mock</test_depend>
 
 </package>
