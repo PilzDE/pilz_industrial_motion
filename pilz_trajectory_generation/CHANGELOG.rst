@@ -2,8 +2,8 @@
 Changelog for package pilz_trajectory_generation
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
-Forthcoming
------------
+0.4.4 (2019-06-19)
+------------------
 * fixed an error that led to trajectories not strictly increasing in time
 * Contributors: Pilz GmbH and Co. KG
 
