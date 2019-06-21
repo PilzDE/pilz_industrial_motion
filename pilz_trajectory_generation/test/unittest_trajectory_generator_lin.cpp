@@ -315,6 +315,31 @@ TEST_P(TrajectoryGeneratorLINTest, LinPlannerLimitViolation)
 }
 
 /**
+ * @brief test joint linear movement with discontinuities in joint space
+ *
+ * This will violate joint velocity/acceleration limits.
+ *
+ * Test Sequence:
+ *    1. Generate lin trajectory which is discontinuous in joint space.
+ *
+ * Expected Results:
+ *    1. Function returns 'false'.
+ */
+TEST_P(TrajectoryGeneratorLINTest, LinPlannerDiscontinuousJointTraj)
+{
+  LinJoint lin {tdp_->getLinJoint("lin2")};
+  // Alter goal joint configuration (represents the same cartesian pose, but does not fit together with start config)
+  lin.getGoalConfiguration().setJoint(1, 1.63);
+  lin.getGoalConfiguration().setJoint(2, 0.96);
+  lin.getGoalConfiguration().setJoint(4, -2.48);
+  lin.setVelocityScale(1.0);
+  lin.setAccelerationScale(1.0);
+
+  planning_interface::MotionPlanResponse res;
+  ASSERT_FALSE(lin_->generate(lin.toRequest(), res));
+}
+
+/**
  * @brief test joint linear movement with equal goal and start
  *
  * Test Sequence:
