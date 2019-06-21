@@ -500,6 +500,33 @@ class TestAPIPause(unittest.TestCase):
         res = cmd_for_testing._execute(self.robot)
         self.assertEqual(self.robot._STOPPED, res)  # Command is execution is halted/stopped.
 
+    def test_pause_sequence(self):
+        """ Test pausing a sequence. This is not implemented yet and should result in a failure of the robot motion.
+
+            Test sequence:
+                1. Start robot motion via sequence in separate thread.
+                2. Trigger pause
+
+            Test Results:
+                1. Robot moves.
+                2. Robot motion stops and an exception is throw in the move thread.
+        """
+
+        # 1. start the robot motion
+        seq = Sequence()
+        seq.append(self.ptp, 0.0)
+        move_thread = MoveThread(self.robot, seq)
+        move_thread.start()
+        self.assertTrue(self.robot_motion_observer.wait_motion_start(
+            move_tolerance=self._TOLERANCE_FOR_MOTION_DETECTION_RAD, sleep_interval=self._SLEEP_TIME_S))
+
+        # 2. trigger pause
+        self.robot.pause()
+        self.assertTrue(self.robot_motion_observer.wait_motion_stop(self._WAIT_CMD_STOP_TIME_OUT_S,
+                                                                    self._TOLERANCE_FOR_MOTION_DETECTION_RAD))
+        move_thread.join()
+        self.assertTrue(move_thread.exception_thrown)
+
 
 if __name__ == '__main__':
     import rostest
