@@ -23,8 +23,6 @@
 #include <stdexcept>
 #include <vector>
 
-#include <moveit/robot_model/joint_model_group.h>
-
 #include "pilz_trajectory_generation/trajectory_generation_exceptions.h"
 
 namespace pilz_trajectory_generation
@@ -36,9 +34,11 @@ CREATE_MOVEIT_ERROR_CODE_EXCEPTION(MoreThanOneTipFrameException, moveit_msgs::Mo
 /**
  * @returns true if the JointModelGroup has a solver, false otherwise.
  *
+ * @tparam JointModelGroup aims at moveit::core::JointModelGroup
  * @throws exception in case group is null.
  */
-static bool hasSolver(const moveit::core::JointModelGroup* group)
+template<class JointModelGroup>
+static bool hasSolver(const JointModelGroup* group)
 {
   if (group == nullptr)
   {
@@ -51,10 +51,12 @@ static bool hasSolver(const moveit::core::JointModelGroup* group)
  * @return The name of the tip frame (link) of the specified group
  * returned by the solver.
  *
+ * @tparam JointModelGroup aims at moveit::core::JointModelGroup
  * @throws exception in case the group has no solver.
  * @throws exception in case the solver for the group has more than one tip frame.
  */
-static const std::string& getSolverTipFrame(const moveit::core::JointModelGroup* group)
+template<class JointModelGroup>
+static const std::string& getSolverTipFrame(const JointModelGroup* group)
 {
   if( !hasSolver(group) )
   {

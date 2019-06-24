@@ -303,7 +303,7 @@ add_rostest_gtest(integrationtest_command_list_manager
 target_link_libraries(integrationtest_command_list_manager
 ${catkin_LIBRARIES} ${PROJECT_NAME}_test)
 
-add_rostest_gtest(integrationtest_get_tip_frame
+add_rostest_gmock(integrationtest_get_tip_frame
   test/integrationtest_get_tip_frame.test
   test/integrationtest_get_tip_frame.cpp
 )
