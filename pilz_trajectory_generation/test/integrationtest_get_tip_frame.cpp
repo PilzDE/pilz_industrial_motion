@@ -125,7 +125,8 @@ TEST_F(IntegrationGetTipFrame, TestExceptionNoSolver)
  */
 TEST_F(IntegrationGetTipFrame, NullptrJointGroup)
 {
-  EXPECT_THROW(hasSolver(nullptr), std::invalid_argument);
+  moveit::core::JointModelGroup* group = nullptr;
+  EXPECT_THROW(hasSolver(group), std::invalid_argument);
 }
 
 int main(int argc, char **argv)
