@@ -382,8 +382,6 @@ class Robot(object):
                         if isinstance(cmd, Sequence):
                             rospy.logerr("Pause not implemented for sequence yet")
                             raise RobotMoveFailed("Pause not implemented for sequence yet")
-                        # the following line is never executed due to optimization
-                        continue # pragma: no cover
                     # external stop
                     elif self._move_ctrl_sm.state == _MoveControlState.NO_REQUEST:
                         rospy.logerr("External stop of move command")
