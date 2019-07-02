@@ -2,8 +2,8 @@
 Changelog for package pilz_trajectory_generation
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
-Forthcoming
------------
+0.3.8 (2019-07-02)
+------------------
 * Commenting unstable test with franka emika panda
 
 0.3.7 (2019-05-09)
