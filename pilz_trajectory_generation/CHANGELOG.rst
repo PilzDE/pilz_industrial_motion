@@ -4,7 +4,7 @@ Changelog for package pilz_trajectory_generation
 
 Forthcoming
 -----------
-* Commenting unstable test with franke emika panda
+* Commenting unstable test with franka emika panda
 
 0.3.7 (2019-05-09)
 ------------------
