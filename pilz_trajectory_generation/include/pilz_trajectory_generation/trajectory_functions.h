@@ -165,17 +165,6 @@ bool determineAndCheckSamplingTime(const robot_trajectory::RobotTrajectoryPtr& f
                                    double& sampling_time);
 
 /**
- * @brief Deprecated, do not use this function signature anymore.
- *
- * @deprecated use the other function signature taking const references to the robot states.
- *
- */
-bool isRobotStateEqual(const robot_state::RobotStatePtr& state1,
-                       const robot_state::RobotStatePtr& state2,
-                       const std::string& joint_group_name,
-                       double epsilon);
-
-/**
  * @brief Check if the two robot states have the same joint position/velocity/acceleration.
  *
  * @param joint_group_name The name of the joint group.
@@ -196,7 +185,7 @@ bool isRobotStateEqual(const robot_state::RobotState& state1,
  * @param EPSILON
  * @return
  */
-bool isRobotStateStationary(const robot_state::RobotStatePtr& state,
+bool isRobotStateStationary(const robot_state::RobotState& state,
                             const std::string& group,
                             double EPSILON);
 

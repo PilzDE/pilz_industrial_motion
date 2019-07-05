@@ -59,7 +59,8 @@ CommandListManager::CommandListManager(const ros::NodeHandle &nh, const moveit::
 }
 
 RobotTrajCont CommandListManager::solve(const planning_scene::PlanningSceneConstPtr& planning_scene,
-                                         const pilz_msgs::MotionSequenceRequest& req_list)
+                                        planning_pipeline::PlanningPipelinePtr planning_pipeline,
+                                        const pilz_msgs::MotionSequenceRequest& req_list)
 {
   if(req_list.items.empty())
   {
@@ -72,7 +73,7 @@ RobotTrajCont CommandListManager::solve(const planning_scene::PlanningSceneConst
 
   MotionResponseCont resp_cont
   {
-    solveSequenceItems(planning_scene, req_list)
+    solveSequenceItems(planning_scene, planning_pipeline, req_list)
   };
 
   assert(model_);
@@ -108,7 +109,7 @@ bool CommandListManager::checkRadiiForOverlap(const robot_trajectory::RobotTraje
     return false;
   }
 
-  const std::string& blend_frame {getTipFrame(model_->getJointModelGroup(traj_A.getGroupName()))};
+  const std::string& blend_frame {getSolverTipFrame(model_->getJointModelGroup(traj_A.getGroupName()))};
   auto distance_endpoints = (traj_A.getLastWayPoint().getFrameTransform(blend_frame).translation() -
                              traj_B.getLastWayPoint().getFrameTransform(blend_frame).translation()).norm();
   return distance_endpoints <= sum_radii;
@@ -175,10 +176,10 @@ bool CommandListManager::isInvalidBlendRadii(const moveit::core::RobotModel &mod
     return true;
   }
 
-  // No blending between end-effectors
-  if (model.getJointModelGroup(item_A.req.group_name)->isEndEffector())
+  // No blending for groups without solver
+  if(!hasSolver(model.getJointModelGroup(item_A.req.group_name)))
   {
-    ROS_WARN_STREAM("Blending between end-effector commands not allowed");
+    ROS_WARN_STREAM("Blending for groups without solver not allowed");
     return true;
   }
 
@@ -203,10 +204,10 @@ CommandListManager::RadiiCont CommandListManager::extractBlendRadii(const moveit
 
 CommandListManager::MotionResponseCont CommandListManager::solveSequenceItems(
     const planning_scene::PlanningSceneConstPtr& planning_scene,
+    planning_pipeline::PlanningPipelinePtr planning_pipeline,
     const pilz_msgs::MotionSequenceRequest &req_list) const
 {
   MotionResponseCont motion_plan_responses;
-  planning_pipeline::PlanningPipelinePtr planning_pipeline(new planning_pipeline::PlanningPipeline(model_, nh_));
   size_t curr_req_index {0};
   const size_t num_req {req_list.items.size()};
   for(const auto& seq_item : req_list.items)

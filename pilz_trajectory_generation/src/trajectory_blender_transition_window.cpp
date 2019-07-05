@@ -135,6 +135,15 @@ bool pilz::TrajectoryBlenderTransitionWindow::validateRequest(const pilz::Trajec
     return false;
   }
 
+  // check link exists
+  if (!req.first_trajectory->getRobotModel()->hasLinkModel(req.link_name) &&
+      !req.first_trajectory->getLastWayPoint().hasAttachedBody(req.link_name))
+  {
+    ROS_ERROR_STREAM("Unknown link name: " << req.link_name);
+    error_code.val = moveit_msgs::MoveItErrorCodes::INVALID_LINK_NAME;
+    return false;
+  }
+
   if(req.blend_radius <=0 )
   {
     ROS_ERROR("Blending radius must be positive");
@@ -143,8 +152,8 @@ bool pilz::TrajectoryBlenderTransitionWindow::validateRequest(const pilz::Trajec
   }
 
   // end position of the first trajectory and start position of second trajectory must be the same
-  if(!pilz::isRobotStateEqual(req.first_trajectory->getLastWayPointPtr(),
-                              req.second_trajectory->getFirstWayPointPtr(),
+  if(!pilz::isRobotStateEqual(req.first_trajectory->getLastWayPoint(),
+                              req.second_trajectory->getFirstWayPoint(),
                               req.group_name,
                               EPSILON))
   {
@@ -167,8 +176,8 @@ bool pilz::TrajectoryBlenderTransitionWindow::validateRequest(const pilz::Trajec
   }
 
   //end position of the first trajectory and start position of second trajectory must have zero velocities/accelerations
-  if(!pilz::isRobotStateStationary(req.first_trajectory->getLastWayPointPtr(), req.group_name, EPSILON) ||
-     !pilz::isRobotStateStationary(req.second_trajectory->getFirstWayPointPtr(), req.group_name, EPSILON) )
+  if(!pilz::isRobotStateStationary(req.first_trajectory->getLastWayPoint(), req.group_name, EPSILON) ||
+     !pilz::isRobotStateStationary(req.second_trajectory->getFirstWayPoint(), req.group_name, EPSILON) )
   {
     ROS_ERROR("Intersection point of the blending trajectories has non-zero velocities/accelerations.");
     error_code.val = moveit_msgs::MoveItErrorCodes::INVALID_MOTION_PLAN;

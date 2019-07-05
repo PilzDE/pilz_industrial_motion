@@ -307,11 +307,11 @@ add_rostest_gtest(integrationtest_command_list_manager
 target_link_libraries(integrationtest_command_list_manager
 ${catkin_LIBRARIES} ${PROJECT_NAME}_test)
 
-add_rostest_gtest(integrationtest_get_tip_frame
-  test/integrationtest_get_tip_frame.test
-  test/integrationtest_get_tip_frame.cpp
+add_rostest_gtest(integrationtest_get_solver_tip_frame
+  test/integrationtest_get_solver_tip_frame.test
+  test/integrationtest_get_solver_tip_frame.cpp
 )
-target_link_libraries(integrationtest_get_tip_frame
+target_link_libraries(integrationtest_get_solver_tip_frame
 ${catkin_LIBRARIES} ${PROJECT_NAME}_test)
 
 add_rostest_gtest(integrationtest_plan_components_builder
@@ -461,6 +461,14 @@ ${catkin_LIBRARIES} ${PROJECT_NAME}_test)
 
   target_link_libraries(unittest_planning_context
      ${catkin_LIBRARIES} ${PROJECT_NAME}_test)
+
+  # GetTipFrames Unit Test
+  catkin_add_gmock(unittest_get_solver_tip_frame
+    test/unittest_get_solver_tip_frame.cpp
+  )
+
+  target_link_libraries(unittest_get_solver_tip_frame
+    ${catkin_LIBRARIES} ${PROJECT_NAME}_test)
 
   # to run: catkin_make -DENABLE_COVERAGE_TESTING=ON package_name_coverage
   if(ENABLE_COVERAGE_TESTING)
