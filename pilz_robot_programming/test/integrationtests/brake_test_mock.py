@@ -29,6 +29,7 @@ from prbt_hardware_support.msg import BrakeTestErrorCodes
 BRAKE_TEST_REQUIRED_SERVICE_NAME = "/prbt/brake_test_required"
 BRAKE_TEST_EXECUTE_SERVICE_NAME = "/prbt/execute_braketest"
 
+
 class BrakeTestMock(Thread):
     """
     Mock of Brake Test Interfaces.
@@ -67,7 +68,6 @@ class BrakeTestMock(Thread):
             service_class=IsBrakeTestRequired,
             handler=self._is_brake_test_required_server_handler
         )
-
 
     def advertise_brake_test_execute_service(self):
         """Method to manually advertise brake_test_execute the service, when necessary"""

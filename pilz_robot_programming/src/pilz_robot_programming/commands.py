@@ -94,7 +94,7 @@ class _AbstractCmd(object):
         assert done is True, "Function wait_for_result() is finished but the goal is not done."
 
         result_code = robot._sequence_client.get_result()
-        if result_code is None: # pragma: no cover  Paranoia-check should actually never happen.
+        if result_code is None:  # pragma: no cover  Paranoia-check should actually never happen.
             rospy.logerr("No result received from action server.")
             return robot._FAILURE
 
@@ -157,7 +157,8 @@ class _BaseCmd(_AbstractCmd):
             E.g. to move the robot 0.1m up and tilt it 10degrees around the global z-axis use:
             ::
 
-                Ptp(goal=Pose(position=Point(0., 0., 0.1), orientation=from_euler(math.radians(10), 0., 0.)), vel_scale=0.4)
+                Ptp(goal=Pose(position=Point(0., 0., 0.1), orientation=from_euler(math.radians(10), 0., 0.)),
+                    vel_scale=0.4)
 
 
             Note the gimbal lock, if you pass a relative rotation to this function: If b==0, the values for a and c
@@ -321,11 +322,8 @@ class Ptp(_BaseCmd):
             acc_scale = vel_scale * vel_scale
     """
     def __init__(self, vel_scale=_MAX_VEL_SCALE, acc_scale=None, *args, **kwargs):
-      
         acc_scale_final = acc_scale if acc_scale is not None else Ptp._calc_acc_scale(vel_scale)
-        
         super(Ptp, self).__init__(vel_scale=vel_scale, acc_scale=acc_scale_final, *args, **kwargs)
-
         self._planner_id = "PTP"
 
     def __str__(self):
@@ -486,7 +484,7 @@ class Circ(_BaseCmd):
 
 
 class _SequenceSubCmd(object):
-    def __init__(self, cmd, blend_radius=0):
+    def __init__(self, cmd, blend_radius=0.):
         self.cmd = cmd
         self.blend_radius = blend_radius
 
@@ -509,7 +507,8 @@ class Sequence(_AbstractCmd):
      one trajectory to the next (in case of blending), the original trajectories are altered slightly
      within the sphere defined by the blending radius.
 
-     :note: In case the blend radius is zero, the robot executes the robot motion commands as if they are sent separately.
+     :note: In case the blend radius is zero, the robot executes the robot motion commands as if they are sent
+            separately.
 
      :note: The robot always stops between gripper and non-gripper commands.
 
@@ -620,8 +619,8 @@ class Gripper(_BaseCmd):
             joint_names = robot._robot_commander.get_group(self._planning_group).get_active_joints()
 
             if len(joint_names) != 1:
-                raise IndexError("PG70 should have only one joint. But group " + req.group_name
-                                 + " contains " + str(len(joint_names)) + " joints.")
+                raise IndexError("PG70 should have only one joint. But group " + req.group_name +
+                                 " contains " + str(len(joint_names)) + " joints.")
 
             joint_constraint = JointConstraint()
             joint_constraint.joint_name = joint_names[0]

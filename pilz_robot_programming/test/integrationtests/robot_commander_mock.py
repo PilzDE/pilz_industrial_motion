@@ -15,7 +15,6 @@
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 import rospy
-from geometry_msgs.msg import PoseStamped
 
 
 class MoveGroupCommanderMock:
@@ -43,6 +42,7 @@ class MoveGroupCommanderMock:
             joint_array.append(0.0)
         rospy.loginfo(joint_array)
         return joint_array
+
 
 class RobotCommanderMock:
     """Mock for testing."""
