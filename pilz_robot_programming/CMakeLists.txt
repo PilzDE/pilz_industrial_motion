@@ -45,9 +45,14 @@ if(CATKIN_ENABLE_TESTING)
   endif()
 
   roslint_python(
+    src/${PROJECT_NAME}/__init__.py
     src/${PROJECT_NAME}/robot.py
+    src/${PROJECT_NAME}/commands.py
+    src/${PROJECT_NAME}/exceptions.py
+    src/${PROJECT_NAME}/move_control_request.py
     ${integrationtest_scripts}
   )
+  roslint_add_test()
 
 function(ADD_PYTHON_COVERAGE)
     set(options NONE)

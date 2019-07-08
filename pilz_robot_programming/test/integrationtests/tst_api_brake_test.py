@@ -121,9 +121,8 @@ class TestAPIBrakeTest(unittest.TestCase):
             self.robot
         )
 
-
-    # Fake method for mock a service call raising a ROSException
     def fake_get_execute_brake_test_service(obj):
+        """Fake method for mock a service call raising a ROSException"""
         def fake_callable():
             raise rospy.exceptions.ROSException("MOCK FAIL")
         return fake_callable
