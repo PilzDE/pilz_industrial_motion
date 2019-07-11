@@ -41,6 +41,8 @@ catkin_package(
   tf2_geometry_msgs
 )
 
+set(CMAKE_CXX_CLANG_TIDY "clang-tidy;")
+
 ###########
 ## Build ##
 ###########
