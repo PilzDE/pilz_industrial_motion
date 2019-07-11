@@ -24,7 +24,7 @@ from moveit_msgs.msg import MoveGroupAction
 from std_srvs.srv import Empty
 
 
-class MoveitMock():
+class MoveitMock:
     """Mock for MoveIt which allows us to simulate errors during command execution."""
 
     def __init__(self):
@@ -34,7 +34,8 @@ class MoveitMock():
                                                  execute_cb=self.move_group_execute_callback, auto_start=False)
 
         self._as_sequence_group = SimpleActionServer('sequence_move_group', MoveGroupSequenceAction,
-                                                  execute_cb=self.blend_move_group_execute_callback, auto_start=False)
+                                                     execute_cb=self.blend_move_group_execute_callback,
+                                                     auto_start=False)
 
         self._as_move_group.start()
         self._as_sequence_group.start()

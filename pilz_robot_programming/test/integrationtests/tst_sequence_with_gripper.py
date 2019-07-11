@@ -131,7 +131,7 @@ class TestSequenceWithGripper(unittest.TestCase):
 
 if __name__ == '__main__':
     import rostest
-    if not 'ros_init_done' in globals():
+    if 'ros_init_done' not in globals():
         rospy.init_node('tst_sequence_with_gripper')
         global ros_init_done
     rostest.rosrun('pilz_robot_programming', 'tst_sequence_with_gripper', TestSequenceWithGripper)
