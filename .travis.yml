@@ -7,7 +7,7 @@ language: generic
 addons:
   apt:
     packages:
-      - clang-tidy
+      - clang-tidy-4.0
 
 cache:
   directories:
