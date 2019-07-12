@@ -31,6 +31,7 @@ env:
     - CATKIN_LINT=true
     - CATKIN_LINT_ARGS='--strict'
   matrix:
+    - TEST="clang-tidy-4.0"
     - ROS_REPO=ros
     - ROS_REPO=ros-shadow-fixed
 matrix:
