@@ -6,6 +6,8 @@ language: generic
 
 addons:
   apt:
+    sources:
+      - llvm-toolchain-trusty-4.0
     packages:
       - clang-tidy-4.0
 
