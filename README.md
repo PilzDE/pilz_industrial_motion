@@ -7,10 +7,11 @@ The FTP is implemented by Pilz GmbH & Co. KG.
 
 ## Build Status
 
-| Kinetic | Melodic |
-| --------|-------- |
-| [![Build Status](https://travis-ci.org/PilzDE/pilz_industrial_motion.svg?branch=kinetic-devel)](https://travis-ci.org/PilzDE/pilz_industrial_motion) | [![Build Status](https://travis-ci.org/PilzDE/pilz_industrial_motion.svg?branch=melodic-devel)](https://travis-ci.org/PilzDE/pilz_industrial_motion) |
-
+|   | Kinetic | Melodic |
+| ----| --------|-------- |
+| Travis  | [![Build Status](https://travis-ci.org/PilzDE/pilz_industrial_motion.svg?branch=kinetic-devel)](https://travis-ci.org/PilzDE/pilz_industrial_motion) | [![Build Status](https://travis-ci.org/PilzDE/pilz_industrial_motion.svg?branch=melodic-devel)](https://travis-ci.org/PilzDE/pilz_industrial_motion) |
+| Buildfarm src | [![buildfarm](http://build.ros.org/buildStatus/icon?job=Ksrc_uX__pilz_industrial_motion__ubuntu_xenial__source)](http://build.ros.org/view/Ksrc_uX/job/Ksrc_uX__pilz_industrial_motion__ubuntu_xenial__source/) | [![buildfarm](http://build.ros.org/buildStatus/icon?job=Msrc_uB__pilz_industrial_motion__ubuntu_bionic__source)](http://build.ros.org/view/Msrc_uB/job/Msrc_uB__pilz_industrial_motion__ubuntu_bionic__source/) |
+| Buildfarm bin | [![buildfarm](http://build.ros.org/buildStatus/icon?job=Kbin_uX64__pilz_industrial_motion__ubuntu_xenial_amd64__binary)](http://build.ros.org/view/Kbin_uX64/job/Kbin_uX64__pilz_industrial_motion__ubuntu_xenial_amd64__binary/) | [![buildfarm](http://build.ros.org/buildStatus/icon?job=Mbin_uB64__pilz_industrial_motion__ubuntu_bionic_amd64__binary)](http://build.ros.org/view/Mbin_uB64/job/Mbin_uB64__pilz_industrial_motion__ubuntu_bionic_amd64__binary/)| 
 
 ### Note to Developers:
 `melodic-devel` is considered to be the active development branch.
