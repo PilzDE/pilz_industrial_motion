@@ -30,8 +30,8 @@ env:
     - ROS_DISTRO="melodic" 
     - CATKIN_LINT=true
     - CATKIN_LINT_ARGS='--strict'
+    - CLANG_FORMAT_CHECK=.clang-tidy
   matrix:
-    - TEST="clang-tidy-4.0"
     - ROS_REPO=ros
     - ROS_REPO=ros-shadow-fixed
 matrix:
