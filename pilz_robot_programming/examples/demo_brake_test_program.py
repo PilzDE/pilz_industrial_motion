@@ -18,16 +18,24 @@ from pilz_robot_programming.robot import *
 from pilz_robot_programming.commands import *
 
 __REQUIRED_API_VERSION__ = "1"
+_BRAKE_TEST_POSE = [0.0]*6
+_DEF_VEL_SCALE = .2
+_DEF_ACC_SCALE = .2
 
 
 def start_program():
-    print("Executing " +__file__)
+    """
+    Starting the demo of brake test
+    """
+    print("Executing " + __file__)
 
     r = Robot(__REQUIRED_API_VERSION__)
-
-    # Execute a brake test if required
+    # Checking if a brake test is required
     if r.is_brake_test_required():
+        # Move robot to the pose where the brake test should be executed
+        r.move(Ptp(goal=_BRAKE_TEST_POSE, vel_scale=_DEF_VEL_SCALE, acc_scale=_DEF_ACC_SCALE))
         try:
+            # Execute brake test
             r.execute_brake_test()
         except RobotBrakeTestException as e:
             rospy.logerr(e)
@@ -40,4 +48,3 @@ if __name__ == "__main__":
     rospy.init_node('gripper_program_node', anonymous=True)
 
     start_program()
-
