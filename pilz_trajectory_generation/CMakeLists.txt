@@ -43,13 +43,13 @@ catkin_package(
 
 find_program(
   CLANG_TIDY_EXE
-  NAMES "clang-tidy-4.0"
+  NAMES "clang-tidy-6.0"
   DOC "Path to clang-tidy executable"
   )
 if(NOT CLANG_TIDY_EXE)
-  message(STATUS "clang-tidy not found.")
+  message(FATAL_ERROR "clang-tidy-6.0 not found.")
 else()
-  message(STATUS "clang-tidy found: ${CLANG_TIDY_EXE}")
+  message(STATUS "clang-tidy-6.0 found: ${CLANG_TIDY_EXE}")
   set(CMAKE_CXX_CLANG_TIDY "${CLANG_TIDY_EXE}")
 endif()
 
@@ -94,6 +94,10 @@ add_library(pilz_command_planner
             )
 target_link_libraries(pilz_command_planner
                       ${catkin_LIBRARIES})
+set_target_properties(pilz_command_planner
+    PROPERTIES
+    CXX_CLANG_TIDY "${DO_CLANG_TIDY}"
+)
 
 add_library(planning_context_loader_ptp
             src/planning_context_loader_ptp.cpp
