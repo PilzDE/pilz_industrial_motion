@@ -4,6 +4,13 @@ sudo: required
 dist: trusty
 language: generic
 
+addons:
+  apt:
+    sources:
+      - llvm-toolchain-trusty-4.0
+    packages:
+      - clang-tidy-4.0
+
 cache:
   directories:
     - $HOME/.ccache
@@ -24,7 +31,6 @@ env:
     - CATKIN_LINT=true
     - CATKIN_LINT_ARGS='--strict'
     - CLANG_FORMAT_CHECK=.clang-tidy
-    - CLANG_FORMAT_VERSION=4.0
   matrix:
     - ROS_REPO=ros
     - ROS_REPO=ros-shadow-fixed
