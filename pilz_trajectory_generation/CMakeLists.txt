@@ -26,21 +26,12 @@ find_package(catkin REQUIRED COMPONENTS
   kdl_conversions
 )
 
-
-
 find_package(orocos_kdl)
 find_package(Boost REQUIRED COMPONENTS )
 
-###################################
-## catkin specific configuration ##
-###################################
-catkin_package(
-  CATKIN_DEPENDS
-  moveit_msgs
-  pilz_msgs
-  tf2_geometry_msgs
-)
-
+################
+## Clang tidy ##
+################
 find_program(
   CLANG_TIDY_EXE
   NAMES "clang-tidy-6.0"
@@ -53,9 +44,20 @@ else()
   set(CMAKE_CXX_CLANG_TIDY "${CLANG_TIDY_EXE}")
 endif()
 
+###################################
+## catkin specific configuration ##
+###################################
+catkin_package(
+  CATKIN_DEPENDS
+  moveit_msgs
+  pilz_msgs
+  tf2_geometry_msgs
+)
+
 ###########
 ## Build ##
 ###########
+
 include_directories(
   include
   ${catkin_INCLUDE_DIRS}
@@ -94,10 +96,6 @@ add_library(pilz_command_planner
             )
 target_link_libraries(pilz_command_planner
                       ${catkin_LIBRARIES})
-set_target_properties(pilz_command_planner
-    PROPERTIES
-    CXX_CLANG_TIDY "${DO_CLANG_TIDY}"
-)
 
 add_library(planning_context_loader_ptp
             src/planning_context_loader_ptp.cpp
