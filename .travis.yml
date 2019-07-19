@@ -4,13 +4,6 @@ sudo: required
 dist: trusty
 language: generic
 
-addons:
-  apt:
-    sources:
-      - llvm-toolchain-trusty-4.0
-    packages:
-      - clang-tidy-4.0
-
 cache:
   directories:
     - $HOME/.ccache
