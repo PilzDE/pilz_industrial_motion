@@ -26,10 +26,23 @@ find_package(catkin REQUIRED COMPONENTS
   kdl_conversions
 )
 
-
-
 find_package(orocos_kdl)
 find_package(Boost REQUIRED COMPONENTS )
+
+￼################
+## Clang tidy ##
+################
+find_program(
+CLANG_TIDY_EXE
+NAMES "clang-tidy-3.8"
+DOC "Path to clang-tidy executable"
+)
+if(NOT CLANG_TIDY_EXE)
+message(FATAL_ERROR "clang-tidy-3.8 not found.")
+else()
+message(STATUS "clang-tidy-3.8 found: ${CLANG_TIDY_EXE}")
+set(CMAKE_CXX_CLANG_TIDY "${CLANG_TIDY_EXE}")
+endif()
 
 ###################################
 ## catkin specific configuration ##

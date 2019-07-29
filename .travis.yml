@@ -13,6 +13,7 @@ notifications:
     on_failure: always
     recipients:
       - a.gutenkunst@pilz.de
+      - c.henkel@pilz.de
       - h.slusarek@pilz.de
       - i.martini@pilz.de
 env:
