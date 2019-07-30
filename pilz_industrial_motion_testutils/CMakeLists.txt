@@ -23,6 +23,21 @@ find_package(Boost REQUIRED COMPONENTS)
 ## See http://ros.org/doc/api/catkin/html/user_guide/setup_dot_py.html
 catkin_python_setup()
 
+################
+## Clang tidy ##
+################
+find_program(
+  CLANG_TIDY_EXE
+  NAMES "clang-tidy-6.0"
+  DOC "Path to clang-tidy executable"
+  )
+if(NOT CLANG_TIDY_EXE)
+  message(FATAL_ERROR "clang-tidy-6.0 not found.")
+else()
+  message(STATUS "clang-tidy-6.0 found: ${CLANG_TIDY_EXE}")
+  set(CMAKE_CXX_CLANG_TIDY "${CLANG_TIDY_EXE}")
+endif()
+
 ###################################
 ## catkin specific configuration ##
 ###################################

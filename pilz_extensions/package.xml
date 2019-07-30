@@ -18,8 +18,9 @@
   <url type="bugtracker">https://github.com/PilzDE/pilz_industrial_motion/issues</url>
   <url type="repository">https://github.com/PilzDE/pilz_industrial_motion</url>
 
+  <build_depend>clang-tidy</build_depend>
   <build_depend>roscpp</build_depend>
-  
+
   <depend>joint_limits_interface</depend>
 
   <test_depend>rostest</test_depend>

@@ -15,10 +15,11 @@
   <url type="bugtracker">https://github.com/PilzDE/pilz_industrial_motion/issues</url>
   <url type="repository">https://github.com/PilzDE/pilz_industrial_motion</url>
 
+  <build_depend>eigen_conversions</build_depend>
+  <build_depend>clang-tidy</build_depend>
   <build_depend>moveit_core</build_depend>
   <build_depend>moveit_msgs</build_depend>
   <build_depend>pilz_msgs</build_depend>
-  <build_depend>eigen_conversions</build_depend>
 
   <run_depend>moveit_core</run_depend>
   <run_depend>moveit_msgs</run_depend>

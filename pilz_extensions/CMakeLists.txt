@@ -8,8 +8,20 @@ find_package(catkin REQUIRED COMPONENTS
   rostest
   joint_limits_interface)
 
-## System dependencies are found with CMake's conventions
-# find_package(Boost REQUIRED COMPONENTS system)
+################
+## Clang tidy ##
+################
+  find_program(
+    CLANG_TIDY_EXE
+    NAMES "clang-tidy-6.0"
+    DOC "Path to clang-tidy executable"
+    )
+  if(NOT CLANG_TIDY_EXE)
+    message(FATAL_ERROR "clang-tidy-6.0 not found.")
+  else()
+    message(STATUS "clang-tidy-6.0 found: ${CLANG_TIDY_EXE}")
+    set(CMAKE_CXX_CLANG_TIDY "${CLANG_TIDY_EXE}")
+  endif()
 
 ###################################
 ## catkin specific configuration ##
