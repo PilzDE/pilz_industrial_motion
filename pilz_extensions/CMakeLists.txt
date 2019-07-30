@@ -8,7 +8,7 @@ find_package(catkin REQUIRED COMPONENTS
   rostest
   joint_limits_interface)
 
-￼################
+################
 ## Clang tidy ##
 ################
 find_program(

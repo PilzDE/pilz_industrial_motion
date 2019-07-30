@@ -29,7 +29,7 @@ find_package(catkin REQUIRED COMPONENTS
 find_package(orocos_kdl)
 find_package(Boost REQUIRED COMPONENTS )
 
-￼################
+################
 ## Clang tidy ##
 ################
 find_program(
