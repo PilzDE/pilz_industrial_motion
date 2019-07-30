@@ -5,6 +5,7 @@
   <description>The pilz_trajectory_generation package containing the MoveIt! plugin pilz_command_planner.</description>
 
   <maintainer email="a.gutenkunst@pilz.de">Alexander Gutenkunst</maintainer>
+  <maintainer email="c.henkel@pilz.de">Christian Henkel</maintainer>
   <maintainer email="h.slusarek@pilz.de">Hagen Slusarek</maintainer>
   <maintainer email="i.martini@pilz.de">Immanuel Martini</maintainer>
 
@@ -15,6 +16,8 @@
   <url type="repository">https://github.com/PilzDE/pilz_industrial_motion</url>
 
   <buildtool_depend>catkin</buildtool_depend>
+
+  <build_depend>clang-tidy</build_depend>
 
   <depend>orocos_kdl</depend>
   <depend>roscpp</depend>
