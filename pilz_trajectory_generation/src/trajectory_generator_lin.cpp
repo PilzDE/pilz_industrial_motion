@@ -183,5 +183,5 @@ std::unique_ptr<KDL::Path> TrajectoryGeneratorLIN::setPathLIN(const Eigen::Affin
 
 }
 
-}
+} // namespace pilz
 

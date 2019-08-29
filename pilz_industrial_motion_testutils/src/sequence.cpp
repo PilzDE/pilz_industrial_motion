@@ -100,4 +100,4 @@ MotionCmd& Sequence::getCmd(const size_t index_cmd)
   return boost::apply_visitor( ToBaseVisitor(), cmds_.at(index_cmd).first);
 }
 
-}
+} // namespace pilz_industrial_motion_testutils

@@ -269,7 +269,7 @@ void MoveGroupSequenceAction::setMoveState(move_group::MoveGroupState state)
 }
 
 
-}
+} // namespace pilz_trajectory_generation
 
 #include <pluginlib/class_list_macros.h>
 PLUGINLIB_EXPORT_CLASS(pilz_trajectory_generation::MoveGroupSequenceAction, move_group::MoveGroupCapability)

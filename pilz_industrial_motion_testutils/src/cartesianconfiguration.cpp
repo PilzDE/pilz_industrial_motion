@@ -115,4 +115,4 @@ std::ostream& operator<< (std::ostream& os, const CartesianConfiguration& obj)
   return os;
 }
 
-}
+} // namespace pilz_industrial_motion_testutils

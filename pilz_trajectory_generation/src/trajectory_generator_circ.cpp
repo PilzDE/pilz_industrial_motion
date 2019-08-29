@@ -252,5 +252,5 @@ std::unique_ptr<KDL::Path> TrajectoryGeneratorCIRC::setPathCIRC(const MotionPlan
   return nullptr;
 }
 
-}
+} // namespace pilz
 
