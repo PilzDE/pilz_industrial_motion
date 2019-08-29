@@ -434,4 +434,4 @@ void VelocityProfile_ATrap::setEmptyProfile()
   t_c_ = 0;
 }
 
-}
+} // namespace pilz
