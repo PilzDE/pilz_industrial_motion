@@ -516,4 +516,4 @@ Gripper XmlTestdataLoader::getGripper(const std::string &cmd_name) const
 }
 
 
-}
+} // namespace pilz_industrial_motion_testutils

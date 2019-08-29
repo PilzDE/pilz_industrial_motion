@@ -119,4 +119,4 @@ void PlanComponentsBuilder::append(robot_trajectory::RobotTrajectoryPtr other,
   blend(other, blend_radius);
 }
 
-}
+} // namespace pilz_trajectory_generation

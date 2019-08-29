@@ -297,4 +297,4 @@ CommandListManager::GroupNamesCont CommandListManager::getGroupNames(const pilz_
   return group_names;
 }
 
-}
+} // namespace pilz_trajectory_generation

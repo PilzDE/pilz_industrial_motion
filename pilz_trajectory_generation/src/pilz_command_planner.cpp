@@ -151,6 +151,6 @@ void CommandPlanner::registerContextLoader(pilz::PlanningContextLoaderPtr planni
   }
 }
 
-} // namespace
+} // namespace pilz
 
 PLUGINLIB_EXPORT_CLASS(pilz::CommandPlanner, planning_interface::PlannerManager)

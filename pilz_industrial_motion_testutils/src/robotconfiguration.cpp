@@ -47,4 +47,4 @@ RobotConfiguration::RobotConfiguration(const std::string& group_name,
   }
 }
 
-}
+} // namespace pilz_industrial_motion_testutils
