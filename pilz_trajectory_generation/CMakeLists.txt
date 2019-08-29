@@ -59,8 +59,13 @@ catkin_package(
 ###########
 include_directories(
   include
-  ${catkin_INCLUDE_DIRS}
+)
+
+# To avoid Warnings from clang-tidy declare system
+include_directories(
+  SYSTEM
   ${Boost_INCLUDE_DIRS}
+  ${catkin_INCLUDE_DIRS}
 )
 
 ## Declare a C++ library
