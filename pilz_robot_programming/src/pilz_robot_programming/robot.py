@@ -30,7 +30,7 @@ from std_srvs.srv import Trigger
 import tf
 
 from pilz_msgs.msg import MoveGroupSequenceAction
-from prbt_hardware_support.srv import IsBrakeTestRequired, BrakeTest, BrakeTestResponse
+from prbt_hardware_support.srv import IsBrakeTestRequired, IsBrakeTestRequiredResponse, BrakeTest, BrakeTestResponse
 from .move_control_request import _MoveControlState, MoveControlAction, _MoveControlStateMachine
 from .commands import _AbstractCmd, _DEFAULT_PLANNING_GROUP, _DEFAULT_TARGET_LINK, _DEFAULT_BASE_LINK, Sequence
 from .exceptions import *
@@ -285,7 +285,7 @@ class Robot(object):
     def is_brake_test_required(self):
         """Checks whether a brake test is currently required.
 
-        :raises ServiceException: when the required ROS service is not available.
+        :raises ServiceException: if it cannot determined if a braketest is needed.
         :returns: `True`: if brake test is required,
             `False`: otherwise
 
@@ -300,11 +300,15 @@ class Robot(object):
                 self._BRAKE_TEST_REQUIRED_SRV,
                 IsBrakeTestRequired)
             resp = is_brake_test_required_client()
-            if resp.result:
+            if resp.result == IsBrakeTestRequiredResponse.REQUIRED:
                 rospy.loginfo("Brake Test REQUIRED")
-            else:
+                return True
+            elif resp.result == IsBrakeTestRequiredResponse.NOT_REQUIRED:
                 rospy.loginfo("Brake Test NOT REQUIRED")
-            return resp.result
+                return False
+            elif resp.result == IsBrakeTestRequiredResponse.UNKNOWN:
+                rospy.logerr("Failure during call of braketest required service: BrakeTestRequirementStatus UNKNOWN")
+                raise rospy.ROSException("Could not determine if braketest is required.")
         except rospy.ROSException, e:
             rospy.logerr("Failure during call of braketest required service: {0}".format(e))
             raise e
