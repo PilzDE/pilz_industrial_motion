@@ -2,6 +2,11 @@
 Changelog for package pilz_robot_programming
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
+Forthcoming
+-----------
+* fix PEP issues
+* Contributors: Pilz GmbH and Co. KG
+
 0.4.4 (2019-06-19)
 ------------------
 * Add python api methods for brake tests
