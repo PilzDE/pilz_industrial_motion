@@ -2,6 +2,13 @@
 Changelog for package pilz_trajectory_generation
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
+Forthcoming
+-----------
+* Adapt to changes in pilz_robots
+* add static code analyzing (clang-tidy)
+* drop deprecated isRobotStateEqual()
+* Contributors: Pilz GmbH and Co. KG
+
 0.3.8 (2019-07-02)
 ------------------
 * Commenting unstable test with franka emika panda

@@ -5,6 +5,7 @@ Changelog for package pilz_msgs
 0.3.8 (2019-07-02)
 ------------------
 * Remove non-ascii symbol from msg/srv/action causing trouble with genpy/python rosbag api
+* Contributors: Pilz GmbH and Co. KG
 
 0.3.7 (2019-05-09)
 ------------------
