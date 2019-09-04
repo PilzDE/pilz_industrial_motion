@@ -2,6 +2,9 @@
 Changelog for package pilz_robot_programming
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
+Forthcoming
+-----------
+
 0.4.5 (2019-09-03)
 ------------------
 * fix PEP issues

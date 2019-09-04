@@ -2,6 +2,9 @@
 Changelog for package pilz_extensions
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
+Forthcoming
+-----------
+
 0.4.5 (2019-09-03)
 ------------------
 
