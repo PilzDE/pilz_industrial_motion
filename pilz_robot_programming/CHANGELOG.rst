@@ -2,8 +2,8 @@
 Changelog for package pilz_robot_programming
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
-Forthcoming
------------
+0.3.9 (2019-09-05)
+------------------
 * fix PEP issues
 * Contributors: Pilz GmbH and Co. KG
 

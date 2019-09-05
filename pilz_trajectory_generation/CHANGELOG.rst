@@ -2,8 +2,8 @@
 Changelog for package pilz_trajectory_generation
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
-Forthcoming
------------
+0.3.9 (2019-09-05)
+------------------
 * Adapt to changes in pilz_robots
 * add static code analyzing (clang-tidy)
 * drop deprecated isRobotStateEqual()
