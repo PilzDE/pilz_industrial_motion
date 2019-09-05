@@ -23,6 +23,7 @@ from pilz_robot_programming.exceptions import RobotBrakeTestException
 from pilz_robot_programming.robot import Robot
 from brake_test_mock import BrakeTestMock
 from prbt_hardware_support.msg import BrakeTestErrorCodes
+from prbt_hardware_support.srv import IsBrakeTestRequiredResponse
 
 
 API_VERSION = "1"
@@ -49,7 +50,7 @@ class TestAPIBrakeTest(unittest.TestCase):
         mock.start()
         mock.advertise_brake_test_required_service()
 
-        mock.set_is_brake_test_required(True)
+        mock.set_is_brake_test_required_state(IsBrakeTestRequiredResponse.REQUIRED)
 
         res = self.robot.is_brake_test_required()
 
@@ -66,11 +67,30 @@ class TestAPIBrakeTest(unittest.TestCase):
         mock.start()
         mock.advertise_brake_test_required_service()
 
-        mock.set_is_brake_test_required(False)
+        mock.set_is_brake_test_required_state(IsBrakeTestRequiredResponse.NOT_REQUIRED)
 
         res = self.robot.is_brake_test_required()
 
         self.assertFalse(res)
+
+        mock.stop()
+        mock.join()
+
+    def test_unknown_if_required(self):
+        """
+        We expect the method to return false, if the brake test is not required.
+        """
+        mock = BrakeTestMock()
+        mock.start()
+        mock.advertise_brake_test_required_service()
+
+        mock.set_is_brake_test_required_state(IsBrakeTestRequiredResponse.UNKNOWN)
+
+        self.assertRaises(
+            rospy.ROSException,
+            Robot.is_brake_test_required,
+            self.robot
+        )
 
         mock.stop()
         mock.join()
@@ -121,9 +141,8 @@ class TestAPIBrakeTest(unittest.TestCase):
             self.robot
         )
 
-
-    # Fake method for mock a service call raising a ROSException
     def fake_get_execute_brake_test_service(obj):
+        """Fake method for mock a service call raising a ROSException"""
         def fake_callable():
             raise rospy.exceptions.ROSException("MOCK FAIL")
         return fake_callable

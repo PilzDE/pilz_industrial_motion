@@ -178,6 +178,7 @@ private:
   {
   public:
     virtual CmdVariant getCmd(const std::string& /*cmd_name*/) const = 0;
+    virtual ~AbstractCmdGetterAdapter() = default;
   };
 
 private:

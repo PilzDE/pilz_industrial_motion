@@ -33,15 +33,15 @@ find_package(Boost REQUIRED COMPONENTS )
 ## Clang tidy ##
 ################
 find_program(
-CLANG_TIDY_EXE
-NAMES "clang-tidy-3.8"
-DOC "Path to clang-tidy executable"
-)
+  CLANG_TIDY_EXE
+  NAMES "clang-tidy"
+  DOC "Path to clang-tidy executable"
+  )
 if(NOT CLANG_TIDY_EXE)
-message(FATAL_ERROR "clang-tidy-3.8 not found.")
+  message(FATAL_ERROR "clang-tidy not found.")
 else()
-message(STATUS "clang-tidy-3.8 found: ${CLANG_TIDY_EXE}")
-set(CMAKE_CXX_CLANG_TIDY "${CLANG_TIDY_EXE}")
+  message(STATUS "clang-tidy found: ${CLANG_TIDY_EXE}")
+  set(CMAKE_CXX_CLANG_TIDY "${CLANG_TIDY_EXE}")
 endif()
 
 ###################################
@@ -59,8 +59,13 @@ catkin_package(
 ###########
 include_directories(
   include
-  ${catkin_INCLUDE_DIRS}
+)
+
+# To avoid Warnings from clang-tidy declare system
+include_directories(
+  SYSTEM
   ${Boost_INCLUDE_DIRS}
+  ${catkin_INCLUDE_DIRS}
 )
 
 ## Declare a C++ library

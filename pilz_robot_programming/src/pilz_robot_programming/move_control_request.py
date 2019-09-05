@@ -87,7 +87,7 @@ class _MoveControlStateMachine(object):
             return self.__state
 
     @state.setter
-    def state(self, state): # pragma: no cover
+    def state(self, state):  # pragma: no cover
         rospy.logerr("State cannot be set directly, please use switch() instead.")
 
     def switch(self, action):

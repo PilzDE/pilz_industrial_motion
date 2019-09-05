@@ -321,4 +321,4 @@ bool TrajectoryGenerator::generate(const planning_interface::MotionPlanRequest& 
   return true;
 }
 
-}
+} // namespace pilz

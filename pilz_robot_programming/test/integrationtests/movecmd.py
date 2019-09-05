@@ -37,7 +37,8 @@ Note:
   The parameters <x> <y> <z> represent the tcp position (in m) with respect to the
   base frame, <a> <b> <c> denote the euler angle in rad.
 
-  The circ command requires an additional subcommand: center or interim, to specify the position of the center point or an interim point of the circle.
+  The circ command requires an additional subcommand: center or interim, to specify the position of the center point
+  or an interim point of the circle.
 
   All options are placed before commands.
 

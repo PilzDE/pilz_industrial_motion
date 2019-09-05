@@ -21,12 +21,15 @@ from pilz_robot_programming.robot import *
 from pilz_robot_programming.commands import Ptp
 
 _REQUIRED_API_VERSION = "1"
-_BRAKE_TEST_POSE=[-2.7, 0.3, -1, 0, -1.8, 0.4]
-_DEF_VEL_SCALE=.2
-_DEF_ACC_SCALE=.2
+_BRAKE_TEST_POSE = [0.0]*6
+_DEF_VEL_SCALE = .2
+_DEF_ACC_SCALE = .2
 
 
 def start_program():
+    """
+    Start the execution of the test
+    """
     print("Executing " + __file__)
     robot = Robot(_REQUIRED_API_VERSION)
     _test_wait_until_required(robot)

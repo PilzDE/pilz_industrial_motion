@@ -380,7 +380,7 @@ TEST_F(IntegrationTestSequenceAction, TestActionServerCallbacks)
                std::bind(&IntegrationTestSequenceAction::feedback_callback, this, ph::_1));
 
   // wait for the ecpected events
-  BARRIER2({GOAL_SUCCEEDED_EVENT, SERVER_IDLE_EVENT});
+  BARRIER({GOAL_SUCCEEDED_EVENT, SERVER_IDLE_EVENT});
 }
 
 /**

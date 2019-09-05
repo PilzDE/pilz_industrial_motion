@@ -101,7 +101,7 @@ bool MoveGroupSequenceService::plan(pilz_msgs::GetMotionSequence::Request& req,
   return true;
 }
 
-}
+} // namespace pilz_trajectory_generation
 
 #include <pluginlib/class_list_macros.h>
 PLUGINLIB_EXPORT_CLASS(pilz_trajectory_generation::MoveGroupSequenceService, move_group::MoveGroupCapability)

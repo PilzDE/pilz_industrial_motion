@@ -17,6 +17,7 @@
 
 from prbt_hardware_support.msg import BrakeTestErrorCodes
 
+
 class RobotVersionError(Exception):
     pass
 
@@ -57,5 +58,3 @@ class RobotBrakeTestException(Exception):
         for description in filter(str.isupper, BrakeTestErrorCodes.__dict__.keys()):
             if result.value == eval("BrakeTestErrorCodes." + description):
                 return description
-
-

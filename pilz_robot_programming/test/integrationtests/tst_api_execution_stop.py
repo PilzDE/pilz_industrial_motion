@@ -334,7 +334,7 @@ class TestAPIExecutionStop(unittest.TestCase):
                 1. Move function throws exception.
         """
         import pilz_robot_programming.commands as cmd
-        abstract_cmd = cmd._AbstractCmd() # private abstract base
+        abstract_cmd = cmd._AbstractCmd()  # private abstract base
 
         self.assertRaises(RobotMoveFailed, self.robot.move, abstract_cmd)
 

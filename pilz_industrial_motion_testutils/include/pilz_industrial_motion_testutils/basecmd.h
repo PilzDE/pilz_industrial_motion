@@ -32,6 +32,8 @@ public:
     : MotionCmd()
   {}
 
+  virtual ~BaseCmd() = default;
+
 public:
   virtual planning_interface::MotionPlanRequest toRequest() const override;
 
