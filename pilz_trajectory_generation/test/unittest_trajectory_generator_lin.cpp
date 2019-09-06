@@ -65,7 +65,7 @@ protected:
    * @brief Create test scenario for lin trajectory generator
    *
    */
-  virtual void SetUp();
+  void SetUp() override;
 
   bool checkLinResponse(const planning_interface::MotionPlanRequest& req,
                         const planning_interface::MotionPlanResponse& res);
@@ -357,10 +357,9 @@ TEST_P(TrajectoryGeneratorLINTest, LinStartEqualsGoal)
   jointStateToRobotState(lin_joint_req.start_state.joint_state, start_state);
 
 
-  for(size_t i = 0; i < lin_joint_req.goal_constraints.at(0).joint_constraints.size(); i++)
+  for (auto& joint_constraint : lin_joint_req.goal_constraints.at(0).joint_constraints)
   {
-    lin_joint_req.goal_constraints.at(0).joint_constraints.at(i).position
-        = start_state.getVariablePosition(lin_joint_req.goal_constraints.at(0).joint_constraints.at(i).joint_name);
+    joint_constraint.position = start_state.getVariablePosition(joint_constraint.joint_name);
   }
 
   // generate the LIN trajectory

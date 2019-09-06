@@ -53,7 +53,7 @@ bool testutils::getExpectedGoalPose(const moveit::core::RobotModelConstPtr &robo
   // ++++++++++++++++++++++++++++++++++
   // + Get goal from joint constraint +
   // ++++++++++++++++++++++++++++++++++
-  if(req.goal_constraints.front().joint_constraints.size() != 0)
+  if(!req.goal_constraints.front().joint_constraints.empty())
   {
     std::map<std::string, double> goal_joint_position;
     for(const auto& joint_item : req.goal_constraints.front().joint_constraints)
@@ -515,7 +515,7 @@ bool testutils::toTCPPose(const moveit::core::RobotModelConstPtr &robot_model,
                           const std::string &link_name,
                           const std::vector<double>& joint_values,
                           geometry_msgs::Pose &pose,
-                          std::string joint_prefix)
+                          const std::string& joint_prefix)
 {
   {
     std::map<std::string, double> joint_state;
@@ -526,12 +526,12 @@ bool testutils::toTCPPose(const moveit::core::RobotModelConstPtr &robot_model,
       ++joint_values_it;
     }
 
-    Eigen::Isometry3d eigPose;
-    if ( !testutils::computeLinkFK(robot_model, link_name, joint_state, eigPose) )
+    Eigen::Isometry3d eig_pose;
+    if ( !testutils::computeLinkFK(robot_model, link_name, joint_state, eig_pose) )
     {
       return false;
     }
-    tf::poseEigenToMsg(eigPose, pose);
+    tf::poseEigenToMsg(eig_pose, pose);
     return true;
   }
 }
@@ -887,11 +887,11 @@ bool testutils::checkThatPointsInRadius(const std::string& link_name,
   bool result = true;
   for (size_t i = 1; i < res.blend_trajectory->getWayPointCount()-1; ++i)
   {
-    Eigen::Isometry3d currPos(res.blend_trajectory->getWayPointPtr(i)->getFrameTransform(link_name));
-    if ( (currPos.translation() - circ_pose.translation()).norm() > r )
+    Eigen::Isometry3d curr_pos(res.blend_trajectory->getWayPointPtr(i)->getFrameTransform(link_name));
+    if ( (curr_pos.translation() - circ_pose.translation()).norm() > r )
     {
       std::cout << "Point " << i << " does not lie within blending radius (dist: "
-                <<  ((currPos.translation() - circ_pose.translation()).norm() - r)
+                <<  ((curr_pos.translation() - circ_pose.translation()).norm() - r)
                  <<")."
                 << std::endl;
       result = false;
@@ -900,8 +900,8 @@ bool testutils::checkThatPointsInRadius(const std::string& link_name,
   return result;
 }
 
-void testutils::computeCartVelocity(const Eigen::Isometry3d pose_1,
-                                    const Eigen::Isometry3d pose_2,
+void testutils::computeCartVelocity(const Eigen::Isometry3d& pose_1,
+                                    const Eigen::Isometry3d& pose_2,
                                     double duration,
                                     Eigen::Vector3d &v,
                                     Eigen::Vector3d &w)
@@ -1003,7 +1003,7 @@ bool testutils::getBlendTestData(const ros::NodeHandle &nh,
 }
 
 bool testutils::generateTrajFromBlendTestData(const robot_model::RobotModelConstPtr& robot_model,
-                                              const std::shared_ptr<pilz::TrajectoryGenerator> tg,
+                                              const std::shared_ptr<pilz::TrajectoryGenerator>& tg,
                                               const std::string& group_name,
                                               const std::string& link_name,
                                               const testutils::blend_test_data& data,
@@ -1314,7 +1314,7 @@ void testutils::checkRobotModel(const moveit::core::RobotModelConstPtr &robot_mo
   return ::testing::AssertionSuccess();
 }
 
-::testing::AssertionResult testutils::checkCartesianTranslationalPath(robot_trajectory::RobotTrajectoryConstPtr trajectory,
+::testing::AssertionResult testutils::checkCartesianTranslationalPath(const robot_trajectory::RobotTrajectoryConstPtr& trajectory,
                                                                       const std::string &link_name,
                                                                       const double acc_tol)
 {
@@ -1342,7 +1342,7 @@ void testutils::checkRobotModel(const moveit::core::RobotModelConstPtr &robot_mo
   return hasTrapezoidVelocity(accelerations, acc_tol);
 }
 
-::testing::AssertionResult testutils::checkCartesianRotationalPath(robot_trajectory::RobotTrajectoryConstPtr trajectory,
+::testing::AssertionResult testutils::checkCartesianRotationalPath(const robot_trajectory::RobotTrajectoryConstPtr& trajectory,
                                                                    const std::string &link_name,
                                                                    const double rot_axis_tol,
                                                                    const double acc_tol)

@@ -62,7 +62,7 @@ protected:
    * @brief Create test scenario for trajectory blender
    *
    */
-  virtual void SetUp();
+  void SetUp() override;
 
   /**
    * @brief Generate lin trajectories for blend sequences
@@ -604,8 +604,8 @@ TEST_P(TrajectoryBlenderTransitionWindowTest, testOverlappingBlendTrajectories)
  */
 TEST_P(TrajectoryBlenderTransitionWindowTest, testNonLinearBlending)
 {
-  const double SINE_SCALING_FACTOR {0.01};
-  const double TIME_SCALING_FACTOR {10};
+  const double sine_scaling_factor {0.01};
+  const double time_scaling_factor {10};
 
   Sequence seq {data_loader_->getSequence("SimpleSequence")};
 
@@ -622,7 +622,7 @@ TEST_P(TrajectoryBlenderTransitionWindowTest, testNonLinearBlending)
     trajectory_msgs::JointTrajectory joint_traj;
     const double duration {lin_traj->getWayPointDurationFromStart(lin_traj->getWayPointCount())};
     // time from start zero does not work
-    const double time_from_start_offset {TIME_SCALING_FACTOR*lin_traj->getWayPointDurations().back()};
+    const double time_from_start_offset {time_scaling_factor*lin_traj->getWayPointDurations().back()};
 
     // generate modified cartesian trajectory
     for (size_t i = 0; i < lin_traj->getWayPointCount(); ++i)
@@ -637,14 +637,14 @@ TEST_P(TrajectoryBlenderTransitionWindowTest, testNonLinearBlending)
       tf::poseEigenToMsg(eigen_pose, waypoint_pose);
 
       // add scaled sine function
-      waypoint_pose.position.x += SINE_SCALING_FACTOR*sin(sine_arg);
-      waypoint_pose.position.y += SINE_SCALING_FACTOR*sin(sine_arg);
-      waypoint_pose.position.z += SINE_SCALING_FACTOR*sin(sine_arg);
+      waypoint_pose.position.x += sine_scaling_factor*sin(sine_arg);
+      waypoint_pose.position.y += sine_scaling_factor*sin(sine_arg);
+      waypoint_pose.position.z += sine_scaling_factor*sin(sine_arg);
 
       // add to trajectory
       waypoint.pose = waypoint_pose;
       waypoint.time_from_start = ros::Duration(time_from_start_offset
-                                               + TIME_SCALING_FACTOR*lin_traj->getWayPointDurationFromStart(i));
+                                               + time_scaling_factor*lin_traj->getWayPointDurationFromStart(i));
       cart_traj.points.push_back(waypoint);
     }
 

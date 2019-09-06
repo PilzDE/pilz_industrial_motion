@@ -82,7 +82,7 @@ public:
    * @return Contains the calculated/generated trajectories.
    */
   RobotTrajCont solve(const planning_scene::PlanningSceneConstPtr& planning_scene,
-                      planning_pipeline::PlanningPipelinePtr planning_pipeline,
+                      const planning_pipeline::PlanningPipelinePtr& planning_pipeline,
                       const pilz_msgs::MotionSequenceRequest& req_list);
 
 private:
@@ -110,7 +110,7 @@ private:
    * @return Container of generated trajectories.
    */
   MotionResponseCont solveSequenceItems(const planning_scene::PlanningSceneConstPtr& planning_scene,
-                                        planning_pipeline::PlanningPipelinePtr planning_pipeline,
+                                        const planning_pipeline::PlanningPipelinePtr& planning_pipeline,
                                         const pilz_msgs::MotionSequenceRequest &req_list) const;
 
   /**

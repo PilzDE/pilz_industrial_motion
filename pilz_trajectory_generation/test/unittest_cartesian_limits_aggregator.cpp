@@ -27,14 +27,6 @@
  */
 class CartesianLimitsAggregator : public ::testing::Test
 {
- protected:
-
-  virtual void SetUp()
-  {
-    return;
-  }
-
-  virtual void TearDown() {}
 };
 
 /**

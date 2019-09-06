@@ -52,11 +52,11 @@ public:
 
   JointConfiguration(const std::string& group_name,
                      const std::vector<double>& config,
-                     CreateJointNameFunc create_joint_name_func);
+                     CreateJointNameFunc&& create_joint_name_func);
 
   JointConfiguration(const std::string& group_name,
                      const std::vector<double>& config,
-                     moveit::core::RobotModelConstPtr robot_model);
+                     const moveit::core::RobotModelConstPtr& robot_model);
 
 
 public:

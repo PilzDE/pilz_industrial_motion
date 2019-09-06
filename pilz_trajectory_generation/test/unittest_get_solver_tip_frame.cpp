@@ -53,7 +53,7 @@ public:
 class GetSolverTipFrameTest : public testing::Test
 {
 protected:
-  virtual void SetUp();
+  void SetUp() override;
 
 protected:
   SolverMock solver_mock_;

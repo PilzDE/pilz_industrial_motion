@@ -143,7 +143,7 @@ void TrajectoryGeneratorPTP::planPTP(const std::map<std::string, double>& start_
       // make full synchronization
       // causes the program to terminate if acc_time<=0 or dec_time<=0 (should be prevented by goal_reached block above)
       // by using the most strict limit, the following should always return true
-      if (!velocity_profile.at(joint_name).SetProfileAllDurations(start_pos.at(joint_name), goal_pos.at(joint_name),
+      if (!velocity_profile.at(joint_name).setProfileAllDurations(start_pos.at(joint_name), goal_pos.at(joint_name),
                                                                   acc_time,const_time,dec_time))
         // LCOV_EXCL_START
       {
@@ -203,12 +203,11 @@ void TrajectoryGeneratorPTP::extractMotionPlanInfo(const planning_interface::Mot
 
   // extract goal
   info.goal_joint_position.clear();
-  if(req.goal_constraints.at(0).joint_constraints.size() != 0)
+  if(!req.goal_constraints.at(0).joint_constraints.empty())
   {
-    for(std::size_t i=0; i<req.goal_constraints.at(0).joint_constraints.size(); ++i)
+    for(const auto& joint_constraint : req.goal_constraints.at(0).joint_constraints)
     {
-      info.goal_joint_position[req.goal_constraints.at(0).joint_constraints[i].joint_name] =
-          req.goal_constraints.at(0).joint_constraints[i].position;
+      info.goal_joint_position[joint_constraint.joint_name] = joint_constraint.position;
     }
   }
   // slove the ik

@@ -31,7 +31,7 @@ class CommandPlannerTest : public testing::TestWithParam<std::string>
 {
 protected:
 
-  virtual void SetUp()
+  void SetUp() override
   {
     createPlannerInstance();
   }
@@ -118,7 +118,7 @@ TEST_P(CommandPlannerTest, ObtainLoadedPlanningAlgorithms)
 
   // Collect the algorithms, check for uniqueness
   std::set<std::string> algs_set;
-  for(auto alg : algs)
+  for(const auto& alg : algs)
   {
     algs_set.insert(alg);
   }

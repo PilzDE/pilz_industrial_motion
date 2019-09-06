@@ -42,7 +42,7 @@ protected:
    * Checks if planning context loader was loaded properly are performed.
    * Exceptions will cause test failure.
    */
-  virtual void SetUp()
+  void SetUp() override
   {
     ASSERT_FALSE(robot_model_ == nullptr) << "There is no robot model!";
 
@@ -72,7 +72,7 @@ protected:
     return;
   }
 
-  virtual void TearDown() {
+  void TearDown() override {
     if(planning_context_loader_class_loader_) {
       planning_context_loader_class_loader_->unloadLibraryForClass(GetParam().front());
     }
