@@ -122,7 +122,7 @@ void VelocityProfile_ATrap::SetProfileDuration(double pos1, double pos2, double 
   t_c_/=ratio;
 }
 
-bool VelocityProfile_ATrap::SetProfileAllDurations(double pos1, double pos2, double duration1,
+bool VelocityProfile_ATrap::setProfileAllDurations(double pos1, double pos2, double duration1,
                                                   double duration2, double duration3)
 {
   // compute the fastest case
@@ -178,7 +178,7 @@ bool VelocityProfile_ATrap::SetProfileAllDurations(double pos1, double pos2, dou
   }
 }
 
-bool VelocityProfile_ATrap::SetProfileStartVelocity(double pos1, double pos2, double vel1)
+bool VelocityProfile_ATrap::setProfileStartVelocity(double pos1, double pos2, double vel1)
 {
   if(vel1 == 0)
   {
@@ -356,7 +356,7 @@ double VelocityProfile_ATrap::Acc(double time) const
 KDL::VelocityProfile* VelocityProfile_ATrap::Clone() const
 {
   VelocityProfile_ATrap* trap = new VelocityProfile_ATrap(max_vel_, max_acc_, max_dec_);
-  trap->SetProfileAllDurations(this->start_pos_, this->end_pos_, this->t_a_, this->t_b_, this->t_c_);
+  trap->setProfileAllDurations(this->start_pos_, this->end_pos_, this->t_a_, this->t_b_, this->t_c_);
   return trap;
 }
 

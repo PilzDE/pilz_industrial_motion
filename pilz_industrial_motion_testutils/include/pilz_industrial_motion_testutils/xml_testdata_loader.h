@@ -105,7 +105,7 @@ class XmlTestdataLoader : public TestdataLoader
 public:
   XmlTestdataLoader(const std::string &path_filename);
   XmlTestdataLoader(const std::string &path_filename,
-                    moveit::core::RobotModelConstPtr robot_model);
+                    const moveit::core::RobotModelConstPtr& robot_model);
   ~XmlTestdataLoader();
 
 public:
@@ -168,7 +168,7 @@ private:
    */
   inline static std::vector<double> strVec2doubleVec(std::vector<std::string> &strVec);
 
-private:
+public:
   /**
    * @brief Abstract base class providing a GENERIC getter-function signature
    * which can be used to load DIFFERENT command types (like Ptp, Lin, etc.)

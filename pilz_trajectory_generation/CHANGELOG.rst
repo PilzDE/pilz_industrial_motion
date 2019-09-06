@@ -2,6 +2,10 @@
 Changelog for package pilz_trajectory_generation
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
+Forthcoming
+-----------
+* Fix clang-tidy issues
+
 0.3.9 (2019-09-05)
 ------------------
 * Adapt to changes in pilz_robots

@@ -144,7 +144,7 @@ XmlTestdataLoader::XmlTestdataLoader(const std::string &path_filename)
 }
 
 XmlTestdataLoader::XmlTestdataLoader(const std::string &path_filename,
-                                     moveit::core::RobotModelConstPtr robot_model)
+                                     const moveit::core::RobotModelConstPtr& robot_model)
   : XmlTestdataLoader(path_filename)
 {
   setRobotModel(robot_model);
@@ -218,24 +218,23 @@ CartesianConfiguration XmlTestdataLoader::getPose(const std::string &pos_name,
     throw TestDataLoaderReadingException("No poses found.");
   }
   const auto& pose_tree {findNodeWithName(all_poses_tree, pos_name, POSE_STR).second};
-  const auto& xyzQuat_tree {findNodeWithName(pose_tree, group_name, XYZ_QUAT_STR, GROUP_NAME_PATH_STR).second};
-  const boost::property_tree::ptree& link_name_attr {xyzQuat_tree.get_child(LINK_NAME_PATH_STR, empty_tree_)};
+  const auto& xyz_quat_tree {findNodeWithName(pose_tree, group_name, XYZ_QUAT_STR, GROUP_NAME_PATH_STR).second};
+  const boost::property_tree::ptree& link_name_attr {xyz_quat_tree.get_child(LINK_NAME_PATH_STR, empty_tree_)};
   if (link_name_attr == empty_tree_)
   {
     throw TestDataLoaderReadingException("No link name found.");
   }
-  std::string link_name {link_name_attr.data()};
 
   // Get rid of things like "\n", etc.
-  std::string data {xyzQuat_tree.data()};
+  std::string data {xyz_quat_tree.data()};
   boost::trim(data);
 
-  std::vector<std::string> posOri_str;
-  boost::split(posOri_str, data, boost::is_any_of(" "));
-  CartesianConfiguration cart_config { CartesianConfiguration(group_name, link_name,
-                                                              strVec2doubleVec(posOri_str), robot_model_)};
+  std::vector<std::string> pos_ori_str;
+  boost::split(pos_ori_str, data, boost::is_any_of(" "));
+  CartesianConfiguration cart_config { CartesianConfiguration(group_name, link_name_attr.data(),
+                                                              strVec2doubleVec(pos_ori_str), robot_model_)};
 
-  const auto& seeds_tree {xyzQuat_tree.get_child(SEED_STR, empty_tree_)};
+  const auto& seeds_tree {xyz_quat_tree.get_child(SEED_STR, empty_tree_)};
   if (seeds_tree != empty_tree_)
   {
     cart_config.setSeed(getJoints(seeds_tree, group_name));
@@ -477,7 +476,7 @@ Sequence XmlTestdataLoader::getSequence(const std::string &cmd_name) const
       throw TestDataLoaderReadingException("Did not find name of sequence cmd");
     }
 
-    std::string cmd_name {cmd_name_attr.data()};
+    const std::string& cmd_name {cmd_name_attr.data()};
 
     // Get type of blend cmd
     const boost::property_tree::ptree& type_name_attr {seq_cmd.second.get_child(CMD_TYPE_PATH_STR, empty_tree_)};
@@ -485,7 +484,7 @@ Sequence XmlTestdataLoader::getSequence(const std::string &cmd_name) const
     {
       throw TestDataLoaderReadingException("Did not find type of sequence cmd \"" + cmd_name +  "\"");
     }
-    std::string cmd_type {type_name_attr.data()};
+    const std::string& cmd_type {type_name_attr.data()};
 
     // Get blend radius of blend cmd.
     double blend_radius {seq_cmd.second.get<double>(BLEND_RADIUS_PATH_STR, DEFAULT_BLEND_RADIUS)};

@@ -57,14 +57,14 @@ protected:
    * @brief Create test scenario for circ trajectory generator
    *
    */
-  virtual void SetUp();
+  void SetUp() override;
 
   void checkCircResult(const planning_interface::MotionPlanRequest &req,
                        const planning_interface::MotionPlanResponse& res);
 
   void getCircCenter(const planning_interface::MotionPlanRequest &req,
                      const planning_interface::MotionPlanResponse &res,
-                     Eigen::Vector3d &circCenter);
+                     Eigen::Vector3d &circ_center);
 
 protected:
   // ros stuff
@@ -141,14 +141,14 @@ void TrajectoryGeneratorCIRCTest::checkCircResult(const planning_interface::Moti
   EXPECT_EQ(req.path_constraints.position_constraints.at(0).constraint_region.primitive_poses.size(),1u);
 
   // Check that all point have the equal distance to the center
-  Eigen::Vector3d circCenter;
-  getCircCenter(req, res, circCenter);
+  Eigen::Vector3d circ_center;
+  getCircCenter(req, res, circ_center);
 
   for(std::size_t i = 0; i < res.trajectory_->getWayPointCount(); ++i )
   {
     Eigen::Affine3d waypoint_pose = res.trajectory_->getWayPointPtr(i)->getFrameTransform(target_link_);
-    EXPECT_NEAR((res.trajectory_->getFirstWayPointPtr()->getFrameTransform(target_link_).translation() - circCenter).norm(),
-                (circCenter - waypoint_pose.translation()).norm(), cartesian_position_tolerance_);
+    EXPECT_NEAR((res.trajectory_->getFirstWayPointPtr()->getFrameTransform(target_link_).translation() - circ_center).norm(),
+                (circ_center - waypoint_pose.translation()).norm(), cartesian_position_tolerance_);
   }
 
   // check translational and rotational paths
@@ -167,11 +167,11 @@ void TrajectoryGeneratorCIRCTest::checkCircResult(const planning_interface::Moti
 
 void TrajectoryGeneratorCIRCTest::getCircCenter(const planning_interface::MotionPlanRequest &req,
                                                 const planning_interface::MotionPlanResponse &res,
-                                                Eigen::Vector3d &circCenter)
+                                                Eigen::Vector3d &circ_center)
 {
   if(req.path_constraints.name == "center")
   {
-    tf::pointMsgToEigen(req.path_constraints.position_constraints.at(0).constraint_region.primitive_poses.at(0).position, circCenter);
+    tf::pointMsgToEigen(req.path_constraints.position_constraints.at(0).constraint_region.primitive_poses.at(0).position, circ_center);
   }
   else if(req.path_constraints.name == "interim")
   {
@@ -188,7 +188,7 @@ void TrajectoryGeneratorCIRCTest::getCircCenter(const planning_interface::Motion
 
     ASSERT_GT(w.norm(), 1e-8) << "Circle center not well defined for given start, interim and goal.";
 
-    circCenter = start + (u*t.dot(t)*u.dot(v) - t*u.dot(u)*t.dot(v)) * 0.5/pow(w.norm(),2);
+    circ_center = start + (u*t.dot(t)*u.dot(v) - t*u.dot(u)*t.dot(v)) * 0.5/pow(w.norm(),2);
   }
 }
 

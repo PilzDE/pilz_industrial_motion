@@ -60,7 +60,7 @@ using namespace pilz_industrial_motion_testutils;
 class IntegrationTestCommandPlanning : public ::testing::Test
 {
 protected:
-  virtual void SetUp();
+  void SetUp() override;
 
 protected:
   ros::NodeHandle ph_ {"~"};
@@ -494,7 +494,7 @@ TEST_F(IntegrationTestCommandPlanning, CircCartCenterCart)
 int main(int argc, char **argv)
 {
   ros::init(argc, argv, "integrationtest_command_planning");
-  ros::NodeHandle nh(); // For output via ROS_ERROR etc during test
+  ros::NodeHandle nh; // For output via ROS_ERROR etc during test
 
   testing::InitGoogleTest(&argc, argv);
   return RUN_ALL_TESTS();

@@ -50,7 +50,7 @@ protected:
    * @brief Create test fixture for ptp trajectory generator
    *
    */
-  virtual void SetUp();
+  void SetUp() override;
 
   /**
    * @brief check the resulted joint trajectory
@@ -359,7 +359,7 @@ TEST_P(TrajectoryGeneratorPTPTest, testCartesianGoal)
 
   moveit_msgs::MotionPlanResponse res_msg;
   res.getMessage(res_msg);
-  if(res_msg.trajectory.joint_trajectory.points.size()>0)
+  if(!res_msg.trajectory.joint_trajectory.points.empty())
   {
     EXPECT_TRUE(checkTrajectory(res_msg.trajectory.joint_trajectory, req, planner_limits_.getJointLimitContainer()));
   }

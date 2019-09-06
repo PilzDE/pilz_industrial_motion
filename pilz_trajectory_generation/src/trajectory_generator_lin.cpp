@@ -52,7 +52,7 @@ void TrajectoryGeneratorLIN::extractMotionPlanInfo(const planning_interface::Mot
   std::string frame_id {robot_model_->getModelFrame()};
 
   // goal given in joint space
-  if(req.goal_constraints.front().joint_constraints.size() != 0)
+  if(!req.goal_constraints.front().joint_constraints.empty())
   {
     info.link_name = robot_model_->getJointModelGroup(req.group_name)->getSolverInstance()->getTipFrame();
 

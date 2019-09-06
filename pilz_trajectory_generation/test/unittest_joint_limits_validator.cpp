@@ -21,12 +21,8 @@
 
 #include "pilz_trajectory_generation/joint_limits_validator.h"
 
-class JointLimitsValidatorTest : public ::testing::Test {
- protected:
-
-  virtual void SetUp() {}
-
-  virtual void TearDown() {}
+class JointLimitsValidatorTest : public ::testing::Test
+{
 };
 
 /**

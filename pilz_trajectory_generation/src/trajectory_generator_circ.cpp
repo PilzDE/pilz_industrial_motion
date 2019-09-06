@@ -74,7 +74,7 @@ void TrajectoryGeneratorCIRC::extractMotionPlanInfo(const planning_interface::Mo
   std::string frame_id {robot_model_->getModelFrame()};
 
   // goal given in joint space
-  if(req.goal_constraints.front().joint_constraints.size() != 0)
+  if(!req.goal_constraints.front().joint_constraints.empty())
   {
     // TODO: link name from goal constraint and path constraint
     info.link_name = req.path_constraints.position_constraints.front().link_name;

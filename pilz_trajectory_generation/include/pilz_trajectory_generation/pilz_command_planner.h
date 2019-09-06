@@ -88,7 +88,7 @@ public:
    * @param planning_context_loader
    * @throw ContextLoaderRegistrationException if a loader with the same algorithm name is already registered
    */
-  void registerContextLoader(pilz::PlanningContextLoaderPtr planning_context_loader);
+  void registerContextLoader(const pilz::PlanningContextLoaderPtr& planning_context_loader);
 
 private:
 

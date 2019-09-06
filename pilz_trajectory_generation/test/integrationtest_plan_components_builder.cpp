@@ -38,7 +38,7 @@ using namespace pilz_trajectory_generation;
 class IntegrationTestPlanComponentBuilder : public testing::Test
 {
 protected:
-  virtual void SetUp();
+  void SetUp() override;
 
 protected:
   ros::NodeHandle ph_ {"~"};

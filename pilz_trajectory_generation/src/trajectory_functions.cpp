@@ -139,8 +139,8 @@ bool pilz::verifySampleJointLimits(const std::map<std::string, double> &position
                                    double duration_current,
                                    const pilz::JointLimitsContainer& joint_limits)
 {
-  const double EPSILON = 10e-6;
-  if(duration_current <= EPSILON)
+  const double epsilon = 10e-6;
+  if(duration_current <= epsilon)
   {
     ROS_ERROR("Sample duration too small, cannot compute the velocity");
     return false;
@@ -211,9 +211,9 @@ bool pilz::generateJointTrajectory(const moveit::core::RobotModelConstPtr &robot
   ros::Time generation_begin = ros::Time::now();
 
   // generate the time samples
-  const double EPSILON = 10e-06; // avoid adding the last time sample twice
+  const double epsilon = 10e-06; // avoid adding the last time sample twice
   std::vector<double> time_samples;
-  for(double t_sample=0.0; t_sample < trajectory.Duration() - EPSILON; t_sample+=sampling_time)
+  for(double t_sample=0.0; t_sample < trajectory.Duration() - epsilon; t_sample+=sampling_time)
   {
     time_samples.push_back(t_sample);
   }
@@ -424,19 +424,19 @@ bool pilz::generateJointTrajectory(const moveit::core::RobotModelConstPtr &robot
 
 bool pilz::determineAndCheckSamplingTime(const robot_trajectory::RobotTrajectoryPtr& first_trajectory,
                                          const robot_trajectory::RobotTrajectoryPtr& second_trajectory,
-                                         double EPSILON,
+                                         double epsilon,
                                          double& sampling_time)
 {
   // The last sample is ignored because it is allowed to violate the sampling time.
-  std::size_t N1 = first_trajectory->getWayPointCount() - 1;
-  std::size_t N2 = second_trajectory->getWayPointCount() - 1;
-  if ( (N1 < 2) && (N2 < 2) )
+  std::size_t n1 = first_trajectory->getWayPointCount() - 1;
+  std::size_t n2 = second_trajectory->getWayPointCount() - 1;
+  if ( (n1 < 2) && (n2 < 2) )
   {
     ROS_ERROR_STREAM("Both trajectories do not have enough points to determine sampling time.");
     return false;
   }
 
-  if (N1 >= 2)
+  if (n1 >= 2)
   {
     sampling_time = first_trajectory->getWayPointDurationFromPrevious(1);
   }
@@ -445,11 +445,11 @@ bool pilz::determineAndCheckSamplingTime(const robot_trajectory::RobotTrajectory
     sampling_time = second_trajectory->getWayPointDurationFromPrevious(1);
   }
 
-  for(std::size_t i = 1; i < std::max(N1, N2); ++i)
+  for(std::size_t i = 1; i < std::max(n1, n2); ++i)
   {
-    if (i < N1)
+    if (i < n1)
     {
-      if ( fabs(sampling_time - first_trajectory->getWayPointDurationFromPrevious(i)) > EPSILON )
+      if ( fabs(sampling_time - first_trajectory->getWayPointDurationFromPrevious(i)) > epsilon )
       {
         ROS_ERROR_STREAM("First trajectory violates sampline time " << sampling_time
                          << " between points "
@@ -458,9 +458,9 @@ bool pilz::determineAndCheckSamplingTime(const robot_trajectory::RobotTrajectory
       }
     }
 
-    if (i < N2)
+    if (i < n2)
     {
-      if ( fabs(sampling_time - second_trajectory->getWayPointDurationFromPrevious(i)) > EPSILON )
+      if ( fabs(sampling_time - second_trajectory->getWayPointDurationFromPrevious(i)) > epsilon )
       {
         ROS_ERROR_STREAM("Second trajectory violates sampline time " << sampling_time << " between points "
                          << (i-1) << "and " << i << " (indices).");

@@ -23,12 +23,8 @@
 #include "pilz_extensions/joint_limits_extension.h"
 #include "pilz_extensions/joint_limits_interface_extension.h"
 
-class JointLimitTest : public ::testing::Test {
- protected:
-
-  virtual void SetUp() {}
-
-  virtual void TearDown() {}
+class JointLimitTest : public ::testing::Test
+{
 };
 
 /**

@@ -47,7 +47,6 @@
 #define _USE_MATH_DEFINES
 
 static constexpr double EPSILON {1.0e-6};
-static constexpr double IK_EPSILON {1.0e-4};
 static constexpr double IK_SEED_OFFSET {0.1};
 static constexpr double L0 {0.2604}; // Height of foot
 static constexpr double L1 {0.3500}; // Height of first connector
@@ -75,7 +74,7 @@ protected:
    * @brief Create test scenario for trajectory functions
    *
    */
-  virtual void SetUp();
+  void SetUp() override;
 
   /**
    * @brief check if two transformations are close
@@ -212,7 +211,7 @@ TEST_P(TrajectoryFunctionsTestFlangeAndGripper, testIKSolver)
     std::vector<geometry_msgs::Pose> ik_poses;
     ik_poses.push_back(pose_expect);
     std::vector<double> ik_seed, ik_expect, ik_actual;
-    for(auto joint_name : jmg->getActiveJointModelNames())
+    for(const auto& joint_name : jmg->getActiveJointModelNames())
     {
       ik_expect.push_back(rstate.getVariablePosition(joint_name));
       if(rstate.getVariablePosition(joint_name)>0)
@@ -325,7 +324,7 @@ TEST_P(TrajectoryFunctionsTestFlangeAndGripper, testComputePoseIK)
 
     // copy the random state and set ik seed
     std::map<std::string, double> ik_seed, ik_expect;
-    for(auto joint_name : robot_model_->getJointModelGroup(planning_group_)->getActiveJointModelNames())
+    for(const auto& joint_name : robot_model_->getJointModelGroup(planning_group_)->getActiveJointModelNames())
     {
       ik_expect[joint_name] = rstate.getVariablePosition(joint_name);
       if(rstate.getVariablePosition(joint_name)>0)
@@ -525,7 +524,7 @@ TEST_P(TrajectoryFunctionsTestFlangeAndGripper, testComputePoseIKSelfCollisionFo
 
   // create seed
   std::map<std::string, double> ik_seed;
-  for (auto joint_name: jmg->getActiveJointModelNames())
+  for (const auto& joint_name: jmg->getActiveJointModelNames())
   {
     ik_seed[joint_name] = 0;
   }
@@ -572,7 +571,7 @@ TEST_P(TrajectoryFunctionsTestFlangeAndGripper, testComputePoseIKSelfCollisionFo
 TEST_P(TrajectoryFunctionsTestFlangeAndGripper, testVerifySampleJointLimitsWithSmallDuration)
 {
   const std::map<std::string, double> position_last, velocity_last, position_current;
-  double duration_last;
+  double duration_last{0.0};
   const pilz::JointLimitsContainer joint_limits;
 
   double duration_current = 10e-7;
@@ -598,8 +597,8 @@ TEST_P(TrajectoryFunctionsTestFlangeAndGripper, testVerifySampleJointLimitsVeloc
   std::map<std::string, double> position_last { {test_joint_name, 2.0} };
   std::map<std::string, double> position_current { {test_joint_name, 10.0} };
   std::map<std::string, double> velocity_last;
-  double duration_current = 1.0;
-  double duration_last;
+  double duration_current {1.0};
+  double duration_last {0.0};
   pilz::JointLimitsContainer joint_limits;
 
   pilz_extensions::JointLimit test_joint_limits;
@@ -731,13 +730,13 @@ TEST_P(TrajectoryFunctionsTestFlangeAndGripper, testGenerateJointTrajectoryWithI
 
   std::map<std::string, double> initial_joint_velocity;
 
-  pilz::CartesianTrajectory cartTraj;
-  cartTraj.group_name = group_name;
-  cartTraj.link_name = tcp_link_;
+  pilz::CartesianTrajectory cart_traj;
+  cart_traj.group_name = group_name;
+  cart_traj.link_name = tcp_link_;
   pilz::CartesianTrajectoryPoint cart_traj_point;
-  cartTraj.points.push_back(cart_traj_point);
+  cart_traj.points.push_back(cart_traj_point);
 
-  EXPECT_FALSE( pilz::generateJointTrajectory(robot_model_, joint_limits, cartTraj, group_name, tcp_link_,
+  EXPECT_FALSE( pilz::generateJointTrajectory(robot_model_, joint_limits, cart_traj, group_name, tcp_link_,
                                               initial_joint_position, initial_joint_velocity, joint_trajectory,
                                               error_code, check_self_collision) );
 

@@ -2,6 +2,10 @@
 Changelog for package pilz_industrial_motion_testutils
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
+Forthcoming
+-----------
+* Fix clang-tidy issues
+
 0.3.9 (2019-09-05)
 ------------------
 

@@ -37,7 +37,7 @@ namespace pilz_trajectory_generation
 class GetSolverTipFrameIntegrationTest : public testing::Test
 {
 protected:
-  virtual void SetUp();
+  void SetUp() override;
 
 protected:
   robot_model::RobotModelConstPtr robot_model_ {
