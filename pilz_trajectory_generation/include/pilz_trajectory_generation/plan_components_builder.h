@@ -78,7 +78,7 @@ public:
    * @param blend_radius The blending radius between the previous and the
    * specified trajectory.
    */
-  void append(robot_trajectory::RobotTrajectoryPtr other, const double blend_radius);
+  void append(const robot_trajectory::RobotTrajectoryPtr& other, const double blend_radius);
 
   /**
    * @brief Clears the trajectory container under construction.
@@ -91,7 +91,7 @@ public:
   std::vector<robot_trajectory::RobotTrajectoryPtr> build() const;
 
 private:
-  void blend(robot_trajectory::RobotTrajectoryPtr other,
+  void blend(const robot_trajectory::RobotTrajectoryPtr& other,
              const double blend_radius);
 
 private:

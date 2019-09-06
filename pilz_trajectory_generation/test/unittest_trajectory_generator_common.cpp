@@ -53,10 +53,10 @@ class ValueTypeContainer
 {
 public:
   typedef T Type_;
-  static const int Value_ = N;
+  static const int VALUE = N;
 };
 template<typename T, int N>
-const int ValueTypeContainer<T, N>::Value_;
+const int ValueTypeContainer<T, N>::VALUE;
 
 typedef ValueTypeContainer<pilz::TrajectoryGeneratorPTP, 0> PTP_NO_GRIPPER;
 typedef ValueTypeContainer<pilz::TrajectoryGeneratorPTP, 1> PTP_WITH_GRIPPER;
@@ -81,7 +81,7 @@ template <typename T>
 class TrajectoryGeneratorCommonTest : public ::testing::Test {
 protected:
 
-  virtual void SetUp()
+  void SetUp() override
   {
     ASSERT_TRUE(ph_.getParam(PARAM_PLANNING_GROUP_NAME, planning_group_));
     ASSERT_TRUE(ph_.getParam(PARAM_TARGET_LINK_NAME, target_link_));
@@ -89,7 +89,7 @@ protected:
     testutils::checkRobotModel(robot_model_, planning_group_, target_link_);
 
     // create the limits container
-    std::string robot_description_param = (!T::Value_ ? PARAM_MODEL_NO_GRIPPER_NAME: PARAM_MODEL_WITH_GRIPPER_NAME);
+    std::string robot_description_param = (!T::VALUE ? PARAM_MODEL_NO_GRIPPER_NAME: PARAM_MODEL_WITH_GRIPPER_NAME);
     pilz::JointLimitsContainer joint_limits =
         pilz::JointLimitsAggregator::getAggregatedLimits(ros::NodeHandle(robot_description_param + "_planning"),
                                                          robot_model_->getActiveJointModels());
@@ -127,7 +127,7 @@ protected:
   // ros stuff
   ros::NodeHandle ph_ {"~"};
   robot_model::RobotModelConstPtr robot_model_ {
-    robot_model_loader::RobotModelLoader(!T::Value_ ? PARAM_MODEL_NO_GRIPPER_NAME: PARAM_MODEL_WITH_GRIPPER_NAME).getModel()};
+    robot_model_loader::RobotModelLoader(!T::VALUE ? PARAM_MODEL_NO_GRIPPER_NAME: PARAM_MODEL_WITH_GRIPPER_NAME).getModel()};
 
   // trajectory generator
   std::unique_ptr<pilz::TrajectoryGenerator> trajectory_generator_;

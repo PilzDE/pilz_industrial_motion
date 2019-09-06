@@ -77,9 +77,9 @@ TEST(CommandPlannerTestDirect, FailOnLoadContext)
       return "Test_Algorithm";
     }
 
-    virtual bool loadContext(planning_interface::PlanningContextPtr& ,
-                     const std::string& ,
-                     const std::string& ) const override
+    bool loadContext(planning_interface::PlanningContextPtr& /* planning_context */,
+                     const std::string& /* name */,
+                     const std::string& /* group */) const override
     {
       // Mock behaviour: Cannot load planning context.
       return false;

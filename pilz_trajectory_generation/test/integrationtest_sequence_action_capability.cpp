@@ -64,8 +64,7 @@ using namespace pilz_industrial_motion_testutils;
 class IntegrationTestSequenceAction : public testing::Test, public testing::AsyncTest
 {
 protected:
-  virtual void SetUp();
-  virtual void TearDown() {}
+  void SetUp() override;
 
 public:
   MOCK_METHOD0(active_callback, void());
@@ -107,15 +106,15 @@ void IntegrationTestSequenceAction::SetUp()
 
   // move to default position
   start_config = data_loader_->getJoints("ZeroPose", group_name_);
-  robot_state::RobotState rState {start_config.toRobotState()};
+  robot_state::RobotState robot_state {start_config.toRobotState()};
 
   move_group_ = std::make_shared<moveit::planning_interface::MoveGroupInterface>(start_config.getGroupName());
   move_group_->setPlannerId("PTP");
   move_group_->setGoalTolerance(joint_position_tolerance_);
-  move_group_->setJointValueTarget(rState);
+  move_group_->setJointValueTarget(robot_state);
   move_group_->move();
 
-  ASSERT_TRUE(isAtExpectedPosition(rState, *(move_group_->getCurrentState()), joint_position_tolerance_));
+  ASSERT_TRUE(isAtExpectedPosition(robot_state, *(move_group_->getCurrentState()), joint_position_tolerance_));
 }
 
 /**
@@ -551,8 +550,8 @@ TEST_F(IntegrationTestSequenceAction, TestLargeRequest)
   pilz_msgs::MotionSequenceRequest req {seq.toRequest()};
   // Create large request by making copies of the original sequence commands
   // and adding them to the end of the original sequence.
-  size_t N {req.items.size()};
-  for(size_t i = 0; i<N; ++i)
+  size_t n {req.items.size()};
+  for(size_t i = 0; i<n; ++i)
   {
     pilz_msgs::MotionSequenceItem item {req.items.at(i)};
     if (i == 0)
@@ -632,10 +631,10 @@ TEST_F(IntegrationTestSequenceAction, TestComplexSequenceWithBlending)
 int main(int argc, char **argv)
 {
   ros::init(argc, argv, "integrationtest_sequence_action_capability");
-  ros::NodeHandle nh();
+  ros::NodeHandle nh;
 
-  ros::AsyncSpinner spinner_ {1};
-  spinner_.start();
+  ros::AsyncSpinner spinner {1};
+  spinner.start();
 
   testing::InitGoogleTest(&argc, argv);
   return RUN_ALL_TESTS();

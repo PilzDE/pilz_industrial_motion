@@ -59,7 +59,7 @@ CommandListManager::CommandListManager(const ros::NodeHandle &nh, const moveit::
 }
 
 RobotTrajCont CommandListManager::solve(const planning_scene::PlanningSceneConstPtr& planning_scene,
-                                        planning_pipeline::PlanningPipelinePtr planning_pipeline,
+                                        const planning_pipeline::PlanningPipelinePtr& planning_pipeline,
                                         const pilz_msgs::MotionSequenceRequest& req_list)
 {
   if(req_list.items.empty())
@@ -150,10 +150,10 @@ void CommandListManager::setStartState(const MotionResponseCont &motion_plan_res
                                        const std::string &group_name,
                                        moveit_msgs::RobotState& start_state)
 {
-  RobotState_OptRef robStateOpt {getPreviousEndState(motion_plan_responses, group_name)};
-  if (robStateOpt)
+  RobotState_OptRef rob_state_op {getPreviousEndState(motion_plan_responses, group_name)};
+  if (rob_state_op)
   {
-    moveit::core::robotStateToRobotStateMsg(robStateOpt.value(), start_state);
+    moveit::core::robotStateToRobotStateMsg(rob_state_op.value(), start_state);
   }
 }
 
@@ -204,7 +204,7 @@ CommandListManager::RadiiCont CommandListManager::extractBlendRadii(const moveit
 
 CommandListManager::MotionResponseCont CommandListManager::solveSequenceItems(
     const planning_scene::PlanningSceneConstPtr& planning_scene,
-    planning_pipeline::PlanningPipelinePtr planning_pipeline,
+    const planning_pipeline::PlanningPipelinePtr& planning_pipeline,
     const pilz_msgs::MotionSequenceRequest &req_list) const
 {
   MotionResponseCont motion_plan_responses;

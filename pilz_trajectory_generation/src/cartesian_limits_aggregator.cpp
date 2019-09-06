@@ -19,54 +19,54 @@
 
 #include "pilz_trajectory_generation/cartesian_limits_aggregator.h"
 
-static const std::string param_cartesian_limits_ns = "cartesian_limits";
+static const std::string PARAM_CARTESIAN_LIMITS_NS = "cartesian_limits";
 
-static const std::string param_max_trans_vel = "max_trans_vel";
-static const std::string param_max_trans_acc = "max_trans_acc";
-static const std::string param_max_trans_dec = "max_trans_dec";
-static const std::string param_max_rot_vel = "max_rot_vel";
-static const std::string param_max_rot_acc = "max_rot_acc";
-static const std::string param_max_rot_dec = "max_rot_dec";
+static const std::string PARAM_MAX_TRANS_VEL = "max_trans_vel";
+static const std::string PARAM_MAX_TRANS_ACC = "max_trans_acc";
+static const std::string PARAM_MAX_TRANS_DEC = "max_trans_dec";
+static const std::string PARAM_MAX_ROT_VEL = "max_rot_vel";
+static const std::string PARAM_MAX_ROT_ACC = "max_rot_acc";
+static const std::string PARAM_MAX_ROT_DEC = "max_rot_dec";
 
 pilz::CartesianLimit pilz::CartesianLimitsAggregator::getAggregatedLimits(const ros::NodeHandle& nh)
 {
 
-  std::string param_prefix = param_cartesian_limits_ns + "/";
+  std::string param_prefix = PARAM_CARTESIAN_LIMITS_NS + "/";
 
   pilz::CartesianLimit cartesian_limit;
 
   // translational velocity
   double max_trans_vel;
-  if(nh.getParam(param_prefix + param_max_trans_vel, max_trans_vel))
+  if(nh.getParam(param_prefix + PARAM_MAX_TRANS_VEL, max_trans_vel))
   {
     cartesian_limit.setMaxTranslationalVelocity(max_trans_vel);
   }
 
   // translational acceleration
   double max_trans_acc;
-  if(nh.getParam(param_prefix + param_max_trans_acc, max_trans_acc))
+  if(nh.getParam(param_prefix + PARAM_MAX_TRANS_ACC, max_trans_acc))
   {
     cartesian_limit.setMaxTranslationalAcceleration(max_trans_acc);
   }
 
   // translational deceleration
   double max_trans_dec;
-  if(nh.getParam(param_prefix + param_max_trans_dec, max_trans_dec))
+  if(nh.getParam(param_prefix + PARAM_MAX_TRANS_DEC, max_trans_dec))
   {
     cartesian_limit.setMaxTranslationalDeceleration(max_trans_dec);
   }
 
   // rotational velocity
   double max_rot_vel;
-  if(nh.getParam(param_prefix + param_max_rot_vel, max_rot_vel))
+  if(nh.getParam(param_prefix + PARAM_MAX_ROT_VEL, max_rot_vel))
   {
     cartesian_limit.setMaxRotationalVelocity(max_rot_vel);
   }
 
   // rotational acceleration + deceleration deprecated
   // LCOV_EXCL_START
-  if(nh.hasParam(param_prefix + param_max_rot_acc)
-     || nh.hasParam(param_prefix + param_max_rot_dec))
+  if(nh.hasParam(param_prefix + PARAM_MAX_ROT_ACC)
+     || nh.hasParam(param_prefix + PARAM_MAX_ROT_DEC))
   {
     ROS_WARN_STREAM("Ignoring cartesian limits parameters for rotational acceleration / deceleration;"
                     << "these parameters are deprecated and are automatically calculated from"

@@ -33,7 +33,7 @@ RobotConfiguration::RobotConfiguration(const std::string& group_name)
 {}
 
 RobotConfiguration::RobotConfiguration(const std::string& group_name,
-                                       moveit::core::RobotModelConstPtr robot_model)
+                                       const moveit::core::RobotModelConstPtr& robot_model)
   : RobotStateMsgConvertible()
   , GoalConstraintMsgConvertible()
   , group_name_(group_name)

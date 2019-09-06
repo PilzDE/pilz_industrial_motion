@@ -34,7 +34,7 @@ class JointLimitsAggregator : public ::testing::Test
 {
  protected:
 
-  virtual void SetUp()
+  void SetUp() override
   {
     ros::NodeHandle node_handle("~");
 
@@ -45,8 +45,6 @@ class JointLimitsAggregator : public ::testing::Test
 
     return;
   }
-
-  virtual void TearDown() {}
 
   /// The robot model loader
   robot_model_loader::RobotModelLoaderPtr model_loader_;
