@@ -19,6 +19,7 @@
   <url type="repository">https://github.com/PilzDE/pilz_industrial_motion</url>
 
   <build_depend>clang-tidy</build_depend>
+  <build_depend>libclang-dev</build_depend>
   <build_depend>roscpp</build_depend>
 
   <depend>joint_limits_interface</depend>

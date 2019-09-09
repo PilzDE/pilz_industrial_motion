@@ -17,6 +17,7 @@
 
   <build_depend>eigen_conversions</build_depend>
   <build_depend>clang-tidy</build_depend>
+  <build_depend>libclang-dev</build_depend>
   <build_depend>moveit_core</build_depend>
   <build_depend>moveit_msgs</build_depend>
   <build_depend>pilz_msgs</build_depend>
