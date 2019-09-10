@@ -17,8 +17,6 @@
 
   <buildtool_depend>catkin</buildtool_depend>
 
-  <build_depend>clang-tidy</build_depend>
-
   <depend>orocos_kdl</depend>
   <depend>roscpp</depend>
   <depend>moveit_msgs</depend>

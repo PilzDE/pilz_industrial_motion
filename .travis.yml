@@ -23,6 +23,7 @@ env:
     - ROS_DISTRO="kinetic" 
     - CATKIN_LINT=true
     - CATKIN_LINT_ARGS='--strict'
+    - ADDITIONAL_DEBS="clang-tidy libclang-dev"
   matrix:
     - ROS_REPO=ros
     - ROS_REPO=ros-shadow-fixed
