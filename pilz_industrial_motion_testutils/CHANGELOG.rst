@@ -2,8 +2,8 @@
 Changelog for package pilz_industrial_motion_testutils
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
-Forthcoming
------------
+0.4.7 (2019-09-10)
+------------------
 * Fix clang-tidy issues
 * integrate clang-tidy via CMake flag
 * Contributors: Pilz GmbH and Co. KG
