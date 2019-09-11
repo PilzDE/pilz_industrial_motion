@@ -347,8 +347,8 @@ bool checkThatPointsInRadius(const std::string &link_name,
  * @param v
  * @param w
  */
-void computeCartVelocity(const Eigen::Affine3d pose_1,
-                         const Eigen::Affine3d pose_2,
+void computeCartVelocity(const Eigen::Affine3d& pose_1,
+                         const Eigen::Affine3d& pose_2,
                          double duration,
                          Eigen::Vector3d& v,
                          Eigen::Vector3d& w);
