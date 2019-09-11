@@ -2,8 +2,8 @@
 Changelog for package pilz_extensions
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
-Forthcoming
------------
+0.3.10 (2019-09-11)
+-------------------
 * Fix clang-tidy issues
 * integrate clang-tidy via CMake flag
 * Contributors: Pilz GmbH and Co. KG
