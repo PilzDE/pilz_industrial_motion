@@ -29,7 +29,7 @@ std::vector<robot_trajectory::RobotTrajectoryPtr> PlanComponentsBuilder::build()
   std::vector<robot_trajectory::RobotTrajectoryPtr> res_vec {traj_cont_};
   if (traj_tail_)
   {
-    assert(res_vec.size() > 0);
+    assert(!res_vec.empty());
     appendWithStrictTimeIncrease(*(res_vec.back()), *traj_tail_);
   }
   return res_vec;
@@ -51,7 +51,7 @@ void PlanComponentsBuilder::appendWithStrictTimeIncrease(robot_trajectory::Robot
   }
 }
 
-void PlanComponentsBuilder::blend(robot_trajectory::RobotTrajectoryPtr other,
+void PlanComponentsBuilder::blend(const robot_trajectory::RobotTrajectoryPtr& other,
                                   const double blend_radius)
 {
   if (!blender_)
@@ -82,7 +82,7 @@ void PlanComponentsBuilder::blend(robot_trajectory::RobotTrajectoryPtr other,
   traj_tail_ = blend_response.second_trajectory; // first for next blending segment
 }
 
-void PlanComponentsBuilder::append(robot_trajectory::RobotTrajectoryPtr other,
+void PlanComponentsBuilder::append(const robot_trajectory::RobotTrajectoryPtr& other,
                                    const double blend_radius)
 {
   if (!model_)

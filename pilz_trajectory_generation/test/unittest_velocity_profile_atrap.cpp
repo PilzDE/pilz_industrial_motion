@@ -167,7 +167,7 @@ TEST(ATrapTest, Test_SetProfile4)
  *
  * Test Sequence:
  *   1. Generate two profiles with same specifica
- *   2. Set double epsilon as duration of the first
+ *   2. Set double EPSILON as duration of the first
  *   3. Set the resulting duration as the duration of the second trajectory
  *
  * Expected Results:
@@ -189,17 +189,17 @@ TEST(ATrapTest, Test_SetProfileToLowDuration)
 }
 
 /**
- * @brief Define Profile with SetProfileAllDurations with to low duration
+ * @brief Define Profile with setProfileAllDurations with to low duration
  *
  * Test Sequence:
  *    1. Define a profile with SetProfile(double, double), this will yield the fastest duration
- *    2. Try to define a profile with SetProfileAllDurations with a faster combination of durations
+ *    2. Try to define a profile with setProfileAllDurations with a faster combination of durations
  *
  * Expected Results:
  *    1.
  *    2. Both trajectories should be equal
  */
-TEST(ATrapTest, Test_SetProfileAllDurationsToLowDuration)
+TEST(ATrapTest, Test_setProfileAllDurationsToLowDuration)
 {
   pilz::VelocityProfile_ATrap vp1 = pilz::VelocityProfile_ATrap(4,2,1);
   pilz::VelocityProfile_ATrap vp2 = vp1;
@@ -208,17 +208,17 @@ TEST(ATrapTest, Test_SetProfileAllDurationsToLowDuration)
   double fastest_duration = vp1.Duration();
 
   // Trigger Duration()>(3*fastest_duration/4)
-  vp2.SetProfileAllDurations(3, 35, fastest_duration/4, fastest_duration/4, fastest_duration/4);
+  vp2.setProfileAllDurations(3, 35, fastest_duration/4, fastest_duration/4, fastest_duration/4);
 
   EXPECT_TRUE(vp1 == vp2) << "Not equal! Profile 1: \n" << vp1 << "\n Profile 2: " << vp2;
 }
 
 /**
- * @brief Define Profile with SetProfileStartVelocity with zero velocity
+ * @brief Define Profile with setProfileStartVelocity with zero velocity
  *
  * Test Sequence:
  *    1. Define a profile with SetProfile(double, double)
- *    2. Try to define a profile with SetProfileStartVelocity with zero velocity
+ *    2. Try to define a profile with setProfileStartVelocity with zero velocity
  *
  * Expected Results:
  *    1.
@@ -231,7 +231,7 @@ TEST(ATrapTest, Test_SetProfileZeroStartVelocity)
 
   vp1.SetProfile(1, 2);
 
-  vp2.SetProfileStartVelocity(1, 2, 0); // <-- Set zero velocity
+  vp2.setProfileStartVelocity(1, 2, 0); // <-- Set zero velocity
   EXPECT_TRUE(vp1 == vp2) << "Not equal! Profile 1: \n" << vp1 << "\n Profile 2: " << vp2;
 }
 
@@ -282,12 +282,12 @@ TEST(ATrapTest, Test_SetProfileDuration)
 
 }
 
-TEST(ATrapTest, Test_SetProfileAllDurations1)
+TEST(ATrapTest, Test_setProfileAllDurations1)
 {
   pilz::VelocityProfile_ATrap vp = pilz::VelocityProfile_ATrap(4,2,1);
 
   // set durations
-  EXPECT_TRUE(vp.SetProfileAllDurations(3, 35, 3.0, 4.0, 5.0));
+  EXPECT_TRUE(vp.setProfileAllDurations(3, 35, 3.0, 4.0, 5.0));
 
   EXPECT_NEAR(vp.Duration(), 12.0, EPSILON);
 
@@ -328,27 +328,27 @@ TEST(ATrapTest, Test_SetProfileAllDurations1)
   EXPECT_NEAR(vp.Acc(13), 0.0, EPSILON);
 }
 
-TEST(ATrapTest, Test_SetProfileAllDurations2)
+TEST(ATrapTest, Test_setProfileAllDurations2)
 {
   pilz::VelocityProfile_ATrap vp = pilz::VelocityProfile_ATrap(4,2,1);
 
   // invalid maximal velocity
-  EXPECT_FALSE(vp.SetProfileAllDurations(3, 35, 3.0, 3.0, 5.0));
+  EXPECT_FALSE(vp.setProfileAllDurations(3, 35, 3.0, 3.0, 5.0));
   // invalid acceleration
-  EXPECT_FALSE(vp.SetProfileAllDurations(3, 35, 1.0, 4.0, 7.0));
+  EXPECT_FALSE(vp.setProfileAllDurations(3, 35, 1.0, 4.0, 7.0));
   // invalid deceleration
-  EXPECT_FALSE(vp.SetProfileAllDurations(3, 35, 7.0, 4.0, 1.0));
+  EXPECT_FALSE(vp.setProfileAllDurations(3, 35, 7.0, 4.0, 1.0));
 }
 
-TEST(ATrapTest, Test_SetProfileStartVelocity1)
+TEST(ATrapTest, Test_setProfileStartVelocity1)
 {
   pilz::VelocityProfile_ATrap vp = pilz::VelocityProfile_ATrap(4,2,1);
 
   //invalide cases
-  EXPECT_FALSE(vp.SetProfileStartVelocity(3.0,5.0,-1.0));
+  EXPECT_FALSE(vp.setProfileStartVelocity(3.0,5.0,-1.0));
 
   //only deceleration
-  vp.SetProfileStartVelocity(3.0,5.0,2.0);
+  vp.setProfileStartVelocity(3.0,5.0,2.0);
 
   EXPECT_NEAR(vp.Duration(), 2.0, EPSILON);
   EXPECT_NEAR(vp.FirstPhaseDuration(), 2.0, EPSILON);
@@ -376,12 +376,12 @@ TEST(ATrapTest, Test_SetProfileStartVelocity1)
   EXPECT_NEAR(vp.Acc(3), 0.0, EPSILON);
 }
 
-TEST(ATrapTest, Test_SetProfileStartVelocity2)
+TEST(ATrapTest, Test_setProfileStartVelocity2)
 {
   pilz::VelocityProfile_ATrap vp = pilz::VelocityProfile_ATrap(4,2,1);
 
   //deceleration, acceleration and deceleration
-  vp.SetProfileStartVelocity(3.0,4.0,2.0);
+  vp.setProfileStartVelocity(3.0,4.0,2.0);
   EXPECT_NEAR(vp.Duration(), 2.0 + 3*sqrt(1.0/3.0), EPSILON);
   EXPECT_NEAR(vp.FirstPhaseDuration(), 2.0, EPSILON);
   EXPECT_NEAR(vp.SecondPhaseDuration(), sqrt(1.0/3.0), EPSILON);
@@ -424,12 +424,12 @@ TEST(ATrapTest, Test_SetProfileStartVelocity2)
   EXPECT_NEAR(vp.Acc(5), 0.0, EPSILON);
 }
 
-TEST(ATrapTest, Test_SetProfileStartVelocity3)
+TEST(ATrapTest, Test_setProfileStartVelocity3)
 {
   pilz::VelocityProfile_ATrap vp = pilz::VelocityProfile_ATrap(4,2,1);
 
   //acceleration, deceleration
-  vp.SetProfileStartVelocity(3, 14, 2);
+  vp.setProfileStartVelocity(3, 14, 2);
   EXPECT_NEAR(vp.Duration(), 5.0, EPSILON);
   EXPECT_NEAR(vp.FirstPhaseDuration(), 1.0, EPSILON);
   EXPECT_NEAR(vp.SecondPhaseDuration(), 0.0, EPSILON);
@@ -464,12 +464,12 @@ TEST(ATrapTest, Test_SetProfileStartVelocity3)
   EXPECT_NEAR(vp.Acc(6), 0, EPSILON);
 }
 
-TEST(ATrapTest, Test_SetProfileStartVelocity4)
+TEST(ATrapTest, Test_setProfileStartVelocity4)
 {
   pilz::VelocityProfile_ATrap vp = pilz::VelocityProfile_ATrap(4,2,1);
 
   //acceleration, constant, deceleration
-  vp.SetProfileStartVelocity(3, 14, 2);
+  vp.setProfileStartVelocity(3, 14, 2);
   EXPECT_NEAR(vp.Duration(), 5.0, EPSILON);
   EXPECT_NEAR(vp.FirstPhaseDuration(), 1.0, EPSILON);
   EXPECT_NEAR(vp.SecondPhaseDuration(), 0.0, EPSILON);
@@ -504,12 +504,12 @@ TEST(ATrapTest, Test_SetProfileStartVelocity4)
   EXPECT_NEAR(vp.Acc(6), 0, EPSILON);
 }
 
-TEST(ATrapTest, Test_SetProfileStartVelocity5)
+TEST(ATrapTest, Test_setProfileStartVelocity5)
 {
   pilz::VelocityProfile_ATrap vp = pilz::VelocityProfile_ATrap(4,2,1);
 
   //acceleration, constant, deceleration
-  vp.SetProfileStartVelocity(3, 18, 2);
+  vp.setProfileStartVelocity(3, 18, 2);
   EXPECT_NEAR(vp.Duration(), 6.0, EPSILON);
   EXPECT_NEAR(vp.FirstPhaseDuration(), 1.0, EPSILON);
   EXPECT_NEAR(vp.SecondPhaseDuration(), 1.0, EPSILON);
@@ -549,12 +549,12 @@ TEST(ATrapTest, Test_SetProfileStartVelocity5)
 }
 
 
-TEST(ATrapTest, Test_SetProfileStartVelocity6)
+TEST(ATrapTest, Test_setProfileStartVelocity6)
 {
   pilz::VelocityProfile_ATrap vp = pilz::VelocityProfile_ATrap(4,2,1);
 
   //acceleration, constant, deceleration
-  vp.SetProfileStartVelocity(3, 15, 4);
+  vp.setProfileStartVelocity(3, 15, 4);
   EXPECT_NEAR(vp.Duration(), 5.0, EPSILON);
   EXPECT_NEAR(vp.FirstPhaseDuration(), 0.0, EPSILON);
   EXPECT_NEAR(vp.SecondPhaseDuration(), 1.0, EPSILON);
@@ -580,12 +580,12 @@ TEST(ATrapTest, Test_SetProfileStartVelocity6)
 /**
  * @brief Check that the clone function returns a equal profile
  *
- * Note: Definitions other than SetProfileAllDurations could fail due to numeric noise
+ * Note: Definitions other than setProfileAllDurations could fail due to numeric noise
  */
 TEST(ATrapTest, Test_Clone)
 {
   pilz::VelocityProfile_ATrap vp = pilz::VelocityProfile_ATrap(4,1,1);
-  vp.SetProfileAllDurations(0, 10, 10, 10, 10);
+  vp.setProfileAllDurations(0, 10, 10, 10, 10);
   pilz::VelocityProfile_ATrap* vp_clone = static_cast<pilz::VelocityProfile_ATrap*>(vp.Clone());
   EXPECT_EQ(vp, *vp_clone);
   delete vp_clone;

@@ -99,11 +99,11 @@ void MoveGroupSequenceAction::executeSequenceCallback(const pilz_msgs::MoveGroup
     {
       ROS_WARN("Only plan will be calculated, although plan_only == false."); //LCOV_EXCL_LINE
     }
-    executeMoveCallback_PlanOnly(goal, action_res);
+    executeMoveCallbackPlanOnly(goal, action_res);
   }
   else
   {
-    executeSequenceCallback_PlanAndExecute(goal, action_res);
+    executeSequenceCallbackPlanAndExecute(goal, action_res);
   }
 
   switch(action_res.error_code.val)
@@ -122,7 +122,7 @@ void MoveGroupSequenceAction::executeSequenceCallback(const pilz_msgs::MoveGroup
   setMoveState(move_group::IDLE);
 }
 
-void MoveGroupSequenceAction::executeSequenceCallback_PlanAndExecute(const pilz_msgs::MoveGroupSequenceGoalConstPtr& goal,
+void MoveGroupSequenceAction::executeSequenceCallbackPlanAndExecute(const pilz_msgs::MoveGroupSequenceGoalConstPtr& goal,
                                                                      pilz_msgs::MoveGroupSequenceResult& action_res)
 {
   ROS_INFO("Combined planning and execution request received for MoveGroupSequenceAction.");
@@ -167,7 +167,7 @@ void MoveGroupSequenceAction::convertToMsg(const ExecutableTrajs& trajs,
   }
 }
 
-void MoveGroupSequenceAction::executeMoveCallback_PlanOnly(const pilz_msgs::MoveGroupSequenceGoalConstPtr& goal,
+void MoveGroupSequenceAction::executeMoveCallbackPlanOnly(const pilz_msgs::MoveGroupSequenceGoalConstPtr& goal,
                                                            pilz_msgs::MoveGroupSequenceResult& res)
 {
   ROS_INFO("Planning request received for MoveGroupSequenceAction action.");

@@ -58,9 +58,9 @@ bool JointLimitsContainer::empty() const
 pilz_extensions::JointLimit JointLimitsContainer::getCommonLimit() const
 {
   pilz_extensions::JointLimit common_limit;
-  for(auto it = container_.begin(); it != container_.end(); ++it)
+  for (const auto & limit : container_)
   {
-    updateCommonLimit(it->second, common_limit);
+    updateCommonLimit(limit.second, common_limit);
   }
   return common_limit;
 }

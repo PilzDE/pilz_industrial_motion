@@ -155,7 +155,7 @@ bool pilz::TrajectoryBlenderTransitionWindow::validateRequest(const pilz::Trajec
   if(!pilz::isRobotStateEqual(req.first_trajectory->getLastWayPoint(),
                               req.second_trajectory->getFirstWayPoint(),
                               req.group_name,
-                              EPSILON))
+                              epsilon))
   {
     ROS_ERROR_STREAM("During blending the last point (" << req.first_trajectory->getLastWayPoint()
                      << " of the preceding and the first point of the succeding trajectory ("
@@ -167,7 +167,7 @@ bool pilz::TrajectoryBlenderTransitionWindow::validateRequest(const pilz::Trajec
   // same uniform sampling time
   if (!pilz::determineAndCheckSamplingTime(req.first_trajectory,
                                            req.second_trajectory,
-                                           EPSILON,
+                                           epsilon,
                                            sampling_time))
   {
 
@@ -176,8 +176,8 @@ bool pilz::TrajectoryBlenderTransitionWindow::validateRequest(const pilz::Trajec
   }
 
   //end position of the first trajectory and start position of second trajectory must have zero velocities/accelerations
-  if(!pilz::isRobotStateStationary(req.first_trajectory->getLastWayPoint(), req.group_name, EPSILON) ||
-     !pilz::isRobotStateStationary(req.second_trajectory->getFirstWayPoint(), req.group_name, EPSILON) )
+  if(!pilz::isRobotStateStationary(req.first_trajectory->getLastWayPoint(), req.group_name, epsilon) ||
+     !pilz::isRobotStateStationary(req.second_trajectory->getFirstWayPoint(), req.group_name, epsilon) )
   {
     ROS_ERROR("Intersection point of the blending trajectories has non-zero velocities/accelerations.");
     error_code.val = moveit_msgs::MoveItErrorCodes::INVALID_MOTION_PLAN;

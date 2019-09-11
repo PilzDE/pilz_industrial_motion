@@ -49,9 +49,9 @@ private:
 
 private:
   void executeSequenceCallback(const pilz_msgs::MoveGroupSequenceGoalConstPtr &goal);
-  void executeSequenceCallback_PlanAndExecute(const pilz_msgs::MoveGroupSequenceGoalConstPtr& goal,
+  void executeSequenceCallbackPlanAndExecute(const pilz_msgs::MoveGroupSequenceGoalConstPtr& goal,
                                               pilz_msgs::MoveGroupSequenceResult& action_res);
-  void executeMoveCallback_PlanOnly(const pilz_msgs::MoveGroupSequenceGoalConstPtr& goal,
+  void executeMoveCallbackPlanOnly(const pilz_msgs::MoveGroupSequenceGoalConstPtr& goal,
                                     pilz_msgs::MoveGroupSequenceResult& res);
   void startMoveExecutionCallback();
   void startMoveLookCallback();

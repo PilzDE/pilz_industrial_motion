@@ -81,7 +81,7 @@ public:
    * @param dec_duration: time of deceleration phase
    * @return ture if the combination of three durations is valid
    */
-  bool SetProfileAllDurations(double pos1, double pos2, double duration1, double duration2, double duration3);
+  bool setProfileAllDurations(double pos1, double pos2, double duration1, double duration2, double duration3);
 
 
   /**
@@ -92,7 +92,7 @@ public:
    * @param vel1: start velocity
    * @return
    */
-  bool SetProfileStartVelocity(double pos1, double pos2, double vel1);
+  bool setProfileStartVelocity(double pos1, double pos2, double vel1);
 
   /**
    * @brief get the time of first phase

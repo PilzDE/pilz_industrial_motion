@@ -38,7 +38,7 @@ public:
   RobotConfiguration(const std::string& group_name);
 
   RobotConfiguration(const std::string& group_name,
-                     moveit::core::RobotModelConstPtr robot_model);
+                     const moveit::core::RobotModelConstPtr& robot_model);
 
 public:
   void setRobotModel(moveit::core::RobotModelConstPtr robot_model);

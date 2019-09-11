@@ -71,7 +71,7 @@ void TrajectoryGenerator::checkForValidGroupName(const std::string& group_name) 
 
 void TrajectoryGenerator::checkStartState(const moveit_msgs::RobotState& start_state) const
 {
-  if(start_state.joint_state.name.size() == 0)
+  if(start_state.joint_state.name.empty())
   {
     throw NoJointNamesInStartState("No joint names for state state given");
   }
@@ -256,7 +256,7 @@ std::unique_ptr<KDL::VelocityProfile> TrajectoryGenerator::cartesianTrapVelocity
   {
     vp_trans->SetProfile(0, std::numeric_limits<double>::epsilon());
   }
-  return std::move(vp_trans);
+  return vp_trans;
 }
 
 bool TrajectoryGenerator::generate(const planning_interface::MotionPlanRequest& req,

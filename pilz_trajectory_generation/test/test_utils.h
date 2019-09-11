@@ -284,11 +284,11 @@ bool isAccelerationBounded(const trajectory_msgs::JointTrajectory& trajectory,
  * @param joint_prefix Prefix of the joint names
  * @return false if forward kinematics failed
  */
-bool toTCPPose(const moveit::core::RobotModelConstPtr &robot_model,
+bool toTCPPose(const moveit::core::RobotModelConstPtr& robot_model,
                const std::string &link_name,
                const std::vector<double> &joint_values,
                geometry_msgs::Pose &pose,
-               std::string joint_prefix = testutils::JOINT_NAME_PREFIX);
+               const std::string& joint_prefix = testutils::JOINT_NAME_PREFIX);
 
 /**
  * @brief computeLinkFK
@@ -347,8 +347,8 @@ bool checkThatPointsInRadius(const std::string &link_name,
  * @param v
  * @param w
  */
-void computeCartVelocity(const Eigen::Affine3d pose_1,
-                         const Eigen::Affine3d pose_2,
+void computeCartVelocity(const Eigen::Affine3d& pose_1,
+                         const Eigen::Affine3d& pose_2,
                          double duration,
                          Eigen::Vector3d& v,
                          Eigen::Vector3d& w);
@@ -452,7 +452,7 @@ bool checkBlendResult(const pilz::TrajectoryBlendRequest& blend_req,
  * @return true if succeed
  */
 bool generateTrajFromBlendTestData(const moveit::core::RobotModelConstPtr &robot_model,
-                                   const std::shared_ptr<pilz::TrajectoryGenerator> tg,
+                                   const std::shared_ptr<pilz::TrajectoryGenerator>& tg,
                                    const std::string &group_name,
                                    const std::string &link_name,
                                    const blend_test_data& data,
@@ -482,7 +482,7 @@ void checkRobotModel(const moveit::core::RobotModelConstPtr &robot_model,
  * @brief Check that the translational path of a given trajectory has a trapezoid velocity profile
  * @param acc_tol: tolerance for comparing acceleration values
  */
-::testing::AssertionResult checkCartesianTranslationalPath(robot_trajectory::RobotTrajectoryConstPtr trajectory,
+::testing::AssertionResult checkCartesianTranslationalPath(const robot_trajectory::RobotTrajectoryConstPtr& trajectory,
                                                            const std::string &link_name,
                                                            const double acc_tol = DEFAULT_ACCELERATION_EQUALITY_TOLERANCE);
 
@@ -491,7 +491,7 @@ void checkRobotModel(const moveit::core::RobotModelConstPtr &robot_model,
  * @param rot_axis_tol: tolerance for comparing rotation axes (in the L2 norm)
  * @param acc_tol: tolerance for comparing angular acceleration values
  */
-::testing::AssertionResult checkCartesianRotationalPath(robot_trajectory::RobotTrajectoryConstPtr trajectory,
+::testing::AssertionResult checkCartesianRotationalPath(const robot_trajectory::RobotTrajectoryConstPtr& trajectory,
                                                         const std::string &link_name,
                                                         const double rot_axis_tol = DEFAULT_ROTATION_AXIS_EQUALITY_TOLERANCE,
                                                         const double acc_tol = DEFAULT_ACCELERATION_EQUALITY_TOLERANCE);

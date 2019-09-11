@@ -58,19 +58,19 @@ bool CommandPlanner::initialize(const moveit::core::RobotModelConstPtr &model, c
   // List available plugins
   const std::vector<std::string> &factories = planner_context_loader->getDeclaredClasses();
   std::stringstream ss;
-  for (std::size_t i = 0 ; i < factories.size(); ++i)
+  for (const auto& factory : factories)
   {
-    ss << factories[i] << " ";
+    ss << factory << " ";
   }
 
   ROS_INFO_STREAM("Available plugins: " << ss.str());
 
   // Load each factory
-  for (std::size_t i = 0; i < factories.size() ; ++i)
+  for (const auto& factory : factories)
   {
 
-    ROS_INFO_STREAM("About to load: " << factories[i]);
-    PlanningContextLoaderPtr loader_pointer(planner_context_loader->createInstance(factories[i]));
+    ROS_INFO_STREAM("About to load: " << factory);
+    PlanningContextLoaderPtr loader_pointer(planner_context_loader->createInstance(factory));
 
     pilz::LimitsContainer limits;
     limits.setJointLimits(aggregated_limit_active_joints_);
@@ -95,9 +95,9 @@ void CommandPlanner::getPlanningAlgorithms(std::vector<std::string> &algs) const
 {
   algs.clear();
 
-  for(auto it = context_loader_map_.begin(); it != context_loader_map_.end(); ++it)
+  for(const auto& context_loader : context_loader_map_)
   {
-    algs.push_back(it->first);
+    algs.push_back(context_loader.first);
   }
 }
 
@@ -115,14 +115,14 @@ planning_interface::PlanningContextPtr CommandPlanner::getPlanningContext(
     return nullptr;
   }
 
-  planning_interface::PlanningContextPtr planningContext;
+  planning_interface::PlanningContextPtr planning_context;
 
-  if(context_loader_map_.at(req.planner_id)->loadContext(planningContext, req.planner_id, req.group_name))
+  if(context_loader_map_.at(req.planner_id)->loadContext(planning_context, req.planner_id, req.group_name))
   {
     ROS_DEBUG_STREAM("Found planning context loader for " << req.planner_id << " group:" << req.group_name);
-    planningContext->setMotionPlanRequest(req);
-    planningContext->setPlanningScene(planning_scene);
-    return planningContext;
+    planning_context->setMotionPlanRequest(req);
+    planning_context->setPlanningScene(planning_scene);
+    return planning_context;
   }
   else {
     error_code.val = moveit_msgs::MoveItErrorCodes::PLANNING_FAILED;
@@ -136,7 +136,7 @@ bool CommandPlanner::canServiceRequest(const moveit_msgs::MotionPlanRequest& req
   return context_loader_map_.find(req.planner_id) != context_loader_map_.end();
 }
 
-void CommandPlanner::registerContextLoader(pilz::PlanningContextLoaderPtr planning_context_loader)
+void CommandPlanner::registerContextLoader(const pilz::PlanningContextLoaderPtr& planning_context_loader)
 {
   // Only add if command is not already in list, throw exception if not
   if(context_loader_map_.find(planning_context_loader->getAlgorithm()) == context_loader_map_.end())

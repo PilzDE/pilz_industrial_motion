@@ -52,7 +52,7 @@ public:
   CartesianConfiguration(const std::string& group_name,
                          const std::string& link_name,
                          const std::vector<double>& config,
-                         moveit::core::RobotModelConstPtr robot_model);
+                         const moveit::core::RobotModelConstPtr& robot_model);
 
 public:
   virtual moveit_msgs::Constraints toGoalConstraints() const override;

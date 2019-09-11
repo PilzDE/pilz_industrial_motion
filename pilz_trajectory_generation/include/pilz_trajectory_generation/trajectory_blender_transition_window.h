@@ -138,7 +138,7 @@ private:
 
 private: // static members
   // Constant to check for equality of values.
-  static constexpr double EPSILON = 1e-4;
+  static constexpr double epsilon = 1e-4;
 };
 
 }

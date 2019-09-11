@@ -77,8 +77,8 @@ pilz_msgs::MotionSequenceRequest Sequence::toRequest() const
 
 void Sequence::erase(const size_t start, const size_t end)
 {
-  const size_t orig_N {size()};
-  if (start > orig_N || end > orig_N)
+  const size_t orig_n {size()};
+  if (start > orig_n || end > orig_n)
   {
     std::string msg;
     msg.append("Parameter start=").append(std::to_string(start));
@@ -88,7 +88,7 @@ void Sequence::erase(const size_t start, const size_t end)
     throw std::invalid_argument(msg);
   }
   cmds_.erase(cmds_.begin()+start, cmds_.begin()+end);
-  if (end == orig_N)
+  if (end == orig_n)
   {
     // Make sure last radius is set zero
     cmds_.at(size()-1).second = 0.;

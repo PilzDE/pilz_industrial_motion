@@ -27,7 +27,7 @@ JointConfiguration::JointConfiguration()
 
 JointConfiguration::JointConfiguration(const std::string& group_name,
                                        const std::vector<double>& config,
-                                       CreateJointNameFunc create_joint_name_func)
+                                       CreateJointNameFunc&& create_joint_name_func)
   : RobotConfiguration(group_name)
   , joints_(config)
   , create_joint_name_func_(create_joint_name_func)
@@ -35,7 +35,7 @@ JointConfiguration::JointConfiguration(const std::string& group_name,
 
 JointConfiguration::JointConfiguration(const std::string& group_name,
                                        const std::vector<double>& config,
-                                       moveit::core::RobotModelConstPtr robot_model)
+                                       const moveit::core::RobotModelConstPtr& robot_model)
   : RobotConfiguration(group_name, robot_model)
   , joints_(config)
 {
@@ -108,9 +108,9 @@ robot_state::RobotState JointConfiguration::toRobotState() const
 moveit_msgs::RobotState JointConfiguration::toMoveitMsgsRobotStateWithModel() const
 {
   robot_state::RobotState start_state(toRobotState());
-  moveit_msgs::RobotState robStateMsg;
-  moveit::core::robotStateToRobotStateMsg(start_state, robStateMsg, false);
-  return robStateMsg;
+  moveit_msgs::RobotState rob_state_msg;
+  moveit::core::robotStateToRobotStateMsg(start_state, rob_state_msg, false);
+  return rob_state_msg;
 }
 
 sensor_msgs::JointState JointConfiguration::toSensorMsg() const
@@ -131,12 +131,12 @@ sensor_msgs::JointState JointConfiguration::toSensorMsg() const
 
 std::ostream& operator<< (std::ostream& os, const JointConfiguration& obj)
 {
-  const size_t N {obj.size()};
+  const size_t n {obj.size()};
   os << "JointConfiguration: [";
-  for(size_t i = 0; i<N; ++i)
+  for(size_t i = 0; i<n; ++i)
   {
     os << obj.getJoint(i);
-    if (i != N-1 )
+    if (i != n-1 )
     {
       os << ", ";
     }

@@ -24,7 +24,7 @@ class JointLimitsContainerTest : public ::testing::Test
 {
  protected:
 
-  virtual void SetUp()
+  void SetUp() override
   {
     pilz_extensions::JointLimit lim1;
     lim1.has_position_limits = true;
@@ -77,8 +77,6 @@ class JointLimitsContainerTest : public ::testing::Test
     common_limit_ = container_.getCommonLimit();
 
   }
-
-  virtual void TearDown() {}
 
   pilz::JointLimitsContainer container_;
   pilz_extensions::JointLimit common_limit_;
