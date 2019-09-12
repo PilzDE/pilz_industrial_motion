@@ -20,11 +20,13 @@
   <run_depend>pilz_msgs</run_depend>
   <run_depend>python-psutil</run_depend>
   <run_depend>tf_conversions</run_depend>
+  <run_depend>prbt_hardware_support</run_depend>
 
   <buildtool_depend>catkin</buildtool_depend>
 
   <build_depend>rospy</build_depend>
   <build_depend>roslint</build_depend>
+  <build_depend>prbt_hardware_support</build_depend>
 
   <test_depend>python-docopt</test_depend>
   <test_depend>rostest</test_depend>
