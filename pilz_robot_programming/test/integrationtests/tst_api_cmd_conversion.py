@@ -358,6 +358,33 @@ class TestAPICmdConversion(unittest.TestCase):
         # +++++++++++++++++++++++
         self.assertEquals(EXP_VEL_SCALE*EXP_VEL_SCALE, req.max_acceleration_scaling_factor)
 
+    def test_ptp_global_scale(self):
+        """ Test the default acceleration scaling factor for ptp commands.
+
+            Test sequence:
+                1. Set the scaling factor for the robot
+                2. Call the convert function.
+
+            Test results:
+                1. -
+                2. The scaled velocity scaling factor and the scaled accerleration scaling factor is set.
+        """
+        # +++++++++++++++++++++++
+        rospy.loginfo("Step 1")
+        # +++++++++++++++++++++++
+        ptp = Ptp(goal=self.test_data.get_joints("PTPJointValid", PLANNING_GROUP_NAME), vel_scale=EXP_VEL_SCALE,
+                  relative=True)
+        self.robot.global_motion_factor = 0.1
+        req = ptp._cmd_to_request(self.robot)
+        self.assertIsNotNone(req)
+
+        # +++++++++++++++++++++++
+        rospy.loginfo("Step 2")
+        # +++++++++++++++++++++++
+        self.assertEquals(self.robot.global_motion_factor*self.robot.global_motion_factor*EXP_VEL_SCALE*EXP_VEL_SCALE,
+                          req.max_acceleration_scaling_factor)
+        self.assertEquals(self.robot.global_motion_factor*EXP_VEL_SCALE, req.max_velocity_scaling_factor)
+
     def test_lin_cmd_convert_pose(self):
         """ Check that conversion to MotionPlanRequest works correctly.
 
@@ -504,6 +531,32 @@ class TestAPICmdConversion(unittest.TestCase):
         # +++++++++++++++++++++++
         self.assertEquals(EXP_VEL_SCALE, req.max_acceleration_scaling_factor)
 
+    def test_lin_global_scale(self):
+        """ Test the default acceleration scaling factor for lin commands.
+
+            Test sequence:
+                1. Set the scaling factor for the robot
+                2. Call the convert function.
+
+            Test results:
+                1. -
+                2. The scaled velocity scaling factor and the scaled accerleration scaling factor is set.
+        """
+        # +++++++++++++++++++++++
+        rospy.loginfo("Step 1")
+        # +++++++++++++++++++++++
+        lin = Lin(goal=self.test_data.get_joints("LINPose1", PLANNING_GROUP_NAME), vel_scale=EXP_VEL_SCALE,
+                  relative=True)
+        self.robot.global_motion_factor = 0.1
+        req = lin._cmd_to_request(self.robot)
+        self.assertIsNotNone(req)
+
+        # +++++++++++++++++++++++
+        rospy.loginfo("Step 2")
+        # +++++++++++++++++++++++
+        self.assertEquals(self.robot.global_motion_factor*EXP_VEL_SCALE, req.max_acceleration_scaling_factor)
+        self.assertEquals(self.robot.global_motion_factor*EXP_VEL_SCALE, req.max_velocity_scaling_factor)
+
     def test_circ_cmd_convert_center(self):
         """ Check that conversion to MotionPlanRequest works correctly.
 
@@ -623,6 +676,36 @@ class TestAPICmdConversion(unittest.TestCase):
         # +++++++++++++++++++++++
         self.assertEquals(EXP_VEL_SCALE, req.max_acceleration_scaling_factor)
 
+    def test_circ_global_scale(self):
+        """ Test the default acceleration scaling factor for circ commands.
+
+            Test sequence:
+                1. Set the scaling factor for the robot
+                2. Call the convert function.
+
+            Test results:
+                1. -
+                2. The scaled velocity scaling factor and the scaled accerleration scaling factor is set.
+        """
+
+        # +++++++++++++++++++++++
+        rospy.loginfo("Step 1")
+        # +++++++++++++++++++++++
+
+        exp_goal_pose = self.test_data.get_pose("LINPose1", PLANNING_GROUP_NAME)
+        exp_help_pose = self.test_data.get_pose("CIRCCenterPose", PLANNING_GROUP_NAME)
+
+        circ = Circ(goal=exp_goal_pose, center=exp_help_pose.position, vel_scale=EXP_VEL_SCALE)
+        self.robot.global_motion_factor = 0.1
+        req = circ._cmd_to_request(self.robot)
+        self.assertIsNotNone(req)
+
+        # +++++++++++++++++++++++
+        rospy.loginfo("Step 2")
+        # +++++++++++++++++++++++
+        self.assertEquals(self.robot.global_motion_factor*EXP_VEL_SCALE, req.max_acceleration_scaling_factor)
+        self.assertEquals(self.robot.global_motion_factor*EXP_VEL_SCALE, req.max_velocity_scaling_factor)
+
     def test_get_sequence_request(self):
         """ Test the _get_sequence_request function of Sequence command works correctly.
 
@@ -686,6 +769,70 @@ class TestAPICmdConversion(unittest.TestCase):
         self._analyze_request_general(PLANNING_GROUP_NAME, "CIRC", EXP_VEL_SCALE, EXP_ACC_SCALE, circ_req)
         self._analyze_request_pose(TARGET_LINK_NAME, exp_circ_goal, circ_req)
         self._analyze_request_circ_help_point("center", exp_circ_center, circ_req)
+
+    def test_get_sequence_request_global_motion_factor(self):
+        """ Test that setting the global motion factor on sequence works correctly
+
+            Test sequence:
+                1. Append valid ptp, lin and circ commands with blend radius to Sequence command
+                2. Define a global motion factor
+                2. Call _get_sequence_request function of the Sequence command
+
+            Test results:
+                1. -
+                2. -
+                3. Check that the each request is scaled properly
+        """
+        # 1
+        exp_ptp_goal = self.test_data.get_joints("PTPJointValid", PLANNING_GROUP_NAME)
+        exp_lin_goal = self.test_data.get_pose("LINPose2", PLANNING_GROUP_NAME)
+        exp_circ_goal = self.test_data.get_pose("LINPose1", PLANNING_GROUP_NAME)
+        exp_circ_center = self.test_data.get_pose("CIRCCenterPose", PLANNING_GROUP_NAME)
+
+        exp_blend_radius_1 = 0.1
+        exp_blend_radius_2 = 0.0
+        exp_blend_radius_3 = 0.3
+
+        ptp = Ptp(goal=exp_ptp_goal, vel_scale=EXP_VEL_SCALE, acc_scale=EXP_ACC_SCALE)
+        lin = Lin(goal=exp_lin_goal, vel_scale=EXP_VEL_SCALE, acc_scale=EXP_ACC_SCALE)
+        circ = Circ(goal=exp_circ_goal, center=exp_circ_center.position, vel_scale=EXP_VEL_SCALE,
+                    acc_scale=EXP_ACC_SCALE)
+
+        seq = Sequence()
+        seq.append(ptp, exp_blend_radius_1)
+        seq.append(lin, exp_blend_radius_2)
+        seq.append(circ, exp_blend_radius_3)
+
+        # 2
+        fac = 0.2
+        self.robot.global_motion_factor = fac
+
+        # 3
+        seq_action_goal = seq._get_sequence_request(self.robot)
+
+        self.assertIsNotNone(seq_action_goal)
+        self.assertEqual(3, len(seq_action_goal.request.items))
+
+        # check first command (ptp)
+        self.assertEqual(exp_blend_radius_1, seq_action_goal.request.items[0].blend_radius)
+        ptp_req = seq_action_goal.request.items[0].req
+
+        self.assertIsNotNone(ptp_req)
+        self._analyze_request_general(PLANNING_GROUP_NAME, "PTP",  fac*EXP_VEL_SCALE, fac*fac*EXP_ACC_SCALE, ptp_req)
+
+        # check second command (lin)
+        self.assertEqual(exp_blend_radius_2, seq_action_goal.request.items[1].blend_radius)
+        lin_req = seq_action_goal.request.items[1].req
+
+        self.assertIsNotNone(lin_req)
+        self._analyze_request_general(PLANNING_GROUP_NAME, "LIN", fac*EXP_VEL_SCALE, fac*EXP_ACC_SCALE, lin_req)
+
+        # check third command (circ)
+        self.assertEqual(exp_blend_radius_3, seq_action_goal.request.items[2].blend_radius)
+        circ_req = seq_action_goal.request.items[2].req
+
+        self.assertIsNotNone(circ_req)
+        self._analyze_request_general(PLANNING_GROUP_NAME, "CIRC", fac*EXP_VEL_SCALE, fac*EXP_ACC_SCALE, circ_req)
 
     def test_get_sequence_request_negative(self):
         """ Test the _get_sequence_request function of Sequence command works correctly.
