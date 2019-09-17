@@ -208,8 +208,8 @@ class _BaseCmd(_AbstractCmd):
         # Set general info
         req.planner_id = self._planner_id
         req.group_name = self._planning_group
-        req.max_velocity_scaling_factor = self._vel_scale
-        req.max_acceleration_scaling_factor = self._acc_scale
+        req.max_velocity_scaling_factor = self._vel_scale * robot.global_motion_factor
+        req.max_acceleration_scaling_factor = self._acc_scale * self._calc_acc_scale(robot.global_motion_factor)
         req.allowed_planning_time = 1.0
 
         # Set an empty diff as start_state => the current state is used by the planner
@@ -607,8 +607,8 @@ class Gripper(_BaseCmd):
         # Set general info
         req.planner_id = "PTP"
         req.group_name = self._planning_group
-        req.max_velocity_scaling_factor = self._vel_scale
-        req.max_acceleration_scaling_factor = self._acc_scale
+        req.max_velocity_scaling_factor = self._vel_scale * robot.global_motion_factor
+        req.max_acceleration_scaling_factor = self._acc_scale * robot.global_motion_factor
         req.allowed_planning_time = 1.0
         # Set an empty diff as start_state => the current state is used by the planner
         req.start_state.is_diff = True
