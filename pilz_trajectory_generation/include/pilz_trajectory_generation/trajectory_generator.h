@@ -203,7 +203,8 @@ private:
   /**
    * @return True if scaling factor is valid, otherwise false.
    */
-  static bool isScalingFactorValid(const double& scaling_factor);
+  static bool isVelocityScalingFactorValid(const double& vel_scaling_factor);
+  static bool isAccelerationScalingFactorValid(const double& acc_scaling_factor);
   static void checkVelocityScaling(const double& scaling_factor);
   static void checkAccelerationScaling(const double& scaling_factor);
 
@@ -227,14 +228,23 @@ private:
 protected:
   const robot_model::RobotModelConstPtr robot_model_;
   const pilz::LimitsContainer planner_limits_;
-  static constexpr double MIN_SCALING_FACTOR {0.0001};
-  static constexpr double MAX_SCALING_FACTOR {1.};
+  static constexpr double MIN_VEL_SCALING_FACTOR {0.0001};
+  static constexpr double MAX_VEL_SCALING_FACTOR {1.};
+
+  static constexpr double MIN_ACC_SCALING_FACTOR {0.0001};
+  static constexpr double MAX_ACC_SCALING_FACTOR {1.};
+
   static constexpr double VELOCITY_TOLERANCE {1e-8};
 };
 
-inline bool TrajectoryGenerator::isScalingFactorValid(const double& scaling_factor)
+inline bool TrajectoryGenerator::isVelocityScalingFactorValid(const double& vel_scaling_factor)
 {
-  return (scaling_factor > MIN_SCALING_FACTOR && scaling_factor <= MAX_SCALING_FACTOR);
+  return (vel_scaling_factor > MIN_VEL_SCALING_FACTOR && vel_scaling_factor <= MAX_VEL_SCALING_FACTOR);
+}
+
+inline bool TrajectoryGenerator::isAccelerationScalingFactorValid(const double& acc_scaling_factor)
+{
+  return (acc_scaling_factor > MIN_ACC_SCALING_FACTOR && acc_scaling_factor <= MAX_ACC_SCALING_FACTOR);
 }
 
 inline bool TrajectoryGenerator::isCartesianGoalGiven(const moveit_msgs::Constraints &constraint)

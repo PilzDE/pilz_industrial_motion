@@ -35,26 +35,26 @@ void TrajectoryGenerator::cmdSpecificRequestValidation(const planning_interface:
   // to provide a command specific request validation.
 }
 
-void TrajectoryGenerator::checkVelocityScaling(const double& scaling_factor)
+void TrajectoryGenerator::checkVelocityScaling(const double& vel_scaling_factor)
 {
-  if( !isScalingFactorValid(scaling_factor) )
+  if( !isVelocityScalingFactorValid(vel_scaling_factor) )
   {
     std::ostringstream os;
     os << "Velocity scaling not in range ["
-       << MIN_SCALING_FACTOR << ", " << MAX_SCALING_FACTOR << "], "
-       << "actual value is: " << scaling_factor;
+       << MIN_VEL_SCALING_FACTOR << ", " << MAX_VEL_SCALING_FACTOR << "], "
+       << "actual value is: " << vel_scaling_factor;
     throw VelocityScalingIncorrect(os.str());
   }
 }
 
-void TrajectoryGenerator::checkAccelerationScaling(const double& scaling_factor)
+void TrajectoryGenerator::checkAccelerationScaling(const double& acc_scaling_factor)
 {
-  if( !isScalingFactorValid(scaling_factor) )
+  if( !isAccelerationScalingFactorValid(acc_scaling_factor) )
   {
     std::ostringstream os;
     os << "Acceleration scaling not in range ["
-       << MIN_SCALING_FACTOR << ", " << MAX_SCALING_FACTOR << "], "
-       << "actual value is: " << scaling_factor;
+       << MIN_ACC_SCALING_FACTOR << ", " << MAX_ACC_SCALING_FACTOR << "], "
+       << "actual value is: " << acc_scaling_factor;
     throw AccelerationScalingIncorrect(os.str());
   }
 }
