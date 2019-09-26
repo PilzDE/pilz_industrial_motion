@@ -21,7 +21,7 @@ __REQUIRED_API_VERSION__ = "1"
 
 # Gripper position in [m], stated for one finger,
 # i.e. opening width = 2*gripper_pos
-_GRIPPER_CLOSED = 0.0
+_GRIPPER_CLOSED = 0.0015 # includes brakets
 _GRIPPER_OPEN = 0.02
 
 
