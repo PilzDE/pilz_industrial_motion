@@ -20,12 +20,12 @@ import sys
 from rospkg import RosPack
 from pilz_robot_programming.robot import *
 from pilz_robot_programming.commands import Ptp
+from tst_api_utils import setOverrideParam
 import roslib
 
 API_VERSION = "1"
 PKG = 'pilz_robot_programming'
 roslib.load_manifest(PKG)  # This line is not needed with Catkin.
-
 
 class TestGlobalMotionFactor(unittest.TestCase):
     """ Checks the basic behaviour of the global motion factor.
@@ -41,26 +41,16 @@ class TestGlobalMotionFactor(unittest.TestCase):
             self.robot = None
 
     def testSettingOverride(self):
-        self.robot.global_motion_factor = 0.3
-        self.assertEqual(self.robot.global_motion_factor, 0.3)
+        setOverrideParam(0.3)
+        self.assertEqual(self.robot.speed_override, 0.3)
 
     def testInvariantMoveOnCommand(self):
         """ Test that the command itself remains untouched to the speed override"""
-
-        self.robot.global_motion_factor = 0.3
+        setOverrideParam(0.3)
         ptp = Ptp(goal=[0, 0.5, 0.5, 0, 0, 0], vel_scale=0.3, acc_scale=0.4)
         self.robot.move(ptp)
         self.assertEqual(ptp._vel_scale, 0.3)
         self.assertEqual(ptp._acc_scale, 0.4)
-
-    def testSettingOverrideNegative(self):
-        with self.assertRaises(ValueError):
-            self.robot.global_motion_factor = -1.0
-
-    def testSettingOverrideTooLarge(self):
-        with self.assertRaises(ValueError):
-            self.robot.global_motion_factor = 1.1
-
 
 if __name__ == '__main__':
     import rostest

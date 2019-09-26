@@ -30,7 +30,8 @@ from std_srvs.srv import Trigger
 import tf
 
 from pilz_msgs.msg import MoveGroupSequenceAction
-from prbt_hardware_support.srv import IsBrakeTestRequired, IsBrakeTestRequiredResponse, BrakeTest, BrakeTestResponse
+from prbt_hardware_support.srv import IsBrakeTestRequired, IsBrakeTestRequiredResponse, BrakeTest, BrakeTestResponse, \
+                                      GetSpeedOverride
 from .move_control_request import _MoveControlState, MoveControlAction, _MoveControlStateMachine
 from .commands import _AbstractCmd, _DEFAULT_PLANNING_GROUP, _DEFAULT_TARGET_LINK, _DEFAULT_BASE_LINK, Sequence
 from .exceptions import *
@@ -101,6 +102,7 @@ class Robot(object):
     _STOP_TOPIC_NAME = "stop_movement"
     _SEQUENCE_TOPIC = "sequence_move_group"
     _BRAKE_TEST_EXECUTE_SRV = "/prbt/execute_braketest"
+    _GET_SPEED_OVERRIDE_SRV = "/prbt/get_speed_override"
     _BRAKE_TEST_REQUIRED_SRV = "/prbt/brake_test_required"
     _INSTANCE_PARAM = "/robot_api_instance"
 
@@ -124,6 +126,8 @@ class Robot(object):
         # manage the move control request
         self._move_ctrl_sm = _MoveControlStateMachine()
 
+        self._get_speed_override_srv = rospy.ServiceProxy(Robot._GET_SPEED_OVERRIDE_SRV, GetSpeedOverride)
+
         self._single_instance_flag = False
 
         self._check_version(version)
@@ -131,8 +135,6 @@ class Robot(object):
         self._claim_single_instance()
 
         self._establish_connections()
-
-        self._global_motion_factor = 1.0
 
         # We use this auxiliary member to implement a lazy initialization
         # for the '_robot_commander' member. The lazy initialization
@@ -157,32 +159,14 @@ class Robot(object):
         self.__robot_commander = robot_commander
 
     @property
-    def global_motion_factor(self):
-        """ Defines a factor applied to all commands.
+    def speed_override(self):
+        """ Returns the currently active speed override
 
         Both velocity and acceleration scaling are factorized. The command itself remains untouched.
-
-        :getter: Returns the global scaling factor
-
-        :setter: The factor applied to all commands before executing them.
-
-          :raises ValueError: If the value is not within (0.0, 1.0]
         """
-        return self._global_motion_factor
+        res = self._get_speed_override_srv()
 
-    @global_motion_factor.setter
-    def global_motion_factor(self, global_motion_factor):
-        if(global_motion_factor <= 0.0):
-            rospy.logerr("The value " + str(global_motion_factor) + " of global_motion_factor is to low. \
-                          Needs to be within (0.0, 1.0]")
-            raise ValueError
-
-        if(global_motion_factor > 1.0):
-            rospy.logerr("The value " + str(global_motion_factor) + " of global_motion_factor is to high. \
-                          Needs to be within (0.0, 1.0]")
-            raise ValueError
-
-        self._global_motion_factor = global_motion_factor
+        return res.speed_override
 
     def get_current_joint_states(self, planning_group=_DEFAULT_PLANNING_GROUP):
         """Returns the current joint state values of the robot.
