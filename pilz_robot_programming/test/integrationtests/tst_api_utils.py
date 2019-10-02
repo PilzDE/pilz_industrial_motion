@@ -19,11 +19,12 @@ import rospy
 from dynamic_reconfigure.srv import Reconfigure, ReconfigureRequest
 from dynamic_reconfigure.msg import DoubleParameter
 
+
 def setOverrideParam(speed_override):
-  set_dynamic_parameter = rospy.ServiceProxy('/fake_speed_override_node/set_parameters', Reconfigure)
-  rec = ReconfigureRequest();
-  double_param = DoubleParameter();
-  double_param.name = "speed_override"
-  double_param.value = speed_override
-  rec.config.doubles.append(double_param)
-  set_dynamic_parameter(rec)
+    set_dynamic_parameter = rospy.ServiceProxy('/fake_speed_override_node/set_parameters', Reconfigure)
+    rec = ReconfigureRequest()
+    double_param = DoubleParameter()
+    double_param.name = "speed_override"
+    double_param.value = speed_override
+    rec.config.doubles.append(double_param)
+    set_dynamic_parameter(rec)
