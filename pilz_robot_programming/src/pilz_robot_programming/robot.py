@@ -126,8 +126,6 @@ class Robot(object):
         # manage the move control request
         self._move_ctrl_sm = _MoveControlStateMachine()
 
-        self._get_speed_override_srv = rospy.ServiceProxy(Robot._GET_SPEED_OVERRIDE_SRV, GetSpeedOverride)
-
         self._single_instance_flag = False
 
         self._check_version(version)
@@ -519,6 +517,12 @@ class Robot(object):
             Robot._RESUME_TOPIC_NAME, Trigger, self._resume_service_callback)
         self._stop_service = rospy.Service(
             Robot._STOP_TOPIC_NAME, Trigger, self._stop_service_callback)
+
+        # Connect to speed override service
+        rospy.loginfo("Waiting for connection to service " + self._GET_SPEED_OVERRIDE_SRV + "...")
+        rospy.wait_for_service(self._GET_SPEED_OVERRIDE_SRV, self._SERVICE_WAIT_TIMEOUT_S)
+        rospy.loginfo("Connection to service " + self._GET_SPEED_OVERRIDE_SRV + " estabilshed")
+        self._get_speed_override_srv = rospy.ServiceProxy(self._GET_SPEED_OVERRIDE_SRV, GetSpeedOverride)
 
     def _release(self):
         rospy.logdebug("Release called")
