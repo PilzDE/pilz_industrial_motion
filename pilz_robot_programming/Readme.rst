@@ -5,13 +5,8 @@ to execute command sequences (called :py:class:`.Sequence`). On top of that, the
 stopped.
 
 All examples are given for a PRBT robot but the API is general enough to be used with any robot that
-has a MoveIt! configuration, it merely requires the availability of the following services:
-
-- ``/get_speed_override``
-- ``/prbt/brake_test_required``
-- ``/prbt/execute_braketest``
-
-In particular, this enables the execution of brake tests. More information can be found here_.
+has a MoveIt! configuration, it merely requires the availability of the service ``/get_speed_override``
+for obtaining the speed override of the robot system.
 
 .. _here: https://github.com/PilzDE/pilz_robots/tree/melodic-devel/prbt_hardware_support
 
