@@ -162,7 +162,7 @@ class Robot(object):
     def speed_override(self):
         """ Returns the currently active speed override
 
-        Both velocity and acceleration scaling are factorized. The command itself remains untouched.
+        Both velocity and acceleration scaling of a command are factorized during :py:meth:`move`. The command itself remains untouched.
         """
         res = self._get_speed_override_srv()
 

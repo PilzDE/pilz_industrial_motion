@@ -5,7 +5,15 @@ to execute command sequences (called :py:class:`.Sequence`). On top of that, the
 stopped.
 
 All examples are given for a PRBT robot but the API is general enough to be used with any robot that
-has a MoveIt! configuration.
+has a MoveIt! configuration, it merely requires the availability of the following services:
+
+- ``/get_operation_mode``
+- ``/prbt/brake_test_required``
+- ``/prbt/execute_braketest``
+
+In particular, this enables the execution of brake tests. More information can be found here_.
+
+.. _here: https://github.com/PilzDE/pilz_robots/tree/melodic-devel/prbt_hardware_support
 
 The robot API has some similarity to the ``moveit_commander`` package but differs in its specialization for
 classical industrial robot commands to be executed by the ``pilz_command_planner`` MoveIt! plugin. The
@@ -63,6 +71,18 @@ robot behaves as expected/intended. In case the versions do not match, an except
 
 :note:
     For the API version check only the major version number is relevant.
+
+Speed-override
+^^^^^^^^^^^^^^
+
+The speed override depends on the operation mode of the robot system,
+see prbt_hardware_support_.
+
+.. _prbt_hardware_support: https://github.com/PilzDE/pilz_robots/tree/melodic-devel/prbt_hardware_support
+
+.. code-block:: python
+
+    print(r.speed_override)
 
 Move
 ^^^^

@@ -28,6 +28,9 @@ def start_program():
 
     r = Robot(__REQUIRED_API_VERSION__)
 
+    # Print global speed override
+    print(r.speed_override)
+
     # Simple ptp movement
     r.move(Ptp(goal=[0, 0.5, 0.5, 0, 0, 0], vel_scale=0.4))
 
