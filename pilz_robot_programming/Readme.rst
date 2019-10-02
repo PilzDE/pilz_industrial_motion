@@ -7,7 +7,7 @@ stopped.
 All examples are given for a PRBT robot but the API is general enough to be used with any robot that
 has a MoveIt! configuration, it merely requires the availability of the following services:
 
-- ``/get_operation_mode``
+- ``/get_speed_override``
 - ``/prbt/brake_test_required``
 - ``/prbt/execute_braketest``
 
@@ -76,7 +76,7 @@ Speed-override
 ^^^^^^^^^^^^^^
 
 The speed override depends on the operation mode of the robot system,
-see prbt_hardware_support_.
+see prbt_hardware_support_, it can not be set via the Python API.
 
 .. _prbt_hardware_support: https://github.com/PilzDE/pilz_robots/tree/melodic-devel/prbt_hardware_support
 
