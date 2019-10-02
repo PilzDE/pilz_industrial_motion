@@ -42,7 +42,7 @@ class TestGlobalMotionFactor(unittest.TestCase):
 
     def testSettingOverride(self):
         setOverrideParam(0.3)
-        self.assertEqual(self.robot.speed_override, 0.3)
+        self.assertEqual(self.robot._speed_override, 0.3)
 
     def testInvariantMoveOnCommand(self):
         """ Test that the command itself remains untouched to the speed override"""

@@ -383,9 +383,9 @@ class TestAPICmdConversion(unittest.TestCase):
         # +++++++++++++++++++++++
         rospy.loginfo("Step 2")
         # +++++++++++++++++++++++
-        self.assertEquals(self.robot.speed_override*self.robot.speed_override*EXP_VEL_SCALE*EXP_VEL_SCALE,
+        self.assertEquals(self.robot._speed_override*self.robot._speed_override*EXP_VEL_SCALE*EXP_VEL_SCALE,
                           req.max_acceleration_scaling_factor)
-        self.assertEquals(self.robot.speed_override*EXP_VEL_SCALE, req.max_velocity_scaling_factor)
+        self.assertEquals(self.robot._speed_override*EXP_VEL_SCALE, req.max_velocity_scaling_factor)
 
     def test_lin_cmd_convert_pose(self):
         """ Check that conversion to MotionPlanRequest works correctly.
@@ -556,8 +556,8 @@ class TestAPICmdConversion(unittest.TestCase):
         # +++++++++++++++++++++++
         rospy.loginfo("Step 2")
         # +++++++++++++++++++++++
-        self.assertEquals(self.robot.speed_override*EXP_VEL_SCALE, req.max_acceleration_scaling_factor)
-        self.assertEquals(self.robot.speed_override*EXP_VEL_SCALE, req.max_velocity_scaling_factor)
+        self.assertEquals(self.robot._speed_override*EXP_VEL_SCALE, req.max_acceleration_scaling_factor)
+        self.assertEquals(self.robot._speed_override*EXP_VEL_SCALE, req.max_velocity_scaling_factor)
 
     def test_circ_cmd_convert_center(self):
         """ Check that conversion to MotionPlanRequest works correctly.
@@ -705,8 +705,8 @@ class TestAPICmdConversion(unittest.TestCase):
         # +++++++++++++++++++++++
         rospy.loginfo("Step 2")
         # +++++++++++++++++++++++
-        self.assertEquals(self.robot.speed_override*EXP_VEL_SCALE, req.max_acceleration_scaling_factor)
-        self.assertEquals(self.robot.speed_override*EXP_VEL_SCALE, req.max_velocity_scaling_factor)
+        self.assertEquals(self.robot._speed_override*EXP_VEL_SCALE, req.max_acceleration_scaling_factor)
+        self.assertEquals(self.robot._speed_override*EXP_VEL_SCALE, req.max_velocity_scaling_factor)
 
     def test_get_sequence_request(self):
         """ Test the _get_sequence_request function of Sequence command works correctly.

@@ -67,17 +67,11 @@ robot behaves as expected/intended. In case the versions do not match, an except
 :note:
     For the API version check only the major version number is relevant.
 
-Speed-override
-^^^^^^^^^^^^^^
-
-The speed override depends on the operation mode of the robot system,
-see prbt_hardware_support_, it can not be set via the Python API.
+:note:
+    In general the speed of all motions depends on the operation mode of the robot system.
+    For more information see prbt_hardware_support_.
 
 .. _prbt_hardware_support: https://github.com/PilzDE/pilz_robots/tree/melodic-devel/prbt_hardware_support
-
-.. code-block:: python
-
-    print(r.speed_override)
 
 Move
 ^^^^

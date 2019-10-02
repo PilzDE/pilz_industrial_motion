@@ -4,7 +4,7 @@ Changelog for package pilz_robot_programming
 
 Forthcoming
 -----------
-* Add speed override as readable property
+* Override speed of motions
 * Contributors: Pilz GmbH and Co. KG
 
 0.4.7 (2019-09-10)
