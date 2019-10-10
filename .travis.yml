@@ -4,9 +4,7 @@ sudo: required
 dist: trusty
 language: generic
 
-cache:
-  directories:
-    - $HOME/.ccache
+cache: ccache
 
 notifications:
   email:
@@ -16,18 +14,14 @@ notifications:
       - c.henkel@pilz.de
       - h.slusarek@pilz.de
       - i.martini@pilz.de
+
 env:
   global:
-    - AFTER_SCRIPT='apt list --installed | grep "^ros-"'
-    - CCACHE_DIR=$HOME/.ccache
-    - ROS_DISTRO="melodic"
-    - CATKIN_LINT=true
-    - CATKIN_LINT_ARGS='--strict'
-    - ADDITIONAL_DEBS="clang-tidy libclang-dev"
+    - ROS_DISTRO=melodic
     - DOCKER_IMAGE=moveit/moveit:master-ci
-    - ROS_REPO=ros
-    - CATKIN_CONFIG='--install "${ROS_UNDERLAY:-/opt/ros/$ROS_DISTRO}"'
-install:
-  - git clone --depth=1 --branch master https://github.com/ros-industrial/industrial_ci.git .industrial_ci
+
+before_script:
+  - git clone -q --depth=1 https://github.com/ros-planning/moveit_ci.git .moveit_ci
+
 script:
-  - .industrial_ci/travis.sh
+  - .moveit_ci/travis.sh
