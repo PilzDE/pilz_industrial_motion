@@ -234,6 +234,7 @@ if(CATKIN_ENABLE_TESTING)
       src/cartesian_limits_aggregator.cpp
       src/planning_context_loader.cpp
       src/plan_components_builder.cpp
+      src/pilz_command_planner.cpp
   )
 
   target_link_libraries(${PROJECT_NAME}_test
@@ -429,7 +430,7 @@ ${catkin_LIBRARIES} ${PROJECT_NAME}_test)
   )
 
   target_link_libraries(unittest_pilz_command_planner
-    ${catkin_LIBRARIES})
+    ${catkin_LIBRARIES} ${PROJECT_NAME}_test)
 
   # JointLimitsAggregator Unit Test
   add_rostest_gtest(unittest_joint_limits_aggregator
