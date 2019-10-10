@@ -10,15 +10,12 @@ notifications:
   email:
     on_failure: always
     recipients:
-      - a.gutenkunst@pilz.de
-      - c.henkel@pilz.de
-      - h.slusarek@pilz.de
-      - i.martini@pilz.de
+      - j.schleicher@pilz.de
 
 env:
   global:
     - ROS_DISTRO=melodic
-    - DOCKER_IMAGE=moveit/moveit:master-ci
+    - DOCKER_IMAGE=moveit/moveit:master-source
 
 before_script:
   - git clone -q --depth=1 https://github.com/ros-planning/moveit_ci.git .moveit_ci
