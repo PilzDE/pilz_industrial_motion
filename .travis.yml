@@ -26,6 +26,7 @@ env:
     - ADDITIONAL_DEBS="clang-tidy libclang-dev"
     - DOCKER_IMAGE=moveit/moveit:master-ci
     - ROS_REPO=ros
+    - CATKIN_CONFIG='--install "${ROS_UNDERLAY:-/opt/ros/$ROS_DISTRO}"'
 install:
   - git clone --depth=1 --branch master https://github.com/ros-industrial/industrial_ci.git .industrial_ci
 script:
