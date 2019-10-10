@@ -24,13 +24,8 @@ env:
     - CATKIN_LINT=true
     - CATKIN_LINT_ARGS='--strict'
     - ADDITIONAL_DEBS="clang-tidy libclang-dev"
-    - DOCKER_IMAGE=moveit/moveit:master-source
-  matrix:
+    - DOCKER_IMAGE=moveit/moveit:master-ci
     - ROS_REPO=ros
-    - ROS_REPO=ros-shadow-fixed
-matrix:
-  allow_failures:
-    - env: ROS_REPO=ros
 install:
   - git clone --depth=1 --branch master https://github.com/ros-industrial/industrial_ci.git .industrial_ci
 script:
