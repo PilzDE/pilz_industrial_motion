@@ -21,26 +21,24 @@ import rospy
 from tf import transformations
 from geometry_msgs.msg import Quaternion, Pose
 from geometry_msgs.msg import PoseStamped
-from pilz_msgs.msg import MoveGroupSequenceGoal, MotionSequenceRequest, MotionSequenceItem
+from pilz_msgs.msg import MoveGroupSequenceGoal, MotionSequenceItem
 from moveit_msgs.msg import (OrientationConstraint, MotionPlanRequest, JointConstraint, Constraints,
-                             MoveGroupGoal, PositionConstraint, PlanningOptions)
+                             PositionConstraint, PlanningOptions)
 import shape_msgs.msg as shape_msgs
 from operator import add
 from math import pi
 
 from .move_control_request import _MoveControlState
-from .exceptions import RobotCurrentStateError
 from copy import deepcopy
 
 
 __version__ = '0.0.dev1'
 
 # Default velocities
-_MAX_VEL_SCALE = 1
-_DEFAULT_VEL_SCALE = 0.1
+_DEFAULT_CARTESIAN_VEL_SCALE = 0.1
+_DEFAULT_JOINT_VEL_SCALE = 1.0
 
-# Default accelerations
-_MAX_ACC_SCALE = 1
+# Default acceleration
 _DEFAULT_ACC_SCALE = 0.1
 
 # Tolerance for cartesian pose
@@ -176,7 +174,7 @@ class _BaseCmd(_AbstractCmd):
     :type reference_frame: string
     """
     def __init__(self, goal=None, planning_group=_DEFAULT_PLANNING_GROUP, target_link=_DEFAULT_TARGET_LINK,
-                 vel_scale=_DEFAULT_VEL_SCALE, acc_scale=_DEFAULT_ACC_SCALE, relative=False,
+                 vel_scale=_DEFAULT_CARTESIAN_VEL_SCALE, acc_scale=_DEFAULT_ACC_SCALE, relative=False,
                  reference_frame=_DEFAULT_BASE_LINK, *args, **kwargs):
         super(_BaseCmd, self).__init__(*args, **kwargs)
 
@@ -321,7 +319,7 @@ class Ptp(_BaseCmd):
 
             acc_scale = vel_scale * vel_scale
     """
-    def __init__(self, vel_scale=_MAX_VEL_SCALE, acc_scale=None, *args, **kwargs):
+    def __init__(self, vel_scale=_DEFAULT_JOINT_VEL_SCALE, acc_scale=None, *args, **kwargs):
         acc_scale_final = acc_scale if acc_scale is not None else Ptp._calc_acc_scale(vel_scale)
         super(Ptp, self).__init__(vel_scale=vel_scale, acc_scale=acc_scale_final, *args, **kwargs)
         self._planner_id = "PTP"
@@ -366,7 +364,7 @@ class Lin(_BaseCmd):
 
             acc_scale = vel_scale
     """
-    def __init__(self, vel_scale=_DEFAULT_VEL_SCALE, acc_scale=None, *args, **kwargs):
+    def __init__(self, vel_scale=_DEFAULT_CARTESIAN_VEL_SCALE, acc_scale=None, *args, **kwargs):
 
         acc_scale_final = acc_scale if acc_scale is not None else Lin._calc_acc_scale(vel_scale)
 
@@ -427,7 +425,8 @@ class Circ(_BaseCmd):
 
             acc_scale = vel_scale
     """
-    def __init__(self, interim=None, center=None, vel_scale=_DEFAULT_VEL_SCALE, acc_scale=None, *args, **kwargs):
+    def __init__(self, interim=None, center=None, vel_scale=_DEFAULT_CARTESIAN_VEL_SCALE, acc_scale=None,
+                 *args, **kwargs):
 
         acc_scale_final = acc_scale if acc_scale is not None else Circ._calc_acc_scale(vel_scale)
 
@@ -587,7 +586,7 @@ class Gripper(_BaseCmd):
 
             allowed axis velocity = vel_scale * maximal axis velocity
     """
-    def __init__(self, goal, vel_scale=_DEFAULT_VEL_SCALE, *args, **kwargs):
+    def __init__(self, goal, vel_scale=_DEFAULT_CARTESIAN_VEL_SCALE, *args, **kwargs):
         super(Gripper, self).__init__(goal=goal, planning_group=_DEFAULT_GRIPPER_PLANNING_GROUP,
                                       vel_scale=vel_scale, relative=False, *args, **kwargs)
 

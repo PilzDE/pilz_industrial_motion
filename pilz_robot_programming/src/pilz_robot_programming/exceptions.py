@@ -34,10 +34,6 @@ class RobotMoveFailed(Exception):
     pass
 
 
-class RobotMoveInvalidState(Exception):
-    pass
-
-
 class RobotUnknownCommandType(Exception):
     pass
 
