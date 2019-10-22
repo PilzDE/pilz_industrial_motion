@@ -78,7 +78,7 @@ if(CATKIN_ENABLE_TESTING)
   find_package(rostest REQUIRED)
   find_package(code_coverage REQUIRED)
 
-  # PlanningContextPTP Unit Test
+  # Unittest of joint_limits_extension
   add_rostest_gtest(unittest_joint_limit
     test/unittest_joint_limit.test
     test/unittest_joint_limit.cpp)
