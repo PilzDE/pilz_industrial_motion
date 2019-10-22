@@ -26,7 +26,7 @@ env:
     - ADDITIONAL_DEBS="clang-tidy libclang-dev"
   matrix:
     - ROS_REPO=ros
-    - ROS_REPO=ros-shadow-fixed
+    - ROS_REPO=testing
 matrix:
   allow_failures:
     - env: ROS_REPO=ros
