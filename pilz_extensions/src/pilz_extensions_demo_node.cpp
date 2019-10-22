@@ -27,22 +27,15 @@
  */
 int main(int argc, char **argv)
 {
-  ros::init (argc, argv, "demo_extension");
-  ros::AsyncSpinner spinner(1);
-  spinner.start();
+  ros::init (argc, argv, "pilz_extensions_demo_node");
   ros::NodeHandle node_handle("~");
 
   // Joints limits interface
   pilz_extensions::joint_limits_interface::JointLimits joint_limits_extended;
-  joint_limits_interface::JointLimits joint_limits;
   pilz_extensions::joint_limits_interface::getJointLimits("joint_1", node_handle, joint_limits_extended);
 
   ROS_INFO_STREAM("Acceleration Limit: " << joint_limits_extended.max_acceleration);
   ROS_INFO_STREAM("Deceleration Limit: " << joint_limits_extended.max_deceleration);
 
-
-
-  ros::shutdown();
-
-  return 0;
+  return EXIT_SUCCESS;
 }

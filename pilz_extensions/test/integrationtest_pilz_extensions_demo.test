@@ -1,5 +1,5 @@
 <!--
-Copyright © 2018 Pilz GmbH & Co. KG
+Copyright © 2019 Pilz GmbH & Co. KG
 
 Licensed under the Apache License, Version 2.0 (the "License");
 you may not use this file except in compliance with the License.
@@ -15,9 +15,8 @@ limitations under the License.
 -->
 
 <launch>
-  <!-- extensions demo -->
-  <node name="pilz_extensions_demo_node" pkg="pilz_extensions" type="pilz_extensions_demo_node" output="screen">
-    <rosparam command="load" file="$(find pilz_extensions)/config/demo_joint_limits.yaml" />
-  </node>
-
+  <!-- run test -->
+  <test pkg="pilz_extensions" test-name="integrationtest_pilz_extensions_demo"
+        type="integrationtest_pilz_extensions_demo.py">
+  </test>
 </launch>
