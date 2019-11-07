@@ -30,10 +30,8 @@ class JointLimitTest : public ::testing::Test
 {
 };
 
-/**
- * @brief Simple read
- */
-TEST_F(JointLimitTest, SimpleRead) {
+TEST_F(JointLimitTest, SimpleRead)
+{
   ros::NodeHandle node_handle("~");
 
   // Joints limits interface
@@ -46,10 +44,8 @@ TEST_F(JointLimitTest, SimpleRead) {
   EXPECT_EQ(-1, joint_limits_extended.max_deceleration);
 }
 
-/**
- * @brief Test reading a non-existing joint limit
- */
-TEST_F(JointLimitTest, readNonExistingJointLimit) {
+TEST_F(JointLimitTest, readNonExistingJointLimit)
+{
   ros::NodeHandle node_handle("~");
 
   // Joints limits interface
@@ -66,7 +62,8 @@ TEST_F(JointLimitTest, readNonExistingJointLimit) {
  *
  * For full coverage.
  */
-TEST_F(JointLimitTest, readInvalidParameterName) {
+TEST_F(JointLimitTest, readInvalidParameterName)
+{
   ros::NodeHandle node_handle("~");
 
   // Joints limits interface
@@ -78,10 +75,8 @@ TEST_F(JointLimitTest, readInvalidParameterName) {
                                                                        joint_limits_extended));
 }
 
-/**
- * @brief Old still works
- */
-TEST_F(JointLimitTest, OldRead) {
+TEST_F(JointLimitTest, OldRead)
+{
   ros::NodeHandle node_handle("~");
 
   // Joints limits interface

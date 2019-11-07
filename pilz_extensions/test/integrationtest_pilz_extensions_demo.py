@@ -23,7 +23,7 @@ PACKAGE_NAME = 'pilz_extensions'
 
 ## Test the pilz_extensions demo
 #
-# This test exists mainly for full coverage
+# This test exists for code coverage of pilz_extensions_demo_node.cpp
 class IntegrationtestPilzExtensionsDemo(unittest.TestCase):
 
     ##  Test Sequence:
