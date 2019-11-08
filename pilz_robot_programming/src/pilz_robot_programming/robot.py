@@ -30,7 +30,7 @@ from std_srvs.srv import Trigger
 import tf
 
 from pilz_msgs.msg import MoveGroupSequenceAction
-from prbt_hardware_support.srv import IsBrakeTestRequired, IsBrakeTestRequiredResponse, BrakeTest, BrakeTestResponse
+from pilz_msgs.srv import IsBrakeTestRequired, IsBrakeTestRequiredResponse, BrakeTest, BrakeTestResponse
 from .move_control_request import _MoveControlState, MoveControlAction, _MoveControlStateMachine
 from .commands import _AbstractCmd, _DEFAULT_PLANNING_GROUP, _DEFAULT_TARGET_LINK, _DEFAULT_BASE_LINK, Sequence
 from .exceptions import *
@@ -369,7 +369,7 @@ class Robot(object):
             resp.error_msg
         ))
         if not resp.success:
-            e = RobotBrakeTestException(resp.error_code, resp.error_msg)
+            e = RobotBrakeTestException(resp.resp.error_msg)
             rospy.logerr("Brake Test returned: " + str(e))
             raise e
 
