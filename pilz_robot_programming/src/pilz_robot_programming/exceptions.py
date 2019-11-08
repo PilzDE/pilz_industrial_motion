@@ -43,14 +43,4 @@ class RobotCurrentStateError(Exception):
 
 
 class RobotBrakeTestException(Exception):
-    def __init__(self, result, message):
-        _message = "{0}:{1}, msg: {2} ".format(
-            result,
-            self._result_nr_to_description(result),
-            message)
-        super(RobotBrakeTestException, self).__init__(_message)
-
-    def _result_nr_to_description(self, result):
-        for description in filter(str.isupper, BrakeTestErrorCodes.__dict__.keys()):
-            if result.value == eval("BrakeTestErrorCodes." + description):
-                return description
+    pass

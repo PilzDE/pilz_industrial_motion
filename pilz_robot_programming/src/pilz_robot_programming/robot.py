@@ -29,9 +29,9 @@ from std_msgs.msg import Header
 from std_srvs.srv import Trigger
 import tf
 
-from pilz_msgs.msg import MoveGroupSequenceAction
-from pilz_msgs.srv import GetSpeedOverride
-from prbt_hardware_support.srv import IsBrakeTestRequired, IsBrakeTestRequiredResponse, BrakeTest, BrakeTestResponse
+from pilz_msgs.msg import MoveGroupSequenceAction, IsBrakeTestRequiredResult
+from pilz_msgs.srv import GetSpeedOverride, IsBrakeTestRequired, BrakeTest, BrakeTestResponse
+
 from .move_control_request import _MoveControlState, MoveControlAction, _MoveControlStateMachine
 from .commands import _AbstractCmd, _DEFAULT_PLANNING_GROUP, _DEFAULT_TARGET_LINK, _DEFAULT_BASE_LINK, Sequence
 from .exceptions import *
@@ -313,13 +313,13 @@ class Robot(object):
                 self._BRAKE_TEST_REQUIRED_SRV,
                 IsBrakeTestRequired)
             resp = is_brake_test_required_client()
-            if resp.result == IsBrakeTestRequiredResponse.REQUIRED:
+            if resp.result.value == IsBrakeTestRequiredResult.REQUIRED:
                 rospy.loginfo("Brake Test REQUIRED")
                 return True
-            elif resp.result == IsBrakeTestRequiredResponse.NOT_REQUIRED:
+            elif resp.result.value == IsBrakeTestRequiredResult.NOT_REQUIRED:
                 rospy.loginfo("Brake Test NOT REQUIRED")
                 return False
-            elif resp.result == IsBrakeTestRequiredResponse.UNKNOWN:
+            elif resp.result.value == IsBrakeTestRequiredResult.UNKNOWN:
                 rospy.logerr("Failure during call of braketest required service: BrakeTestRequirementStatus UNKNOWN")
                 raise rospy.ROSException("Could not determine if braketest is required.")
         except rospy.ROSException, e:
@@ -352,7 +352,7 @@ class Robot(object):
             resp.error_msg
         ))
         if not resp.success:
-            e = RobotBrakeTestException(resp.error_code, resp.error_msg)
+            e = RobotBrakeTestException(resp.error_msg)
             rospy.logerr("Brake Test returned: " + str(e))
             raise e
 

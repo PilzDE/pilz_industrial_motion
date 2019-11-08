@@ -18,14 +18,13 @@ from threading import Thread
 
 import rospy
 
-from prbt_hardware_support.srv import \
+from pilz_msgs.msg import IsBrakeTestRequiredResult
+
+from pilz_msgs.srv import \
     BrakeTest, \
     BrakeTestResponse, \
     IsBrakeTestRequired, \
     IsBrakeTestRequiredResponse
-
-from prbt_hardware_support.msg import BrakeTestErrorCodes
-from prbt_hardware_support.srv import IsBrakeTestRequiredResponse
 
 BRAKE_TEST_REQUIRED_SERVICE_NAME = "/prbt/brake_test_required"
 BRAKE_TEST_EXECUTE_SERVICE_NAME = "/prbt/execute_braketest"
@@ -42,21 +41,22 @@ class BrakeTestMock(Thread):
         rospy.loginfo("Mocking Brake Test")
         self._is_brake_test_required_service_mock = None
         self._brake_test_execute_service_mock = None
-        self._is_brake_test_required = IsBrakeTestRequiredResponse(result=IsBrakeTestRequiredResponse.NOT_REQUIRED)
+        self._is_brake_test_required = IsBrakeTestRequiredResult.NOT_REQUIRED
         self._brake_test_execute_duration_s = .1
-        self._brake_test_execute_result = BrakeTestErrorCodes.STATUS_SUCCESS
+        self._brake_test_execute_success = True
         self._brake_test_execute_msg = "Test Message"
         self._running = True
 
     def _is_brake_test_required_server_handler(self, _):
-        return self._is_brake_test_required
+        res = IsBrakeTestRequiredResponse()
+        res.result.value = self._is_brake_test_required
+        return res
 
     def _brake_test_execute_server_handler(self, _):
         # Sleeping ot simulate execution of brake test
         rospy.sleep(self._brake_test_execute_duration_s)
         res = BrakeTestResponse()
-        res.success = self._brake_test_execute_result == BrakeTestErrorCodes.STATUS_SUCCESS
-        res.error_code.value = self._brake_test_execute_result
+        res.success = self._brake_test_execute_success
         res.error_msg = self._brake_test_execute_msg
         return res
 
@@ -95,7 +95,7 @@ class BrakeTestMock(Thread):
 
         :param state: status that the service should return
         """
-        self._is_brake_test_required = IsBrakeTestRequiredResponse(result=state)
+        self._is_brake_test_required = state
 
     def set_brake_test_execute_duration_s(self, duration):
         """Set the duration of the simulated brake test
@@ -104,9 +104,12 @@ class BrakeTestMock(Thread):
         """
         self._brake_test_execute_duration_s = duration
 
-    def set_brake_test_execute_result(self, result):
-        """Set the result that the simulated brake test should return
-
-        :param result: desired result
+    def set_brake_test_execute_success(self):
+        """Set that the simulated brake test should be successful
         """
-        self._brake_test_execute_result = result
+        self._brake_test_execute_success = True
+
+    def set_brake_test_execute_failure(self):
+        """Set that the simulated brake test should have failed
+        """
+        self._brake_test_execute_success = False

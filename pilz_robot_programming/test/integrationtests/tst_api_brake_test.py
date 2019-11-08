@@ -22,8 +22,7 @@ import rospy
 from pilz_robot_programming.exceptions import RobotBrakeTestException
 from pilz_robot_programming.robot import Robot
 from brake_test_mock import BrakeTestMock
-from prbt_hardware_support.msg import BrakeTestErrorCodes
-from prbt_hardware_support.srv import IsBrakeTestRequiredResponse
+from pilz_msgs.msg import IsBrakeTestRequiredResult
 
 
 API_VERSION = "1"
@@ -50,7 +49,7 @@ class TestAPIBrakeTest(unittest.TestCase):
         mock.start()
         mock.advertise_brake_test_required_service()
 
-        mock.set_is_brake_test_required_state(IsBrakeTestRequiredResponse.REQUIRED)
+        mock.set_is_brake_test_required_state(IsBrakeTestRequiredResult.REQUIRED)
 
         res = self.robot.is_brake_test_required()
 
@@ -67,7 +66,7 @@ class TestAPIBrakeTest(unittest.TestCase):
         mock.start()
         mock.advertise_brake_test_required_service()
 
-        mock.set_is_brake_test_required_state(IsBrakeTestRequiredResponse.NOT_REQUIRED)
+        mock.set_is_brake_test_required_state(IsBrakeTestRequiredResult.NOT_REQUIRED)
 
         res = self.robot.is_brake_test_required()
 
@@ -84,7 +83,7 @@ class TestAPIBrakeTest(unittest.TestCase):
         mock.start()
         mock.advertise_brake_test_required_service()
 
-        mock.set_is_brake_test_required_state(IsBrakeTestRequiredResponse.UNKNOWN)
+        mock.set_is_brake_test_required_state(IsBrakeTestRequiredResult.UNKNOWN)
 
         self.assertRaises(
             rospy.ROSException,
@@ -101,7 +100,7 @@ class TestAPIBrakeTest(unittest.TestCase):
         mock.start()
         mock.advertise_brake_test_execute_service()
 
-        mock.set_brake_test_execute_result(BrakeTestErrorCodes.STATUS_SUCCESS)
+        mock.set_brake_test_execute_success()
         self.robot.execute_brake_test()
 
         mock.stop()
@@ -113,15 +112,13 @@ class TestAPIBrakeTest(unittest.TestCase):
         mock.start()
         mock.advertise_brake_test_execute_service()
 
-        mock.set_brake_test_execute_result(BrakeTestErrorCodes.FAILURE)
+        mock.set_brake_test_execute_failure()
 
         try:
             self.robot.execute_brake_test()
         except Exception as e:
             # Testing wether it is the right exception
             self.assertIsInstance(e, RobotBrakeTestException)
-            # Checking if the error code is resolved correctly in the exception message
-            self.assertIn("FAILURE", str(e))
 
         mock.stop()
         mock.join()
