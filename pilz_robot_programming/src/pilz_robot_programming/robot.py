@@ -369,7 +369,7 @@ class Robot(object):
             resp.error_msg
         ))
         if not resp.success:
-            e = RobotBrakeTestException(resp.resp.error_msg)
+            e = RobotBrakeTestException(resp.error_msg)
             rospy.logerr("Brake Test returned: " + str(e))
             raise e
 
