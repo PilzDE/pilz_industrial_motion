@@ -2,6 +2,11 @@
 Changelog for package pilz_msgs
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
+Forthcoming
+-----------
+* Add srv definitions for the brake-test support
+* Contributors: Pilz GmbH and Co. KG
+
 0.4.7 (2019-09-10)
 ------------------
 
