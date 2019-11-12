@@ -43,12 +43,6 @@ include_directories(
  ${catkin_INCLUDE_DIRS}
 )
 
-add_executable(${PROJECT_NAME}_demo_node src/pilz_extensions_demo_node.cpp)
-
-target_link_libraries(${PROJECT_NAME}_demo_node
-   ${catkin_LIBRARIES}
- )
-
 #############
 ## Install ##
 #############
@@ -60,12 +54,6 @@ install(DIRECTORY include/${PROJECT_NAME}/
   PATTERN ".svn" EXCLUDE
 )
 
-install(TARGETS ${PROJECT_NAME}_demo_node
-   ARCHIVE DESTINATION ${CATKIN_PACKAGE_LIB_DESTINATION}
-   LIBRARY DESTINATION ${CATKIN_PACKAGE_LIB_DESTINATION}
-   RUNTIME DESTINATION ${CATKIN_PACKAGE_BIN_DESTINATION}
-)
-
 
 #############
 ## Testing ##
@@ -73,8 +61,6 @@ install(TARGETS ${PROJECT_NAME}_demo_node
 
 if(CATKIN_ENABLE_TESTING)
 
-  find_package(roslint REQUIRED)
-  find_package(rospy REQUIRED)
   find_package(rostest REQUIRED)
   find_package(code_coverage REQUIRED)
 
@@ -85,11 +71,6 @@ if(CATKIN_ENABLE_TESTING)
 
   target_link_libraries(unittest_joint_limit
      ${catkin_LIBRARIES})
-
-  # Integrationtest of pilz_extensions_demo_node
-  add_rostest(test/integrationtest_pilz_extensions_demo.test)
-
-  roslint_python(test/integrationtest_pilz_extensions_demo.py)
 
   # to run: catkin_make -DENABLE_COVERAGE_TESTING=ON package_name_coverage
   if(ENABLE_COVERAGE_TESTING)
