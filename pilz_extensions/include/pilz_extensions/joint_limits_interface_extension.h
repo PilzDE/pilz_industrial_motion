@@ -52,7 +52,7 @@ inline bool getJointLimits(const std::string& joint_name,
 
   // Set the existing limits
   if(! ::joint_limits_interface::getJointLimits(joint_name, nh, limits)) {
-    return false;
+    return false; //LCOV_EXCL_LINE // The case where getJointLimits returns false is covered above.
   }
 
   // Deceleration limits

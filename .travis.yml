@@ -26,7 +26,7 @@ env:
     - ADDITIONAL_DEBS="clang-tidy libclang-dev"
   matrix:
     - ROS_REPO=ros
-    - ROS_REPO=ros-shadow-fixed
+    - ROS_REPO=testing
     - ROS_REPO="testing"
       CATKIN_LINT=false NOT_TEST_BUILD=true
       AFTER_SCRIPT="./.coverage.sh"

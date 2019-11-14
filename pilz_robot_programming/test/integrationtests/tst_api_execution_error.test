@@ -35,6 +35,7 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
   </node>
 
   <node name="moveit_mock" pkg="pilz_robot_programming" type="moveit_mock.py"/>
+  <node name="fake_speed_override_node" pkg="prbt_hardware_support" type="fake_speed_override_node"/>
 
   <!-- test node -->
   <test test-name="test_api_execution_error" pkg="pilz_robot_programming"

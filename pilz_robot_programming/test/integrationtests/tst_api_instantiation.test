@@ -37,6 +37,8 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
     <arg name="pipeline" value="pilz_command_planner" />
   </include>
 
+  <node name="fake_speed_override_node" pkg="prbt_hardware_support" type="fake_speed_override_node"/>
+
   <!-- test node -->
   <test test-name="test_api_instantiation" pkg="pilz_robot_programming"
         type="tst_api_instantiation.py"

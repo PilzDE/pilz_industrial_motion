@@ -20,6 +20,7 @@ import numpy as np
 import tf
 import tf_conversions.posemath as pm
 from geometry_msgs.msg import Point
+from tst_api_utils import setOverrideParam
 
 
 from pilz_robot_programming.robot import *
@@ -134,6 +135,7 @@ class TestAPICmdConversion(unittest.TestCase):
                                req_position.z)
 
     def setUp(self):
+        setOverrideParam(1.0)
         rospy.loginfo("Loading Robot...")
         self.robot = Robot(API_VERSION)
         rospy.loginfo("Loading Robot done")
@@ -374,16 +376,16 @@ class TestAPICmdConversion(unittest.TestCase):
         # +++++++++++++++++++++++
         ptp = Ptp(goal=self.test_data.get_joints("PTPJointValid", PLANNING_GROUP_NAME), vel_scale=EXP_VEL_SCALE,
                   relative=True)
-        self.robot.global_motion_factor = 0.1
+        setOverrideParam(0.1)
         req = ptp._cmd_to_request(self.robot)
         self.assertIsNotNone(req)
 
         # +++++++++++++++++++++++
         rospy.loginfo("Step 2")
         # +++++++++++++++++++++++
-        self.assertEquals(self.robot.global_motion_factor*self.robot.global_motion_factor*EXP_VEL_SCALE*EXP_VEL_SCALE,
+        self.assertEquals(self.robot._speed_override*self.robot._speed_override*EXP_VEL_SCALE*EXP_VEL_SCALE,
                           req.max_acceleration_scaling_factor)
-        self.assertEquals(self.robot.global_motion_factor*EXP_VEL_SCALE, req.max_velocity_scaling_factor)
+        self.assertEquals(self.robot._speed_override*EXP_VEL_SCALE, req.max_velocity_scaling_factor)
 
     def test_lin_cmd_convert_pose(self):
         """ Check that conversion to MotionPlanRequest works correctly.
@@ -547,15 +549,15 @@ class TestAPICmdConversion(unittest.TestCase):
         # +++++++++++++++++++++++
         lin = Lin(goal=self.test_data.get_joints("LINPose1", PLANNING_GROUP_NAME), vel_scale=EXP_VEL_SCALE,
                   relative=True)
-        self.robot.global_motion_factor = 0.1
+        setOverrideParam(0.1)
         req = lin._cmd_to_request(self.robot)
         self.assertIsNotNone(req)
 
         # +++++++++++++++++++++++
         rospy.loginfo("Step 2")
         # +++++++++++++++++++++++
-        self.assertEquals(self.robot.global_motion_factor*EXP_VEL_SCALE, req.max_acceleration_scaling_factor)
-        self.assertEquals(self.robot.global_motion_factor*EXP_VEL_SCALE, req.max_velocity_scaling_factor)
+        self.assertEquals(self.robot._speed_override*EXP_VEL_SCALE, req.max_acceleration_scaling_factor)
+        self.assertEquals(self.robot._speed_override*EXP_VEL_SCALE, req.max_velocity_scaling_factor)
 
     def test_circ_cmd_convert_center(self):
         """ Check that conversion to MotionPlanRequest works correctly.
@@ -696,15 +698,15 @@ class TestAPICmdConversion(unittest.TestCase):
         exp_help_pose = self.test_data.get_pose("CIRCCenterPose", PLANNING_GROUP_NAME)
 
         circ = Circ(goal=exp_goal_pose, center=exp_help_pose.position, vel_scale=EXP_VEL_SCALE)
-        self.robot.global_motion_factor = 0.1
+        setOverrideParam(0.1)
         req = circ._cmd_to_request(self.robot)
         self.assertIsNotNone(req)
 
         # +++++++++++++++++++++++
         rospy.loginfo("Step 2")
         # +++++++++++++++++++++++
-        self.assertEquals(self.robot.global_motion_factor*EXP_VEL_SCALE, req.max_acceleration_scaling_factor)
-        self.assertEquals(self.robot.global_motion_factor*EXP_VEL_SCALE, req.max_velocity_scaling_factor)
+        self.assertEquals(self.robot._speed_override*EXP_VEL_SCALE, req.max_acceleration_scaling_factor)
+        self.assertEquals(self.robot._speed_override*EXP_VEL_SCALE, req.max_velocity_scaling_factor)
 
     def test_get_sequence_request(self):
         """ Test the _get_sequence_request function of Sequence command works correctly.
@@ -770,7 +772,7 @@ class TestAPICmdConversion(unittest.TestCase):
         self._analyze_request_pose(TARGET_LINK_NAME, exp_circ_goal, circ_req)
         self._analyze_request_circ_help_point("center", exp_circ_center, circ_req)
 
-    def test_get_sequence_request_global_motion_factor(self):
+    def test_get_sequence_request_speed_override(self):
         """ Test that setting the global motion factor on sequence works correctly
 
             Test sequence:
@@ -805,7 +807,7 @@ class TestAPICmdConversion(unittest.TestCase):
 
         # 2
         fac = 0.2
-        self.robot.global_motion_factor = fac
+        setOverrideParam(fac)
 
         # 3
         seq_action_goal = seq._get_sequence_request(self.robot)
