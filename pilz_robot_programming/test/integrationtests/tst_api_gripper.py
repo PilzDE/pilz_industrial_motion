@@ -21,6 +21,7 @@ from pilz_industrial_motion_testutils.xml_testdata_loader import *
 from pilz_robot_programming.commands import *
 from pilz_industrial_motion_testutils.integration_test_utils import *
 from pilz_industrial_motion_testutils.robot_motion_observer import RobotMotionObserver
+from tst_api_utils import setOverrideParam
 
 _TEST_DATA_FILE_NAME = RosPack().get_path("pilz_industrial_motion_testutils") + "/test_data/testdata_deprecated.xml"
 API_VERSION = "1"
@@ -94,6 +95,24 @@ class TestAPIGripper(unittest.TestCase):
         self.assertEqual("PTP", req.planner_id)
         self.assertEqual(0.0, req.goal_constraints[0].joint_constraints[0].position)
         self.assertEqual(0.1, req.max_velocity_scaling_factor)
+
+    def test_gripper_cmd_convert_ignore_speed_override(self):
+        """ Test the gripper convert function ignores the speed override.
+
+            Test sequence:
+                1. Call gripper convert function with a valid floating point goal and set a SpeedOverride
+
+            Test Results:
+                1. The max_velocity_scaling_factor and max_acceleration_scaling_factor is not changed.
+        """
+
+        gripper_cmd = Gripper(goal=0.02, vel_scale=0.1, acc_scale=0.2)
+        req = gripper_cmd._cmd_to_request(self.robot)
+        setOverrideParam(0.1)
+
+        # gripper command is internal a ptp command
+        self.assertEqual(0.1, req.max_velocity_scaling_factor)
+        self.assertEqual(0.2, req.max_acceleration_scaling_factor)
 
     def test_gripper_execution(self):
         """ Test execution of valid gripper command works successfully.
