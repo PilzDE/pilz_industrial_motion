@@ -23,14 +23,15 @@
 #include "pilz_extensions/joint_limits_extension.h"
 #include "pilz_extensions/joint_limits_interface_extension.h"
 
+namespace pilz_extensions_tests
+{
+
 class JointLimitTest : public ::testing::Test
 {
 };
 
-/**
- * @brief Simple read
- */
-TEST_F(JointLimitTest, SimpleRead) {
+TEST_F(JointLimitTest, SimpleRead)
+{
   ros::NodeHandle node_handle("~");
 
   // Joints limits interface
@@ -43,10 +44,39 @@ TEST_F(JointLimitTest, SimpleRead) {
   EXPECT_EQ(-1, joint_limits_extended.max_deceleration);
 }
 
+TEST_F(JointLimitTest, readNonExistingJointLimit)
+{
+  ros::NodeHandle node_handle("~");
+
+  // Joints limits interface
+  pilz_extensions::joint_limits_interface::JointLimits joint_limits_extended;
+  joint_limits_interface::JointLimits joint_limits;
+
+  EXPECT_FALSE(pilz_extensions::joint_limits_interface::getJointLimits("anything",
+                                                                       node_handle,
+                                                                       joint_limits_extended));
+}
+
 /**
- * @brief Old still works
+ * @brief Test reading a joint limit representing an invalid parameter key
+ *
+ * For full coverage.
  */
-TEST_F(JointLimitTest, OldRead) {
+TEST_F(JointLimitTest, readInvalidParameterName)
+{
+  ros::NodeHandle node_handle("~");
+
+  // Joints limits interface
+  pilz_extensions::joint_limits_interface::JointLimits joint_limits_extended;
+  joint_limits_interface::JointLimits joint_limits;
+
+  EXPECT_FALSE(pilz_extensions::joint_limits_interface::getJointLimits("~anything",
+                                                                       node_handle,
+                                                                       joint_limits_extended));
+}
+
+TEST_F(JointLimitTest, OldRead)
+{
   ros::NodeHandle node_handle("~");
 
   // Joints limits interface
@@ -54,6 +84,8 @@ TEST_F(JointLimitTest, OldRead) {
   joint_limits_interface::getJointLimits("joint_1", node_handle, joint_limits);
 
   EXPECT_EQ(1, joint_limits.max_acceleration);
+}
+
 }
 
 int main(int argc, char **argv)
