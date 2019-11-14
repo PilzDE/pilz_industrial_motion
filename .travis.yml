@@ -25,11 +25,11 @@ env:
     - CATKIN_LINT_ARGS='--strict'
     - ADDITIONAL_DEBS="clang-tidy libclang-dev"
   matrix:
-    - ROS_REPO=ros
+    - ROS_REPO=main
     - ROS_REPO=testing
 matrix:
   allow_failures:
-    - env: ROS_REPO=ros
+    - env: ROS_REPO=main
 install:
   - git clone --depth=1 --branch master https://github.com/ros-industrial/industrial_ci.git .industrial_ci
 script:
