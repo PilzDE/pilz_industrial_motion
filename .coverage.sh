@@ -23,6 +23,8 @@ for pkg in $COVERAGE_PKGS; do
         echo "this is home: [$HOME]"
         cd $HOME/.ros
         echo "this is source: [$ws]/src/[$pkg]"
+        echo "target repo path: $TARGET_REPO_PATH"
+        echo "target repo name: $TARGET_REPO_NAME"
         echo "Coverage summary for $pkg ----------------------"
         python-coverage report --include "*$ws/src/$pkg*"
         echo "---------------------------------------------------"
