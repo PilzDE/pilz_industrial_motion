@@ -12,13 +12,22 @@ for pkg in $COVERAGE_PKGS; do
     extend="/opt/ros/$ROS_DISTRO"
     ici_exec_in_workspace "$extend" "$ws" catkin build $pkg -v --no-deps --catkin-make-args ${pkg}_coverage
     cd $TARGET_REPO_PATH
-    echo "Coverage summary for $pkg ----------------------"
-    lcov --summary $ws/build/$pkg/${pkg}_coverage.info.cleaned
-    echo "---------------------------------------------------"
 
-    line_cov_percentage=$(lcov --summary $ws/build/$pkg/${pkg}_coverage.info.cleaned 2>&1 | grep -Poi "lines\.*: \K[0-9.]*")
+    if [ -a $ws/build/$pkg/${pkg}_coverage.info.cleaned ]; then
+        echo "Coverage summary for $pkg ----------------------"
+        lcov --summary $ws/build/$pkg/${pkg}_coverage.info.cleaned
+        echo "---------------------------------------------------"
+
+        line_cov_percentage=$(lcov --summary $ws/build/$pkg/${pkg}_coverage.info.cleaned 2>&1 | grep -Poi "lines\.*: \K[0-9.]*")
+    else
+        cd $HOME/.ros
+        echo "Coverage summary for $pkg ----------------------"
+        python-coverage report --include "*$ws/src/$pkg/src/$pkg*"
+        echo "---------------------------------------------------"
+        line_cov_percentage=$(python-coverage report --include "*$ws/src/$pkg/src/$pkg*" | grep -Poi "TOTAL.* [0-9]* [0-9]* \K[0-9.]*")
+    fi
+
     required_coverage="100.0"
-
     if [ "$line_cov_percentage" != "$required_coverage" ]; then
         result_str="$pkg: $line_cov_percentage%(required:$required_coverage%)\e[${ANSI_RED}m[failed]\e[0m"
         echo -e $result_str

@@ -31,7 +31,7 @@ env:
       CATKIN_LINT=false NOT_TEST_BUILD=true
       AFTER_SCRIPT="./.coverage.sh"
       CMAKE_ARGS="-DENABLE_COVERAGE_TESTING=ON -DCMAKE_BUILD_TYPE=Debug"
-      DOCKER_RUN_OPTS='-e COVERAGE_PKGS="pilz_extensions pilz_trajectory_generation"'
+      DOCKER_RUN_OPTS='-e COVERAGE_PKGS="pilz_extensions pilz_robot_programming"'
 matrix:
   allow_failures:
     - env: ROS_REPO=ros
