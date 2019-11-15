@@ -19,16 +19,16 @@ for pkg in $COVERAGE_PKGS; do
         echo "---------------------------------------------------"
 
         line_cov_percentage=$(lcov --summary $ws/build/$pkg/${pkg}_coverage.info.cleaned 2>&1 | grep -Poi "lines\.*: \K[0-9.]*")
+        required_coverage="100.0"
     else
         cd $HOME/.ros
-        echo "*/$pkg/test/*"
         echo "Coverage summary for $pkg ----------------------"
-        python-coverage report --include "*$ws/src/$TARGET_REPO_NAME/$pkg*"
+        python-coverage report --include "*$ws/src/$TARGET_REPO_NAME/$pkg*" --omit "*/$pkg/test/*"
         echo "---------------------------------------------------"
-        line_cov_percentage=$(python-coverage report --include "$ws/src/$TARGET_REPO_NAME/$pkg*" --omit "$ws/src/$TARGET_REPO_NAME/$pkg/test/*" | grep -Poi "TOTAL.* [0-9]* [0-9]* \K[0-9.]*")
+        line_cov_percentage=$(python-coverage report --include "$ws/src/$TARGET_REPO_NAME/$pkg*" --omit "*/$pkg/test/*" | grep -Poi "TOTAL.* ([0-9]*){2} \K[0-9]*")
+        required_coverage="100"
     fi
 
-    required_coverage="100.0"
     if [ "$line_cov_percentage" != "$required_coverage" ]; then
         result_str="$pkg: $line_cov_percentage%(required:$required_coverage%)\e[${ANSI_RED}m[failed]\e[0m"
         echo -e $result_str
