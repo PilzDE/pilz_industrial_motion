@@ -21,10 +21,11 @@ for pkg in $COVERAGE_PKGS; do
         line_cov_percentage=$(lcov --summary $ws/build/$pkg/${pkg}_coverage.info.cleaned 2>&1 | grep -Poi "lines\.*: \K[0-9.]*")
     else
         cd $HOME/.ros
+        echo "*/$pkg/test/*"
         echo "Coverage summary for $pkg ----------------------"
         python-coverage report --include "*$ws/src/$TARGET_REPO_NAME/$pkg*"
         echo "---------------------------------------------------"
-        line_cov_percentage=$(python-coverage report --include "$ws/src/$TARGET_REPO_NAME/$pkg*" --omit "*/$pkg/test/*" | grep -Poi "TOTAL.* [0-9]* [0-9]* \K[0-9.]*")
+        line_cov_percentage=$(python-coverage report --include "$ws/src/$TARGET_REPO_NAME/$pkg*" --omit "$ws/src/$TARGET_REPO_NAME/$pkg/test/*" | grep -Poi "TOTAL.* [0-9]* [0-9]* \K[0-9.]*")
     fi
 
     required_coverage="100.0"
