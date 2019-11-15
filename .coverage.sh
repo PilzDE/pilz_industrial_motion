@@ -22,7 +22,7 @@ for pkg in $COVERAGE_PKGS; do
     else
         cd $HOME/.ros
         echo "Coverage summary for $pkg ----------------------"
-        python-coverage report --include "*$ws/src/$pkg/src/$pkg*"
+        python-coverage report --include "*$ws/src/$pkg/src*"
         echo "---------------------------------------------------"
         line_cov_percentage=$(python-coverage report --include "*$ws/src/$pkg/src/$pkg*" | grep -Poi "TOTAL.* [0-9]* [0-9]* \K[0-9.]*")
     fi
