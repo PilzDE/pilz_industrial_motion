@@ -18,11 +18,14 @@ from threading import Thread
 
 import rospy
 
-from pilz_msgs.srv import \
+from prbt_hardware_support.srv import \
     BrakeTest, \
     BrakeTestResponse, \
     IsBrakeTestRequired, \
     IsBrakeTestRequiredResponse
+
+from prbt_hardware_support.msg import BrakeTestErrorCodes
+from prbt_hardware_support.srv import IsBrakeTestRequiredResponse
 
 BRAKE_TEST_REQUIRED_SERVICE_NAME = "/prbt/brake_test_required"
 BRAKE_TEST_EXECUTE_SERVICE_NAME = "/prbt/execute_braketest"
@@ -41,7 +44,7 @@ class BrakeTestMock(Thread):
         self._brake_test_execute_service_mock = None
         self._is_brake_test_required = IsBrakeTestRequiredResponse(result=IsBrakeTestRequiredResponse.NOT_REQUIRED)
         self._brake_test_execute_duration_s = .1
-        self._brake_test_execute_success = True
+        self._brake_test_execute_result = BrakeTestErrorCodes.STATUS_SUCCESS
         self._brake_test_execute_msg = "Test Message"
         self._running = True
 
@@ -52,7 +55,8 @@ class BrakeTestMock(Thread):
         # Sleeping ot simulate execution of brake test
         rospy.sleep(self._brake_test_execute_duration_s)
         res = BrakeTestResponse()
-        res.success = self._brake_test_execute_success
+        res.success = self._brake_test_execute_result == BrakeTestErrorCodes.STATUS_SUCCESS
+        res.error_code.value = self._brake_test_execute_result
         res.error_msg = self._brake_test_execute_msg
         return res
 
@@ -100,12 +104,9 @@ class BrakeTestMock(Thread):
         """
         self._brake_test_execute_duration_s = duration
 
-    def set_brake_test_execute_success(self):
-        """Set that the simulated brake test should be successful
-        """
-        self._brake_test_execute_success = True
+    def set_brake_test_execute_result(self, result):
+        """Set the result that the simulated brake test should return
 
-    def set_brake_test_execute_failure(self):
-        """Set that the simulated brake test should have failed
+        :param result: desired result
         """
-        self._brake_test_execute_success = False
+        self._brake_test_execute_result = result

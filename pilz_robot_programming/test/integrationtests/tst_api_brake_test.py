@@ -22,7 +22,8 @@ import rospy
 from pilz_robot_programming.exceptions import RobotBrakeTestException
 from pilz_robot_programming.robot import Robot
 from brake_test_mock import BrakeTestMock
-from pilz_msgs.srv import IsBrakeTestRequiredResponse
+from prbt_hardware_support.msg import BrakeTestErrorCodes
+from prbt_hardware_support.srv import IsBrakeTestRequiredResponse
 
 
 API_VERSION = "1"
@@ -100,7 +101,7 @@ class TestAPIBrakeTest(unittest.TestCase):
         mock.start()
         mock.advertise_brake_test_execute_service()
 
-        mock.set_brake_test_execute_success()
+        mock.set_brake_test_execute_result(BrakeTestErrorCodes.STATUS_SUCCESS)
         self.robot.execute_brake_test()
 
         mock.stop()
@@ -112,13 +113,15 @@ class TestAPIBrakeTest(unittest.TestCase):
         mock.start()
         mock.advertise_brake_test_execute_service()
 
-        mock.set_brake_test_execute_failure()
+        mock.set_brake_test_execute_result(BrakeTestErrorCodes.FAILURE)
 
         try:
             self.robot.execute_brake_test()
         except Exception as e:
             # Testing wether it is the right exception
             self.assertIsInstance(e, RobotBrakeTestException)
+            # Checking if the error code is resolved correctly in the exception message
+            self.assertIn("FAILURE", str(e))
 
         mock.stop()
         mock.join()
