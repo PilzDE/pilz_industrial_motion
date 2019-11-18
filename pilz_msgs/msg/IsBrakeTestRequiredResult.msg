@@ -13,6 +13,8 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
+int8 value
 
----
-IsBrakeTestRequiredResult result
+int8 NOT_REQUIRED = -1
+int8 REQUIRED = 1
+int8 UNKNOWN = 0

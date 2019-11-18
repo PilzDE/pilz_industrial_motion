@@ -10,6 +10,7 @@ find_package(catkin REQUIRED COMPONENTS
    FILES
    MotionSequenceItem.msg
    MotionSequenceRequest.msg
+   IsBrakeTestRequiredResult.msg
  )
 
  #Generate services in the 'srv' folder
