@@ -13,7 +13,7 @@ for pkg in $COVERAGE_PKGS; do
     ici_exec_in_workspace "$extend" "$ws" catkin build $pkg -v --no-deps --catkin-make-args ${pkg}_coverage
     cd $TARGET_REPO_PATH
 
-    echo "PKG: $(pkg)"
+    echo "PKG: $pkg"
     echo ""
 
     echo "PWD: $(pwd)"
