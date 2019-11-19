@@ -10,12 +10,15 @@ find_package(catkin REQUIRED COMPONENTS
    FILES
    MotionSequenceItem.msg
    MotionSequenceRequest.msg
+   IsBrakeTestRequiredResult.msg
  )
 
  #Generate services in the 'srv' folder
  add_service_files(
    FILES
+   BrakeTest.srv
    GetMotionSequence.srv
+   IsBrakeTestRequired.srv
  )
 
 # Generate actions in the 'action' folder
