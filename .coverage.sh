@@ -34,9 +34,9 @@ for pkg in $COVERAGE_PKGS; do
     else
         cd $HOME/.ros
         echo "Coverage summary for $pkg"
-        python-coverage report --include "$ws/src/$pkg/*" --omit "*/$pkg/test/*"
+        python-coverage report --include "$ws/src/$TARGET_REPO_NAME/$pkg/*" --omit "*/$pkg/test/*"
 
-        line_cov_percentage=$(python-coverage report --include "$TARGET_REPO_PATH/$pkg/*" --omit "*/$pkg/test/*" | grep -Poi "TOTAL.* ([0-9]*){2} \K[0-9]*")
+        line_cov_percentage=$(python-coverage report --include "$ws/src/$TARGET_REPO_NAME/$pkg/*" --omit "*/$pkg/test/*" | grep -Poi "TOTAL.* ([0-9]*){2} \K[0-9]*")
         required_coverage="100"
     fi
 
