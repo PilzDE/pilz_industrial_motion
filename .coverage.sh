@@ -13,6 +13,14 @@ for pkg in $COVERAGE_PKGS; do
     ici_exec_in_workspace "$extend" "$ws" catkin build $pkg -v --no-deps --catkin-make-args ${pkg}_coverage
     cd $TARGET_REPO_PATH
 
+    echo "PWD: $(pwd)"
+    echo "$(ls -al)"
+    echo ""
+
+    echo "SOURCE DIR"
+    echo "$(ls -al $ws/src/)"
+    echo ""
+
     if [ -a $ws/build/$pkg/${pkg}_coverage.info.cleaned ]; then
         echo "Coverage summary for $pkg ----------------------"
         lcov --summary $ws/build/$pkg/${pkg}_coverage.info.cleaned
