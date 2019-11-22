@@ -4,6 +4,7 @@ Changelog for package pilz_robot_programming
 
 Forthcoming
 -----------
+* Drop unused variables in python api (#162)
 * Override speed of motions
 * Contributors: Pilz GmbH and Co. KG
 
