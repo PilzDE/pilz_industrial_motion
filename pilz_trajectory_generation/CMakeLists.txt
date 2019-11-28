@@ -218,7 +218,7 @@ if(CATKIN_ENABLE_TESTING)
   ####Integration Tests####
   #########################
 
-  set(${PROJECT_NAME}_integrationtests
+  set(${PROJECT_NAME}_INTEGRATIONTEST_LIBRARIES
     sequence_capability
     pilz_command_planner
     planning_context_loader_ptp
@@ -235,7 +235,7 @@ if(CATKIN_ENABLE_TESTING)
   target_link_libraries(integrationtest_sequence_action_capability
     ${catkin_LIBRARIES}
     ${pilz_testutils_LIBRARIES}
-    ${${PROJECT_NAME}_integrationtests}
+    ${${PROJECT_NAME}_INTEGRATIONTEST_LIBRARIES}
   )
 
   add_rostest(test/integrationtest_sequence_action_capability_with_gripper.test
@@ -259,7 +259,7 @@ if(CATKIN_ENABLE_TESTING)
 
   target_link_libraries(integrationtest_sequence_service_capability
     ${catkin_LIBRARIES}
-    ${${PROJECT_NAME}_integrationtests}
+    ${${PROJECT_NAME}_INTEGRATIONTEST_LIBRARIES}
   )
 
   # Tests with other robots only for kinetic (for now)
@@ -283,7 +283,7 @@ if(CATKIN_ENABLE_TESTING)
 
   target_link_libraries(integrationtest_command_planning
     ${catkin_LIBRARIES}
-    ${${PROJECT_NAME}_integrationtests}
+    ${${PROJECT_NAME}_INTEGRATIONTEST_LIBRARIES}
   )
 
   add_rostest(test/integrationtest_command_planning_with_gripper.test
@@ -307,7 +307,7 @@ if(CATKIN_ENABLE_TESTING)
 
   target_link_libraries(integrationtest_command_list_manager
     ${catkin_LIBRARIES}
-    ${${PROJECT_NAME}_integrationtests}
+    ${${PROJECT_NAME}_INTEGRATIONTEST_LIBRARIES}
   )
 
   add_rostest_gtest(integrationtest_get_solver_tip_frame
@@ -317,7 +317,7 @@ if(CATKIN_ENABLE_TESTING)
 
   target_link_libraries(integrationtest_get_solver_tip_frame
     ${catkin_LIBRARIES}
-    ${${PROJECT_NAME}_integrationtests}
+    ${${PROJECT_NAME}_INTEGRATIONTEST_LIBRARIES}
   )
 
   add_rostest_gtest(integrationtest_plan_components_builder
@@ -327,7 +327,7 @@ if(CATKIN_ENABLE_TESTING)
 
   target_link_libraries(integrationtest_plan_components_builder
     ${catkin_LIBRARIES}
-    ${${PROJECT_NAME}_integrationtests}
+    ${${PROJECT_NAME}_INTEGRATIONTEST_LIBRARIES}
   )
 
 
