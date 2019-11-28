@@ -2,6 +2,9 @@
 Changelog for package pilz_msgs
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
+Forthcoming
+-----------
+
 0.4.8 (2019-11-22)
 ------------------
 * Add srv definition for speed override

@@ -2,6 +2,9 @@
 Changelog for package pilz_extensions
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
+Forthcoming
+-----------
+
 0.4.8 (2019-11-22)
 ------------------
 * Remove demo node

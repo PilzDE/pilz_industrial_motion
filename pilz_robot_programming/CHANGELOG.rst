@@ -2,6 +2,11 @@
 Changelog for package pilz_robot_programming
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
+Forthcoming
+-----------
+* Import speed override srv from pilz_msgs
+* Contributors: Pilz GmbH and Co. KG
+
 0.4.8 (2019-11-22)
 ------------------
 * Drop unused variables in python api (#162)
