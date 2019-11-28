@@ -33,7 +33,8 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
   </include>
 
   <!-- run test -->
-  <test pkg="pilz_trajectory_generation" test-name="integrationtest_sequence_action_capability_with_gripper" type="integrationtest_sequence_action_capability_with_gripper" time-limit="300.0">
+  <test pkg="pilz_trajectory_generation" test-name="integrationtest_sequence_action_capability_with_gripper"
+        type="integrationtest_sequence_action_capability" time-limit="300.0">
     <param name="joint_position_tolerance" value="0.01" />
     <param name="testdata_file_name" value="$(find pilz_trajectory_generation)/test/test_robots/prbt/test_data/testdata_sequence.xml" />
   </test>
