@@ -1,7 +1,7 @@
 <?xml version="1.0"?>
 <package format="2">
   <name>pilz_extensions</name>
-  <version>0.4.8</version>
+  <version>0.4.9</version>
   <description>
   The pilz_extensions package. Here are classes extending the functionality of other packages.
   On the long run these extensions should become pull requests on the respective packages.
