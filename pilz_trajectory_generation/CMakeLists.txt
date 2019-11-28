@@ -214,158 +214,168 @@ if(CATKIN_ENABLE_TESTING)
     APPEND_COVERAGE_COMPILER_FLAGS()
   endif()
 
-  ## Declare a C++ library
-  add_library(${PROJECT_NAME}_test
-      test/test_utils.cpp
-      src/trajectory_functions.cpp
-      src/joint_limits_aggregator.cpp
-      src/joint_limits_validator.cpp
-      src/trajectory_generator.cpp
-      src/trajectory_generator_ptp.cpp
-      src/trajectory_generator_lin.cpp
-      src/trajectory_generator_circ.cpp
-      src/path_circle_generator.cpp
-      src/velocity_profile_atrap.cpp
-      src/limits_container.cpp
-      src/joint_limits_container.cpp
-      src/cartesian_limit.cpp
-      src/command_list_manager.cpp
-      src/trajectory_blender_transition_window.cpp
-      src/cartesian_limits_aggregator.cpp
-      src/planning_context_loader.cpp
-      src/plan_components_builder.cpp
-      src/pilz_command_planner.cpp
+  #########################
+  ####Integration Tests####
+  #########################
+
+  set(${PROJECT_NAME}_INTEGRATIONTEST_LIBRARIES
+    sequence_capability
+    pilz_command_planner
+    planning_context_loader_ptp
+    planning_context_loader_lin
+    planning_context_loader_circ
   )
 
-  target_link_libraries(${PROJECT_NAME}_test
+  # Planning Integration tests
+  add_rostest_gmock(integrationtest_sequence_action_capability
+    test/integrationtest_sequence_action_capability.test
+    test/integrationtest_sequence_action_capability.cpp
+  )
+
+  target_link_libraries(integrationtest_sequence_action_capability
     ${catkin_LIBRARIES}
+    ${pilz_testutils_LIBRARIES}
+    ${${PROJECT_NAME}_INTEGRATIONTEST_LIBRARIES}
   )
 
-add_dependencies(${PROJECT_NAME}_test
-            ${catkin_EXPORTED_TARGETS})
+  add_rostest(test/integrationtest_sequence_action_capability_with_gripper.test
+    DEPENDENCIES integrationtest_sequence_action_capability
+  )
 
-#########################
-####Integration Tests####
-#########################
+  # Tests with other robots only for kinetic (for now)
 
-# Planning Integration tests
-add_rostest_gmock(integrationtest_sequence_action_capability
-  test/integrationtest_sequence_action_capability.test
-  test/integrationtest_sequence_action_capability.cpp
-)
+  #add_rostest(test/integrationtest_sequence_action_capability_abb_irb2400.test
+  #  DEPENDENCIES integrationtest_sequence_action_capability
+  #)
 
-target_link_libraries(integrationtest_sequence_action_capability
-   ${catkin_LIBRARIES} ${pilz_testutils_LIBRARIES} ${PROJECT_NAME}_test)
+  #add_rostest(test/integrationtest_sequence_action_capability_frankaemika_panda.test
+  #  DEPENDENCIES integrationtest_sequence_action_capability
+  #)
 
-add_rostest_gmock(integrationtest_sequence_action_capability_with_gripper
-  test/integrationtest_sequence_action_capability_with_gripper.test
-  test/integrationtest_sequence_action_capability.cpp
-)
-target_link_libraries(integrationtest_sequence_action_capability_with_gripper
-   ${catkin_LIBRARIES} ${pilz_testutils_LIBRARIES} ${PROJECT_NAME}_test)
+  add_rostest_gtest(integrationtest_sequence_service_capability
+    test/integrationtest_sequence_service_capability.test
+    test/integrationtest_sequence_service_capability.cpp
+  )
 
-# Tests with other robots only for kinetic (for now)
+  target_link_libraries(integrationtest_sequence_service_capability
+    ${catkin_LIBRARIES}
+    ${${PROJECT_NAME}_INTEGRATIONTEST_LIBRARIES}
+  )
 
-#add_rostest_gmock(integrationtest_sequence_action_capability_abb_irb2400
-#  test/integrationtest_sequence_action_capability_abb_irb2400.test
-#  test/integrationtest_sequence_action_capability.cpp
-#)
-#target_link_libraries(integrationtest_sequence_action_capability_abb_irb2400
-#  ${catkin_LIBRARIES} ${pilz_testutils_LIBRARIES} ${PROJECT_NAME}_test)
+  # Tests with other robots only for kinetic (for now)
 
-#add_rostest_gmock(integrationtest_sequence_action_capability_frankaemika_panda
-#  test/integrationtest_sequence_action_capability_frankaemika_panda.test
-#  test/integrationtest_sequence_action_capability.cpp
-#)
-#target_link_libraries(integrationtest_sequence_action_capability_frankaemika_panda
-#  ${catkin_LIBRARIES} ${pilz_testutils_LIBRARIES} ${PROJECT_NAME}_test)
+  #add_rostest(test/integrationtest_sequence_service_capability_frankaemika_panda.test
+  #  DEPENDENCIES integrationtest_sequence_service_capability )
 
-add_rostest_gtest(integrationtest_sequence_service_capability
-  test/integrationtest_sequence_service_capability.test
-  test/integrationtest_sequence_service_capability.cpp
-)
-target_link_libraries(integrationtest_sequence_service_capability
-  ${catkin_LIBRARIES} ${PROJECT_NAME}_test)
+  #add_rostest(test/integrationtest_sequence_service_capability_abb_irb2400.test
+  #  DEPENDENCIES integrationtest_sequence_service_capability )
 
-# Tests with other robots only for kinetic (for now)
+  add_rostest(test/integrationtest_sequence_service_capability_with_gripper.test
+    DEPENDENCIES integrationtest_sequence_service_capability
+  )
 
-#add_rostest(test/integrationtest_sequence_service_capability_frankaemika_panda.test
-#  DEPENDENCIES integrationtest_sequence_service_capability )
+  # Planning Integration tests
+  add_rostest_gtest(integrationtest_command_planning
+    test/integrationtest_command_planning.test
+    test/integrationtest_command_planning.cpp
+    test/test_utils.cpp
+  )
 
-#add_rostest(test/integrationtest_sequence_service_capability_abb_irb2400.test
-#  DEPENDENCIES integrationtest_sequence_service_capability )
+  target_link_libraries(integrationtest_command_planning
+    ${catkin_LIBRARIES}
+    ${${PROJECT_NAME}_INTEGRATIONTEST_LIBRARIES}
+  )
 
-add_rostest_gtest(integrationtest_sequence_service_capability_with_gripper
-  test/integrationtest_sequence_service_capability_with_gripper.test
-  test/integrationtest_sequence_service_capability.cpp
-)
-target_link_libraries(integrationtest_sequence_service_capability_with_gripper
-  ${catkin_LIBRARIES} ${PROJECT_NAME}_test)
+  add_rostest(test/integrationtest_command_planning_with_gripper.test
+    DEPENDENCIES integrationtest_command_planning
+  )
 
-# Planning Integration tests
-add_rostest_gtest(integrationtest_command_planning
-  test/integrationtest_command_planning.test
-  test/integrationtest_command_planning.cpp
-)
-target_link_libraries(integrationtest_command_planning
-   ${catkin_LIBRARIES} ${PROJECT_NAME}_test)
+  # Tests with other robots only for kinetic (for now)
 
-add_rostest(test/integrationtest_command_planning_with_gripper.test
-  DEPENDENCIES integrationtest_command_planning )
+  #add_rostest(test/integrationtest_command_planning_abb_irb2400.test
+  #  DEPENDENCIES integrationtest_command_planning )
 
-# Tests with other robots only for kinetic (for now)
+  #add_rostest(test/integrationtest_command_planning_frankaemika_panda.test
+  #  DEPENDENCIES integrationtest_command_planning )
 
-#add_rostest(test/integrationtest_command_planning_abb_irb2400.test
-#  DEPENDENCIES integrationtest_command_planning )
+  # Blending Integration tests
+  add_rostest_gtest(integrationtest_command_list_manager
+    test/integrationtest_command_list_manager.test
+    test/integrationtest_command_list_manager.cpp
+    test/test_utils.cpp
+  )
 
-#add_rostest(test/integrationtest_command_planning_frankaemika_panda.test
-#  DEPENDENCIES integrationtest_command_planning )
+  target_link_libraries(integrationtest_command_list_manager
+    ${catkin_LIBRARIES}
+    ${${PROJECT_NAME}_INTEGRATIONTEST_LIBRARIES}
+  )
 
-# Blending Integration tests
-add_rostest_gtest(integrationtest_command_list_manager
-  test/integrationtest_command_list_manager.test
-  test/integrationtest_command_list_manager.cpp
-)
-target_link_libraries(integrationtest_command_list_manager
-${catkin_LIBRARIES} ${PROJECT_NAME}_test)
+  add_rostest_gtest(integrationtest_get_solver_tip_frame
+    test/integrationtest_get_solver_tip_frame.test
+    test/integrationtest_get_solver_tip_frame.cpp
+  )
 
-add_rostest_gtest(integrationtest_get_solver_tip_frame
-  test/integrationtest_get_solver_tip_frame.test
-  test/integrationtest_get_solver_tip_frame.cpp
-)
-target_link_libraries(integrationtest_get_solver_tip_frame
-${catkin_LIBRARIES} ${PROJECT_NAME}_test)
+  target_link_libraries(integrationtest_get_solver_tip_frame
+    ${catkin_LIBRARIES}
+    ${${PROJECT_NAME}_INTEGRATIONTEST_LIBRARIES}
+  )
 
-add_rostest_gtest(integrationtest_plan_components_builder
-  test/integrationtest_plan_components_builder.test
-  test/integrationtest_plan_components_builder.cpp
-)
-target_link_libraries(integrationtest_plan_components_builder
-${catkin_LIBRARIES} ${PROJECT_NAME}_test)
+  add_rostest_gtest(integrationtest_plan_components_builder
+    test/integrationtest_plan_components_builder.test
+    test/integrationtest_plan_components_builder.cpp
+  )
+
+  target_link_libraries(integrationtest_plan_components_builder
+    ${catkin_LIBRARIES}
+    ${${PROJECT_NAME}_INTEGRATIONTEST_LIBRARIES}
+  )
 
 
 
-##################
-####Unit Tests####
-##################
+  ##################
+  ####Unit Tests####
+  ##################
+
+  add_library(${PROJECT_NAME}_testutils
+    test/test_utils.cpp
+    src/trajectory_generator.cpp
+    src/trajectory_generator_circ.cpp
+    src/trajectory_generator_lin.cpp
+    src/trajectory_generator_ptp.cpp
+    src/path_circle_generator.cpp
+    src/velocity_profile_atrap.cpp
+  )
+
+  target_link_libraries(${PROJECT_NAME}_testutils ${PROJECT_NAME})
 
   ## Add gtest based cpp test target and link libraries
   catkin_add_gtest(unittest_pilz_command_planner_direct
-                   test/unittest_pilz_command_planner_direct.cpp
-                   src/planning_context_loader_ptp.cpp)
+    test/unittest_pilz_command_planner_direct.cpp
+    src/planning_context_loader_ptp.cpp
+  )
+
   target_link_libraries(unittest_pilz_command_planner_direct
-    ${PROJECT_NAME} ${catkin_LIBRARIES} ${PROJECT_NAME}_test)
+    ${catkin_LIBRARIES}
+    ${PROJECT_NAME}_testutils
+  )
 
   ## Add gtest based cpp test target and link libraries
   catkin_add_gtest(unittest_velocity_profile_atrap
-                   test/unittest_velocity_profile_atrap.cpp)
-  target_link_libraries(unittest_velocity_profile_atrap
-    ${catkin_LIBRARIES} ${PROJECT_NAME}_test)
+    test/unittest_velocity_profile_atrap.cpp
+    src/velocity_profile_atrap.cpp
+  )
+
+  target_link_libraries(unittest_velocity_profile_atrap ${catkin_LIBRARIES})
 
   catkin_add_gtest(unittest_trajectory_generator
-                   test/unittest_trajectory_generator.cpp)
+    test/unittest_trajectory_generator.cpp
+    src/trajectory_generator.cpp
+  )
+
   target_link_libraries(unittest_trajectory_generator
-    ${PROJECT_NAME} ${catkin_LIBRARIES} ${PROJECT_NAME}_test)
+    ${catkin_LIBRARIES}
+    ${PROJECT_NAME}
+  )
 
   # Trajectory Generator Unit Test
   add_rostest_gtest(unittest_trajectory_functions
@@ -374,17 +384,21 @@ ${catkin_LIBRARIES} ${PROJECT_NAME}_test)
   )
 
   target_link_libraries(unittest_trajectory_functions
-    ${catkin_LIBRARIES}  ${PROJECT_NAME}_test)
-
+    ${catkin_LIBRARIES}
+    ${PROJECT_NAME}_testutils
+  )
 
   # unittest for trajectory blender transition window
   add_rostest_gtest(unittest_trajectory_blender_transition_window
     test/unittest_trajectory_blender_transition_window.test
     test/unittest_trajectory_blender_transition_window.cpp
+    src/trajectory_blender_transition_window.cpp
   )
 
   target_link_libraries(unittest_trajectory_blender_transition_window
-    ${catkin_LIBRARIES} ${PROJECT_NAME}_test)
+    ${catkin_LIBRARIES}
+    ${PROJECT_NAME}_testutils
+  )
 
   # trajectory generator Unit Test
   add_rostest_gtest(unittest_trajectory_generator_common
@@ -393,7 +407,9 @@ ${catkin_LIBRARIES} ${PROJECT_NAME}_test)
   )
 
   target_link_libraries(unittest_trajectory_generator_common
-      ${catkin_LIBRARIES} ${PROJECT_NAME}_test)
+    ${catkin_LIBRARIES}
+    ${PROJECT_NAME}_testutils
+  )
 
 
   # trajectory generator circ Unit Test
@@ -403,7 +419,9 @@ ${catkin_LIBRARIES} ${PROJECT_NAME}_test)
   )
 
   target_link_libraries(unittest_trajectory_generator_circ
-    ${catkin_LIBRARIES} ${PROJECT_NAME}_test)
+    ${catkin_LIBRARIES}
+    ${PROJECT_NAME}_testutils
+  )
 
   # trajectory generator lin Unit Test
   add_rostest_gtest(unittest_trajectory_generator_lin
@@ -412,7 +430,9 @@ ${catkin_LIBRARIES} ${PROJECT_NAME}_test)
   )
 
   target_link_libraries(unittest_trajectory_generator_lin
-      ${catkin_LIBRARIES} ${PROJECT_NAME}_test)
+    ${catkin_LIBRARIES}
+    ${PROJECT_NAME}_testutils
+  )
 
   # trajectory generator ptp Unit Test
   add_rostest_gtest(unittest_trajectory_generator_ptp
@@ -421,7 +441,9 @@ ${catkin_LIBRARIES} ${PROJECT_NAME}_test)
   )
 
   target_link_libraries(unittest_trajectory_generator_ptp
-    ${catkin_LIBRARIES} ${PROJECT_NAME}_test)
+    ${catkin_LIBRARIES}
+    ${PROJECT_NAME}_testutils
+  )
 
   # Command Planner Unit Test
   add_rostest_gtest(unittest_pilz_command_planner
@@ -430,7 +452,9 @@ ${catkin_LIBRARIES} ${PROJECT_NAME}_test)
   )
 
   target_link_libraries(unittest_pilz_command_planner
-    ${catkin_LIBRARIES} ${PROJECT_NAME}_test)
+    ${catkin_LIBRARIES}
+    ${PROJECT_NAME}
+  )
 
   # JointLimitsAggregator Unit Test
   add_rostest_gtest(unittest_joint_limits_aggregator
@@ -439,7 +463,9 @@ ${catkin_LIBRARIES} ${PROJECT_NAME}_test)
   )
 
   target_link_libraries(unittest_joint_limits_aggregator
-      ${catkin_LIBRARIES} ${PROJECT_NAME}_test)
+    ${catkin_LIBRARIES}
+    ${PROJECT_NAME}
+  )
 
   # JointLimitsContainer Unit Test
   catkin_add_gtest(unittest_joint_limits_container
@@ -447,7 +473,9 @@ ${catkin_LIBRARIES} ${PROJECT_NAME}_test)
   )
 
   target_link_libraries(unittest_joint_limits_container
-    ${catkin_LIBRARIES} ${PROJECT_NAME}_test)
+    ${catkin_LIBRARIES}
+    ${PROJECT_NAME}
+  )
 
   # JointLimitsValidator Unit Test
   catkin_add_gtest(unittest_joint_limits_validator
@@ -455,7 +483,9 @@ ${catkin_LIBRARIES} ${PROJECT_NAME}_test)
   )
 
   target_link_libraries(unittest_joint_limits_validator
-     ${catkin_LIBRARIES} ${PROJECT_NAME}_test)
+    ${catkin_LIBRARIES}
+    ${PROJECT_NAME}
+  )
 
    # Cartesian Limits Aggregator Unit Test
   add_rostest_gtest(unittest_cartesian_limits_aggregator
@@ -464,7 +494,9 @@ ${catkin_LIBRARIES} ${PROJECT_NAME}_test)
   )
 
   target_link_libraries(unittest_cartesian_limits_aggregator
-    ${catkin_LIBRARIES} ${PROJECT_NAME}_test)
+    ${catkin_LIBRARIES}
+    ${PROJECT_NAME}
+  )
 
   # PlanningContextLoaderPTP Unit Test
   add_rostest_gtest(unittest_planning_context_loaders
@@ -473,24 +505,30 @@ ${catkin_LIBRARIES} ${PROJECT_NAME}_test)
   )
 
   target_link_libraries(unittest_planning_context_loaders
-    ${catkin_LIBRARIES} ${PROJECT_NAME}_test)
+    ${catkin_LIBRARIES}
+    ${PROJECT_NAME}_testutils
+  )
 
   # PlanningContext Unit Test (Typed test)
   add_rostest_gtest(unittest_planning_context
     test/unittest_planning_context.test
     test/unittest_planning_context.cpp
-    )
+    src/planning_context_loader_circ.cpp
+    src/planning_context_loader_lin.cpp
+    src/planning_context_loader_ptp.cpp
+  )
 
   target_link_libraries(unittest_planning_context
-     ${catkin_LIBRARIES} ${PROJECT_NAME}_test)
+    ${catkin_LIBRARIES}
+    ${PROJECT_NAME}_testutils
+  )
 
   # GetTipFrames Unit Test
   catkin_add_gmock(unittest_get_solver_tip_frame
     test/unittest_get_solver_tip_frame.cpp
   )
 
-  target_link_libraries(unittest_get_solver_tip_frame
-    ${catkin_LIBRARIES} ${PROJECT_NAME}_test)
+  target_link_libraries(unittest_get_solver_tip_frame ${catkin_LIBRARIES})
 
   # to run: catkin_make -DENABLE_COVERAGE_TESTING=ON package_name_coverage
   if(ENABLE_COVERAGE_TESTING)
