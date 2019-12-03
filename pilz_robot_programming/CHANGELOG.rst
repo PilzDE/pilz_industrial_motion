@@ -2,6 +2,11 @@
 Changelog for package pilz_robot_programming
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
+Forthcoming
+-----------
+* Adapt to new brake test srv definitions in pilz_msgs
+* Contributors: Pilz GmbH and Co. KG
+
 0.4.9 (2019-11-28)
 ------------------
 * Import speed override srv from pilz_msgs
