@@ -1,7 +1,7 @@
 <?xml version="1.0"?>
 <package>
   <name>pilz_robot_programming</name>
-  <version>0.4.9</version>
+  <version>0.4.10</version>
   <description>
   An Easy to use API to execute standard industrial robot commands like Ptp, Lin, Circ and Sequence using Moveit.
   </description>

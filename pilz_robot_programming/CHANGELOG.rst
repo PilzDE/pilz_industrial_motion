@@ -2,8 +2,8 @@
 Changelog for package pilz_robot_programming
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
-Forthcoming
------------
+0.4.10 (2019-12-04)
+-------------------
 * Adapt to new brake test srv definitions in pilz_msgs
 * Contributors: Pilz GmbH and Co. KG
 
