@@ -19,7 +19,9 @@ from rospkg import RosPack
 import numpy as np
 import tf
 import tf_conversions.posemath as pm
-from geometry_msgs.msg import Point
+from geometry_msgs.msg import Point, PoseStamped
+from sensor_msgs.msg import JointState
+from std_msgs.msg import Header
 from tst_api_utils import setOverrideParam
 
 
@@ -27,6 +29,7 @@ from pilz_robot_programming.robot import *
 from pilz_industrial_motion_testutils.xml_testdata_loader import *
 from pilz_robot_programming.commands import *
 
+print "pilz_industrial_motion_testutils" in RosPack().list()
 _TEST_DATA_FILE_NAME = RosPack().get_path("pilz_industrial_motion_testutils") + "/test_data/testdata_deprecated.xml"
 PLANNING_GROUP_NAME = "manipulator"
 TARGET_LINK_NAME = "prbt_tcp"
@@ -169,6 +172,42 @@ class TestAPICmdConversion(unittest.TestCase):
         self._analyze_request_general(PLANNING_GROUP_NAME, "PTP", EXP_VEL_SCALE, EXP_ACC_SCALE, req)
         self._analyze_request_pose(TARGET_LINK_NAME, exp_goal_pose, req)
 
+    def test_ptp_cmd_convert_stamped_pose(self):
+        """ Check that conversion to MotionPlanRequest works correctly.
+
+            Test sequence:
+                1. Call ptp convert function with cartesian goal stamped pose.
+
+            Test Results:
+                1. Correct MotionPlanRequest is returned.
+        """
+        exp_goal_pose = self.test_data.get_pose("PTPPose", PLANNING_GROUP_NAME)
+        exp_goal_pose_stamped = PoseStamped(pose=exp_goal_pose)
+        ptp = Ptp(goal=exp_goal_pose_stamped, vel_scale=EXP_VEL_SCALE, acc_scale=EXP_ACC_SCALE)
+        req = ptp._cmd_to_request(self.robot)
+        self.assertIsNotNone(req)
+        self._analyze_request_general(PLANNING_GROUP_NAME, "PTP", EXP_VEL_SCALE, EXP_ACC_SCALE, req)
+        self._analyze_request_pose(TARGET_LINK_NAME, exp_goal_pose, req)
+
+    def test_ptp_cmd_convert_joint_state(self):
+        """ Check that conversion to MotionPlanRequest works correctly.
+
+            Test sequence:
+                1. Call ptp convert function with cartesian goal joint_state.
+
+            Test Results:
+                1. Correct MotionPlanRequest is returned.
+        """
+        exp_joint_values = self.test_data.get_joints("PTPJointValid", PLANNING_GROUP_NAME)
+        exp_joint_state = JointState(velocity=exp_joint_values)
+        ptp = Ptp(goal=exp_joint_state, vel_scale=EXP_VEL_SCALE, acc_scale=EXP_ACC_SCALE)
+        req = ptp._cmd_to_request(self.robot)
+        self.assertIsNotNone(req)
+        self._analyze_request_general(PLANNING_GROUP_NAME, "PTP", EXP_VEL_SCALE, EXP_ACC_SCALE, req)
+
+        exp_joint_names = self.robot._robot_commander.get_group(req.group_name).get_active_joints()
+        self._analyze_request_joint(exp_joint_names, exp_joint_values, req)
+
     def test_ptp_cmd_convert_pose_uninitialized_orientation(self):
         """ Check that conversion with uninitialized orientation.
 
@@ -214,6 +253,25 @@ class TestAPICmdConversion(unittest.TestCase):
         exp_joint_names = self.robot._robot_commander.get_group(req.group_name).get_active_joints()
         self._analyze_request_joint(exp_joint_names, exp_joint_values, req)
 
+    def test_ptp_cmd_convert_joint_tuple(self):
+        """ Check that conversion to MotionPlanRequest works correctly.
+
+            Test sequence:
+                1. Call ptp convert function with joint goal.
+
+            Test Results:
+                1. Correct MotionPlanRequest is returned.
+        """
+        exp_joint_values = self.test_data.get_joints("PTPJointValid", PLANNING_GROUP_NAME)
+
+        ptp = Ptp(goal=tuple(exp_joint_values), vel_scale=EXP_VEL_SCALE, acc_scale=EXP_ACC_SCALE)
+        req = ptp._cmd_to_request(self.robot)
+        self.assertIsNotNone(req)
+        self._analyze_request_general(PLANNING_GROUP_NAME, "PTP", EXP_VEL_SCALE, EXP_ACC_SCALE, req)
+
+        exp_joint_names = self.robot._robot_commander.get_group(req.group_name).get_active_joints()
+        self._analyze_request_joint(exp_joint_names, exp_joint_values, req)
+
     def test_ptp_cmd_convert_negative(self):
         """ Check that conversion to MotionPlanRequest returns None.
 
@@ -221,11 +279,10 @@ class TestAPICmdConversion(unittest.TestCase):
                 1. Call ptp convert function with no goal.
                 2. Call ptp convert function with a joint goal, which has more joint values than needed.
                 3. Call ptp convert function with goal of unknown type
+                4. Call ptp convert function with string to test iterable of unknown type
 
             Test results:
-                1. raises exception.
-                2. raises exception.
-                2. raises exception.
+                1-4. raises exception.
         """
         # 1
         ptp_1 = Ptp(vel_scale=EXP_VEL_SCALE, acc_scale=EXP_ACC_SCALE)
@@ -240,6 +297,10 @@ class TestAPICmdConversion(unittest.TestCase):
         # 3
         ptp_3 = Ptp(goal=object(), vel_scale=EXP_VEL_SCALE, acc_scale=EXP_ACC_SCALE)
         self.assertRaises(NotImplementedError, ptp_3._cmd_to_request, self.robot)
+
+        # 4
+        ptp_4 = Ptp(goal="123456", vel_scale=EXP_VEL_SCALE, acc_scale=EXP_ACC_SCALE)
+        self.assertRaises(NotImplementedError, ptp_4._cmd_to_request, self.robot)
 
     def test_ptp_relative_joint(self):
         """ Test the conversion of ptp command with relative joint works correctly
