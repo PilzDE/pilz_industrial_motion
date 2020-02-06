@@ -539,7 +539,9 @@ if(CATKIN_ENABLE_TESTING)
     set(COVERAGE_EXCLUDES "*/${PROJECT_NAME}/test*")
     add_code_coverage(
       NAME ${PROJECT_NAME}_coverage
-      DEPENDENCIES tests
+      # specifying dependencies in a reliable way is on open issue
+      # see https://github.com/mikeferguson/code_coverage/pull/14
+      #DEPENDENCIES tests
     )
   endif()
 endif()
