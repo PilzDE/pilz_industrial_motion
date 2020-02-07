@@ -29,6 +29,11 @@ find_package(catkin REQUIRED COMPONENTS
 find_package(orocos_kdl)
 find_package(Boost REQUIRED COMPONENTS )
 
+if(CATKIN_ENABLE_TESTING AND ENABLE_COVERAGE_TESTING)
+  find_package(code_coverage REQUIRED)
+  APPEND_COVERAGE_COMPILER_FLAGS()
+endif()
+
 ################
 ## Clang tidy ##
 ################
@@ -202,7 +207,6 @@ install(TARGETS
 #############
 if(CATKIN_ENABLE_TESTING)
   find_package(rostest REQUIRED)
-  find_package(code_coverage REQUIRED)
   find_package(pilz_testutils REQUIRED)
 
   include_directories(
@@ -530,12 +534,14 @@ if(CATKIN_ENABLE_TESTING)
 
   target_link_libraries(unittest_get_solver_tip_frame ${catkin_LIBRARIES})
 
-  # to run: catkin_make -DENABLE_COVERAGE_TESTING=ON package_name_coverage
+  # to run: catkin_make -DCMAKE_BUILD_TYPE=Debug -DENABLE_COVERAGE_TESTING=ON package_name_coverage
   if(ENABLE_COVERAGE_TESTING)
     set(COVERAGE_EXCLUDES "*/${PROJECT_NAME}/test*")
     add_code_coverage(
       NAME ${PROJECT_NAME}_coverage
-      DEPENDS tests
+      # specifying dependencies in a reliable way is on open issue
+      # see https://github.com/mikeferguson/code_coverage/pull/14
+      #DEPENDENCIES tests
     )
   endif()
 endif()
