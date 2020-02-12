@@ -260,6 +260,8 @@ class _BaseCmd(_AbstractCmd):
             _to_pose_constraint(goal_pose, robot_reference_frame, self._target_link))
 
     def _set_constraint_by_stamped_pose(self, req):
+        if self._goal.header.stamp != rospy.Time():
+            raise ValueError("Given stamped pose goal expects unsupported future execution.")
         self._reference_frame = self._goal.header.frame_id if self._goal.header.frame_id != "" else _DEFAULT_BASE_LINK
         self._goal = self._goal.pose
         self._set_constraint_by_pose(req)

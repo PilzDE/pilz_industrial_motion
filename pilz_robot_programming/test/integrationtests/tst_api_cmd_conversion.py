@@ -302,6 +302,12 @@ class TestAPICmdConversion(unittest.TestCase):
         ptp_4 = Ptp(goal="123456", vel_scale=EXP_VEL_SCALE, acc_scale=EXP_ACC_SCALE)
         self.assertRaises(NotImplementedError, ptp_4._cmd_to_request, self.robot)
 
+        # 5
+        goal = PoseStamped()
+        goal.header.stamp.secs = 50
+        ptp_5 = Ptp(goal=goal, vel_scale=EXP_VEL_SCALE, acc_scale=EXP_ACC_SCALE)
+        self.assertRaises(ValueError, ptp_5._cmd_to_request, self.robot)
+
     def test_ptp_relative_joint(self):
         """ Test the conversion of ptp command with relative joint works correctly
 
