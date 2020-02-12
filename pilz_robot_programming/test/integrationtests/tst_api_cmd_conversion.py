@@ -199,7 +199,7 @@ class TestAPICmdConversion(unittest.TestCase):
                 1. Correct MotionPlanRequest is returned.
         """
         exp_joint_values = self.test_data.get_joints("PTPJointValid", PLANNING_GROUP_NAME)
-        exp_joint_state = JointState(velocity=exp_joint_values)
+        exp_joint_state = JointState(position=exp_joint_values)
         ptp = Ptp(goal=exp_joint_state, vel_scale=EXP_VEL_SCALE, acc_scale=EXP_ACC_SCALE)
         req = ptp._cmd_to_request(self.robot)
         self.assertIsNotNone(req)

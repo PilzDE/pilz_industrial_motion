@@ -219,16 +219,14 @@ class _BaseCmd(_AbstractCmd):
         if self._goal is None:
             raise NameError("Goal is not given.")
 
-        req.goal_constraints.append(Constraints())
-
-        convertion_methods = [self._set_constraint_by_joint_values,
-                              self._set_constraint_by_pose,
-                              self._set_constraint_by_stamped_pose,
-                              self._set_constraint_by_joint_state]
+        convertion_methods = [self._constraint_by_joint_values,
+                              self._constraint_by_pose,
+                              self._constraint_by_stamped_pose,
+                              self._constraint_by_joint_state]
 
         for method in convertion_methods:
             try:
-                method(req)
+                req.goal_constraints = method()
                 break
             except (TypeError, AttributeError, AssertionError):
                 pass
@@ -237,39 +235,41 @@ class _BaseCmd(_AbstractCmd):
 
         return req
 
-    def _set_constraint_by_joint_values(self, req, joint_names=()):
+    def _constraint_by_joint_values(self, joint_names=()):
         assert not isinstance(self._goal, str)
         joint_names = joint_names if len(joint_names) != 0 \
             else self._robot._robot_commander.get_group(self._planning_group).get_active_joints()
         joint_values = self._get_joint_pose()
         if len(joint_names) != len(joint_values):
-            raise IndexError("Given joint goal does not match the planning group " + req.group_name + ".")
-        for joint_name, joint_value in zip(joint_names, joint_values):
-            joint_constraint = JointConstraint()
-            joint_constraint.joint_name = joint_name
-            joint_constraint.position = joint_value
-            joint_constraint.weight = 1
-            req.goal_constraints[0].joint_constraints.append(joint_constraint)
+            raise IndexError("Given joint goal does not match the active joints " + joint_names + ".")
+        goal_constraints = Constraints()
+        goal_constraints.joint_constraints = [JointConstraint(joint_name=joint_name,
+                                                              position=joint_value,
+                                                              weight=1) for
+                                              joint_name, joint_value in zip(joint_names, joint_values)]
+        return [goal_constraints]
 
-    def _set_constraint_by_pose(self, req):
+    def _constraint_by_pose(self):
         goal_pose = self._get_goal_pose()
+        goal_constraints = Constraints()
         robot_reference_frame = self._robot._robot_commander.get_planning_frame()
-        req.goal_constraints[0].orientation_constraints.append(
+        goal_constraints.orientation_constraints.append(
             _to_ori_constraint(goal_pose, robot_reference_frame, self._target_link))
-        req.goal_constraints[0].position_constraints.append(
+        goal_constraints.position_constraints.append(
             _to_pose_constraint(goal_pose, robot_reference_frame, self._target_link))
+        return [goal_constraints]
 
-    def _set_constraint_by_stamped_pose(self, req):
+    def _constraint_by_stamped_pose(self):
         if self._goal.header.stamp != rospy.Time():
             raise ValueError("Given stamped pose goal expects unsupported future execution.")
         self._reference_frame = self._goal.header.frame_id if self._goal.header.frame_id != "" else _DEFAULT_BASE_LINK
         self._goal = self._goal.pose
-        self._set_constraint_by_pose(req)
+        return self._constraint_by_pose()
 
-    def _set_constraint_by_joint_state(self, req):
+    def _constraint_by_joint_state(self):
         joint_names = self._goal.name
-        self._goal = self._goal.velocity
-        self._set_constraint_by_joint_values(req, joint_names=joint_names)
+        self._goal = self._goal.position
+        return self._constraint_by_joint_values(joint_names=joint_names)
 
     def _get_sequence_request(self, robot):
         """Constructs a sequence request from the command.
