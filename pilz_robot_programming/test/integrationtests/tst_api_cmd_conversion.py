@@ -173,6 +173,7 @@ class TestAPICmdConversion(unittest.TestCase):
 
     def test_ptp_cmd_convert_stamped_pose(self):
         """ Check that conversion to MotionPlanRequest works correctly.
+            PoseStamp with a timestamp != Time() will be rejected, since future execution is not supported!
 
             Test sequence:
                 1. Call ptp convert function with cartesian goal stamped pose.
@@ -279,6 +280,8 @@ class TestAPICmdConversion(unittest.TestCase):
                 2. Call ptp convert function with a joint goal, which has more joint values than needed.
                 3. Call ptp convert function with goal of unknown type
                 4. Call ptp convert function with string to test iterable of unknown type
+                    - Uses a string with length 6 to be equal to an valid joint goal.
+                5. Call ptp convert function with PoseStamped and set timestamp
 
             Test results:
                 1-4. raises exception.
