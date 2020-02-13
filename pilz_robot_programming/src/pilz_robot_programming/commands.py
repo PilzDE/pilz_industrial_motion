@@ -201,8 +201,8 @@ class _BaseCmd(_AbstractCmd):
     __repr__ = __str__
 
     def _cmd_to_request(self, robot):
-        self._robot = robot
         """Transforms the given command to a MotionPlanRequest."""
+        self._robot = robot
         req = MotionPlanRequest()
 
         # Set general info
@@ -241,7 +241,7 @@ class _BaseCmd(_AbstractCmd):
             else self._robot._robot_commander.get_group(self._planning_group).get_active_joints()
         joint_values = self._get_joint_pose()
         if len(joint_names) != len(joint_values):
-            raise IndexError("Given joint goal does not match the active joints " + joint_names + ".")
+            raise IndexError("Given joint goal does not match the active joints " + str(joint_names) + ".")
         goal_constraints = Constraints()
         goal_constraints.joint_constraints = [JointConstraint(joint_name=joint_name,
                                                               position=joint_value,

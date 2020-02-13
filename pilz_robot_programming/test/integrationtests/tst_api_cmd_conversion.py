@@ -284,7 +284,7 @@ class TestAPICmdConversion(unittest.TestCase):
                 5. Call ptp convert function with PoseStamped and set timestamp
 
             Test results:
-                1-4. raises exception.
+                1-5. raises exception.
         """
         # 1
         ptp_1 = Ptp(vel_scale=EXP_VEL_SCALE, acc_scale=EXP_ACC_SCALE)
