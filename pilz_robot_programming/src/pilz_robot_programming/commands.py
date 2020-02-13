@@ -219,6 +219,8 @@ class _BaseCmd(_AbstractCmd):
         if self._goal is None:
             raise NameError("Goal is not given.")
 
+        self._check_for_future_goal_expectation()
+
         convertion_methods = [self._constraint_by_joint_values,
                               self._constraint_by_pose,
                               self._constraint_by_stamped_pose,
@@ -234,6 +236,13 @@ class _BaseCmd(_AbstractCmd):
             raise NotImplementedError("Unknown type of goal is given.")
 
         return req
+
+    def _check_for_future_goal_expectation(self):
+        try:
+            if self._goal.header.stamp != rospy.Time():
+                raise ValueError("Given goal expects unsupported future execution.")
+        except AttributeError:
+            pass
 
     def _constraint_by_joint_values(self, joint_names=()):
         assert not isinstance(self._goal, str)
@@ -260,15 +269,11 @@ class _BaseCmd(_AbstractCmd):
         return [goal_constraints]
 
     def _constraint_by_stamped_pose(self):
-        if self._goal.header.stamp != rospy.Time():
-            raise ValueError("Given stamped pose goal expects unsupported future execution.")
         self._reference_frame = self._goal.header.frame_id if self._goal.header.frame_id != "" else _DEFAULT_BASE_LINK
         self._goal = self._goal.pose
         return self._constraint_by_pose()
 
     def _constraint_by_joint_state(self):
-        if self._goal.header.stamp != rospy.Time():
-            raise ValueError("Given joint_state goal expects unsupported future execution.")
         joint_names = self._goal.name
         self._goal = self._goal.position
         return self._constraint_by_joint_values(joint_names=joint_names)
