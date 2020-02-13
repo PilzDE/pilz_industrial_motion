@@ -281,10 +281,11 @@ class TestAPICmdConversion(unittest.TestCase):
                 3. Call ptp convert function with goal of unknown type
                 4. Call ptp convert function with string to test iterable of unknown type
                     - Uses a string with length 6 to be equal to an valid joint goal.
-                5. Call ptp convert function with PoseStamped and set timestamp
+                5. Call ptp convert function with PoseStamped and set timestamp.
+                5. Call ptp convert function with JointState and set timestamp.
 
             Test results:
-                1-5. raises exception.
+                1-6. raises exception.
         """
         # 1
         ptp_1 = Ptp(vel_scale=EXP_VEL_SCALE, acc_scale=EXP_ACC_SCALE)
@@ -309,6 +310,12 @@ class TestAPICmdConversion(unittest.TestCase):
         goal.header.stamp.secs = 50
         ptp_5 = Ptp(goal=goal, vel_scale=EXP_VEL_SCALE, acc_scale=EXP_ACC_SCALE)
         self.assertRaises(ValueError, ptp_5._cmd_to_request, self.robot)
+
+        # 6
+        goal = JointState()
+        goal.header.stamp.secs = 50
+        ptp_6 = Ptp(goal=goal, vel_scale=EXP_VEL_SCALE, acc_scale=EXP_ACC_SCALE)
+        self.assertRaises(ValueError, ptp_6._cmd_to_request, self.robot)
 
     def test_ptp_relative_joint(self):
         """ Test the conversion of ptp command with relative joint works correctly

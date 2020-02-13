@@ -267,6 +267,8 @@ class _BaseCmd(_AbstractCmd):
         return self._constraint_by_pose()
 
     def _constraint_by_joint_state(self):
+        if self._goal.header.stamp != rospy.Time():
+            raise ValueError("Given joint_state goal expects unsupported future execution.")
         joint_names = self._goal.name
         self._goal = self._goal.position
         return self._constraint_by_joint_values(joint_names=joint_names)
