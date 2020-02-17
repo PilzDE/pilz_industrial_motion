@@ -1,6 +1,6 @@
 The pilz_robot_programming package provides the user with an easy to use API to move a MoveIt! enabled robot.
 It's target is to execute standard industrial robot commands like :py:class:`.Ptp`, :py:class:`.Lin` and
-:py:class:`.Circ` using the ``pilz::CommandPlanner`` plugin for MoveIt!. It also provides the user with the possibility
+:py:class:`.Circ` using the ``trapezoidal::CommandPlanner`` plugin for MoveIt!. It also provides the user with the possibility
 to execute command sequences (called :py:class:`.Sequence`). On top of that, the robot movement can be paused, resumed and
 stopped.
 
@@ -11,7 +11,7 @@ for obtaining the speed override of the robot system.
 .. _here: https://github.com/PilzDE/pilz_robots/tree/melodic-devel/prbt_hardware_support
 
 The robot API has some similarity to the ``moveit_commander`` package but differs in its specialization for
-classical industrial robot commands to be executed by the ``pilz_command_planner`` MoveIt! plugin. The
+classical industrial robot commands to be executed by the ``trapezoidal_command_planner`` MoveIt! plugin. The
 robot API connects to MoveIt! using the standard ``move_group`` action interface and the custom ``sequence_move_group``
 action, that the sequence capability implements.
 
