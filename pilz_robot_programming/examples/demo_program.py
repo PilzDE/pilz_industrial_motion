@@ -15,8 +15,7 @@
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 from geometry_msgs.msg import Point
-from pilz_robot_programming.robot import *
-from pilz_robot_programming.commands import *
+from pilz_robot_programming import *
 import math
 import rospy
 
@@ -74,7 +73,8 @@ def start_program():
     r.move(blend_sequence)
 
     # Move with custom reference frame
-    r.move(Ptp(goal=Pose(position=Point(0, 0, 0.1)), reference_frame="prbt_tcp"))
+    r.move(Ptp(goal=PoseStamped(header=Header(frame_id="prbt_tcp"),
+                                pose=Pose(position=Point(0, 0, 0.1)))))
     r.move(Ptp(goal=Pose(position=Point(0, -0.1, 0)), reference_frame="prbt_link_3", relative=True))
 
     # Create and execute an invalid ptp command with out of bound joint values
