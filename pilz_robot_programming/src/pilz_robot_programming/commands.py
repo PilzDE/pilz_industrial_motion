@@ -22,9 +22,8 @@ from tf import transformations
 from geometry_msgs.msg import Quaternion, Pose
 from geometry_msgs.msg import PoseStamped
 from pilz_msgs.msg import MoveGroupSequenceGoal, MotionSequenceItem
-from moveit_msgs.msg import (OrientationConstraint, MotionPlanRequest, JointConstraint, Constraints,
-                             PositionConstraint, PlanningOptions)
-from moveit_msgs.msg import RobotState
+from moveit_msgs.msg import (Constraints, JointConstraint, MotionPlanRequest, OrientationConstraint, PlanningOptions,
+                             PositionConstraint, RobotState)
 from moveit_msgs.srv import GetPositionFK
 import shape_msgs.msg as shape_msgs
 from std_msgs.msg import Header
