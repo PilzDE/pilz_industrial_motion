@@ -20,8 +20,6 @@ import numpy as np
 import tf
 import tf_conversions.posemath as pm
 from geometry_msgs.msg import Point, PoseStamped
-from sensor_msgs.msg import JointState
-from std_msgs.msg import Header
 from tst_api_utils import setOverrideParam
 
 
@@ -189,25 +187,6 @@ class TestAPICmdConversion(unittest.TestCase):
         self._analyze_request_general(PLANNING_GROUP_NAME, "PTP", EXP_VEL_SCALE, EXP_ACC_SCALE, req)
         self._analyze_request_pose(TARGET_LINK_NAME, exp_goal_pose, req)
 
-    def test_ptp_cmd_convert_joint_state(self):
-        """ Check that conversion to MotionPlanRequest works correctly.
-
-            Test sequence:
-                1. Call ptp convert function with cartesian goal joint_state.
-
-            Test Results:
-                1. Correct MotionPlanRequest is returned.
-        """
-        exp_joint_values = self.test_data.get_joints("PTPJointValid", PLANNING_GROUP_NAME)
-        exp_joint_state = JointState(position=exp_joint_values)
-        ptp = Ptp(goal=exp_joint_state, vel_scale=EXP_VEL_SCALE, acc_scale=EXP_ACC_SCALE)
-        req = ptp._cmd_to_request(self.robot)
-        self.assertIsNotNone(req)
-        self._analyze_request_general(PLANNING_GROUP_NAME, "PTP", EXP_VEL_SCALE, EXP_ACC_SCALE, req)
-
-        exp_joint_names = self.robot._robot_commander.get_group(req.group_name).get_active_joints()
-        self._analyze_request_joint(exp_joint_names, exp_joint_values, req)
-
     def test_ptp_cmd_convert_pose_uninitialized_orientation(self):
         """ Check that conversion with uninitialized orientation.
 
@@ -282,10 +261,9 @@ class TestAPICmdConversion(unittest.TestCase):
                 4. Call ptp convert function with string to test iterable of unknown type
                     - Uses a string with length 6 to be equal to an valid joint goal.
                 5. Call ptp convert function with PoseStamped and set timestamp.
-                5. Call ptp convert function with JointState and set timestamp.
 
             Test results:
-                1-6. raises exception.
+                1-5. raises exception.
         """
         # 1
         ptp_1 = Ptp(vel_scale=EXP_VEL_SCALE, acc_scale=EXP_ACC_SCALE)
@@ -310,12 +288,6 @@ class TestAPICmdConversion(unittest.TestCase):
         goal.header.stamp.secs = 50
         ptp_5 = Ptp(goal=goal, vel_scale=EXP_VEL_SCALE, acc_scale=EXP_ACC_SCALE)
         self.assertRaises(ValueError, ptp_5._cmd_to_request, self.robot)
-
-        # 6
-        goal = JointState()
-        goal.header.stamp.secs = 50
-        ptp_6 = Ptp(goal=goal, vel_scale=EXP_VEL_SCALE, acc_scale=EXP_ACC_SCALE)
-        self.assertRaises(ValueError, ptp_6._cmd_to_request, self.robot)
 
     def test_ptp_relative_joint(self):
         """ Test the conversion of ptp command with relative joint works correctly

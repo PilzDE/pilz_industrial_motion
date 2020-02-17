@@ -223,8 +223,7 @@ class _BaseCmd(_AbstractCmd):
 
         convertion_methods = [self._constraint_by_joint_values,
                               self._constraint_by_pose,
-                              self._constraint_by_stamped_pose,
-                              self._constraint_by_joint_state]
+                              self._constraint_by_stamped_pose]
 
         for method in convertion_methods:
             try:
@@ -272,11 +271,6 @@ class _BaseCmd(_AbstractCmd):
         self._reference_frame = self._goal.header.frame_id if self._goal.header.frame_id != "" else _DEFAULT_BASE_LINK
         self._goal = self._goal.pose
         return self._constraint_by_pose()
-
-    def _constraint_by_joint_state(self):
-        joint_names = self._goal.name
-        self._goal = self._goal.position
-        return self._constraint_by_joint_values(joint_names=joint_names)
 
     def _get_sequence_request(self, robot):
         """Constructs a sequence request from the command.
