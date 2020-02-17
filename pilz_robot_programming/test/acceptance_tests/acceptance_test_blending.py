@@ -46,6 +46,7 @@ def start_program():
     _testUnreachableFirstPose(robot)
 
     _testBlendRadiusOnSecondCommand(robot)
+    _testBlendRelativeLinAfterPpt(robot)
 
 # Tests a sequence which contains Lin motions commanded in joint space
 # instead of cartesian space.
@@ -171,7 +172,7 @@ def _testOverlappingRadi(robot):
 # Expected Results:
 #   1. Robot moves to start position.
 #   2. Robot performs a blending motion along a rectangle (without stop).
-#       The robot moves along the rectangle for serveral rounds.
+#       The robot moves along the rectangle for several rounds.
 #
 def _testSeveralLinBlends(robot):
     if (_askPermission(_testSeveralLinBlends.__name__) == 0):
@@ -339,13 +340,47 @@ def _testOriChangeInABC(robot):
 
     _askSuccess(_testOriChangeInABC.__name__, 'Did the robot perform a lin-lin blending motion with orientation change in A,B,C?')
 
+
+# Tests the blending of a lin motion after a ptp motion
+#
+# Test Sequence:
+#   1. Move to start position.
+#   2. Execute blended ptp motion followed by lin motion
+#
+#
+# Expected Results:
+#   1. Robot moves to start position.
+#   2. Robot executes a trajectory which consists of a ptp motion followed by a lin motion.
+#       b. Robot performed continuous motion (without stop).
+#       d. Robot makes smooth curve into the lin motion.
+#
+def _testBlendRelativeLinAfterPpt(robot):
+    if (_askPermission(_testBlendRelativeLinAfterPpt.__name__) == 0):
+        return
+
+    # Move to start position (Left corner close to robot base)
+    robot.move(Ptp(goal=[0, 0.007, -1.816, 0, 1.8236, 0], vel_scale=DEFAULT_PTP_VEL))
+
+    seq = Sequence()
+    move_1 = Ptp(goal=Pose(position=Point(0.2, 0.0, 0.9), orientation=from_euler(0, 0, 0)),
+                 vel_scale=DEFAULT_PTP_VEL, acc_scale=DEFAULT_PTP_ACC)
+    seq.append(move_1, blend_radius=0.1)
+
+    pose_2 = ptp_lin_to_absolute(robot, move_1.get_goal(), Pose(position=Point(-0.1, 0.0, 0.0)))
+    move_2 = Lin(goal=pose_2, vel_scale=DEFAULT_PTP_VEL, acc_scale=DEFAULT_PTP_ACC)
+    seq.append(move_2)
+    robot.move(seq)
+
+    _askSuccess(_testBlendRadiusOnSecondCommand.__name__)
+
+
 # Performs a motion using an empty sequence.
 def _emptySequence(robot):
     seq1 = Sequence()
     robot.move(seq1)
 
 # Moves to a start position and, consequently, performs a blending motion
-# along a rectangle. The robot moves along the rectangle for serveral rounds.
+# along a rectangle. The robot moves along the rectangle for several rounds.
 def _rectangleLinLoop(robot):
     # Move to start position (Left corner close to robot base)
     robot.move(Ptp(goal=[0, 0.007, -1.816, 0, 1.8236, 0], vel_scale=DEFAULT_PTP_VEL))
@@ -360,7 +395,7 @@ def _rectangleLinLoop(robot):
     robot.move(seq)
 
 # Adds a rectangle blending motion to the given sequence using the given
-# blending radi.
+# blending radii.
 def _addRectangleLin(seq, r1, r2, r3, r4):
     #Left corner away from robot base
     seq.append(Lin(goal=Pose(position=Point(0.5, 0.25, 0.68)), vel_scale=0.1, acc_scale=0.07), blend_radius=r1)
