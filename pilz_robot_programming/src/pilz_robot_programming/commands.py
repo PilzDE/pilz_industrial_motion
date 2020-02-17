@@ -17,22 +17,22 @@
 
 from __future__ import absolute_import
 
+from copy import deepcopy
+from math import pi
+from operator import add
+
 import rospy
-from tf import transformations
-from geometry_msgs.msg import Quaternion, Pose
+import shape_msgs.msg as shape_msgs
+from geometry_msgs.msg import Pose, Quaternion
 from geometry_msgs.msg import PoseStamped
-from pilz_msgs.msg import MoveGroupSequenceGoal, MotionSequenceItem
 from moveit_msgs.msg import (Constraints, JointConstraint, MotionPlanRequest, OrientationConstraint, PlanningOptions,
                              PositionConstraint, RobotState)
 from moveit_msgs.srv import GetPositionFK
-import shape_msgs.msg as shape_msgs
+from pilz_msgs.msg import MotionSequenceItem, MoveGroupSequenceGoal
 from std_msgs.msg import Header
-from operator import add
-from math import pi
+from tf import transformations
 
 from .move_control_request import _MoveControlState
-from copy import deepcopy
-
 
 __version__ = '0.0.dev1'
 
