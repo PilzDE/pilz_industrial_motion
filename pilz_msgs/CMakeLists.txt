@@ -11,6 +11,7 @@ find_package(catkin REQUIRED COMPONENTS
    MotionSequenceItem.msg
    MotionSequenceRequest.msg
    IsBrakeTestRequiredResult.msg
+   FrameSpeeds.msg
  )
 
  #Generate services in the 'srv' folder
@@ -20,6 +21,7 @@ find_package(catkin REQUIRED COMPONENTS
    GetMotionSequence.srv
    IsBrakeTestRequired.srv
    GetSpeedOverride.srv
+   SetSpeedLimit.srv
  )
 
 # Generate actions in the 'action' folder
