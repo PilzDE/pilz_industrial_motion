@@ -130,8 +130,10 @@ class _AbstractCmd(object):
 class _BaseCmd(_AbstractCmd):
     """Base class for all single commands.
 
-    :param goal: The goal of the motion, which can be given in joint (list of float, in the order of active joints in
-        the planning group) or Cartesian space (geometry_msgs/Pose).
+    :param goal: The goal of the motion, which can be given in joint (list or tuple of float, in the order of active
+        joints in the planning group) or Cartesian space. For geometry_msgs/Pose you can specify the reference frame
+        as extra parameter `reference_frame` (see below). If a PoseStamped is passed as goal, timestamp has to be zero
+        and the `frame_id` from the Header is used instead of `reference_frame`
 
     :note:
         The geometry_msgs/Pose consists of position and orientation (quaternion). When creating an instance of
@@ -219,7 +221,7 @@ class _BaseCmd(_AbstractCmd):
         if self._goal is None:
             raise NameError("Goal is not given.")
 
-        self._check_for_future_goal_expectation()
+        self._check_header_time()
 
         convertion_methods = [self._constraint_by_joint_values,
                               self._constraint_by_pose,
@@ -236,10 +238,10 @@ class _BaseCmd(_AbstractCmd):
 
         return req
 
-    def _check_for_future_goal_expectation(self):
+    def _check_header_time(self):
         try:
-            if self._goal.header.stamp != rospy.Time():
-                raise ValueError("Given goal expects unsupported future execution.")
+            if self._goal.header.stamp != rospy.Time(0, 0):
+                raise ValueError("Given goal has unsupported time for future execution.")
         except AttributeError:
             pass
 
