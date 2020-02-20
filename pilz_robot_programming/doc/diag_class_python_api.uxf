@@ -160,7 +160,7 @@ For arm &amp; gripper movements</panel_attributes>
       <w>310</w>
       <h>80</h>
     </coordinates>
-    <panel_attributes>_BaseCmd
+    <panel_attributes>BaseCmd
 --
 - execute(Robot): int</panel_attributes>
     <additional_attributes/>
