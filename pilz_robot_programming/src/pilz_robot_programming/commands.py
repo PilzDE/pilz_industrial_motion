@@ -221,9 +221,9 @@ class _BaseCmd(_AbstractCmd):
         if self._goal is None:
             raise NameError("Goal is not given.")
 
-        convertion_methods = [self._constraint_by_joint_values,
-                              self._constraint_by_pose,
-                              self._constraint_by_stamped_pose]
+        convertion_methods = [self._joint_values_to_constraint,
+                              self._pose_to_constraint,
+                              self._pose_stamped_to_constraint]
         error_list = []
 
         for method in convertion_methods:
@@ -242,7 +242,7 @@ class _BaseCmd(_AbstractCmd):
         if self._goal.header.stamp != rospy.Time(0, 0):
             raise ValueError("Given goal has unsupported time for future execution.")
 
-    def _constraint_by_joint_values(self, joint_names=()):
+    def _joint_values_to_constraint(self, joint_names=()):
         if isinstance(self._goal, str):
             raise TypeError("String is not convertible into joint values.")
         joint_names = joint_names if len(joint_names) != 0 \
@@ -258,7 +258,7 @@ class _BaseCmd(_AbstractCmd):
                                               joint_name, joint_value in zip(joint_names, joint_values)]
         return [goal_constraints]
 
-    def _constraint_by_pose(self):
+    def _pose_to_constraint(self):
         goal_pose = self._get_goal_pose()
         goal_constraints = Constraints()
         robot_reference_frame = self._robot._robot_commander.get_planning_frame()
@@ -268,11 +268,11 @@ class _BaseCmd(_AbstractCmd):
             _to_pose_constraint(goal_pose, robot_reference_frame, self._target_link))
         return [goal_constraints]
 
-    def _constraint_by_stamped_pose(self):
+    def _pose_stamped_to_constraint(self):
         self._reference_frame = self._goal.header.frame_id if self._goal.header.frame_id != "" else _DEFAULT_BASE_LINK
         self._check_header_time()
         self._goal = self._goal.pose
-        return self._constraint_by_pose()
+        return self._pose_to_constraint()
 
     def _get_sequence_request(self, robot):
         """Constructs a sequence request from the command.
