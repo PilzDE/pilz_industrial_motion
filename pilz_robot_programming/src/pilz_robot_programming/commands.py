@@ -221,37 +221,36 @@ class _BaseCmd(_AbstractCmd):
         if self._goal is None:
             raise NameError("Goal is not given.")
 
-        self._check_header_time()
-
         convertion_methods = [self._constraint_by_joint_values,
                               self._constraint_by_pose,
                               self._constraint_by_stamped_pose]
+        error_list = []
 
         for method in convertion_methods:
             try:
                 req.goal_constraints = method()
                 break
-            except (TypeError, AttributeError, AssertionError):
+            except (TypeError, AttributeError) as e:
+                error_list.append(e)
                 pass
         else:
-            raise NotImplementedError("Unknown type of goal is given.")
+            raise NotImplementedError("Unknown type of goal: %s \nerrors: %s" % (str(self._goal), str(error_list)))
 
         return req
 
     def _check_header_time(self):
-        try:
-            if self._goal.header.stamp != rospy.Time(0, 0):
-                raise ValueError("Given goal has unsupported time for future execution.")
-        except AttributeError:
-            pass
+        if self._goal.header.stamp != rospy.Time(0, 0):
+            raise ValueError("Given goal has unsupported time for future execution.")
 
     def _constraint_by_joint_values(self, joint_names=()):
-        assert not isinstance(self._goal, str)
+        if isinstance(self._goal, str):
+            raise TypeError("String is not convertible into joint values.")
         joint_names = joint_names if len(joint_names) != 0 \
             else self._robot._robot_commander.get_group(self._planning_group).get_active_joints()
         joint_values = self._get_joint_pose()
         if len(joint_names) != len(joint_values):
             raise IndexError("Given joint goal does not match the active joints " + str(joint_names) + ".")
+
         goal_constraints = Constraints()
         goal_constraints.joint_constraints = [JointConstraint(joint_name=joint_name,
                                                               position=joint_value,
@@ -271,6 +270,7 @@ class _BaseCmd(_AbstractCmd):
 
     def _constraint_by_stamped_pose(self):
         self._reference_frame = self._goal.header.frame_id if self._goal.header.frame_id != "" else _DEFAULT_BASE_LINK
+        self._check_header_time()
         self._goal = self._goal.pose
         return self._constraint_by_pose()
 
