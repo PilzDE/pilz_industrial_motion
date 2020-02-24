@@ -15,7 +15,7 @@ classical industrial robot commands to be executed by the ``trapezoidal_command_
 robot API connects to MoveIt! using the standard ``move_group`` action interface and the custom ``sequence_move_group``
 action, that the sequence capability implements.
 
-See the package ``pilz_trajectory_generation`` for more details about the parameters for industrial trajectory
+See the package ``trapezoidal_trajectory_generation`` for more details about the parameters for industrial trajectory
 generation.
 
 A simple demo program
