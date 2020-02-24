@@ -221,9 +221,9 @@ class _BaseCmd(_AbstractCmd):
         if self._goal is None:
             raise NameError("Goal is not given.")
 
-        convertion_methods = [self._joint_values_to_constraint,
-                              self._pose_to_constraint,
-                              self._pose_stamped_to_constraint]
+        convertion_methods = [self._pose_to_constraint,
+                              self._pose_stamped_to_constraint,
+                              self._joint_values_to_constraint]
         error_list = []
 
         for method in convertion_methods:
