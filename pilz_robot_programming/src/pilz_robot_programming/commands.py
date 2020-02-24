@@ -722,9 +722,6 @@ def _is_quaternion_initialized(quaternion):
 
 def _pose_relative_to_absolute(current_pose, relative_pose):
     """Add the offset relative_pose to current_pose and return an absolute goal pose"""
-    assert isinstance(current_pose, Pose)
-    assert isinstance(relative_pose, Pose)
-
     goal_pose = deepcopy(current_pose)
 
     # translation
