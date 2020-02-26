@@ -130,8 +130,10 @@ class _AbstractCmd(object):
 class _BaseCmd(_AbstractCmd):
     """Base class for all single commands.
 
-    :param goal: The goal of the motion, which can be given in joint (list of float, in the order of active joints in
-        the planning group) or Cartesian space (geometry_msgs/Pose).
+    :param goal: The goal of the motion, which can be given in joint (list or tuple of float, in the order of active
+        joints in the planning group) or Cartesian space. For geometry_msgs/Pose you can specify the reference frame
+        as extra parameter `reference_frame` (see below). If a PoseStamped is passed as goal, timestamp has to be zero
+        and the `frame_id` from the Header is used instead of `reference_frame`
 
     :note:
         The geometry_msgs/Pose consists of position and orientation (quaternion). When creating an instance of
@@ -189,6 +191,7 @@ class _BaseCmd(_AbstractCmd):
         self._relative = relative
 
         self._reference_frame = reference_frame
+        self._robot = None
 
     def __str__(self):
         out_str = _AbstractCmd.__str__(self)
@@ -201,13 +204,14 @@ class _BaseCmd(_AbstractCmd):
 
     def _cmd_to_request(self, robot):
         """Transforms the given command to a MotionPlanRequest."""
+        self._robot = robot
         req = MotionPlanRequest()
 
         # Set general info
         req.planner_id = self._planner_id
         req.group_name = self._planning_group
-        req.max_velocity_scaling_factor = self._vel_scale * robot._speed_override
-        req.max_acceleration_scaling_factor = self._acc_scale * self._calc_acc_scale(robot._speed_override)
+        req.max_velocity_scaling_factor = self._vel_scale * self._robot._speed_override
+        req.max_acceleration_scaling_factor = self._acc_scale * self._calc_acc_scale(self._robot._speed_override)
         req.allowed_planning_time = 1.0
 
         # Set an empty diff as start_state => the current state is used by the planner
@@ -217,39 +221,58 @@ class _BaseCmd(_AbstractCmd):
         if self._goal is None:
             raise NameError("Goal is not given.")
 
-        goal_constraints = Constraints()
+        convertion_methods = [self._pose_to_constraint,
+                              self._pose_stamped_to_constraint,
+                              self._joint_values_to_constraint]
+        error_list = []
 
-        # goal as Pose in Cartesian space
-        if isinstance(self._goal, Pose):
-            goal_pose = self._get_goal_pose(robot)
-
-            robot_reference_frame = robot._robot_commander.get_planning_frame()
-            goal_constraints.orientation_constraints.append(
-                _to_ori_constraint(goal_pose, robot_reference_frame, self._target_link))
-            goal_constraints.position_constraints.append(
-                _to_pose_constraint(goal_pose, robot_reference_frame, self._target_link))
-
-        # goal as list of int or float in joint space
-        elif isinstance(self._goal, list):
-            joint_names = robot._robot_commander.get_group(self._planning_group).get_active_joints()
-            joint_values = self._get_joint_pose(robot)
-
-            if len(joint_names) != len(joint_values):
-                raise IndexError("Given joint goal does not match the planning group " + req.group_name + ".")
-
-            for joint_name, joint_value in zip(joint_names, joint_values):
-                joint_constraint = JointConstraint()
-                joint_constraint.joint_name = joint_name
-                joint_constraint.position = joint_value
-                joint_constraint.weight = 1
-                goal_constraints.joint_constraints.append(joint_constraint)
-
+        for method in convertion_methods:
+            try:
+                req.goal_constraints = method()
+                break
+            except (TypeError, AttributeError) as e:
+                error_list.append(e)
+                pass
         else:
-            raise NotImplementedError("Unknown type of goal is given.")
-
-        req.goal_constraints.append(goal_constraints)
+            raise NotImplementedError("Unknown type of goal: %s \nerrors: %s" % (str(self._goal), str(error_list)))
 
         return req
+
+    def _check_header_time(self):
+        if self._goal.header.stamp != rospy.Time(0, 0):
+            raise ValueError("Given goal has unsupported time for future execution.")
+
+    def _joint_values_to_constraint(self, joint_names=()):
+        if isinstance(self._goal, str):
+            raise TypeError("String is not convertible into joint values.")
+        joint_names = joint_names if len(joint_names) != 0 \
+            else self._robot._robot_commander.get_group(self._planning_group).get_active_joints()
+        joint_values = self._get_joint_pose()
+        if len(joint_names) != len(joint_values):
+            raise IndexError("Given joint goal does not match the active joints " + str(joint_names) + ".")
+
+        goal_constraints = Constraints()
+        goal_constraints.joint_constraints = [JointConstraint(joint_name=joint_name,
+                                                              position=joint_value,
+                                                              weight=1) for
+                                              joint_name, joint_value in zip(joint_names, joint_values)]
+        return [goal_constraints]
+
+    def _pose_to_constraint(self):
+        goal_pose = self._get_goal_pose()
+        goal_constraints = Constraints()
+        robot_reference_frame = self._robot._robot_commander.get_planning_frame()
+        goal_constraints.orientation_constraints.append(
+            _to_ori_constraint(goal_pose, robot_reference_frame, self._target_link))
+        goal_constraints.position_constraints.append(
+            _to_pose_constraint(goal_pose, robot_reference_frame, self._target_link))
+        return [goal_constraints]
+
+    def _pose_stamped_to_constraint(self):
+        self._reference_frame = self._goal.header.frame_id if self._goal.header.frame_id != "" else _DEFAULT_BASE_LINK
+        self._check_header_time()
+        self._goal = self._goal.pose
+        return self._pose_to_constraint()
 
     def _get_sequence_request(self, robot):
         """Constructs a sequence request from the command.
@@ -268,15 +291,15 @@ class _BaseCmd(_AbstractCmd):
 
         return sequence_action_goal
 
-    def _get_goal_pose(self, robot):
+    def _get_goal_pose(self):
         """Determines the goal pose for the given command."""
-        current_pose = robot.get_current_pose(target_link=self._target_link, base=self._reference_frame)
+        current_pose = self._robot.get_current_pose(target_link=self._target_link, base=self._reference_frame)
 
         if self._relative:
             self._goal = _pose_relative_to_absolute(current_pose, self._goal)
 
         if not self._reference_frame == _DEFAULT_BASE_LINK:
-            return _to_robot_reference(robot, self._reference_frame, self._goal)
+            return _to_robot_reference(self._robot, self._reference_frame, self._goal)
 
         # in case of uninitialized orientation, set the goal orientation as current
         if _is_quaternion_initialized(self._goal.orientation):
@@ -284,14 +307,13 @@ class _BaseCmd(_AbstractCmd):
         else:
             return Pose(position=self._goal.position, orientation=current_pose.orientation)
 
-    def _get_joint_pose(self, robot):
+    def _get_joint_pose(self):
         """Determines the joint goal for the given command."""
-        assert isinstance(self._goal, list)
         goal_joint_state = self._goal
 
         if self._relative:
             goal_joint_state = map(add, goal_joint_state,
-                                   robot.get_current_joint_states(planning_group=self._planning_group))
+                                   self._robot.get_current_joint_states(planning_group=self._planning_group))
         return goal_joint_state
 
 
@@ -700,9 +722,6 @@ def _is_quaternion_initialized(quaternion):
 
 def _pose_relative_to_absolute(current_pose, relative_pose):
     """Add the offset relative_pose to current_pose and return an absolute goal pose"""
-    assert isinstance(current_pose, Pose)
-    assert isinstance(relative_pose, Pose)
-
     goal_pose = deepcopy(current_pose)
 
     # translation

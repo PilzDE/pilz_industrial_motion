@@ -44,7 +44,7 @@ Robot creation
 ^^^^^^^^^^^^^^
 .. code-block:: python
 
-    from pilz_robot_programming.robot import *
+    from pilz_robot_programming import *
 
 
 At first we import the robot API.
@@ -91,7 +91,7 @@ The :py:meth:`.move` function is the most important part of the robot API. With 
 function the user can execute the different robot motion commands, like shown for :py:class:`.Ptp`, :py:class:`.Lin`
 and :py:class:`.Circ`.
 
-All cartesian goals are interpreted as poses of the tool center point (TCP) link.
+By default cartesian goals are interpreted as poses of the tool center point (TCP) link.
 The transformation between the TCP link and the last robot link can be adjusted through the ``tcp_offset_xyz`` and
 ``tcp_offset_rpy`` parameters in ``prbt.xacro``.
 
@@ -145,14 +145,18 @@ Custom Reference Frame
 ^^^^^^^^^^^^^^^^^^^^^^
 .. code-block:: python
 
-    r.move(Ptp(goal=Pose(position=Point(0, 0, 0.1)), reference_frame="prbt_tcp"))
+    r.move(Ptp(goal=PoseStamped(header=Header(frame_id="prbt_tcp"),
+                                pose=Pose(position=Point(0, 0, 0.1)))))
 
 .. code-block:: python
 
     r.move(Ptp(goal=Pose(position=Point(0, -0.1, 0)), reference_frame="prbt_link_3", relative=True))
 
-All three move classes :py:class:`.Ptp`, :py:class:`.Lin` and :py:class:`.Circ` can be executed within a custom reference frame.
-In this case, the passed goal pose will be seen relative to this coordinate system instead of the default system: ``prbt_base``
+For all three move classes :py:class:`.Ptp`, :py:class:`.Lin` and :py:class:`.Circ` you can define a custom reference
+frame.
+Passing a PoseStamped with the Header set to any valid tf2 ``frame_id`` is supported besides an extra argument
+``reference_frame``. The goal passed is interpreted relative to the given coordinate frame instead of the default
+system ``prbt_base``.
 
 The custom reference frame argument (``reference_frame="target_frame"``) has to be a valid tf frame id and can be paired with the relative command.
 When paired with relative flag, the goal will be applied to the current robot pose in this custom reference frame.
