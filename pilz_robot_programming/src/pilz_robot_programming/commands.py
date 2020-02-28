@@ -17,20 +17,22 @@
 
 from __future__ import absolute_import
 
-import rospy
-from tf import transformations
-from geometry_msgs.msg import Quaternion, Pose
-from geometry_msgs.msg import PoseStamped
-from pilz_msgs.msg import MoveGroupSequenceGoal, MotionSequenceItem
-from moveit_msgs.msg import (OrientationConstraint, MotionPlanRequest, JointConstraint, Constraints,
-                             PositionConstraint, PlanningOptions)
-import shape_msgs.msg as shape_msgs
-from operator import add
+from copy import deepcopy
 from math import pi
+from operator import add
+
+import rospy
+import shape_msgs.msg as shape_msgs
+from geometry_msgs.msg import Pose, Quaternion
+from geometry_msgs.msg import PoseStamped
+from moveit_msgs.msg import (Constraints, JointConstraint, MotionPlanRequest, OrientationConstraint, PlanningOptions,
+                             PositionConstraint, RobotState)
+from moveit_msgs.srv import GetPositionFK
+from pilz_msgs.msg import MotionSequenceItem, MoveGroupSequenceGoal
+from std_msgs.msg import Header
+from tf import transformations
 
 from .move_control_request import _MoveControlState
-from copy import deepcopy
-
 
 __version__ = '0.0.dev1'
 
@@ -781,3 +783,48 @@ def from_euler(a, b, c):
     [quat.x, quat.y, quat.z, quat.w] = transformations.quaternion_from_euler(a, b, c, axes=_AXIS_SEQUENCE)
 
     return quat
+
+
+def compute_fk_client(robot, joint_values, planning_group="", links=[]):
+    """ Calculate forward kinematic and get goal pose.
+        Uses default planning_group and target_link if not stated otherwise
+
+        Needed for sequences with relative LIN movements after PTP movements.
+        Calculate PTP pose goal and then absolute LIN goal with _pose_relative_to_absolute.
+    """
+
+    rospy.wait_for_service('compute_fk')
+
+    if (links == []):
+        links = [_DEFAULT_TARGET_LINK]
+
+    if (planning_group == ""):
+        planning_group = _DEFAULT_PLANNING_GROUP
+
+    try:
+        group = robot._robot_commander.get_group(planning_group)
+        compute_fk = rospy.ServiceProxy('compute_fk', GetPositionFK)
+        header = Header()
+        header.stamp = rospy.Time.now()
+        header.frame_id = group.get_pose_reference_frame()
+
+        rs = RobotState()
+        rs.joint_state.header = header
+        rs.joint_state.name = group.get_active_joints()
+        rs.joint_state.position = joint_values
+
+        res = compute_fk(header, links, rs)
+        return res.pose_stamped
+
+    except rospy.ServiceException as e:
+        print("Service call failed: %s" % e)
+
+
+def ptp_lin_to_absolute(robot, ptp_goal_joints, lin_rel_goal_pose):
+    """ Combining a joint goal and a relative lin position to a absolute lin position """
+
+    res = compute_fk_client(robot, ptp_goal_joints)
+    pose_p = res[0].pose
+
+    pose_l = _pose_relative_to_absolute(pose_p, lin_rel_goal_pose)
+    return pose_l
