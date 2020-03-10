@@ -27,7 +27,8 @@ from moveit_msgs.msg import MoveItErrorCodes
 import rospy
 from std_msgs.msg import Header
 from std_srvs.srv import Trigger
-import tf
+import tf2_ros
+import tf2_geometry_msgs  # for buffer.transform() to eat a geometry_msgs.Pose directly
 
 from pilz_msgs.msg import MoveGroupSequenceAction, IsBrakeTestRequiredResult
 from pilz_msgs.srv import GetSpeedOverride, IsBrakeTestRequired, BrakeTest
@@ -119,7 +120,8 @@ class Robot(object):
 
         # tf listener is necessary for pose transformation
         # when using custom reference frames.
-        self.tf_listener_ = tf.TransformListener()
+        self.tf_buffer_ = tf2_ros.Buffer()
+        self.tf_listener_ = tf2_ros.TransformListener(self.tf_buffer_)
 
         self._move_lock = threading.Lock()
 
@@ -190,14 +192,11 @@ class Robot(object):
         """
 
         try:
-            self.tf_listener_.waitForTransform(
-                target_link, base, rospy.Time(), rospy.Duration(5, 0))
-            orientation_ = Quaternion(0, 0, 0, 1)
-            stamped = PoseStamped(header=Header(frame_id=target_link),
-                                  pose=Pose(orientation=orientation_))
-            current_pose = self.tf_listener_.transformPose(base, stamped).pose
+            zero_pose = PoseStamped(header=Header(frame_id=target_link),
+                                    pose=Pose(orientation=Quaternion(w=1.0)))
+            current_pose = self.tf_buffer_.transform(zero_pose, base, rospy.Duration(5, 0)).pose
             return current_pose
-        except tf.Exception as e:
+        except tf2_ros.LookupException as e:
             rospy.logerr(e.message)
             raise RobotCurrentStateError(e.message)
 

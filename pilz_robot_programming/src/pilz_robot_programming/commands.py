@@ -18,7 +18,8 @@
 from __future__ import absolute_import
 
 import rospy
-from tf import transformations
+import tf2_geometry_msgs  # for buffer.transform() to eat a geometry_msgs.Pose directly
+from tf_conversions import transformations
 from geometry_msgs.msg import Quaternion, Pose
 from geometry_msgs.msg import PoseStamped
 from pilz_msgs.msg import MoveGroupSequenceGoal, MotionSequenceItem
@@ -679,7 +680,7 @@ def _to_robot_reference(robot, pose_frame, goal_pose_custom_ref):
     stamped = PoseStamped()
     stamped.header.frame_id = pose_frame
     stamped.pose = goal_pose_custom_ref
-    return robot.tf_listener_.transformPose(robot_ref, stamped).pose
+    return robot.tf_buffer_.transform(stamped, robot_ref).pose
 
 
 def _to_ori_constraint(pose, reference_frame, link_name, orientation_tolerance=_DEFAULT_ORIENTATION_TOLERANCE):
