@@ -207,8 +207,8 @@ class BaseCmd(_AbstractCmd):
         """Transforms the given command to a MotionPlanRequest."""
         req = MotionPlanRequest()
 
-        self._robot_reference_frame = robot._robot_commander.get_planning_frame()
-        self._active_joints = robot._robot_commander.get_group(self._planning_group).get_active_joints()
+        self._robot_reference_frame = robot.get_planning_frame()
+        self._active_joints = robot.get_active_joints(self._planning_group)
         self._start_joint_states = robot.get_current_joint_states(planning_group=self._planning_group)
         self._start_pose = robot.get_current_pose(target_link=self._target_link, base=self._reference_frame)
         self._tf_buffer = robot.tf_buffer_
