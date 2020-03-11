@@ -98,7 +98,7 @@ class _AbstractCmd(object):
             rospy.logerr("No result received from action server.")
             return robot._FAILURE
 
-        return robot._map_error_code(result_code.error_code)
+        return robot._map_error_code(result_code.response.error_code)
 
     @staticmethod
     def _locked_send_goal(robot, action_client, goal):

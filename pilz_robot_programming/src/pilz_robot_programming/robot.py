@@ -56,7 +56,7 @@ class Robot(object):
     * :py:class:`.Gripper`
 
     For a more detailed description of the individual commands please see the documentation of
-    the corresponding command. Especially see the documentation of the `trapezoidal_trajectory_generation` package
+    the corresponding command. Especially see the documentation of the `pilz_industrial_motion_planner` package
     to get more information on additional parameters that can be configured in the MoveIt! plugin.
 
     The commands are executed with the help of Moveit.

@@ -11,11 +11,11 @@ for obtaining the speed override of the robot system.
 .. _here: https://github.com/PilzDE/pilz_robots/tree/melodic-devel/prbt_hardware_support
 
 The robot API has some similarity to the ``moveit_commander`` package but differs in its specialization for
-classical industrial robot commands to be executed by the ``trapezoidal_command_planner`` MoveIt! plugin. The
+classical industrial robot commands to be executed by the ``pilz_industrial_motion_planner`` MoveIt! plugin. The
 robot API connects to MoveIt! using the standard ``move_group`` action interface and the custom ``sequence_move_group``
 action, that the sequence capability implements.
 
-See the package ``trapezoidal_trajectory_generation`` for more details about the parameters for industrial trajectory
+See the package ``pilz_industrial_motion_planner`` for more details about the parameters for industrial trajectory
 generation.
 
 A simple demo program

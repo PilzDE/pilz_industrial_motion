@@ -24,7 +24,7 @@ to be moved out of singularities.
 
 ## Starting the blending acceptance tests
 - Bringup can: `sudo ip link set can0 up type can bitrate 1000000`
-- Run `roslaunch prbt_moveit_config moveit_planning_execution.launch sim:=False pipeline:=trapezoidal_command_planner gripper:=pg70`
+- Run `roslaunch prbt_moveit_config moveit_planning_execution.launch sim:=False pipeline:=pilz_industrial_motion_planner gripper:=pg70`
 - Run `rosrun pilz_robot_programming acceptance_test_circ.py`.
   - Please note: Each test must be confirmed before it is executed.
 Confirm by entering `y` or `n` to skip test.
