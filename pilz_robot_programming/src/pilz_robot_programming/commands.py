@@ -18,7 +18,8 @@
 from __future__ import absolute_import
 
 import rospy
-from tf import transformations
+import tf2_geometry_msgs  # for buffer.transform() to eat a geometry_msgs.Pose directly
+from tf_conversions import transformations
 from geometry_msgs.msg import Quaternion, Pose
 from geometry_msgs.msg import PoseStamped
 from pilz_msgs.msg import MoveGroupSequenceGoal, MotionSequenceItem
@@ -127,7 +128,7 @@ class _AbstractCmd(object):
     __repr__ = __str__
 
 
-class _BaseCmd(_AbstractCmd):
+class BaseCmd(_AbstractCmd):
     """Base class for all single commands.
 
     :param goal: The goal of the motion, which can be given in joint (list or tuple of float, in the order of active
@@ -179,7 +180,7 @@ class _BaseCmd(_AbstractCmd):
     def __init__(self, goal=None, planning_group=_DEFAULT_PLANNING_GROUP, target_link=_DEFAULT_TARGET_LINK,
                  vel_scale=_DEFAULT_CARTESIAN_VEL_SCALE, acc_scale=_DEFAULT_ACC_SCALE, relative=False,
                  reference_frame=_DEFAULT_BASE_LINK, *args, **kwargs):
-        super(_BaseCmd, self).__init__(*args, **kwargs)
+        super(BaseCmd, self).__init__(*args, **kwargs)
 
         # Needs to be set by derived classes
         self._planner_id = None
@@ -210,7 +211,7 @@ class _BaseCmd(_AbstractCmd):
         self._active_joints = robot._robot_commander.get_group(self._planning_group).get_active_joints()
         self._start_joint_states = robot.get_current_joint_states(planning_group=self._planning_group)
         self._start_pose = robot.get_current_pose(target_link=self._target_link, base=self._reference_frame)
-        self._tf_listener = robot.tf_listener_
+        self._tf_buffer = robot.tf_buffer_
 
         # Set general info
         req.planner_id = self._planner_id
@@ -333,10 +334,10 @@ class _BaseCmd(_AbstractCmd):
         stamped = PoseStamped()
         stamped.header.frame_id = pose_frame
         stamped.pose = goal_pose_custom_ref
-        return self._tf_listener.transformPose(self._robot_reference_frame, stamped).pose
+        return self._tf_buffer.transform(stamped, self._robot_reference_frame).pose
 
 
-class Ptp(_BaseCmd):
+class Ptp(BaseCmd):
     """Represents a single point-to-point (Ptp) command.
     A :py:class:`Ptp` command allows the user to quickly move the robot from its current position to a specified point
     in space (goal). The trajectory taken to reach the goal is defined by the underlying planning
@@ -367,7 +368,7 @@ class Ptp(_BaseCmd):
         self._planner_id = "PTP"
 
     def __str__(self):
-        out_str = _BaseCmd.__str__(self)
+        out_str = BaseCmd.__str__(self)
         if self._relative:
             out_str += " relative: True"
         if isinstance(self._goal, Pose):
@@ -383,7 +384,7 @@ class Ptp(_BaseCmd):
         return vel_scale * vel_scale
 
 
-class Lin(_BaseCmd):
+class Lin(BaseCmd):
     """Represents a linear command.
     A :py:class:`Lin` command allows the user to move the robot from its current position to a specified point
     in space (goal). The trajectory taken to reach the goal is a straight line (in Cartesian space).
@@ -416,7 +417,7 @@ class Lin(_BaseCmd):
         self._planner_id = "LIN"
 
     def __str__(self):
-        out_str = _BaseCmd.__str__(self)
+        out_str = BaseCmd.__str__(self)
         if self._relative:
             out_str += " relative: True"
         if isinstance(self._goal, Pose):
@@ -432,7 +433,7 @@ class Lin(_BaseCmd):
         return vel_scale
 
 
-class Circ(_BaseCmd):
+class Circ(BaseCmd):
     """Represents a circular command. A :py:class:`Circ` command allows the user to move the robot from its
     current position to a specified point in space (goal).
     The trajectory taken to reach the goal represents a circle (in Cartesian space). The circle is defined by the
@@ -481,7 +482,7 @@ class Circ(_BaseCmd):
         self._center = center
 
     def __str__(self):
-        out_str = _BaseCmd.__str__(self)
+        out_str = BaseCmd.__str__(self)
         if isinstance(self._goal, Pose) and self._goal is not None:
             out_str += " goal:\n" + str(self._goal)
         if self._interim is not None:
@@ -493,7 +494,7 @@ class Circ(_BaseCmd):
     __repr__ = __str__
 
     def _cmd_to_request(self, robot):
-        req = _BaseCmd._cmd_to_request(self, robot)
+        req = BaseCmd._cmd_to_request(self, robot)
 
         if self._center is not None and self._interim is not None:
             raise NameError("Both center and interim are set for circ command!")
@@ -574,7 +575,7 @@ class Sequence(_AbstractCmd):
             execute consecutively.
             The blend radius preceding a gripper command is always ignored. The blend radius stated with a gripper
             command is also ignored.
-        :type cmd: :py:class:`pilz_robot_programming.commands._BaseCmd`
+        :type cmd: :py:class:`pilz_robot_programming.commands.BaseCmd`
 
         :param blend_radius: The blending radius states how much the robot trajectory can deviate from the
             original trajectory (trajectory without blending) to blend the robot motion from one trajectory to the next.
@@ -616,7 +617,7 @@ class Sequence(_AbstractCmd):
     __repr__ = __str__
 
 
-class Gripper(_BaseCmd):
+class Gripper(BaseCmd):
     """Represents a gripper command to open and close the gripper.
     A :py:class:`gripper` command allows the user to move the gripper finger to desired opening width.
 

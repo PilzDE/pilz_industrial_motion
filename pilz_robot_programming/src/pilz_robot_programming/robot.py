@@ -27,10 +27,11 @@ from moveit_msgs.msg import MoveItErrorCodes
 import rospy
 from std_msgs.msg import Header
 from std_srvs.srv import Trigger
-import tf
+import tf2_ros
+import tf2_geometry_msgs  # for buffer.transform() to eat a geometry_msgs.Pose directly
 
 from pilz_msgs.msg import MoveGroupSequenceAction, IsBrakeTestRequiredResult
-from pilz_msgs.srv import GetSpeedOverride, IsBrakeTestRequired, BrakeTest, BrakeTestResponse
+from pilz_msgs.srv import GetSpeedOverride, IsBrakeTestRequired, BrakeTest
 
 from .move_control_request import _MoveControlState, MoveControlAction, _MoveControlStateMachine
 from .commands import _AbstractCmd, _DEFAULT_PLANNING_GROUP, _DEFAULT_TARGET_LINK, _DEFAULT_BASE_LINK, Sequence
@@ -119,7 +120,8 @@ class Robot(object):
 
         # tf listener is necessary for pose transformation
         # when using custom reference frames.
-        self.tf_listener_ = tf.TransformListener()
+        self.tf_buffer_ = tf2_ros.Buffer()
+        self.tf_listener_ = tf2_ros.TransformListener(self.tf_buffer_)
 
         self._move_lock = threading.Lock()
 
@@ -190,14 +192,11 @@ class Robot(object):
         """
 
         try:
-            self.tf_listener_.waitForTransform(
-                target_link, base, rospy.Time(), rospy.Duration(5, 0))
-            orientation_ = Quaternion(0, 0, 0, 1)
-            stamped = PoseStamped(header=Header(frame_id=target_link),
-                                  pose=Pose(orientation=orientation_))
-            current_pose = self.tf_listener_.transformPose(base, stamped).pose
+            zero_pose = PoseStamped(header=Header(frame_id=target_link),
+                                    pose=Pose(orientation=Quaternion(w=1.0)))
+            current_pose = self.tf_buffer_.transform(zero_pose, base, rospy.Duration(5, 0)).pose
             return current_pose
-        except tf.Exception as e:
+        except tf2_ros.LookupException as e:
             rospy.logerr(e.message)
             raise RobotCurrentStateError(e.message)
 
@@ -322,7 +321,7 @@ class Robot(object):
             elif resp.result.value == IsBrakeTestRequiredResult.UNKNOWN:
                 rospy.logerr("Failure during call of braketest required service: BrakeTestRequirementStatus UNKNOWN")
                 raise rospy.ROSException("Could not determine if braketest is required.")
-        except rospy.ROSException, e:
+        except rospy.ROSException as e:
             rospy.logerr("Failure during call of braketest required service: {0}".format(e))
             raise e
 
@@ -340,10 +339,9 @@ class Robot(object):
 
         execute_brake_test_client = self._get_execute_brake_test_service()
 
-        resp = BrakeTestResponse()
         try:
             resp = execute_brake_test_client()
-        except rospy.ROSException, e:
+        except rospy.ROSException as e:
             rospy.logerr("Failure during call of braketest execute service: {0}".format(e))
             raise e
 
@@ -359,7 +357,7 @@ class Robot(object):
     def _get_execute_brake_test_service(self):
         try:
             rospy.wait_for_service(self._BRAKE_TEST_EXECUTE_SRV, self._SERVICE_WAIT_TIMEOUT_S)
-        except rospy.ROSException, e:
+        except rospy.ROSException as e:
             rospy.logerr(
                 "Unsuccessful waited for braketest execute service to come up: {0}".format(e))
             raise e
@@ -459,7 +457,8 @@ class Robot(object):
         else:
             return self._FAILURE
 
-    def _check_version(self, version):
+    @staticmethod
+    def _check_version(version):
         # check if version is set by user
         if version is None:
             rospy.logerr("Version of Robot API is not set!")
@@ -498,7 +497,7 @@ class Robot(object):
             if psutil.pid_exists(pid):
                 process = psutil.Process(pid)
 
-                if (process.create_time() == create_time):
+                if process.create_time() == create_time:
                     rospy.logerr("An instance of Robot class already exists (pid=" + str(pid) + ").")
                     return False
 
