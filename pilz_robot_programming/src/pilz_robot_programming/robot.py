@@ -169,6 +169,14 @@ class Robot(object):
 
         return res.speed_override
 
+    def get_planning_frame(self):
+        """Get the name of the frame in which the robot is planning."""
+        return self._robot_commander.get_planning_frame()
+
+    def get_active_joints(self, planning_group):
+        "Returns the joints contained in the specified planning group"
+        return self._robot_commander.get_group(planning_group).get_active_joints()
+
     def get_current_joint_states(self, planning_group=_DEFAULT_PLANNING_GROUP):
         """Returns the current joint state values of the robot.
         :param planning_group: Name of the planning group, default value is "manipulator".
