@@ -251,17 +251,14 @@ class BaseCmd(_AbstractCmd):
     def _joint_values_to_constraint(self, joint_names=()):
         if isinstance(self._goal, str):
             raise TypeError("String is not convertible into joint values.")
-        joint_names = joint_names if len(joint_names) != 0 \
-            else self._active_joints
+        joint_names = joint_names if len(joint_names) != 0 else self._active_joints
         joint_values = self._get_joint_pose()
         if len(joint_names) != len(joint_values):
             raise IndexError("Given joint goal does not match the active joints " + str(joint_names) + ".")
 
         goal_constraints = Constraints()
-        goal_constraints.joint_constraints = [JointConstraint(joint_name=joint_name,
-                                                              position=joint_value,
-                                                              weight=1) for
-                                              joint_name, joint_value in zip(joint_names, joint_values)]
+        goal_constraints.joint_constraints = [JointConstraint(joint_name=name, position=value, weight=1)
+                                              for name, value in zip(joint_names, joint_values)]
         return [goal_constraints]
 
     def _pose_to_constraint(self):
@@ -771,8 +768,4 @@ def from_euler(a, b, c):
         (pi/2., pi/2., 0) horizontal west
 
     """
-    quat = Quaternion()
-
-    [quat.x, quat.y, quat.z, quat.w] = transformations.quaternion_from_euler(a, b, c, axes=_AXIS_SEQUENCE)
-
-    return quat
+    return Quaternion(*transformations.quaternion_from_euler(a, b, c, axes=_AXIS_SEQUENCE))
