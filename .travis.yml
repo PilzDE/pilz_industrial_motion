@@ -4,9 +4,7 @@ sudo: required
 dist: trusty
 language: generic
 
-cache:
-  directories:
-    - $HOME/.ccache
+cache: ccache
 
 notifications:
   email:
