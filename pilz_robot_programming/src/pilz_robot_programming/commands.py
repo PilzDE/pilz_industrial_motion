@@ -201,6 +201,28 @@ class BaseCmd(_AbstractCmd):
         out_str += " reference: " + str(self._reference_frame)
         return out_str
 
+    def __eq__(self, other):
+        if isinstance(other, BaseCmd):
+            return self._goal == other._goal \
+                   and self._planner_id == other._planner_id \
+                   and self._planning_group == other._planning_group \
+                   and self._target_link == other._target_link \
+                   and self._vel_scale == other._vel_scale \
+                   and self._acc_scale == other._acc_scale \
+                   and self._relative == other._relative \
+                   and self._reference_frame == other._reference_frame
+
+        return NotImplemented
+
+    def __ne__(self, other):
+        x = self.__eq__(other)
+        if x is not NotImplemented:
+            return not x
+        return NotImplemented
+
+    def __hash__(self):
+        return hash(tuple(sorted(self.__dict__.items())))
+
     __repr__ = __str__
 
     def _cmd_to_request(self, robot):
@@ -477,6 +499,14 @@ class Circ(BaseCmd):
         self._planner_id = "CIRC"
         self._interim = interim
         self._center = center
+
+    def __eq__(self, other):
+        if isinstance(other, Circ):
+            return super(Circ, self).__eq__(other) \
+                   and self._interim == other._interim \
+                   and self._center == other._center
+
+        return NotImplemented
 
     def __str__(self):
         out_str = BaseCmd.__str__(self)
