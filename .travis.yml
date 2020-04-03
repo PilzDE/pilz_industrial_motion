@@ -1,8 +1,6 @@
-# Travis CI instructions
-
-sudo: required
-dist: trusty
 language: generic
+dist: trusty
+os: linux
 
 cache:
   directories:
