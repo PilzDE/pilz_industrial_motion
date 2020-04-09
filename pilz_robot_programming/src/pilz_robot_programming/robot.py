@@ -114,7 +114,7 @@ class Robot(object):
     # time constant
     _SERVICE_WAIT_TIMEOUT_S = 1
 
-    def __init__(self, version=None, *args, **kwargs):
+    def __init__(self, version=None, lock=True, *args, **kwargs):
         super(Robot, self).__init__(*args, **kwargs)
         rospy.logdebug("Initialize Robot Api.")
 
@@ -132,7 +132,8 @@ class Robot(object):
 
         self._check_version(version)
 
-        self._claim_single_instance()
+        if lock:
+            self.claim_instance_lock()
 
         self._establish_connections()
 
@@ -237,6 +238,10 @@ class Robot(object):
         if not isinstance(cmd, _AbstractCmd):
             rospy.logerr("Unknown command type.")
             raise RobotUnknownCommandType("Unknown command type.")
+
+        # Check that the instance has acquired the move right
+        if not self._single_instance_flag:
+            raise RobotMultiInstancesError("Robot not locked to this instance.")
 
         # Check that move is not called by multiple threads in parallel.
         if not self._move_lock.acquire(False):
@@ -479,7 +484,7 @@ class Robot(object):
             raise RobotVersionError("Version of Robot API does not match! "
                                     "Current installed version is " + __version__ + "!")
 
-    def _claim_single_instance(self):
+    def claim_instance_lock(self):
         # check if we are the single instance
         if self._check_single_instance():
             # If no other instance exists, the pid and create_time is stored (overwrites old one)
@@ -491,7 +496,7 @@ class Robot(object):
             raise RobotMultiInstancesError("Only one instance of Robot class can be created!")
 
     def _check_single_instance(self):
-        # return True if no other instance exists
+        # return True if no other instance has claimed the lock
         # If running the same program twice the second should kill the first, however the parameter server
         # has a small delay so we check twice for the single instance flag.
         if rospy.has_param(self._INSTANCE_PARAM):
@@ -506,7 +511,7 @@ class Robot(object):
                 process = psutil.Process(pid)
 
                 if process.create_time() == create_time:
-                    rospy.logerr("An instance of Robot class already exists (pid=" + str(pid) + ").")
+                    rospy.logerr("An instance of Robot class already has claimed the lock (pid=" + str(pid) + ").")
                     return False
 
         return True
@@ -540,10 +545,17 @@ class Robot(object):
             self._stop_service.shutdown(reason="Robot instance released.")
         except AttributeError:
             rospy.logdebug("Services do not exists yet or have already been shutdown.")
+        self.release_instance_lock()
+
+    def release_instance_lock(self):
+        if self._move_lock.locked():
+            raise RobotMoveAlreadyRunningError("Can not release instance lock during move")
+
         # do not delete pid parameter if it has not been set or overwritten
         if self._single_instance_flag:
             rospy.logdebug("Delete single instance parameter from parameter server.")
             rospy.delete_param(self._INSTANCE_PARAM)
+            self._single_instance_flag = False
 
     def __enter__(self):
         return self
