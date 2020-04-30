@@ -221,7 +221,7 @@ class BaseCmd(_AbstractCmd):
         return NotImplemented
 
     def __hash__(self):
-        return hash((hash(t) for t in tuple(map(lambda k: self.__dict__[k], sorted(self.__dict__.items())))))
+        return hash((hash(t) for t in tuple(sorted(self.__dict__.items()))))
 
     __repr__ = __str__
 
