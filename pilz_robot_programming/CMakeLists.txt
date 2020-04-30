@@ -88,5 +88,4 @@ endfunction() # SETUP_TARGET_FOR_COVERAGE
           NAME ${PROJECT_NAME}_coverage
           )
   endif(ENABLE_COVERAGE_TESTING)
-
 endif()

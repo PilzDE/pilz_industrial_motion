@@ -1232,16 +1232,21 @@ class TestAPICmdConversion(unittest.TestCase):
         self.assertNotEqual(Ptp(), Circ())
         self.assertNotEqual(Ptp(), Lin())
         self.assertNotEqual(Circ(goal=[1], interim=Point(1, 3, 4)), Circ(goal=[1], center=Point(1, 3, 4)))
-        self.assertEqual(Ptp(planning_group="test"), Ptp(planning_group="test2"))
-        self.assertEqual(Ptp(target_link="prbt_tcp"), Ptp(target_link="world"))
-        self.assertEqual(Ptp(vel_scale=.1), Ptp(vel_scale=.2))
-        self.assertEqual(Ptp(acc_scale=.1), Ptp(acc_scale=.2))
-        self.assertEqual(Ptp(relative=False), Ptp(relative=True))
-        self.assertEqual(Ptp(reference_frame="prbt_tcp"), Ptp(reference_frame="world"))
-        self.assertEqual(Ptp(goal=Pose(position=Point(1, 2, 3), orientation=Quaternion(1, 0, 0, 0))),
-                         Ptp(goal=Pose(position=Point(3, 2, 1), orientation=Quaternion(1, 0, 0, 0))))
-        self.assertEqual(Ptp(goal=Pose(position=Point(1, 2, 3), orientation=Quaternion(1, 0, 0, 0))),
-                         Ptp(goal=Pose(position=Point(1, 2, 3), orientation=Quaternion(0, 0, 0, 1))))
+        self.assertNotEqual(Ptp(planning_group="test"), Ptp(planning_group="test2"))
+        self.assertNotEqual(Ptp(target_link="prbt_tcp"), Ptp(target_link="world"))
+        self.assertNotEqual(Ptp(vel_scale=.1), Ptp(vel_scale=.2))
+        self.assertNotEqual(Ptp(acc_scale=.1), Ptp(acc_scale=.2))
+        self.assertNotEqual(Ptp(relative=False), Ptp(relative=True))
+        self.assertNotEqual(Ptp(reference_frame="prbt_tcp"), Ptp(reference_frame="world"))
+        self.assertNotEqual(Ptp(goal=Pose(position=Point(1, 2, 3), orientation=Quaternion(1, 0, 0, 0))),
+                            Ptp(goal=Pose(position=Point(3, 2, 1), orientation=Quaternion(1, 0, 0, 0))))
+        self.assertNotEqual(Ptp(goal=Pose(position=Point(1, 2, 3), orientation=Quaternion(1, 0, 0, 0))),
+                            Ptp(goal=Pose(position=Point(1, 2, 3), orientation=Quaternion(0, 0, 0, 1))))
+
+        self.assertNotEqual(Ptp(), "")
+        self.assertNotEqual(Ptp(), "")
+        self.assertNotEqual(Circ(), "")
+        self.assertEqual(len({Ptp(), Ptp(), Circ()}), 2)
 
 
 if __name__ == '__main__':
