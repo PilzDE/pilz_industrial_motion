@@ -185,7 +185,13 @@ class BaseCmd(_AbstractCmd):
         # Needs to be set by derived classes
         self._planner_id = None
 
-        self._goal = goal
+        try:
+            if isinstance(goal, str):
+                raise TypeError()
+            self._goal = tuple(goal)
+        except TypeError:
+            self._goal = goal
+
         self._planning_group = planning_group
         self._target_link = target_link
         self._vel_scale = vel_scale
@@ -203,15 +209,7 @@ class BaseCmd(_AbstractCmd):
 
     def __eq__(self, other):
         if isinstance(other, BaseCmd):
-            return self._goal == other._goal \
-                   and self._planner_id == other._planner_id \
-                   and self._planning_group == other._planning_group \
-                   and self._target_link == other._target_link \
-                   and self._vel_scale == other._vel_scale \
-                   and self._acc_scale == other._acc_scale \
-                   and self._relative == other._relative \
-                   and self._reference_frame == other._reference_frame
-
+            return hash(self) == hash(other)
         return NotImplemented
 
     def __ne__(self, other):
@@ -221,7 +219,7 @@ class BaseCmd(_AbstractCmd):
         return NotImplemented
 
     def __hash__(self):
-        return hash((hash(t) for t in tuple(sorted(self.__dict__.items()))))
+        return hash(tuple(sorted([str(t) for t in self.__dict__.items()])))
 
     __repr__ = __str__
 
@@ -390,9 +388,9 @@ class Ptp(BaseCmd):
         out_str = BaseCmd.__str__(self)
         if self._relative:
             out_str += " relative: True"
-        if isinstance(self._goal, Pose):
+        if isinstance(self._goal, Pose) or isinstance(self._goal, PoseStamped):
             out_str += " Cartesian goal:\n" + str(self._goal)
-        if isinstance(self._goal, list):
+        elif isinstance(self._goal, tuple):
             out_str += " joint goal: " + str(self._goal)
         return out_str
 
@@ -439,9 +437,9 @@ class Lin(BaseCmd):
         out_str = BaseCmd.__str__(self)
         if self._relative:
             out_str += " relative: True"
-        if isinstance(self._goal, Pose):
+        if isinstance(self._goal, Pose) or isinstance(self._goal, PoseStamped):
             out_str += " Cartesian goal:\n" + str(self._goal)
-        if isinstance(self._goal, list):
+        elif isinstance(self._goal, tuple):
             out_str += " joint goal: " + str(self._goal)
         return out_str
 
@@ -499,14 +497,6 @@ class Circ(BaseCmd):
         self._planner_id = "CIRC"
         self._interim = interim
         self._center = center
-
-    def __eq__(self, other):
-        if isinstance(other, Circ):
-            return super(Circ, self).__eq__(other) \
-                   and self._interim == other._interim \
-                   and self._center == other._center
-
-        return NotImplemented
 
     def __str__(self):
         out_str = BaseCmd.__str__(self)
