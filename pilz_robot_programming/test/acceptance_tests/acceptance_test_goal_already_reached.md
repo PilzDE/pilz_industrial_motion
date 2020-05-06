@@ -24,5 +24,5 @@ This acceptance test is to test that no error will occur when the robot is comma
 ## Test Sequence:
   1. Bringup can: `sudo ip link set can0 up type can bitrate 1000000`
   2. Run `roslaunch prbt_moveit_config moveit_planning_execution.launch sim:=False`
-  3. Run `rosrun pilz_trajectory_generation acceptance_test_goal_already_reached.py`
+  3. Run `rosrun pilz_robot_programming acceptance_test_goal_already_reached.py`
 ---
