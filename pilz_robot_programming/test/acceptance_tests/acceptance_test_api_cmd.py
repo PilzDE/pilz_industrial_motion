@@ -19,14 +19,20 @@ from pilz_robot_programming.robot import *
 from pilz_robot_programming.commands import *
 from pilz_industrial_motion_testutils.acceptance_test_utils import _askPermission, _askSuccess
 
+from pilz_robot_tfc_api.modbus_tfc_api import ModbusTfcAPI
+from pilz_robot_tfc_api.pilz_modbus_client import PilzModbusClient
+from pilz_robot_tfc_api.op_modes import OperationMode
+
 PTP_VEL_PICK = 0.1
 
 _REQUIRED_API_VERSION = "1"
+
 
 def start_program():
     print("Executing " + __file__)
 
     robot = Robot(_REQUIRED_API_VERSION)
+
     _test_ptp_pos(robot)
     _test_lin_pos(robot)
     _test_circ_pos(robot)
@@ -46,13 +52,26 @@ def _test_ptp_pos(robot):
           1. Robot moves to zero position.
           2. Robot moves away from the singularity.
     """
-    if _askPermission(_test_ptp_pos.__name__) == 0:
-        return
+    tfc = ModbusTfcAPI(PilzModbusClient())
+    tfc.open()
+
+    tfc.disable_emergency()
+    tfc.acknowledge_ready_signal()
+
+    tfc.choose_operation_mode(OperationMode.T1)
+    tfc.acknowledge_ready_signal()
+
+    tfc.activate_enabling()
+    # Wait till enabling is given by FS controller
+    time.sleep(0.5)
+
     robot.move(Ptp(goal=[0, 0, 0, 0, 0, 0]))
     robot.move(Ptp(goal=[0, -0.78, 0.78, 0, 1.56, 0]))
 
-    _askSuccess(_test_ptp_pos.__name__,
-                'The robot should have moved to [0,0,0,0,0,0] and after that away from [0,0,0,0,0,0].')
+    tfc.deactivate_enabling()
+    tfc.close()
+
+    # TODO: Check that robot moved to [0,0,0,0,0,0] and after that away from [0,0,0,0,0,0]
 
 
 def _test_lin_pos(robot):
@@ -68,14 +87,28 @@ def _test_lin_pos(robot):
           2. Robot moves 15cm linear down.
           3. Robot moves 15cm linear up.
     """
-    if _askPermission(_test_lin_pos.__name__) == 0:
-        return
+
+    tfc = ModbusTfcAPI(PilzModbusClient())
+    tfc.open()
+
+    tfc.disable_emergency()
+    tfc.acknowledge_ready_signal()
+
+    tfc.choose_operation_mode(OperationMode.T1)
+    tfc.acknowledge_ready_signal()
+
+    tfc.activate_enabling()
+    # Wait till enabling is given by FS controller
+    time.sleep(0.5)
+
     robot.move(Ptp(goal=Pose(position=Point(-0.46, -0.21, 0.19), orientation=from_euler(0, -3.14, -0.25))))
     robot.move(Lin(goal=Pose(position=Point(0.0, 0.0, -0.15)), relative=True, vel_scale=PTP_VEL_PICK))
     robot.move(Lin(goal=Pose(position=Point(0.0, 0.0, 0.15)), relative=True, vel_scale=PTP_VEL_PICK))
 
-    _askSuccess(_test_lin_pos.__name__, 'The robot should have moved to the upper pick position. Afterwards the tcp'
-                                        + ' should have moved linear 15cm down and then linear 15cm up.')
+    tfc.deactivate_enabling()
+    tfc.close()
+
+    # TODO: Check that robot has moved to the upper pick position, then  linear 15cm down and then linear 15cm up
 
 
 def _test_seq_pos1(robot):
@@ -102,8 +135,18 @@ def _test_seq_pos1(robot):
                 f. Robot moves back the quarter circle.
                 g. Robot moves back to zero position.
     """
-    if _askPermission(_test_seq_pos1.__name__) == 0:
-        return
+    tfc = ModbusTfcAPI(PilzModbusClient())
+    tfc.open()
+
+    tfc.disable_emergency()
+    tfc.acknowledge_ready_signal()
+
+    tfc.choose_operation_mode(OperationMode.T1)
+    tfc.acknowledge_ready_signal()
+
+    tfc.activate_enabling()
+    # Wait till enabling is given by FS controller
+    time.sleep(0.5)
 
     x_pick = 0
     y_pick = 0.25
@@ -132,10 +175,12 @@ def _test_seq_pos1(robot):
 
     robot.move(seq_l)
 
-    _askSuccess(_test_seq_pos1.__name__, 'The robot should have moved to [0,0,0,0,0,0] and then to the upper pick'
-                                         + ' position. After that the robot tcp should have moved linear 15cm down and'
-                                         + ' then linear 15cm up. Further on the robot should have moved a quarter'
-                                         + ' circle forwards and backwards and then back to [0,0,0,0,0,0].')
+    tfc.deactivate_enabling()
+    tfc.close()
+
+    # TODO Check that robot  moved to [0,0,0,0,0,0] and then to the upper pick position,
+    #  After that the robot tcp should have moved linear 15cm down and then linear 15cm up.
+    #  Further on the robot should have moved a quarter circle forwards and backwards and then back to [0,0,0,0,0,0].
 
 
 def _test_seq_pos2(robot):
@@ -158,8 +203,18 @@ def _test_seq_pos2(robot):
                 d. Robot moves 15cm linear up.
                 e. Robot moves back to zero position.
     """
-    if _askPermission(_test_seq_pos2.__name__) == 0:
-        return
+    tfc = ModbusTfcAPI(PilzModbusClient())
+    tfc.open()
+
+    tfc.disable_emergency()
+    tfc.acknowledge_ready_signal()
+
+    tfc.choose_operation_mode(OperationMode.T1)
+    tfc.acknowledge_ready_signal()
+
+    tfc.activate_enabling()
+    # Wait till enabling is given by FS controller
+    time.sleep(0.5)
 
     x_pick = 0
     y_pick = 0.25
@@ -186,10 +241,12 @@ def _test_seq_pos2(robot):
 
     robot.move(seq_l)
 
-    _askSuccess(_test_seq_pos2.__name__, 'The robot should have moved to a start position and then a quarter'
-                                         + ' circle arriving at the upper pick position. After that the robot tcp'
-                                         + ' should have moved linear 15cm down and then linear 15cm up. In the end the'
-                                         + ' robot should have moved back to [0,0,0,0,0,0].')
+    tfc.deactivate_enabling()
+    tfc.close()
+
+    # TODO Check that robot moved to a start position and then a quarter circle arriving at the upper pick position.
+    #  After that the robot tcp should have moved linear 15cm down and then linear 15cm up.
+    #  In the end the robot should have moved back to [0,0,0,0,0,0].
 
 
 def _test_circ_pos(robot):
@@ -205,8 +262,18 @@ def _test_circ_pos(robot):
           2. Robot moves half a circle.
           3. Robot moves half a circle back to origin.
     """
-    if _askPermission(_test_circ_pos.__name__) == 0:
-        return
+    tfc = ModbusTfcAPI(PilzModbusClient())
+    tfc.open()
+
+    tfc.disable_emergency()
+    tfc.acknowledge_ready_signal()
+
+    tfc.choose_operation_mode(OperationMode.T1)
+    tfc.acknowledge_ready_signal()
+
+    tfc.activate_enabling()
+    # Wait till enabling is given by FS controller
+    time.sleep(0.5)
 
     robot.move(Ptp(goal=Pose(position=Point(-0.46, -0.21, 0.19), orientation=from_euler(0, -3.14, -0.25))))
 
@@ -218,8 +285,10 @@ def _test_circ_pos(robot):
                     orientation=from_euler(0, -3.14, -0.25)), vel_scale=PTP_VEL_PICK,
                     interim=Point(-0.565, -0.105, 0.19)))
 
-    _askSuccess(_test_circ_pos.__name__, 'The robot should have moved to a start position and then two times half a'
-                                         + ' circle.')
+    tfc.deactivate_enabling()
+    tfc.close()
+
+    # TODO Check that robot moved to a start position and then two times half a circle
 
 
 def _test_blend_pos(robot):
@@ -233,8 +302,18 @@ def _test_blend_pos(robot):
           1. Robot moves to start position.
           2. Robot moves in a square without intermediate stops.
     """
-    if _askPermission(_test_blend_pos.__name__) == 0:
-        return
+    tfc = ModbusTfcAPI(PilzModbusClient())
+    tfc.open()
+
+    tfc.disable_emergency()
+    tfc.acknowledge_ready_signal()
+
+    tfc.choose_operation_mode(OperationMode.T1)
+    tfc.acknowledge_ready_signal()
+
+    tfc.activate_enabling()
+    # Wait till enabling is given by FS controller
+    time.sleep(0.5)
 
     robot.move(Ptp(goal=Pose(position=Point(-0.46, -0.21, 0.19), orientation=from_euler(0, -3.14, -0.25))))
 
@@ -253,8 +332,11 @@ def _test_blend_pos(robot):
 
     robot.move(seq_l)
 
-    _askSuccess(_test_blend_pos.__name__, 'The robot should moved to a start position and then in a square always retur'
-                                         + 'ning to the start position. During the motion the robot does not stop.')
+    tfc.deactivate_enabling()
+    tfc.close()
+
+    # TODO Check that robot  moved to a start position and then in a square always returning to the start position.
+    #  During the motion the robot does not stop.
 
 
 if __name__ == "__main__":
