@@ -25,7 +25,7 @@ gripper commands.
 ## Starting the tests
 - Bringup can: `sudo ip link set can0 up type can bitrate 1000000`
 - Run `roslaunch prbt_moveit_config moveit_planning_execution.launch sim:=False gripper:=pg70 pipeline:=pilz_command_planner`
-- Run `rosrun pilz_robot_programming acceptance_test_gripper.py`.
+- Run `rosrun pilz_robot_programming acceptance_test_gripper_cmd.py`.
   - Please note: Each test must be confirmed before it is executed.
 Confirm by entering `y` or `n` to skip test.
   - Please note: At the end of each test the result must be checked.
@@ -34,4 +34,4 @@ Confirm success by entering `y`, or `n` in case of failure.
 
 ## Test descriptions
 - The concrete test descriptions consisting of test-summary, test-sequence and
-expected results can be found in `acceptance_test_gripper.py`.
+expected results can be found in `acceptance_test_gripper_cmd.py`.
