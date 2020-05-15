@@ -14,3 +14,4 @@
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 from .ros_message_serializer import RosMessageSerializer
+from .pose_file_tf_publisher import PoseFileTFPublisher
