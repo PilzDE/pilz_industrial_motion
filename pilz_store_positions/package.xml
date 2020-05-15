@@ -15,23 +15,17 @@
 
   <buildtool_depend>catkin</buildtool_depend>
 
-  <build_depend>message_generation</build_depend>
   <build_depend>std_msgs</build_depend>
   <build_depend>rospy</build_depend>
   <build_depend>roslint</build_depend>
 
-  <exec_depend>message_runtime</exec_depend>
-  <exec_depend>rospy_message_converter</exec_depend>
-  <exec_depend>yaml</exec_depend>
   <exec_depend>geometry_msgs</exec_depend>
-  <exec_depend>control_msgs</exec_depend>
   <exec_depend>rospy</exec_depend>
   <exec_depend>tf2_ros</exec_depend>
 
   <test_depend>python-mock</test_depend>
   <test_depend>rostest</test_depend>
   <test_depend>ros_pytest</test_depend>
-  <test_depend>visualization_msgs</test_depend>
 
   </export>
 </package>
