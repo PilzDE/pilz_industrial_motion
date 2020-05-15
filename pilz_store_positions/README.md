@@ -58,5 +58,5 @@ Those target frames can for example be displayed by Rviz.
 
 To publish the points run:
 ```
-rosrun pilz_teleoperation pose_visualisation_node.py _file_path:="/path/to/file.py"
+rosrun pilz_store_positions pose_visualisation_node.py _file_path:="/path/to/file.py"
 ```

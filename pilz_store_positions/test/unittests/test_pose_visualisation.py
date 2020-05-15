@@ -20,13 +20,13 @@ import tf2_ros
 import rospkg
 import pytest
 from contextlib import contextmanager
-from pilz_teleoperation import PoseFileTFPublisher
+from pilz_store_positions import PoseFileTFPublisher
 from mock import Mock, call
 from geometry_msgs.msg import TransformStamped, Transform, Point, Quaternion
 from std_msgs.msg import Header
 
 
-PKG = 'pilz_teleoperation'
+PKG = 'pilz_store_positions'
 
 
 @contextmanager
@@ -58,7 +58,7 @@ def test_visualisation(test_file, expected_exception, tf_calls, ros_errs, monkey
     """
     __mock_dependencys(monkeypatch)
     publish_mock, err_mock = __mock_side_effects(monkeypatch)
-    _test_data_dir = rospkg.RosPack().get_path("pilz_teleoperation") + "/test/unittests/test_data/"
+    _test_data_dir = rospkg.RosPack().get_path("pilz_store_positions") + "/test/unittests/test_data/"
 
     with expected_exception:
         PoseFileTFPublisher().publish_poses_from_file(_test_data_dir + test_file)

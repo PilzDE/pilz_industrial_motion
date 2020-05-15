@@ -16,7 +16,7 @@
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 import rospy
-from pilz_teleoperation import PoseFileTFPublisher
+from pilz_store_positions import PoseFileTFPublisher
 
 
 if __name__ == '__main__':

@@ -22,10 +22,10 @@
   <exec_depend>geometry_msgs</exec_depend>
   <exec_depend>rospy</exec_depend>
   <exec_depend>tf2_ros</exec_depend>
+  <exec_depend>yaml</exec_depend>
 
   <test_depend>python-mock</test_depend>
   <test_depend>rostest</test_depend>
   <test_depend>ros_pytest</test_depend>
 
-  </export>
 </package>

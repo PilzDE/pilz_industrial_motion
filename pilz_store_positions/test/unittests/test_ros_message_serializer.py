@@ -17,10 +17,10 @@
 
 import rospy
 import pytest
-from pilz_teleoperation import RosMessageSerializer
+from pilz_store_positions import RosMessageSerializer
 
 
-PKG = 'pilz_teleoperation'
+PKG = 'pilz_store_positions'
 
 
 def single_pose():
