@@ -17,7 +17,7 @@
 import unittest
 from pilz_robot_programming import *
 from geometry_msgs.msg import Pose
-from pilz_teleoperation import RosMessageSerializer
+from pilz_pilz_store_positions import RosMessageSerializer
 import rospy
 
 __REQUIRED_API_VERSION__ = '1'
