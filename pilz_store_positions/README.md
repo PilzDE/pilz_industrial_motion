@@ -2,7 +2,7 @@
 
 After moving the robot to the desired position, you can store the current position to file.
 
-To save the current robot pose as ros_msg to a file use `rosrun pilz_store_postions store_current_pose.py`.
+To save the current robot pose as ros_msg to a file use `rosrun pilz_store_postions store_current_pose`.
 The generated file can be included into your pilz_robot_programming script as follows:
 
 ```
@@ -58,5 +58,5 @@ Those target frames can for example be displayed by Rviz.
 
 To publish the points run:
 ```
-rosrun pilz_store_positions pose_visualisation_node.py _file_path:="/path/to/file.py"
+rosrun pilz_store_positions pose_visualisation_node _file_path:="/path/to/file.py"
 ```
