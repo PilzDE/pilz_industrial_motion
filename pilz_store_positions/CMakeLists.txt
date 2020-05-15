@@ -17,8 +17,8 @@ catkin_package()
 catkin_python_setup()
 
 catkin_install_python(PROGRAMS
-   scripts/pose_visualisation_node.py
-   scripts/store_current_pose.py
+   scripts/pose_visualisation_node
+   scripts/store_current_pose
    DESTINATION ${CATKIN_PACKAGE_BIN_DESTINATION}
 )
 
