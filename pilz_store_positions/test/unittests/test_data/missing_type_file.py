@@ -1,0 +1,23 @@
+start_pose_test = PoseStamped(
+    header=Header(
+        seq=0,
+        stamp=Time(
+            secs=12345,
+            nsecs=6789
+        ),
+        frame_id='world'
+    ),
+    pose=Pose(
+        position=Point(
+            x=7,
+            y=0.0,
+            z=0.0
+        ),
+        orientation=Quaternion(
+            x=0.0,
+            y=0.0,
+            z=0.0,
+            w=-1.0
+        )
+    )
+)
