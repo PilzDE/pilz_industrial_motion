@@ -2,14 +2,25 @@ cmake_minimum_required(VERSION 2.8.3)
 project(pilz_store_positions)
 
 find_package(catkin REQUIRED COMPONENTS
-  message_generation
   roslint
   rospy
   std_msgs
   visualization_msgs
 )
 
+catkin_package()
+
+#############
+## Install ##
+#############
+
 catkin_python_setup()
+
+catkin_install_python(PROGRAMS
+   scripts/pose_visualisation_node.py
+   scripts/store_current_pose.py
+   DESTINATION ${CATKIN_PACKAGE_BIN_DESTINATION}
+)
 
 #############
 ## Testing ##
