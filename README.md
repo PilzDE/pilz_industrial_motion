@@ -32,6 +32,8 @@ pilz\_robot\_programming provides a python API for an intuitive programming of a
 ## Package: pilz_industrial_motion_testutils
 Contains helper classes and functions that are used by the tests
 
+## Package: pilz_store_positions
+Contains a python module to store poses during teach-in.
 
 ***
 <!--
