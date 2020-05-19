@@ -190,6 +190,24 @@ class Robot(object):
             rospy.logerr(e.message)
             raise RobotCurrentStateError(e.message)
 
+    def get_current_pose_stamped(self, target_link=_DEFAULT_TARGET_LINK, base=_DEFAULT_BASE_LINK):
+        """Returns the current stamped pose of target link in the reference frame.
+        :param target_link: Name of the target_link, default value is "prbt_tcp".
+        :param base: The target reference system of the pose, default ist "prbt_base".
+        :return: Returns the stamped pose of the given frame
+        :rtype: geometry_msgs.msg.PoseStamped
+        :raises RobotCurrentStateError if the pose of the given frame is not known
+        """
+
+        try:
+            zero_pose = PoseStamped(header=Header(frame_id=target_link),
+                                    pose=Pose(orientation=Quaternion(w=1.0)))
+            current_pose = self.tf_buffer_.transform(zero_pose, base, rospy.Duration(5, 0))
+            return current_pose
+        except tf2_ros.LookupException as e:
+            rospy.logerr(e.message)
+            raise RobotCurrentStateError(e.message)
+
     def get_current_pose(self, target_link=_DEFAULT_TARGET_LINK, base=_DEFAULT_BASE_LINK):
         """Returns the current pose of target link in the reference frame.
         :param target_link: Name of the target_link, default value is "prbt_tcp".
@@ -199,14 +217,7 @@ class Robot(object):
         :raises RobotCurrentStateError if the pose of the given frame is not known
         """
 
-        try:
-            zero_pose = PoseStamped(header=Header(frame_id=target_link),
-                                    pose=Pose(orientation=Quaternion(w=1.0)))
-            current_pose = self.tf_buffer_.transform(zero_pose, base, rospy.Duration(5, 0)).pose
-            return current_pose
-        except tf2_ros.LookupException as e:
-            rospy.logerr(e.message)
-            raise RobotCurrentStateError(e.message)
+        return get_current_pose_stamped(self, target_link, base).pose
 
     def move(self, cmd):
         """ Allows the user to start/execute robot motion commands.
