@@ -215,7 +215,7 @@ class Robot(object):
         :rtype: geometry_msgs.msg.Pose
         :raises RobotCurrentStateError if the pose of the given frame is not known
         """
-        return self.get_current_pose_stamped(self, target_link, base).pose
+        return self.get_current_pose_stamped(target_link, base).pose
 
     def move(self, cmd):
         """ Allows the user to start/execute robot motion commands.
