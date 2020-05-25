@@ -50,7 +50,11 @@ if(CATKIN_ENABLE_TESTING)
 
   file(GLOB unittest_files "test/unittests/test_*.py")
   foreach(file ${unittest_files})
-    add_pytests(${file})
+    if(ENABLE_COVERAGE_TESTING)
+      add_pytests(${file} OPTIONS "--cov=${PROJECT_NAME} --cov-append")
+    else()
+      add_pytests(${file})
+    endif()
   endforeach()
 
   # check for pep8 compliance and fail test on error(s)

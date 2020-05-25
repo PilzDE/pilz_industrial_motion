@@ -29,4 +29,5 @@
   <test_depend>ros_pytest</test_depend>
   <test_depend>visualization_msgs</test_depend>
   <test_depend>code_coverage</test_depend>
+  <test_depend>python-pytest-cov</test_depend>
 </package>
