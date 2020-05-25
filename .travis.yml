@@ -27,13 +27,13 @@ env:
     - ROS_REPO=testing
     - ROS_REPO="testing"
       CATKIN_LINT=false NOT_TEST_BUILD=true
-      AFTER_SCRIPT="./.coverage.sh"
+      AFTER_SCRIPT="source /root/ici/industrial_ci_addons/check_coverage.sh && check_coverage pilz_extensions pilz_robot_programming pilz_trajectory_generation"
       CMAKE_ARGS="-DENABLE_COVERAGE_TESTING=ON -DCMAKE_BUILD_TYPE=Debug"
-      DOCKER_RUN_OPTS='-e COVERAGE_PKGS="pilz_extensions pilz_robot_programming pilz_trajectory_generation"'
 matrix:
   allow_failures:
     - env: ROS_REPO=main
 install:
   - git clone --depth=1 --branch master https://github.com/ros-industrial/industrial_ci.git .industrial_ci
+  - git clone --depth=1 --branch master https://github.com/PilzDE/industrial_ci_addons.git .industrial_ci/industrial_ci/src/industrial_ci_addons
 script:
   - .industrial_ci/travis.sh
