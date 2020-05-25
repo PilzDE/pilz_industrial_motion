@@ -8,6 +8,11 @@ find_package(catkin REQUIRED COMPONENTS
   visualization_msgs
 )
 
+if(CATKIN_ENABLE_TESTING AND ENABLE_COVERAGE_TESTING)
+  find_package(code_coverage REQUIRED)
+  APPEND_COVERAGE_COMPILER_FLAGS()
+endif()
+
 catkin_package()
 
 #############
@@ -51,6 +56,17 @@ if(CATKIN_ENABLE_TESTING)
   # check for pep8 compliance and fail test on error(s)
   roslint_python( )
   roslint_add_test()
+
+  # to run: catkin_make -DCMAKE_BUILD_TYPE=Debug -DENABLE_COVERAGE_TESTING=ON package_name_coverage
+  if(ENABLE_COVERAGE_TESTING)
+    set(COVERAGE_EXCLUDES "*/${PROJECT_NAME}/test*")
+    add_code_coverage(
+      NAME ${PROJECT_NAME}_coverage
+      # specifying dependencies in a reliable way is on open issue
+      # see https://github.com/mikeferguson/code_coverage/pull/14
+      #DEPENDENCIES tests
+    )
+  endif()
 
 endif()
 
