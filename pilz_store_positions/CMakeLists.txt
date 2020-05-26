@@ -61,7 +61,9 @@ if(CATKIN_ENABLE_TESTING)
   roslint_python( )
   roslint_add_test()
 
-  # to run: catkin_make -DCMAKE_BUILD_TYPE=Debug -DENABLE_COVERAGE_TESTING=ON package_name_coverage
+  # Fasest way to generate coverage - Make sure to run the test in sequence:
+  # catkin_make -DCMAKE_BUILD_TYPE=Debug -DENABLE_COVERAGE_TESTING=ON tests
+  # catkin_make -DCMAKE_BUILD_TYPE=Debug -DENABLE_COVERAGE_TESTING=ON pilz_store_positions_coverage -j1
   if(ENABLE_COVERAGE_TESTING)
     set(COVERAGE_EXCLUDES "*/${PROJECT_NAME}/test*")
     add_code_coverage(
