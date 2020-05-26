@@ -64,6 +64,10 @@ if(CATKIN_ENABLE_TESTING)
   # Fasest way to generate coverage - Make sure to run the test in sequence:
   # catkin_make -DCMAKE_BUILD_TYPE=Debug -DENABLE_COVERAGE_TESTING=ON tests
   # catkin_make -DCMAKE_BUILD_TYPE=Debug -DENABLE_COVERAGE_TESTING=ON pilz_store_positions_coverage -j1
+  # or
+  # catkin config --cmake-args -DENABLE_COVERAGE_TESTING=ON -DCMAKE_BUILD_TYPE=Debug
+  # catkin build pilz_store_positions -v --no-deps --catkin-make-args tests
+  # catkin build pilz_store_positions -j 1 -v --no-deps --catkin-make-args pilz_store_positions_coverage
   if(ENABLE_COVERAGE_TESTING)
     set(COVERAGE_EXCLUDES "*/${PROJECT_NAME}/test*")
     add_code_coverage(
