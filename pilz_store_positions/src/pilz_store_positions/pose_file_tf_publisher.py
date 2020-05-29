@@ -58,7 +58,7 @@ class PoseFileTFPublisher(object):
                 if not callable(v) and v.__class__ is not None and not k.startswith("_"):
                     rospy.logerr("%s is of unknown type: %s" % (k, v.__class__))
 
-    def publish_poses_from_file_loop(self, file_path, rate=1):
+    def publish_poses_from_file_loop(self, file_path, rate=1): # pragma: no cover
         """ publishes all stamped poses from a given file path repeatedly
         :param file_path: the path to the python file, containing the stamped poses
         :param rate: (optional) rate to publish with
