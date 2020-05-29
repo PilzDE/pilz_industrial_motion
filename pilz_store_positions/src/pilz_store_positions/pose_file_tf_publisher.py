@@ -20,9 +20,9 @@ from geometry_msgs.msg import TransformStamped
 
 
 class PoseFileTFPublisher(object):
-    def __init__(self):
+    def __init__(self, file_path):
         self.tf_broadcaster = tf2_ros.TransformBroadcaster()
-        self.__pose_list_file = None
+        self._import_pose_list(file_path)
 
     def _import_pose_list(self, file_path):
         file_name_without_extension, path_to_file = self._get_name_and_path(file_path)
@@ -38,14 +38,7 @@ class PoseFileTFPublisher(object):
         file_name_without_extension = file_name.split(".")[0]
         return file_name_without_extension, path_to_file
 
-    def publish_poses_from_file(self, file_path):
-        """ publishes all stamped poses from a given file path
-        :param file_path: the path to the python file, containing the stamped poses
-        """
-        self._import_pose_list(file_path)
-        self._publish_poses()
-
-    def _publish_poses(self):
+    def publish_poses(self):
         for k, v in self.__pose_list_file.__dict__.items():
             try:
                 t = TransformStamped(child_frame_id=k)
@@ -57,13 +50,3 @@ class PoseFileTFPublisher(object):
             except AttributeError:
                 if not callable(v) and v.__class__ is not None and not k.startswith("_"):
                     rospy.logerr("%s is of unknown type: %s" % (k, v.__class__))
-
-    def publish_poses_from_file_loop(self, file_path, rate=1):  # pragma: no cover
-        """ publishes all stamped poses from a given file path repeatedly
-        :param file_path: the path to the python file, containing the stamped poses
-        :param rate: (optional) rate to publish with
-        """
-        self._import_pose_list(file_path)
-        while not rospy.is_shutdown():
-            self._publish_poses()
-            rospy.Rate(rate).sleep()

@@ -23,8 +23,12 @@ if __name__ == '__main__':
     rospy.init_node("pose_visualisation")
     try:
         file_path = rospy.get_param("~file_path")
-        pb = PoseFileTFPublisher()
-        pb.publish_poses_from_file_loop(file_path)
+        pb = PoseFileTFPublisher(file_path)
+
+        while not rospy.is_shutdown():
+            pb.publish_poses()
+            rospy.Rate(1).sleep()
+
     except ImportError:
         rospy.logerr("path invalid!")
     except rospy.ROSInterruptException:

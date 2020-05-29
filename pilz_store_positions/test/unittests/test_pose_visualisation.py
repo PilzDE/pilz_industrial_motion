@@ -61,7 +61,8 @@ def test_visualisation(test_file, expected_exception, tf_calls, ros_errs, monkey
     _test_data_dir = rospkg.RosPack().get_path("pilz_store_positions") + "/test/unittests/test_data/"
 
     with expected_exception:
-        PoseFileTFPublisher().publish_poses_from_file(_test_data_dir + test_file)
+        pb = PoseFileTFPublisher(_test_data_dir + test_file)
+        pb.publish_poses()
         publish_mock.assert_has_calls(tf_calls)
         err_mock.assert_has_calls(ros_errs)
 
