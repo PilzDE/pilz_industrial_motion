@@ -20,6 +20,10 @@ from geometry_msgs.msg import TransformStamped
 
 
 class PoseFileTFPublisher(object):
+    """!
+    Publishes TF poses from a given python file containing various poses on the /tf topic.
+    """
+
     def __init__(self, file_path):
         self.tf_broadcaster = tf2_ros.TransformBroadcaster()
         self._import_pose_list(file_path)

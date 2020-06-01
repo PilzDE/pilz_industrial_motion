@@ -19,7 +19,7 @@ from collections import OrderedDict
 
 
 class RosMessageSerializer(object):
-    """
+    """!
     Serialization and De-Serialization of ROS messages for convenient file printing
     """
 
@@ -27,11 +27,11 @@ class RosMessageSerializer(object):
         self._module_imports = {}
 
     def write_messages_to_file(self, ros_messages, filename):
-        """
+        """!
         Writes a file that can be used with 'import' to restore
-        :param ros_messages: iterable [ordered] dictionary of messages to be serialized.
+        @param ros_messages: iterable [ordered] dictionary of messages to be serialized.
                 key is the variable name used for serialization and value a ROS message object
-        :param filename: target filename, overwritten if existent
+        @param filename: target filename, overwritten if existent
         """
         with open(filename, 'w') as f:
             serialized_message = ""
@@ -44,9 +44,9 @@ class RosMessageSerializer(object):
             f.write("\n")
 
     def convert_ros_message_to_python(self, message, indentation=0):
-        """
+        """!
         Serialize a ROS msg into a String Object that can be used with eval() afterwards
-        :rtype: String
+        @return String
         """
         if not isinstance(message, (genpy.Message, rospy.rostime.Time, rospy.rostime.Duration)):
             # end of recursion
