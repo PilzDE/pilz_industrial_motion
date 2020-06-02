@@ -22,32 +22,80 @@ env:
     - CATKIN_LINT=true
     - CATKIN_LINT_ARGS='--strict'
     - ADDITIONAL_DEBS="clang-tidy libclang-dev"
-  matrix:
-    - ROS_REPO=main
-    - ROS_REPO=testing
-    - ROS_REPO="testing"
-      CATKIN_LINT=false NOT_TEST_BUILD=true
-      PARALLEL_TESTS=false
-      AFTER_SCRIPT="source /root/ici/industrial_ci_addons/check_coverage.sh && check_coverage pilz_extensions"
-      CMAKE_ARGS="-DENABLE_COVERAGE_TESTING=ON -DCMAKE_BUILD_TYPE=Debug"
-    - ROS_REPO="testing"
-      CATKIN_LINT=false NOT_TEST_BUILD=true
-      AFTER_SCRIPT="source /root/ici/industrial_ci_addons/check_coverage.sh && check_coverage pilz_robot_programming"
-      CMAKE_ARGS="-DENABLE_COVERAGE_TESTING=ON -DCMAKE_BUILD_TYPE=Debug"
-    - ROS_REPO="testing"
-      CATKIN_LINT=false NOT_TEST_BUILD=true
-      AFTER_SCRIPT="source /root/ici/industrial_ci_addons/check_coverage.sh && check_coverage pilz_trajectory_generation"
-      CMAKE_ARGS="-DENABLE_COVERAGE_TESTING=ON -DCMAKE_BUILD_TYPE=Debug"
-    - ROS_REPO="testing"
-      PARALLEL_TESTS=false
-      CATKIN_LINT=false NOT_TEST_BUILD=true
-      AFTER_SCRIPT="source /root/ici/industrial_ci_addons/check_coverage.sh && check_coverage pilz_store_positions"
-      CMAKE_ARGS="-DENABLE_COVERAGE_TESTING=ON -DCMAKE_BUILD_TYPE=Debug"
-matrix:
-  allow_failures:
-    - env: ROS_REPO=main
-install:
-  - git clone --depth=1 --branch master https://github.com/ros-industrial/industrial_ci.git .industrial_ci
-  - git clone --depth=1 --branch master https://github.com/PilzDE/industrial_ci_addons.git .industrial_ci/industrial_ci/src/industrial_ci_addons
-script:
-  - .industrial_ci/travis.sh
+
+jobs:
+  include:
+    # Main Job - Checks against released packages
+    - name: "Build + Test with Main Repo (http://packages.ros.org/ros/ubuntu)"
+      install:
+        - git clone --depth=1 --branch master https://github.com/ros-industrial/industrial_ci.git .industrial_ci
+        - git clone --depth=1 --branch master https://github.com/PilzDE/industrial_ci_addons.git .industrial_ci/industrial_ci/src/industrial_ci_addons
+      env:
+        - ROS_REPO=main
+      script:
+        - .industrial_ci/travis.sh
+      allow_failure: true
+
+    # Testing Job - Checks against packages in testing stage. Relevant since all these get released together during a sync.
+    - name: "Build + Test with Testing Repo (http://packages.ros.org/ros-testing/ubuntu)"
+      install:
+        - git clone --depth=1 --branch master https://github.com/ros-industrial/industrial_ci.git .industrial_ci
+        - git clone --depth=1 --branch master https://github.com/PilzDE/industrial_ci_addons.git .industrial_ci/industrial_ci/src/industrial_ci_addons
+      env:
+        - ROS_REPO=testing
+      script:
+        - .industrial_ci/travis.sh
+    - name: "Coverage check for pilz_extensions"
+      install:
+        - git clone --depth=1 --branch master https://github.com/ros-industrial/industrial_ci.git .industrial_ci
+        - git clone --depth=1 --branch master https://github.com/PilzDE/industrial_ci_addons.git .industrial_ci/industrial_ci/src/industrial_ci_addons
+      env:
+        - ROS_REPO="testing"
+          CATKIN_LINT=false NOT_TEST_BUILD=true
+          PARALLEL_TESTS=false
+          AFTER_SCRIPT="source /root/ici/industrial_ci_addons/check_coverage.sh && check_coverage pilz_extensions"
+          CMAKE_ARGS="-DENABLE_COVERAGE_TESTING=ON -DCMAKE_BUILD_TYPE=Debug"
+      script:
+        - .industrial_ci/travis.sh
+
+    # Coverage Job - Checks that the code coverage of pilz_robot_programming is at 100.0%.
+    - name: "Coverage check for pilz_robot_programming"
+      install:
+        - git clone --depth=1 --branch master https://github.com/ros-industrial/industrial_ci.git .industrial_ci
+        - git clone --depth=1 --branch master https://github.com/PilzDE/industrial_ci_addons.git .industrial_ci/industrial_ci/src/industrial_ci_addons
+      env:
+        - ROS_REPO="testing"
+          CATKIN_LINT=false NOT_TEST_BUILD=true
+          PARALLEL_TESTS=false
+          AFTER_SCRIPT="source /root/ici/industrial_ci_addons/check_coverage.sh && check_coverage pilz_robot_programming"
+          CMAKE_ARGS="-DENABLE_COVERAGE_TESTING=ON -DCMAKE_BUILD_TYPE=Debug"
+      script:
+        - .industrial_ci/travis.sh
+
+    # Coverage Job - Checks that the code coverage of pilz_trajectory_generation is at 100.0%.
+    - name: "Coverage check for pilz_trajectory_generation"
+      install:
+        - git clone --depth=1 --branch master https://github.com/ros-industrial/industrial_ci.git .industrial_ci
+        - git clone --depth=1 --branch master https://github.com/PilzDE/industrial_ci_addons.git .industrial_ci/industrial_ci/src/industrial_ci_addons
+      env:
+        - ROS_REPO="testing"
+          CATKIN_LINT=false NOT_TEST_BUILD=true
+          PARALLEL_TESTS=false
+          AFTER_SCRIPT="source /root/ici/industrial_ci_addons/check_coverage.sh && check_coverage pilz_trajectory_generation"
+          CMAKE_ARGS="-DENABLE_COVERAGE_TESTING=ON -DCMAKE_BUILD_TYPE=Debug"
+      script:
+        - .industrial_ci/travis.sh
+
+    # Coverage Job - Checks that the code coverage of pilz_store_positions is at 100.0%.
+    - name: "Coverage check for pilz_store_positions"
+      install:
+        - git clone --depth=1 --branch master https://github.com/ros-industrial/industrial_ci.git .industrial_ci
+        - git clone --depth=1 --branch master https://github.com/PilzDE/industrial_ci_addons.git .industrial_ci/industrial_ci/src/industrial_ci_addons
+      env:
+        - ROS_REPO="testing"
+          CATKIN_LINT=false NOT_TEST_BUILD=true
+          PARALLEL_TESTS=false
+          AFTER_SCRIPT="source /root/ici/industrial_ci_addons/check_coverage.sh && check_coverage pilz_store_positions"
+          CMAKE_ARGS="-DENABLE_COVERAGE_TESTING=ON -DCMAKE_BUILD_TYPE=Debug"
+      script:
+        - .industrial_ci/travis.sh
