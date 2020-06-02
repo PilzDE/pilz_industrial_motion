@@ -19,6 +19,7 @@ from rospkg import RosPack
 from pilz_robot_programming.robot import *
 from pilz_industrial_motion_testutils.xml_testdata_loader import *
 from pilz_robot_programming.commands import *
+from geometry_msgs.msg import PoseStamped, Pose
 
 _TEST_DATA_FILE_NAME = RosPack().get_path("pilz_industrial_motion_testutils") + "/test_data/testdata_deprecated.xml"
 PLANNING_GROUP_NAME = "manipulator"
@@ -77,6 +78,14 @@ class TestAPIUtilityFunctions(unittest.TestCase):
         """ Check if trying to get the current pose for a nonexistent frame raises an exception
         """
         self.assertRaises(RobotCurrentStateError, self.robot.get_current_pose, target_link="invalid")
+
+    def test_get_current_pose_return_type(self):
+        current_pose = self.robot.get_current_pose()
+        self.assertTrue(isinstance(current_pose, Pose))
+
+    def test_get_current_pose_stamped_return_type(self):
+        current_pose = self.robot.get_current_pose_stamped()
+        self.assertTrue(isinstance(current_pose, PoseStamped))
 
     def test_get_current_joints(self):
         """ Check if the current joints can be retrieved correctly

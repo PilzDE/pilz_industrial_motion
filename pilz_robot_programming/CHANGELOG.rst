@@ -2,6 +2,11 @@
 Changelog for package pilz_robot_programming
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
+Forthcoming
+-----------
+* Add get_current_pose_stamped to robot api
+* Contributors: Pilz GmbH and Co. KG
+
 0.4.10 (2019-12-04)
 -------------------
 * Adapt to new brake test srv definitions in pilz_msgs
