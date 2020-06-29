@@ -68,5 +68,4 @@ if(CATKIN_ENABLE_TESTING)
           NAME ${PROJECT_NAME}_coverage
           )
   endif(ENABLE_COVERAGE_TESTING)
-
 endif()

@@ -185,7 +185,13 @@ class BaseCmd(_AbstractCmd):
         # Needs to be set by derived classes
         self._planner_id = None
 
-        self._goal = goal
+        try:
+            if isinstance(goal, str):
+                raise TypeError()
+            self._goal = tuple(goal)
+        except TypeError:
+            self._goal = goal
+
         self._planning_group = planning_group
         self._target_link = target_link
         self._vel_scale = vel_scale
@@ -200,6 +206,20 @@ class BaseCmd(_AbstractCmd):
         out_str += " acc_scale: " + str(self._acc_scale)
         out_str += " reference: " + str(self._reference_frame)
         return out_str
+
+    def __eq__(self, other):
+        if isinstance(other, BaseCmd):
+            return hash(self) == hash(other)
+        return NotImplemented
+
+    def __ne__(self, other):
+        x = self.__eq__(other)
+        if x is not NotImplemented:
+            return not x
+        return NotImplemented
+
+    def __hash__(self):
+        return hash(tuple(sorted([str(t) for t in self.__dict__.items()])))
 
     __repr__ = __str__
 
@@ -368,9 +388,9 @@ class Ptp(BaseCmd):
         out_str = BaseCmd.__str__(self)
         if self._relative:
             out_str += " relative: True"
-        if isinstance(self._goal, Pose):
+        if isinstance(self._goal, Pose) or isinstance(self._goal, PoseStamped):
             out_str += " Cartesian goal:\n" + str(self._goal)
-        if isinstance(self._goal, list):
+        elif isinstance(self._goal, tuple):
             out_str += " joint goal: " + str(self._goal)
         return out_str
 
@@ -417,9 +437,9 @@ class Lin(BaseCmd):
         out_str = BaseCmd.__str__(self)
         if self._relative:
             out_str += " relative: True"
-        if isinstance(self._goal, Pose):
+        if isinstance(self._goal, Pose) or isinstance(self._goal, PoseStamped):
             out_str += " Cartesian goal:\n" + str(self._goal)
-        if isinstance(self._goal, list):
+        elif isinstance(self._goal, tuple):
             out_str += " joint goal: " + str(self._goal)
         return out_str
 
