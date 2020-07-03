@@ -14,6 +14,10 @@ notifications:
       - c.henkel@pilz.de
       - h.slusarek@pilz.de
       - i.martini@pilz.de
+      - s.heinisch@pilz.de
+      - c.doehn@pilz.de
+      - g.sansone@pilz.de
+      - r.feistenauer@pilz.de
 env:
   global:
     - AFTER_SCRIPT='apt list --installed | grep "^ros-"'
