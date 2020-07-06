@@ -33,7 +33,6 @@ jobs:
     - name: "Build + Test with Main Repo (http://packages.ros.org/ros/ubuntu)"
       install:
         - git clone --depth=1 --branch master https://github.com/ros-industrial/industrial_ci.git .industrial_ci
-        - git clone --depth=1 --branch master https://github.com/PilzDE/industrial_ci_addons.git .industrial_ci/industrial_ci/src/industrial_ci_addons
       env:
         - ROS_REPO=main
       script:
@@ -44,11 +43,11 @@ jobs:
     - name: "Build + Test with Testing Repo (http://packages.ros.org/ros-testing/ubuntu)"
       install:
         - git clone --depth=1 --branch master https://github.com/ros-industrial/industrial_ci.git .industrial_ci
-        - git clone --depth=1 --branch master https://github.com/PilzDE/industrial_ci_addons.git .industrial_ci/industrial_ci/src/industrial_ci_addons
       env:
         - ROS_REPO=testing
       script:
         - .industrial_ci/travis.sh
+
     - name: "Coverage check for pilz_extensions"
       install:
         - git clone --depth=1 --branch master https://github.com/ros-industrial/industrial_ci.git .industrial_ci
