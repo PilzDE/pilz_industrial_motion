@@ -446,6 +446,8 @@ class Robot(object):
             first_iteration_flag = False
 
     def _on_shutdown(self):
+        if self.__robot_commander is not None:
+            del self.__robot_commander
         with self._move_ctrl_sm:  # wait, if _execute is just starting a send_goal()
             actionclient_state = self._sequence_client.get_state()
         # stop movement
