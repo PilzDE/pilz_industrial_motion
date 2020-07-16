@@ -4,7 +4,19 @@ Changelog for package pilz_robot_programming
 
 Forthcoming
 -----------
+* Add Attribute based equivalence for commands.
+* Add feature to store points.
+* Add PoseStamped and tuple goals.
 * Add get_current_pose_stamped to robot api
+* Replace tf by tf2 in pilz_robot_programming.
+* Rename _BaseCmd -> BaseCmd.
+* Remove outdated add_python_coverage() function.
+* Remove outdated/superfluous documents.
+* Remove static version from doc.
+* Remove unused import of prbt_hardware_support.
+* Fix acceptance tests.
+* Fix segfault on shutdown.
+* Fix python 3 compatibility issues.
 * Contributors: Pilz GmbH and Co. KG
 
 0.4.10 (2019-12-04)

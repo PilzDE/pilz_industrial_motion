@@ -2,6 +2,12 @@
 Changelog for package pilz_msgs
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
+Forthcoming
+-----------
+* Add msg definition for speed frame
+* Add srv definition for speed limit
+* Contributors: Pilz GmbH and Co. KG
+
 0.4.10 (2019-12-04)
 -------------------
 
