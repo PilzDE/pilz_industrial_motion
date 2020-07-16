@@ -2,8 +2,8 @@
 Changelog for package pilz_robot_programming
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
-Forthcoming
------------
+0.4.11 (2020-07-16)
+-------------------
 * Add Attribute based equivalence for commands.
 * Add feature to store points.
 * Add PoseStamped and tuple goals.
