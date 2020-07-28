@@ -14,196 +14,155 @@
 # You should have received a copy of the GNU Lesser General Public License
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
+import unittest
+import rospy
+
 from pilz_robot_programming.robot import *
 from pilz_robot_programming.commands import *
-from pilz_industrial_motion_testutils.acceptance_test_utils import _askPermission, _askSuccess
-from pilz_industrial_motion_testutils.integration_test_utils import *
-from pilz_industrial_motion_testutils.robot_motion_observer import RobotMotionObserver
+from pilz_industrial_motion_testutils.integration_test_utils import MoveThread
 
-_SLEEP_TIME_S = 0.01
-_TOLERANCE_FOR_MOTION_DETECTION_RAD = 0.3
-_DEFAULT_VEL_SCALE = 0.1
-_REQUIRED_API_VERSION = "1"
-_PLANNING_GROUP = "manipulator"
+from pilz_test_facility.test_facility_manager import TestFacilityManager
+from pilz_test_facility.test_facility_sensors import TestFacilitySensors
+from pilz_test_facility.op_modes import OperationMode
+
+_DEFAULT_VEL_SCALE = 0.8
 
 
-def start_program():
-    print("Executing " + __file__)
+class TestMoveControl(unittest.TestCase):
+    """Tests the features 'stop', 'pause' and 'resume' of the Python API."""
 
-    robot = Robot(_REQUIRED_API_VERSION)
-    _test_stop(robot)
-    _test_pause_resume(robot)
-    _test_pause_stop(robot)
-    _test_pause_between_moves(robot)
+    _TOLERANCE_FOR_MOTION_DETECTION_RAD = 0.3
+    _REQUIRED_API_VERSION = "1"
 
+    _HOME_POSE = [0, 0, 0, 0, 0, 0]
+    _FIRST_POSE = [0, -0.52, 0, 0, 0, 0]
+    _SECOND_POSE = [0, 0.52, 0, 0, 0, 0]
 
-def _test_stop(robot):
-    """Tests stopping a robot motion.
+    @classmethod
+    def setUpClass(cls):
+        rospy.init_node('test_move_ctrl')
 
-        Test Sequence:
-            1. Start robot motion and wait for the motion to start.
-            2. Trigger stop.
-            3. Start robot motion with different goal.
+    def _move_robot_to_default_start_pose(self):
+        rospy.loginfo("Test-SetUp: Move robot to default start pose: " + str(self._HOME_POSE) + "...")
+        with self._test_facility:
+            self._test_facility.ready_robot_for_motion_in(OperationMode.T1)
+            self._robot.move(Ptp(goal=self._HOME_POSE))
+        rospy.loginfo("Test-SetUp: FINISHED - Move robot to default start pose: " + str(self._HOME_POSE))
 
-        Expected Results:
-            1. Robot moves.
-            2. Robot stops motion before reaching goal.
-            3. Robot starts motion and moves to the other goal.
-    """
+        self.assertTrue(self._sensors.is_robot_at_position(self._HOME_POSE),
+                        msg="Robot not at default robot start pose: " + str(self._HOME_POSE))
 
-    if _askPermission(_test_stop.__name__) == 0:
-        return
+    def setUp(self):
+        rospy.loginfo("SetUp called...")
 
-    _robot_motion_observer = RobotMotionObserver(_PLANNING_GROUP)
+        self._robot = Robot(self._REQUIRED_API_VERSION)
 
-    # 1. Create simple ptp command and start thread for movement
-    ptp = Ptp(goal=[0, -0.78, 0.78, 0, 1.56, 0], vel_scale=_DEFAULT_VEL_SCALE)
-    move_thread = MoveThread(robot, ptp)
-    move_thread.start()
-    _robot_motion_observer.wait_motion_start(sleep_interval=_SLEEP_TIME_S,
-                                             move_tolerance=_TOLERANCE_FOR_MOTION_DETECTION_RAD)
+        self._sensors = TestFacilitySensors()
+        self._sensors.set_default_motion_detection_tolerance(self._TOLERANCE_FOR_MOTION_DETECTION_RAD)
 
-    # 2. Trigger stop
-    robot.stop()
+        self._test_facility = TestFacilityManager()
 
-    # Wait for thread to finish
-    move_thread.join()
+        self._move_robot_to_default_start_pose()
 
-    # 3. Trigger motion with different goal
-    robot.move(Ptp(goal=[0.78, 0.0, 0.0, 0, 0, 0], relative=True, vel_scale=_DEFAULT_VEL_SCALE))
+    def tearDown(self):
+        rospy.loginfo("TearDown called...")
+        self._robot._release()
+        self._robot = None
 
-    _askSuccess(_test_stop.__name__,
-                'The robot should have stopped before reaching the upper pick position and continued moving in '
-                'another direction.')
+    def test_stop(self):
+        """Tests stopping a robot motion and executing a new robot motion."""
+        with self._test_facility:
+            self._test_facility.ready_robot_for_motion_in(OperationMode.T1)
 
+            move_thread = MoveThread(self._robot, Ptp(goal=self._FIRST_POSE, vel_scale=_DEFAULT_VEL_SCALE))
+            move_thread.start_async_motion()
+            self.assertTrue(self._sensors.wait_for_robot_motion(), msg="Robot should have started moving.")
 
-def _test_pause_resume(robot):
-    """Tests pausing and resuming a robot motion.
+            self._robot.stop()
+            move_thread.wait_until_move_cmd_finished()
+            self.assertFalse(self._sensors.is_robot_moving(), msg="Robot is still moving")
+            self.assertFalse(self._sensors.is_robot_at_position(self._FIRST_POSE),
+                             msg="Due to the executed stop, the robot should have not reached the goal position.")
 
-        Test Sequence:
-            1. Start robot motion and wait for the motion to start.
-            2. Trigger pause and wait 5 seconds.
-            3. Trigger resume.
+            self._robot.move(Ptp(goal=self._SECOND_POSE, vel_scale=_DEFAULT_VEL_SCALE))
+            self.assertTrue(self._sensors.is_robot_at_position(self._SECOND_POSE),
+                            msg="Robot did not reach goal position.")
 
-        Expected Results:
-            1. Robot moves.
-            2. Robot stops motion.
-            3. Robot starts motion again and moves to goal.
-    """
-    if _askPermission(_test_pause_resume.__name__) == 0:
-        return
+    def test_pause_resume(self):
+        """Tests pausing and resuming a robot motion."""
+        with self._test_facility:
+            self._test_facility.ready_robot_for_motion_in(OperationMode.T1)
 
-    _robot_motion_observer = RobotMotionObserver(_PLANNING_GROUP)
+            move_thread = MoveThread(self._robot, Ptp(goal=self._FIRST_POSE, vel_scale=_DEFAULT_VEL_SCALE))
+            move_thread.start_async_motion()
+            self.assertTrue(self._sensors.wait_for_robot_motion(), msg="Robot should have started moving")
 
-    # 1. Create simple ptp command and start thread for movement
-    ptp = Ptp(goal=[0, 0.39, -0.39, 0, 0.78, 0], vel_scale=_DEFAULT_VEL_SCALE)
-    move_thread = MoveThread(robot, ptp)
-    move_thread.start()
-    _robot_motion_observer.wait_motion_start(sleep_interval=_SLEEP_TIME_S,
-                                             move_tolerance=_TOLERANCE_FOR_MOTION_DETECTION_RAD)
+            self._robot.pause()
+            self.assertFalse(self._sensors.is_robot_moving(), msg="Robot should not move after call to pause()")
+            self.assertFalse(self._sensors.is_robot_at_position(self._FIRST_POSE),
+                             msg="Due to the call to pause(), the robot should have not reached the goal.")
 
-    # 2. Trigger pause
-    robot.pause()
-    rospy.sleep(5.0)
+            self._robot.resume()
+            self.assertTrue(self._sensors.wait_for_robot_motion(), msg="Robot should have started moving")
 
-    # 3. Trigger resume
-    robot.resume()
+            move_thread.wait_until_move_cmd_finished()
+            self.assertFalse(self._sensors.is_robot_moving(), msg="Robot should have finished motion")
+            self.assertTrue(self._sensors.is_robot_at_position(self._FIRST_POSE),
+                            msg="Robot did not reach goal position.")
 
-    # Wait for thread to finish
-    move_thread.join()
+    def test_pause_stop(self):
+        """Tests pausing and canceling a robot motion."""
+        with self._test_facility:
+            self._test_facility.ready_robot_for_motion_in(OperationMode.T1)
 
-    _askSuccess(_test_pause_resume.__name__,
-                'The robot should have paused his movement and continued after approximately 5 seconds.')
+            move_thread = MoveThread(self._robot, Ptp(goal=self._FIRST_POSE, vel_scale=_DEFAULT_VEL_SCALE))
+            move_thread.start_async_motion()
+            self.assertTrue(self._sensors.wait_for_robot_motion(), msg="Robot should have started moving")
 
+            self._robot.pause()
+            self.assertTrue(self._sensors.wait_till_robot_stopped(), msg="Robot should stop after call to pause()")
+            self.assertFalse(self._sensors.is_robot_at_position(self._FIRST_POSE),
+                             msg="Due to the call to pause(), the robot should have not reached the goal.")
 
-def _test_pause_stop(robot):
-    """Tests pausing and canceling a robot motion.
+            self._robot.stop()
+            move_thread.wait_until_move_cmd_finished()
+            self.assertFalse(self._sensors.is_robot_moving(), msg="Robot should not move after call to stop()")
+            self.assertFalse(self._sensors.is_robot_at_position(self._FIRST_POSE),
+                             msg="Robot should have not reached goal, after call to pause() and stop()")
 
-        Test Sequence:
-            1. Start robot motion and wait for the motion to start.
-            2. Trigger pause.
-            3. Trigger stop.
+    def test_pause_between_moves(self):
+        """Tests pausing the next motion when no motion is active."""
+        first_move_thread = MoveThread(self._robot, Ptp(goal=self._FIRST_POSE, vel_scale=_DEFAULT_VEL_SCALE))
+        second_move_thread = MoveThread(self._robot, Ptp(goal=self._HOME_POSE, vel_scale=_DEFAULT_VEL_SCALE))
 
-        Expected Results:
-            1. Robot moves.
-            2. Robot stops motion.
-            3. Move thread terminates.
-    """
-    if _askPermission(_test_pause_stop.__name__) == 0:
-        return
+        with self._test_facility:
+            self._test_facility.ready_robot_for_motion_in(OperationMode.T1)
 
-    _robot_motion_observer = RobotMotionObserver(_PLANNING_GROUP)
+            first_move_thread.start_async_motion()
+            self.assertTrue(self._sensors.wait_for_robot_motion(), msg="Robot should have started moving")
 
-    # 1. Create simple ptp command and start thread for movement
-    ptp = Ptp(goal=[0, -0.78, 0.78, 0, 1.56, 0], vel_scale=_DEFAULT_VEL_SCALE)
-    move_thread = MoveThread(robot, ptp)
-    move_thread.start()
-    _robot_motion_observer.wait_motion_start(sleep_interval=_SLEEP_TIME_S,
-                                             move_tolerance=_TOLERANCE_FOR_MOTION_DETECTION_RAD)
+            first_move_thread.wait_until_move_cmd_finished()
+            self.assertFalse(self._sensors.is_robot_moving(), msg="Robot should have finished motion")
+            self.assertTrue(self._sensors.is_robot_at_position(self._FIRST_POSE),
+                            msg="Robot did not reach goal position.")
 
-    # 2. Trigger pause
-    robot.pause()
+            self._robot.pause()
+            self.assertFalse(self._sensors.is_robot_moving(), msg="Robot should have not started moving")
+            self.assertTrue(self._sensors.is_robot_at_position(self._FIRST_POSE),
+                            msg="Robot not at expected position.")
 
-    # 3. Trigger stop
-    robot.stop()
+            second_move_thread.start_async_motion()
+            self.assertFalse(self._sensors.wait_for_robot_motion(),
+                             msg="Robot should have not started moving while pause is active")
+            self.assertTrue(self._sensors.is_robot_at_position(self._FIRST_POSE),
+                            msg="Robot not at expected position.")
 
-    # Wait for thread to finish
-    move_thread.join()
-
-    _askSuccess(_test_pause_stop.__name__,
-                'The robot should have paused his movement before reaching the upper pick position '
-                'and the test should have terminated immediately.')
-
-
-def _test_pause_between_moves(robot):
-    """Tests pausing the next motion when no motion is active.
-
-        Test Sequence:
-            1. Start robot motion and wait for the motion to end.
-            2. Trigger pause.
-            3. Start robot motion and wait for 5 seconds.
-            4. Trigger resume.
-
-        Expected Results:
-            1. Robot moves to goal.
-            2. Robot does not move.
-            3. Robot does not move.
-            4. Robot moves to goal.
-    """
-    if _askPermission(_test_pause_between_moves.__name__) == 0:
-        return
-
-    # 1. Create simple ptp command and start thread for movement
-    ptp = Ptp(goal=[0, -0.78, 0.78, 0, 1.56, 0], vel_scale=_DEFAULT_VEL_SCALE)
-    move_thread = MoveThread(robot, ptp)
-    move_thread.start()
-
-    # Wait for thread to finish
-    move_thread.join()
-
-    # 2. Trigger pause
-    robot.pause()
-
-    # 3. Start another motion
-    ptp = Ptp(goal=[0, 0, 0, 0, 0, 0], vel_scale=_DEFAULT_VEL_SCALE)
-    move_thread = MoveThread(robot, ptp)
-    move_thread.start()
-
-    rospy.sleep(5.0)
-
-    # 4. Trigger resume
-    robot.resume()
-
-    # Wait for thread to finish
-    move_thread.join()
-
-    _askSuccess(_test_pause_between_moves.__name__,
-                'The robot should have moved to the upper pick position and back to [0, 0, 0, 0, 0, 0] after '
-                'approximately 5 seconds.')
+            self._robot.resume()
+            second_move_thread.wait_until_move_cmd_finished()
+            self.assertFalse(self._sensors.is_robot_moving(), msg="Robot should have not started moving")
+            self.assertTrue(self._sensors.is_robot_at_position(self._HOME_POSE),
+                            msg="Robot not at expected position.")
 
 
 if __name__ == "__main__":
-    # Init a ros node
-    rospy.init_node('move_control_acceptance_tests_node', anonymous=True)
-
-    start_program()
+    unittest.main()

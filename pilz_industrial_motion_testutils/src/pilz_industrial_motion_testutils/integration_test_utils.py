@@ -34,6 +34,22 @@ class MoveThread(threading.Thread):
         self._cmd = cmd
         self.exception_thrown = False
 
+    def start_async_motion(self):
+        """Helper function, for easier readability in tests.
+
+        :note:
+            This function needs to be called from the main test thread.
+        """
+        self.start()
+
+    def wait_until_move_cmd_finished(self):
+        """Helper function, for easier readability in tests.
+
+        :note:
+            This function needs to be called from the main test thread.
+        """
+        self.join()
+
     def run(self):
         rospy.logdebug("Start motion...")
         try:
@@ -41,3 +57,4 @@ class MoveThread(threading.Thread):
         except RobotMoveFailed:
             rospy.logdebug("Caught expected exception.")
             self.exception_thrown = True
+
