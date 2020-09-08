@@ -1,0 +1,63 @@
+<!--
+Copyright (c) 2020 Pilz GmbH & Co. KG
+
+This program is free software: you can redistribute it and/or modify
+it under the terms of the GNU Lesser General Public License as published by
+the Free Software Foundation, either version 3 of the License, or
+(at your option) any later version.
+
+This program is distributed in the hope that it will be useful,
+but WITHOUT ANY WARRANTY; without even the implied warranty of
+MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+GNU Lesser General Public License for more details.
+
+You should have received a copy of the GNU Lesser General Public License
+along with this program.  If not, see <http://www.gnu.org/licenses/>.
+-->
+
+<testdata>
+
+  <!-- See ../../concept_testdata.png for a visualization of the concept behind these points -->
+
+  <poses>
+
+    <pos name="ZeroPose">
+      <joints group_name="manipulator">0.0 0.0 0.0 0.0 0.0 0.0</joints>
+    </pos>
+
+    <pos name="P1">
+      <joints group_name="manipulator">-0.170863 -0.909598 0.9075894 0.002010 -0.170863 0.</joints>
+      <xyzQuat group_name="manipulator" link_name="tool0">0.376685 0.130915 0.259281 0. 0.70711 0.70711 0.</xyzQuat>
+    </pos>
+
+    <pos name="P2">
+      <joints group_name="manipulator">6.169920 5.585564 1.229269 -0.531648 -0.113264 -6.283184</joints>
+      <xyzQuat group_name="manipulator" link_name="tool0">0.38087 0.15165 0.11496 0. 0.70711 0.70711 0.</xyzQuat>
+    </pos>
+
+  </poses>
+
+
+  <ptps>
+
+    <ptp name="Ptp1">
+      <planningGroup>manipulator</planningGroup>
+      <targetLink>tool0</targetLink>
+      <startPos>ZeroPose</startPos>
+      <endPos>P1</endPos>
+      <vel>1.0</vel>
+      <acc>0.3</acc>
+    </ptp>
+
+    <ptp name="Ptp2">
+      <planningGroup>manipulator</planningGroup>
+      <targetLink>tool0</targetLink>
+      <startPos>P1</startPos>
+      <endPos>P2</endPos>
+      <vel>1.0</vel>
+      <acc>0.3</acc>
+    </ptp>
+
+  </ptps>
+
+</testdata>

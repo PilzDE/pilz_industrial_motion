@@ -302,6 +302,16 @@ if(CATKIN_ENABLE_TESTING)
   #add_rostest(test/integrationtest_command_planning_frankaemika_panda.test
   #  DEPENDENCIES integrationtest_command_planning )
 
+  add_rostest_gtest(integrationtest_ur3
+    test/integrationtest_ur3.test
+    test/integrationtest_ur3.cpp
+    test/test_utils.cpp
+  )
+  target_link_libraries(integrationtest_ur3
+    ${catkin_LIBRARIES}
+    ${${PROJECT_NAME}_INTEGRATIONTEST_LIBRARIES}
+  )
+
   # Blending Integration tests
   add_rostest_gtest(integrationtest_command_list_manager
     test/integrationtest_command_list_manager.test
