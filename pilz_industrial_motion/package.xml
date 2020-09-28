@@ -16,7 +16,6 @@
 
   <buildtool_depend>catkin</buildtool_depend>
 
-  <exec_depend>pilz_extensions</exec_depend>
   <exec_depend>pilz_msgs</exec_depend>
   <exec_depend>trapezoidal_trajectory_generation</exec_depend>
   <exec_depend>pilz_robot_programming</exec_depend>

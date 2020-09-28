@@ -20,9 +20,6 @@ Relevant changes are cherry-picked into `kinetic-devel` on a case-by-case basis.
 ## Package: pilz_trajectory_generation
 This package used to be found here but is now moved to [moveit](https://moveit.ros.org/documentation/planners/
 
-## Package: pilz_extensions
-Minor extensions of existing packages needed for the trajectory_generation.
-
 ## Package: pilz\_robot\_programming
 pilz\_robot\_programming provides a python API for an intuitive programming of a MoveIt! enabled robot. For details please refer to the [ Pilz Robot Programming Documentation ](pilz_robot_programming/Readme.rst).
 
