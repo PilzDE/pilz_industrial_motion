@@ -39,22 +39,9 @@ if(CATKIN_ENABLE_TESTING)
     ${catkin_INCLUDE_DIRS}
   )
 
-  file(GLOB integrationtest_files "test/integrationtests/*.test")
-  foreach(file ${integrationtest_files})
-    if(ENABLE_COVERAGE_TESTING)
-        add_rostest(${file} ARGS coverage:=TRUE)
-    else()
-        add_rostest(${file})
-    endif()
-  endforeach()
-
   file(GLOB unittest_files "test/unittests/test_*.py")
   foreach(file ${unittest_files})
-    if(ENABLE_COVERAGE_TESTING)
-      add_pytests(${file} OPTIONS "--cov=${PROJECT_NAME} --cov-append")
-    else()
-      add_pytests(${file})
-    endif()
+    add_pytests(${file})
   endforeach()
 
   # check for pep8 compliance and fail test on error(s)
