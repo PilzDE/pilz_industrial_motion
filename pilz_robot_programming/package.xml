@@ -1,5 +1,5 @@
 <?xml version="1.0"?>
-<package>
+<package format="3">
   <name>pilz_robot_programming</name>
   <version>0.4.11</version>
   <description>
@@ -13,28 +13,30 @@
 
   <license>LGPLv3</license>
 
-  <run_depend>moveit_commander</run_depend>
-  <run_depend>tf2_ros</run_depend>
-  <run_depend>tf2_geometry_msgs</run_depend>
-  <run_depend>tf_conversions</run_depend>
-  <run_depend>pilz_msgs</run_depend>
-  <run_depend>pilz_trajectory_generation</run_depend>
-  <run_depend>pilz_msgs</run_depend>
-  <run_depend>python-psutil</run_depend>
-  <run_depend>rospy</run_depend>
+  <depend>moveit_commander</depend>
+  <depend>pilz_msgs</depend>
+  <depend>pilz_trajectory_generation</depend>
+  <depend condition="$ROS_PYTHON_VERSION == 2">python-psutil</depend>
+  <depend condition="$ROS_PYTHON_VERSION == 3">python3-psutil</depend>
+  <depend>rospy</depend>
+  <depend>tf_conversions</depend>
+  <depend>tf2_geometry_msgs</depend>
+  <depend>tf2_ros</depend>
 
   <buildtool_depend>catkin</buildtool_depend>
 
   <build_depend>roslint</build_depend>
-  <build_depend>rospy</build_depend>
 
-  <test_depend>python-docopt</test_depend>
+  <test_depend>rostest</test_depend>
   <test_depend>pilz_industrial_motion_testutils</test_depend>
-  <test_depend>python-coverage</test_depend>
-  <test_depend>python-mock</test_depend>
   <test_depend>prbt_moveit_config</test_depend>
   <test_depend>prbt_pg70_support</test_depend>
-  <test_depend>rostest</test_depend>
+  <test_depend condition="$ROS_PYTHON_VERSION == 2">python-coverage</test_depend>
+  <test_depend condition="$ROS_PYTHON_VERSION == 3">python3-coverage</test_depend>
+  <test_depend condition="$ROS_PYTHON_VERSION == 2">python-docopt</test_depend>
+  <test_depend condition="$ROS_PYTHON_VERSION == 3">python3-docopt</test_depend>
+  <test_depend condition="$ROS_PYTHON_VERSION == 2">python-mock</test_depend>
+  <test_depend condition="$ROS_PYTHON_VERSION == 3">python3-mock</test_depend>
   <test_depend>rosunit</test_depend>
   <test_depend>code_coverage</test_depend>
 
