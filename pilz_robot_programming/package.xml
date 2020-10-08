@@ -13,15 +13,16 @@
 
   <license>LGPLv3</license>
 
-  <depend>moveit_commander</depend>
-  <depend>pilz_msgs</depend>
-  <depend>pilz_trajectory_generation</depend>
-  <depend condition="$ROS_PYTHON_VERSION == 2">python-psutil</depend>
-  <depend condition="$ROS_PYTHON_VERSION == 3">python3-psutil</depend>
   <depend>rospy</depend>
-  <depend>tf_conversions</depend>
-  <depend>tf2_geometry_msgs</depend>
-  <depend>tf2_ros</depend>
+
+  <exec_depend>moveit_commander</exec_depend>
+  <exec_depend>pilz_msgs</exec_depend>
+  <exec_depend>pilz_trajectory_generation</exec_depend>
+  <exec_depend condition="$ROS_PYTHON_VERSION == 2">python-psutil</exec_depend>
+  <exec_depend condition="$ROS_PYTHON_VERSION == 3">python3-psutil</exec_depend>
+  <exec_depend>tf_conversions</exec_depend>
+  <exec_depend>tf2_geometry_msgs</exec_depend>
+  <exec_depend>tf2_ros</exec_depend>
 
   <buildtool_depend>catkin</buildtool_depend>
 
