@@ -1,0 +1,42 @@
+name: CI
+
+on: [push, pull_request]
+
+env:
+  ADDITIONAL_DEBS: "clang-tidy libclang-dev"
+  AFTER_SCRIPT: 'apt list --installed | grep "^ros-"'
+  CATKIN_LINT: true
+  CATKIN_LINT_ARGS: '--strict'
+  CMAKE_ARGS: "-DCATKIN_ENABLE_CLANG_TIDY=true"
+
+jobs:
+  builds:
+    strategy:
+      matrix:
+        env:
+          - {ROS_DISTRO: melodic, ROS_REPO: testing}
+          - {ROS_DISTRO: melodic, ROS_REPO: main}
+    runs-on: ubuntu-18.04
+    steps:
+      - uses: actions/checkout@v1
+      - uses: 'ros-industrial/industrial_ci@master'
+        env: ${{matrix.env}}
+
+  coverage:
+    name: "Coverage check"
+    strategy:
+      matrix:
+        package: [pilz_extensions, pilz_robot_programming, pilz_trajectory_generation , pilz_store_positions ]
+    runs-on: ubuntu-18.04
+    steps:
+      - uses: actions/checkout@v1
+      - uses: 'ros-industrial/industrial_ci@master'
+        env:
+          ROS_REPO: testing
+          ROS_DISTRO: melodic
+          ADDITIONAL_DEBS: git
+          CATKIN_LINT: false
+          NOT_TEST_BUILD: true
+          PARALLEL_TESTS: false
+          AFTER_SCRIPT: 'git clone --depth=1 --branch master https://github.com/PilzDE/industrial_ci_addons.git /industrial_ci_addons && source /industrial_ci_addons/check_coverage.sh && check_coverage ${{ matrix.package }}'
+          CMAKE_ARGS: '-DENABLE_COVERAGE_TESTING=ON -DCMAKE_BUILD_TYPE=Debug'
