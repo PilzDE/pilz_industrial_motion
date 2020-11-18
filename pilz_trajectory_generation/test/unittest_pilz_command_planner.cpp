@@ -77,7 +77,7 @@ protected:
     }
   }
 
-  virtual void TearDown()
+  void TearDown() override
   {
     planner_plugin_loader_->unloadLibraryForClass(planner_plugin_name_);
   }
@@ -138,7 +138,7 @@ TEST_P(CommandPlannerTest, CheckValidAlgorithmsForServiceRequest)
   std::vector<std::string> algs;
   planner_instance_->getPlanningAlgorithms(algs);
 
-  for(auto alg : algs)
+  for(const auto& alg : algs)
   {
     planning_interface::MotionPlanRequest req;
     req.planner_id = alg;
@@ -193,7 +193,7 @@ TEST_P(CommandPlannerTest, CheckPlanningContextRequest)
   std::vector<std::string> algs;
   planner_instance_->getPlanningAlgorithms(algs);
 
-  for(auto alg : algs)
+  for(const auto& alg : algs)
   {
     req.planner_id = alg;
 
