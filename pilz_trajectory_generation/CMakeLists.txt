@@ -56,6 +56,7 @@ endif()
 ###################################
 catkin_package(
   CATKIN_DEPENDS
+  roscpp
   moveit_msgs
   pilz_msgs
   tf2_geometry_msgs
