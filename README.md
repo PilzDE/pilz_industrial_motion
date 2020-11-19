@@ -29,9 +29,6 @@ Minor extensions of existing packages needed for the trajectory_generation.
 ## Package: pilz\_robot\_programming
 pilz\_robot\_programming provides a python API for an intuitive programming of a MoveIt! enabled robot. For details please refer to the [ Pilz Robot Programming Documentation ](pilz_robot_programming/Readme.rst).
 
-## Package: pilz_industrial_motion_testutils
-Contains helper classes and functions that are used by the tests
-
 ## Package: pilz_store_positions
 Contains a python module to store poses during teach-in.
 
