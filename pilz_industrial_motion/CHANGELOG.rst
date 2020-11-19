@@ -2,6 +2,11 @@
 Changelog for package pilz_industrial_motion
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
+Forthcoming
+-----------
+* Remove pilz_msgs from meta-package
+* Contributors: Pilz GmbH and Co. KG
+
 0.4.11 (2020-07-16)
 -------------------
 
