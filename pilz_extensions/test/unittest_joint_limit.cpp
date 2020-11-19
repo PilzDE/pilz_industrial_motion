@@ -86,7 +86,7 @@ TEST_F(JointLimitTest, OldRead)
   EXPECT_EQ(1, joint_limits.max_acceleration);
 }
 
-}
+} // namespace pilz_extensions_tests
 
 int main(int argc, char **argv)
 {
