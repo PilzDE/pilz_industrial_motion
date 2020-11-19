@@ -8,9 +8,10 @@ find_package(catkin REQUIRED COMPONENTS
 ## Generate messages in the 'msg' folder
  add_message_files(
    FILES
+   IsBrakeTestRequiredResult.msg
    MotionSequenceItem.msg
    MotionSequenceRequest.msg
-   IsBrakeTestRequiredResult.msg
+   OperationModes.msg
  )
 
  #Generate services in the 'srv' folder
@@ -18,8 +19,9 @@ find_package(catkin REQUIRED COMPONENTS
    FILES
    BrakeTest.srv
    GetMotionSequence.srv
-   IsBrakeTestRequired.srv
+   GetOperationMode.srv
    GetSpeedOverride.srv
+   IsBrakeTestRequired.srv
    SetSpeedLimit.srv
  )
 
