@@ -16,6 +16,7 @@ jobs:
         env:
           - {ROS_DISTRO: melodic, ROS_REPO: testing}
           - {ROS_DISTRO: melodic, ROS_REPO: main}
+      fail-fast: false
     runs-on: ubuntu-18.04
     steps:
       - uses: actions/checkout@v1
