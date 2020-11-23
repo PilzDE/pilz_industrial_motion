@@ -98,7 +98,7 @@ class TestAPIPauseConcurrency(unittest.TestCase):
         """
 
         # 1. start the robot motion
-        move_thread = MoveThread(self.robot, self.ptp)
+        move_thread = MoveThread(self.robot, self.ptp, RobotMoveFailed)
         move_thread.start()
         self.assertTrue(self.robot_motion_observer.wait_motion_start(
             move_tolerance=self._TOLERANCE_FOR_MOTION_DETECTION_RAD, sleep_interval=self._SLEEP_TIME_S))
