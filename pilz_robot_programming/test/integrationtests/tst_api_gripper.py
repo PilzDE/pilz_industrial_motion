@@ -153,7 +153,7 @@ class TestAPIGripper(unittest.TestCase):
         self.robot.move(Gripper(goal=0.00))
 
         # 2
-        move_thread = MoveThread(self.robot, Gripper(goal=0.02))
+        move_thread = MoveThread(self.robot, Gripper(goal=0.02), RobotMoveFailed)
         move_thread.start()
 
         # 3

@@ -132,7 +132,7 @@ class TestAPIExecutionStop(unittest.TestCase):
         # +++++++++++++++++++++++
         rospy.loginfo("Step 1")
         # +++++++++++++++++++++++
-        move_thread = MoveThread(self.robot, cmd_for_testing)
+        move_thread = MoveThread(self.robot, cmd_for_testing, RobotMoveFailed)
         move_thread.start()
 
         # +++++++++++++++++++++++
@@ -410,7 +410,7 @@ class TestAPIExecutionStop(unittest.TestCase):
         rospy.loginfo("Step 1")
         # +++++++++++++++++++++++
         ptp = Ptp(goal=self.test_data.get_joints("PTPJointValid", PLANNING_GROUP_NAME), vel_scale=0.05)
-        move_thread = MoveThread(self.robot, ptp)
+        move_thread = MoveThread(self.robot, ptp, RobotMoveFailed)
         move_thread.start()
 
         # +++++++++++++++++++++++
@@ -448,7 +448,7 @@ class TestAPIExecutionStop(unittest.TestCase):
         rospy.loginfo("Step 1")
         # +++++++++++++++++++++++
         ptp = Ptp(goal=self.test_data.get_joints("PTPJointValid", PLANNING_GROUP_NAME), vel_scale=0.1)
-        move_thread = MoveThread(self.robot, ptp)
+        move_thread = MoveThread(self.robot, ptp, RobotMoveFailed)
         move_thread.start()
 
         # +++++++++++++++++++++++

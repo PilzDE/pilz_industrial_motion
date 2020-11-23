@@ -66,7 +66,7 @@ class TestAPIPause(unittest.TestCase):
         self.robot.pause()
 
         # 2. start the robot motion
-        move_thread = MoveThread(self.robot, self.ptp)
+        move_thread = MoveThread(self.robot, self.ptp, RobotMoveFailed)
         move_thread.start()
         # no movement
         self.assertFalse(self.robot_motion_observer.is_robot_moving(self._SLEEP_TIME_S,
@@ -95,7 +95,7 @@ class TestAPIPause(unittest.TestCase):
                 3. Robot starts motion again and moves to goal.
         """
         # 1. start the robot motion
-        move_thread = MoveThread(self.robot, self.ptp)
+        move_thread = MoveThread(self.robot, self.ptp, RobotMoveFailed)
         move_thread.start()
         self.assertTrue(self.robot_motion_observer.wait_motion_start(
             move_tolerance=self._TOLERANCE_FOR_MOTION_DETECTION_RAD, sleep_interval=self._SLEEP_TIME_S))
@@ -130,7 +130,7 @@ class TestAPIPause(unittest.TestCase):
                 5. Robot moves again
         """
         # 1. start the robot motion
-        move_thread = MoveThread(self.robot, self.ptp)
+        move_thread = MoveThread(self.robot, self.ptp, RobotMoveFailed)
         move_thread.start()
         self.assertTrue(self.robot_motion_observer.wait_motion_start(
             move_tolerance=self._TOLERANCE_FOR_MOTION_DETECTION_RAD, sleep_interval=self._SLEEP_TIME_S))
@@ -154,7 +154,7 @@ class TestAPIPause(unittest.TestCase):
         self.assertTrue(move_thread.exception_thrown)
 
         # 5. start the robot motion again
-        move_thread2 = MoveThread(self.robot, self.ptp)
+        move_thread2 = MoveThread(self.robot, self.ptp, RobotMoveFailed)
         move_thread2.start()
         self.assertTrue(self.robot_motion_observer.wait_motion_start(
             move_tolerance=self._TOLERANCE_FOR_MOTION_DETECTION_RAD, sleep_interval=self._SLEEP_TIME_S))
@@ -181,7 +181,7 @@ class TestAPIPause(unittest.TestCase):
         self.robot.resume()
 
         # 3 start the robot motion
-        move_thread = MoveThread(self.robot, self.ptp)
+        move_thread = MoveThread(self.robot, self.ptp, RobotMoveFailed)
         move_thread.start()
         self.assertTrue(self.robot_motion_observer.wait_motion_start(
             move_tolerance=self._TOLERANCE_FOR_MOTION_DETECTION_RAD, sleep_interval=self._SLEEP_TIME_S))
@@ -207,7 +207,7 @@ class TestAPIPause(unittest.TestCase):
         self.robot.pause()
 
         # 2 start the robot motion, robot not moving
-        move_thread = MoveThread(self.robot, self.ptp)
+        move_thread = MoveThread(self.robot, self.ptp, RobotMoveFailed)
         move_thread.start()
         self.assertFalse(self.robot_motion_observer.is_robot_moving(self._SLEEP_TIME_S,
                                                                     self._TOLERANCE_FOR_MOTION_DETECTION_RAD))
@@ -239,7 +239,7 @@ class TestAPIPause(unittest.TestCase):
         self.robot.pause()
 
         # 2. start the robot motion
-        move_thread = MoveThread(self.robot, self.ptp)
+        move_thread = MoveThread(self.robot, self.ptp, RobotMoveFailed)
         move_thread.start()
         # no movement
         self.assertFalse(self.robot_motion_observer.is_robot_moving(self._SLEEP_TIME_S,
@@ -266,7 +266,7 @@ class TestAPIPause(unittest.TestCase):
                 2. Robot moves successfully.
         """
         # 1. start the robot motion
-        move_thread = MoveThread(self.robot, self.ptp)
+        move_thread = MoveThread(self.robot, self.ptp, RobotMoveFailed)
         move_thread.start()
         self.assertTrue(self.robot_motion_observer.wait_motion_start(
             move_tolerance=self._TOLERANCE_FOR_MOTION_DETECTION_RAD, sleep_interval=self._SLEEP_TIME_S))
@@ -300,7 +300,7 @@ class TestAPIPause(unittest.TestCase):
         self.robot.pause()
 
         # 2. start the robot motion
-        move_thread = MoveThread(self.robot, self.ptp)
+        move_thread = MoveThread(self.robot, self.ptp, RobotMoveFailed)
         move_thread.start()
         # no movement
         self.assertFalse(self.robot_motion_observer.is_robot_moving(self._SLEEP_TIME_S,
@@ -346,7 +346,7 @@ class TestAPIPause(unittest.TestCase):
         self.robot.stop()
 
         # 3. start the robot motion
-        move_thread = MoveThread(self.robot, self.ptp)
+        move_thread = MoveThread(self.robot, self.ptp, RobotMoveFailed)
         move_thread.start()
         self.assertTrue(self.robot_motion_observer.wait_motion_start(
             move_tolerance=self._TOLERANCE_FOR_MOTION_DETECTION_RAD, sleep_interval=self._SLEEP_TIME_S))
@@ -369,7 +369,7 @@ class TestAPIPause(unittest.TestCase):
         self.robot.stop()
 
         # 2. start the robot motion
-        move_thread = MoveThread(self.robot, self.ptp)
+        move_thread = MoveThread(self.robot, self.ptp, RobotMoveFailed)
         move_thread.start()
         self.assertTrue(self.robot_motion_observer.wait_motion_start(
             move_tolerance=self._TOLERANCE_FOR_MOTION_DETECTION_RAD, sleep_interval=self._SLEEP_TIME_S))
@@ -392,7 +392,7 @@ class TestAPIPause(unittest.TestCase):
         self.robot.resume()
 
         # 2. start the robot motion
-        move_thread = MoveThread(self.robot, self.ptp)
+        move_thread = MoveThread(self.robot, self.ptp, RobotMoveFailed)
         move_thread.start()
         self.assertTrue(self.robot_motion_observer.wait_motion_start(
             move_tolerance=self._TOLERANCE_FOR_MOTION_DETECTION_RAD, sleep_interval=self._SLEEP_TIME_S))
@@ -416,7 +416,7 @@ class TestAPIPause(unittest.TestCase):
                 4. Robot continues to move.
         """
         # 1. start the robot motion in separate thread
-        move_thread = MoveThread(self.robot, self.ptp)
+        move_thread = MoveThread(self.robot, self.ptp, RobotMoveFailed)
         move_thread.start()
         self.assertTrue(self.robot_motion_observer.wait_motion_start(
             move_tolerance=self._TOLERANCE_FOR_MOTION_DETECTION_RAD, sleep_interval=self._SLEEP_TIME_S))
@@ -454,7 +454,7 @@ class TestAPIPause(unittest.TestCase):
         """
 
         # 1. start the robot motion
-        move_thread = MoveThread(self.robot, self.ptp)
+        move_thread = MoveThread(self.robot, self.ptp, RobotMoveFailed)
         move_thread.start()
         self.assertTrue(self.robot_motion_observer.wait_motion_start(
             move_tolerance=self._TOLERANCE_FOR_MOTION_DETECTION_RAD, sleep_interval=self._SLEEP_TIME_S))
@@ -515,7 +515,7 @@ class TestAPIPause(unittest.TestCase):
         # 1. start the robot motion
         seq = Sequence()
         seq.append(self.ptp, 0.0)
-        move_thread = MoveThread(self.robot, seq)
+        move_thread = MoveThread(self.robot, seq, RobotMoveFailed)
         move_thread.start()
         self.assertTrue(self.robot_motion_observer.wait_motion_start(
             move_tolerance=self._TOLERANCE_FOR_MOTION_DETECTION_RAD, sleep_interval=self._SLEEP_TIME_S))

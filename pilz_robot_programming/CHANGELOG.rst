@@ -2,6 +2,11 @@
 Changelog for package pilz_robot_programming
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
+Forthcoming
+-----------
+* Adapt to generalized test-utils
+* Contributors: Pilz GmbH and Co. KG
+
 0.4.11 (2020-07-16)
 -------------------
 * Add Attribute based equivalence for commands.

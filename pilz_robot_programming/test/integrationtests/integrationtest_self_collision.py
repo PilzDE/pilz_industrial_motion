@@ -64,7 +64,7 @@ class TestSelfCollision(unittest.TestCase):
                 2. No movement is executed. Message is send on COLLISION_TOPIC.
         """
 
-        move_thread = MoveThread(self.robot, Ptp(goal=[0, 0.185, 2.27, 0, 1.25, 0]))
+        move_thread = MoveThread(self.robot, Ptp(goal=[0, 0.185, 2.27, 0, 1.25, 0]), RobotMoveFailed)
         move_thread.start()
         move_thread.join()
         rospy.loginfo("Ptp Movement done.")
@@ -74,7 +74,7 @@ class TestSelfCollision(unittest.TestCase):
 
         move_thread_lin = MoveThread(self.robot,
                                      Lin(goal=Pose(position=Point(0.15, 0, 0.12)), relative=True, vel_scale=0.5,
-                                         acc_scale=0.1))
+                                         acc_scale=0.1), RobotMoveFailed)
         move_thread_lin.start()
 
         rospy.loginfo("Waiting for notification...")

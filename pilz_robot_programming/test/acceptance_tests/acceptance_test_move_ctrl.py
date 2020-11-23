@@ -58,7 +58,7 @@ def _test_stop(robot):
 
     # 1. Create simple ptp command and start thread for movement
     ptp = Ptp(goal=[0, -0.78, 0.78, 0, 1.56, 0], vel_scale=_DEFAULT_VEL_SCALE)
-    move_thread = MoveThread(robot, ptp)
+    move_thread = MoveThread(robot, ptp, RobotMoveFailed)
     move_thread.start()
     _robot_motion_observer.wait_motion_start(sleep_interval=_SLEEP_TIME_S,
                                              move_tolerance=_TOLERANCE_FOR_MOTION_DETECTION_RAD)
@@ -97,7 +97,7 @@ def _test_pause_resume(robot):
 
     # 1. Create simple ptp command and start thread for movement
     ptp = Ptp(goal=[0, 0.39, -0.39, 0, 0.78, 0], vel_scale=_DEFAULT_VEL_SCALE)
-    move_thread = MoveThread(robot, ptp)
+    move_thread = MoveThread(robot, ptp, RobotMoveFailed)
     move_thread.start()
     _robot_motion_observer.wait_motion_start(sleep_interval=_SLEEP_TIME_S,
                                              move_tolerance=_TOLERANCE_FOR_MOTION_DETECTION_RAD)
@@ -136,7 +136,7 @@ def _test_pause_stop(robot):
 
     # 1. Create simple ptp command and start thread for movement
     ptp = Ptp(goal=[0, -0.78, 0.78, 0, 1.56, 0], vel_scale=_DEFAULT_VEL_SCALE)
-    move_thread = MoveThread(robot, ptp)
+    move_thread = MoveThread(robot, ptp, RobotMoveFailed)
     move_thread.start()
     _robot_motion_observer.wait_motion_start(sleep_interval=_SLEEP_TIME_S,
                                              move_tolerance=_TOLERANCE_FOR_MOTION_DETECTION_RAD)
@@ -175,7 +175,7 @@ def _test_pause_between_moves(robot):
 
     # 1. Create simple ptp command and start thread for movement
     ptp = Ptp(goal=[0, -0.78, 0.78, 0, 1.56, 0], vel_scale=_DEFAULT_VEL_SCALE)
-    move_thread = MoveThread(robot, ptp)
+    move_thread = MoveThread(robot, ptp, RobotMoveFailed)
     move_thread.start()
 
     # Wait for thread to finish
@@ -186,7 +186,7 @@ def _test_pause_between_moves(robot):
 
     # 3. Start another motion
     ptp = Ptp(goal=[0, 0, 0, 0, 0, 0], vel_scale=_DEFAULT_VEL_SCALE)
-    move_thread = MoveThread(robot, ptp)
+    move_thread = MoveThread(robot, ptp, RobotMoveFailed)
     move_thread.start()
 
     rospy.sleep(5.0)
