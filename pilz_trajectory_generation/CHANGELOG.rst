@@ -2,6 +2,9 @@
 Changelog for package pilz_trajectory_generation
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
+Forthcoming
+-----------
+
 0.4.11 (2020-07-16)
 -------------------
 * Fix CodeCoverage warnings (Remove warnings on normal builds).
