@@ -2,8 +2,8 @@
 Changelog for package pilz_robot_programming
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
-Forthcoming
------------
+0.4.12 (2020-11-24)
+-------------------
 * Adapt to generalized test-utils
 * Add missing test-depend on prbt_hardware_support
 * Contributors: Pilz GmbH and Co. KG

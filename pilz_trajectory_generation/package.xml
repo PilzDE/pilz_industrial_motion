@@ -1,7 +1,7 @@
 <?xml version="1.0"?>
 <package format="2">
   <name>pilz_trajectory_generation</name>
-  <version>0.4.11</version>
+  <version>0.4.12</version>
   <description>The pilz_trajectory_generation package containing the MoveIt! plugin pilz_command_planner.</description>
 
   <maintainer email="a.gutenkunst@pilz.de">Alexander Gutenkunst</maintainer>
