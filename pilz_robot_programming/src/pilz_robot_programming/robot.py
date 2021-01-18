@@ -541,7 +541,7 @@ class Robot(object):
         # Connect to speed override service
         rospy.loginfo("Waiting for connection to service " + self._GET_SPEED_OVERRIDE_SRV + "...")
         rospy.wait_for_service(self._GET_SPEED_OVERRIDE_SRV, self._SERVICE_WAIT_TIMEOUT_S)
-        rospy.loginfo("Connection to service " + self._GET_SPEED_OVERRIDE_SRV + " estabilshed")
+        rospy.loginfo("Connection to service " + self._GET_SPEED_OVERRIDE_SRV + " established")
         self._get_speed_override_srv = rospy.ServiceProxy(self._GET_SPEED_OVERRIDE_SRV, GetSpeedOverride)
 
     def _release(self):
