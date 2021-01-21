@@ -554,7 +554,11 @@ class Robot(object):
         # do not delete pid parameter if it has not been set or overwritten
         if self._single_instance_flag:
             rospy.logdebug("Delete single instance parameter from parameter server.")
-            rospy.delete_param(self._INSTANCE_PARAM)
+            try:
+                rospy.delete_param(self._INSTANCE_PARAM)
+            except KeyError:
+                rospy.logdebug("Instance parameter was missing.")
+            self._single_instace_flag = False
 
     def __enter__(self):
         return self
