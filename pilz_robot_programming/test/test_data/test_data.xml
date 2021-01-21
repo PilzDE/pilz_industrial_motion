@@ -264,7 +264,7 @@ limitations under the License.
 
     <sequences>
         <sequence name="LINLINBlend">
-            <sequenceCmd name="Blend_1_1_Lin" type="lin" blend_radius="0.1"/>
+            <sequenceCmd name="Blend_1_1_Lin" type="lin" blend_radius="0.05"/>
             <sequenceCmd name="Blend_1_2_Lin" type="lin" blend_radius="0" />
         </sequence>
 
