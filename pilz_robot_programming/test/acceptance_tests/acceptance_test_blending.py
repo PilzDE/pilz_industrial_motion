@@ -19,6 +19,7 @@ import rospy
 from geometry_msgs.msg import Pose, Point
 from pilz_robot_programming.robot import *
 from pilz_robot_programming.commands import *
+from pilz_industrial_motion_testutils.acceptance_test_utils import _askPermission, _askSuccess
 
 DEFAULT_PTP_VEL = 0.5
 DEFAULT_PTP_ACC = 0.5
@@ -381,29 +382,6 @@ def _linLinBlend(robot, z_ori_change, r=0.3):
     seq1.append(Lin(goal=Pose(position=Point(-0.1, 0.5, 0.65), orientation=from_euler(0,0,z_ori_change)),vel_scale=0.1, acc_scale=0.1), blend_radius=0)
 
     robot.move(seq1)
-
-# Asks the user permission to start the test.
-def _askPermission(test_name):
-    s = raw_input('Perform ' + test_name + ' [(y)es, (n)o]?: ')
-    if(s == "n"):
-        print('\n\nSkip ' + test_name + '\n___TEST-END___\n')
-        return 0
-    print('\n\nStart ' + test_name + '\n')
-    return 1
-
-# Asks the user if the test was successful and (if given) displays
-# a hint regarding the assessment of a successful test.
-def _askSuccess(test_name, question=None):
-    if (question != None):
-        print('\nTest ' + test_name + 'successful?')
-        print('Hint: \n' + question)
-
-    s = raw_input('Test ' + test_name + 'successful [(y)es, (n)o]?: ')
-    if(s == "n"):
-        print('\nTest ' + test_name + 'failed!\n___TEST-END___\n')
-        return 0
-    print('Test ' + test_name + 'successful.\n___TEST-END___\n')
-    return 1
 
 if __name__ == "__main__":
     # Init a rosnode
