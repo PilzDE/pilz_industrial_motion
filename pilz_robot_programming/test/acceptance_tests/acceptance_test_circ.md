@@ -22,9 +22,10 @@ to be moved out of singularities.
 ## Prerequisites
   - Properly connect and startup the robot. Make sure a emergency stop is within reach.
 
-## Starting the blending acceptance tests
+## Starting the CIRC acceptance tests
 - Bringup can: `sudo ip link set can0 up type can bitrate 1000000`
-- Run `roslaunch prbt_moveit_config moveit_planning_execution.launch sim:=False pipeline:=pilz_command_planner gripper:=pg70`
+- Run `roslaunch prbt_moveit_config moveit_planning_execution.launch sim:=False pipeline:=pilz_command_planner gripper:=pg70`<br>
+**! This test is tailored towards the prbt with gripper. Without gripper some test cases might fail.**
 - Run `rosrun pilz_robot_programming acceptance_test_circ.py`.
   - Please note: Each test must be confirmed before it is executed.
 Confirm by entering `y` or `n` to skip test.
