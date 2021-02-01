@@ -14,8 +14,8 @@ The FTP is implemented by Pilz GmbH & Co. KG.
 | Buildfarm bin | [![buildfarm](http://build.ros.org/buildStatus/icon?job=Kbin_uX64__pilz_industrial_motion__ubuntu_xenial_amd64__binary)](http://build.ros.org/view/Kbin_uX64/job/Kbin_uX64__pilz_industrial_motion__ubuntu_xenial_amd64__binary/) | [![buildfarm](http://build.ros.org/buildStatus/icon?job=Mbin_uB64__pilz_industrial_motion__ubuntu_bionic_amd64__binary)](http://build.ros.org/view/Mbin_uB64/job/Mbin_uB64__pilz_industrial_motion__ubuntu_bionic_amd64__binary/)| 
 
 ### Note to Developers:
-`melodic-devel` is considered to be the active development branch.
-Relevant changes are cherry-picked into `kinetic-devel` on a case-by-case basis.
+`noetic-devel` is considered to be the active development branch.
+Relevant changes are cherry-picked into `melodic-devel` or `kinetic-devel` on a case-by-case basis.
 
 ## Package: pilz_trajectory_generation
 Provides the generators to create LIN, PTP and CIRC trajectories. All of these commands can be combined and
