@@ -141,7 +141,7 @@ def _test_repeat_circ_pose(robot):
       pass
 
     _askSuccess(_test_repeat_circ_pose.__name__, 'No INVALID_GOAL should appear from controller. The following error '
-                                                 'is o.k. Failed to create path object for circle.Circle : Plane for '
+                                                 'is o.k.: Failed to create path object for circle. Circle : Plane for '
                                                  'motion is not properly defined.')
 
 
