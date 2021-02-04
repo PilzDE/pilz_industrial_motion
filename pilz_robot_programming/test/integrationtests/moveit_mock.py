@@ -18,8 +18,7 @@ import rospy
 
 from actionlib import SimpleActionServer
 
-from pilz_msgs.msg import MoveGroupSequenceAction
-from moveit_msgs.msg import MoveGroupAction
+from moveit_msgs.msg import MoveGroupAction, MoveGroupSequenceAction
 
 from std_srvs.srv import Empty
 

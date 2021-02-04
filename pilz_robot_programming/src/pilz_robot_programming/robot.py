@@ -30,7 +30,8 @@ from std_srvs.srv import Trigger
 import tf2_ros
 import tf2_geometry_msgs  # for buffer.transform() to eat a geometry_msgs.Pose directly
 
-from pilz_msgs.msg import MoveGroupSequenceAction, IsBrakeTestRequiredResult
+from moveit_msgs.msg import MoveGroupSequenceAction
+from pilz_msgs.msg import IsBrakeTestRequiredResult
 from pilz_msgs.srv import GetSpeedOverride, IsBrakeTestRequired, BrakeTest
 
 from .move_control_request import _MoveControlState, MoveControlAction, _MoveControlStateMachine

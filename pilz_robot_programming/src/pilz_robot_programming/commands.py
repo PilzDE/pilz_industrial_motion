@@ -17,21 +17,22 @@
 
 from __future__ import absolute_import
 
+from copy import deepcopy
+from math import pi
+from operator import add
+
 import rospy
 import tf2_geometry_msgs  # for buffer.transform() to eat a geometry_msgs.Pose directly
 from tf_conversions import transformations
 from geometry_msgs.msg import Quaternion, Pose
 from geometry_msgs.msg import PoseStamped
-from pilz_msgs.msg import MoveGroupSequenceGoal, MotionSequenceItem
-from moveit_msgs.msg import (OrientationConstraint, MotionPlanRequest, JointConstraint, Constraints,
-                             PositionConstraint, PlanningOptions)
+from moveit_msgs.msg import (Constraints, JointConstraint, MotionPlanRequest,
+                             MotionSequenceItem, MoveGroupSequenceGoal,
+                             OrientationConstraint, PlanningOptions,
+                             PositionConstraint)
 import shape_msgs.msg as shape_msgs
-from operator import add
-from math import pi
 
 from .move_control_request import _MoveControlState
-from copy import deepcopy
-
 
 __version__ = '0.0.dev1'
 
