@@ -119,6 +119,15 @@ class TestAPIInstantiation(unittest.TestCase):
                 r2._release()
                 self.fail('Multiple robot instances does not throw exception.')
 
+    def test_double_release(self):
+        """ Checks that calling _release() a second time doesn't throw an exception."""
+        r = Robot(API_VERSION)
+        r._release()
+        try:
+            r._release()
+        except KeyError as e:
+            self.fail('Second _release() throws: %s' % e)
+
 
 if __name__ == '__main__':
     import rostest
