@@ -15,17 +15,9 @@ move function and the connection between them.
 The move control request "tells" the thread executing the move function:
 * to wait for resume,
 * to end waiting for resume or
-* to perform normally.  
+* to perform normally.
 
 ![Move orders state diag](diag_state_move_orders.png)
 
 # Brake test
-The following diagram illustrates the component architecture that is required 
-to execute brake tests and how it is called by the Python-API.
-
-![Brake test component diag](diag_comp_brake_test_python_api.png)
-
-The remaining architecture is implemented in 
-[prbt_hardware_support](https://github.com/PilzDE/pilz_robots/tree/melodic-devel/prbt_hardware_support).
-
-
+The component architecture that is required to execute brake tests is mainly implemented in [prbt_hardware_support](https://github.com/PilzDE/pilz_robots/tree/melodic-devel/prbt_hardware_support). A [diagram](https://github.com/PilzDE/pilz_robots/tree/melodic-devel/prbt_hardware_support/doc/diag_comp_overall_architecture.png) illustrates the components and how they are called by the Python-API.
