@@ -476,7 +476,8 @@ class TestAPIPause(unittest.TestCase):
         rospy.wait_for_service(self.robot._STOP_TOPIC_NAME)
         stop = rospy.ServiceProxy(self.robot._STOP_TOPIC_NAME, Trigger)
         stop()
-        self.assertRaises(RobotMoveFailed, move_thread.join())
+        move_thread.join()
+        self.assertTrue(move_thread.exception_thrown)
 
     def test_pause_and_new_command(self):
         """Tests a time critical edge case of the pause/stop behavior, the edge case is explained in detail below.

@@ -124,7 +124,8 @@ class TestAPIPauseConcurrency(unittest.TestCase):
         thread_stop.join()
         thread_resume.join()
 
-        self.assertRaises(RobotMoveFailed, move_thread.join())
+        move_thread.join()
+        self.assertTrue(move_thread.exception_thrown)
 
     def test_resume_move_concurrency_when_paused_without_move(self):
         """ Test the concurrent situation of resume and move pause is requested
