@@ -17,7 +17,7 @@
 from geometry_msgs.msg import Point
 from pilz_robot_programming.robot import *
 from pilz_robot_programming.commands import *
-from pilz_industrial_motion_testutils.acceptance_test_utils import _askPermission, _askSuccess
+from pilz_industrial_motion_testutils.acceptance_test_utils import askPermission, askSuccess
 
 DEFAULT_PTP_VEL = 0.5
 PTP_VEL_PICK = 0.05
@@ -48,14 +48,14 @@ def _test_repeat_ptp_joint(robot):
           2. Robot moves away from the singularity.
           3. No INVALID_GOAL is returned from controller
     """
-    if _askPermission(_test_repeat_ptp_joint.__name__) == 0:
+    if askPermission(_test_repeat_ptp_joint.__name__) == 0:
         return
 
     robot.move(Ptp(goal=[0, 0, 0, 0, 0, 0]))
     robot.move(Ptp(goal=[0, -0.78, 0.78, 0, 1.56, 0]))
     robot.move(Ptp(goal=[0, -0.78, 0.78, 0, 1.56, 0]))
 
-    _askSuccess(_test_repeat_ptp_joint.__name__, 'No INVALID_GOAL should appear from controller.')
+    askSuccess(_test_repeat_ptp_joint.__name__, 'No INVALID_GOAL should appear from controller.')
 
 
 def _test_repeat_ptp_pose(robot):
@@ -73,7 +73,7 @@ def _test_repeat_ptp_pose(robot):
           3. Robot moves to the given position.
           4. No INVALID_GOAL is returned from controller
     """
-    if _askPermission(_test_repeat_ptp_pose.__name__) == 0:
+    if askPermission(_test_repeat_ptp_pose.__name__) == 0:
         return
 
     robot.move(Ptp(goal=[0, 0, 0, 0, 0, 0]))
@@ -82,7 +82,7 @@ def _test_repeat_ptp_pose(robot):
     robot.move(Ptp(goal=Pose(position=Point(-0.46, -0.21, 0.19), orientation=from_euler(0, -3.14, -0.25))))
     robot.move(Ptp(goal=Pose(position=Point(-0.46, -0.21, 0.19), orientation=from_euler(0, -3.14, -0.25))))
 
-    _askSuccess(_test_repeat_ptp_pose.__name__, 'No INVALID_GOAL should appear from controller.')
+    askSuccess(_test_repeat_ptp_pose.__name__, 'No INVALID_GOAL should appear from controller.')
 
 
 def _test_repeat_lin_pose(robot):
@@ -98,7 +98,7 @@ def _test_repeat_lin_pose(robot):
           2. Robot moves to the given position.
           3. No INVALID_GOAL is returned from controller
     """
-    if _askPermission(_test_repeat_lin_pose.__name__) == 0:
+    if askPermission(_test_repeat_lin_pose.__name__) == 0:
         return
 
     robot.move(Ptp(goal=[0, 0, 0, 0, 0, 0]))
@@ -106,7 +106,7 @@ def _test_repeat_lin_pose(robot):
     robot.move(Ptp(goal=Pose(position=Point(-0.46, -0.21, 0.19), orientation=from_euler(0, -3.14, -0.25))))
     robot.move(Lin(goal=Pose(position=Point(-0.46, -0.21, 0.19)), vel_scale=PTP_VEL_PICK))
 
-    _askSuccess(_test_repeat_lin_pose.__name__, 'No INVALID_GOAL should appear from controller.')
+    askSuccess(_test_repeat_lin_pose.__name__, 'No INVALID_GOAL should appear from controller.')
 
 
 def _test_repeat_circ_pose(robot):
@@ -122,7 +122,7 @@ def _test_repeat_circ_pose(robot):
           2. Robot moves half a circle.
           3. No INVALID_GOAL is returned from controller
     """
-    if _askPermission(_test_repeat_circ_pose.__name__) == 0:
+    if askPermission(_test_repeat_circ_pose.__name__) == 0:
         return
 
     robot.move(Ptp(goal=[0, 0, 0, 0, 0, 0]))
@@ -140,7 +140,7 @@ def _test_repeat_circ_pose(robot):
     except RobotMoveFailed:
       pass
 
-    _askSuccess(_test_repeat_circ_pose.__name__, 'Failed to create path object for circle. '
+    askSuccess(_test_repeat_circ_pose.__name__, 'Failed to create path object for circle. '
                                                  'Circle : Plane for motion is not properly defined.')
 
 
@@ -158,7 +158,7 @@ def _test_repeat_ptp_in_sequence(robot):
             - Moves to start position.
             - Moves away from the singularity.
     """
-    if _askPermission(_test_repeat_ptp_in_sequence.__name__) == 0:
+    if askPermission(_test_repeat_ptp_in_sequence.__name__) == 0:
         return
 
     seq = Sequence()
@@ -168,7 +168,7 @@ def _test_repeat_ptp_in_sequence(robot):
 
     robot.move(seq)
 
-    _askSuccess(_test_repeat_ptp_in_sequence.__name__, 'No INVALID_GOAL or other error should appear from controller.')
+    askSuccess(_test_repeat_ptp_in_sequence.__name__, 'No INVALID_GOAL or other error should appear from controller.')
 
 
 if __name__ == "__main__":
