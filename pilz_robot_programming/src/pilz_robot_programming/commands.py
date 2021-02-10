@@ -272,7 +272,7 @@ class BaseCmd(_AbstractCmd):
         if isinstance(self._goal, str):
             raise TypeError("String is not convertible into joint values.")
         joint_names = joint_names if len(joint_names) != 0 else self._active_joints
-        joint_values = self._get_joint_pose()
+        joint_values = list(self._get_joint_pose())
         if len(joint_names) != len(joint_values):
             raise IndexError("Given joint goal does not match the active joints " + str(joint_names) + ".")
 
@@ -333,6 +333,10 @@ class BaseCmd(_AbstractCmd):
         goal_joint_state = self._goal if not self._relative else \
             map(add, self._goal, self._start_joint_states)
         return goal_joint_state
+
+    @staticmethod
+    def _calc_acc_scale(vel_scale):  # pragma: no cover  Abstract method
+        raise NotImplementedError("Needs to be defined by child class")
 
     def _to_robot_reference(self, pose_frame, goal_pose_custom_ref):
         """ Transforms a pose from a custom reference frame to one in robot reference frame.
@@ -676,7 +680,7 @@ class Gripper(BaseCmd):
 
         # create goal constraints
         goal_constraints = Constraints()
-        if isinstance(self._goal, (float, int, long)):
+        if isinstance(self._goal, (float, int)):
             joint_names = robot._robot_commander.get_group(self._planning_group).get_active_joints()
 
             if len(joint_names) != 1:

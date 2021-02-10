@@ -19,7 +19,7 @@
   <run_depend>tf_conversions</run_depend>
   <run_depend>pilz_msgs</run_depend>
   <run_depend>pilz_industrial_motion_planner</run_depend>
-  <run_depend>python-psutil</run_depend>
+  <run_depend>python3-psutil</run_depend>
   <run_depend>rospy</run_depend>
 
   <buildtool_depend>catkin</buildtool_depend>
@@ -27,14 +27,14 @@
   <build_depend>roslint</build_depend>
   <build_depend>rospy</build_depend>
 
-  <test_depend>python-docopt</test_depend>
-  <test_depend>pilz_industrial_motion_testutils</test_depend>
-  <test_depend>python-coverage</test_depend>
-  <test_depend>python-mock</test_depend>
+  <test_depend>python3-docopt</test_depend>
+  <test_depend>rostest</test_depend>
+  <test_depend>python3-mock</test_depend>
   <test_depend>prbt_hardware_support</test_depend>
   <test_depend>prbt_moveit_config</test_depend>
   <test_depend>prbt_pg70_support</test_depend>
-  <test_depend>rostest</test_depend>
+  <test_depend>pilz_industrial_motion_testutils</test_depend>
+  <test_depend>python3-coverage</test_depend>
   <test_depend>rosunit</test_depend>
   <test_depend>code_coverage</test_depend>
 

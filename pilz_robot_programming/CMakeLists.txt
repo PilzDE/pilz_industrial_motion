@@ -1,4 +1,4 @@
-cmake_minimum_required(VERSION 2.8.3)
+cmake_minimum_required(VERSION 3.0.2)
 project(pilz_robot_programming)
 
 find_package(catkin REQUIRED COMPONENTS roslint rospy)
@@ -68,4 +68,17 @@ if(CATKIN_ENABLE_TESTING)
           NAME ${PROJECT_NAME}_coverage
           )
   endif(ENABLE_COVERAGE_TESTING)
+
+  catkin_install_python(PROGRAMS
+    test/acceptance_tests/acceptance_test_api_cmd.py
+    test/acceptance_tests/acceptance_test_blending.py
+    test/acceptance_tests/acceptance_test_brake_test.py
+    test/acceptance_tests/acceptance_test_circ.py
+    test/acceptance_tests/acceptance_test_goal_already_reached.py
+    test/acceptance_tests/acceptance_test_gripper_cmd.py
+    test/acceptance_tests/acceptance_test_move_ctrl.py
+    test/acceptance_tests/acceptance_test_manual_move_ctrl.py
+    DESTINATION ${CATKIN_PACKAGE_BIN_DESTINATION}
+  )
+
 endif()
