@@ -18,8 +18,7 @@
   <run_depend>tf2_geometry_msgs</run_depend>
   <run_depend>tf_conversions</run_depend>
   <run_depend>pilz_msgs</run_depend>
-  <run_depend>pilz_trajectory_generation</run_depend>
-  <run_depend>pilz_msgs</run_depend>
+  <run_depend>pilz_industrial_motion_planner</run_depend>
   <run_depend>python-psutil</run_depend>
   <run_depend>rospy</run_depend>
 
