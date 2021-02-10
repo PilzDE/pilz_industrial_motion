@@ -2,6 +2,19 @@
 Changelog for package pilz_robot_programming
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
+Forthcoming
+-----------
+* Adapt to changes in MoveThread api
+* Port to ROS Noetic (ubuntu 20.04, python3)
+  * Remove pilz_store_positions package
+  * Update branching model in README.md
+  * Use relative paths for test-data/movecmd.py (colcon support)
+  * Misc minor refactorings
+* Fix KeyError on calling release twice
+* Use public acceptance-test utility methods
+* Move pilz command planner to moveit
+* Contributors: Pilz GmbH and Co. KG
+
 0.4.12 (2020-11-24)
 -------------------
 * Adapt to generalized test-utils

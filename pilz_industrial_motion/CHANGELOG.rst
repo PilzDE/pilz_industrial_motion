@@ -2,6 +2,12 @@
 Changelog for package pilz_industrial_motion
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
+Forthcoming
+-----------
+* Update maintainer list
+* Move pilz command planner to moveit
+* Contributors: Pilz GmbH and Co. KG
+
 0.4.12 (2020-11-24)
 -------------------
 * Remove pilz_msgs from meta-package
