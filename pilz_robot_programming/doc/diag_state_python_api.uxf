@@ -300,8 +300,8 @@ Exception ends thread/script</panel_attributes>
       <h>180</h>
     </coordinates>
     <panel_attributes>_Threading tests:_
-- Test 1: 1 -&gt; pause || move -&gt; Roboter steht // Kann eventuell schief gehen, da Actionlib problem mit schnellem senden von send_goal, cancel hat.
-- Test 2: 4 -&gt; resume || stop -&gt; 1 (Roboter steht)
+- Test 1: 1 -&gt; pause || move -&gt; robot stands still // Could go wrong since sending goal and cancel in quick succession can be problematic with actionlib.
+- Test 2: 4 -&gt; resume || stop -&gt; 1 (robot stands still)
 - Test 3: 2 -&gt; resume || move -&gt; 3</panel_attributes>
     <additional_attributes/>
   </element>
