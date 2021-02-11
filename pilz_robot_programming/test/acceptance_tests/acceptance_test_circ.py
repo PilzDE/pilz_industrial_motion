@@ -66,8 +66,8 @@ def _test_circ_center(robot):
                     center=CENTER_POINT, vel_scale=VELOCITY_HIGH, acc_scale=DEFAULT_ACC))
 
     askSuccess(_test_circ_center.__name__,
-                'The robot should have moved to a start position, then a quarter circle two times and then a quarter'
-                + ' circle back two times.')
+               'The robot should have moved to a start position, then a quarter circle two times and then a quarter'
+               + ' circle back two times.')
 
 
 def _test_circ_interim(robot):
@@ -100,8 +100,8 @@ def _test_circ_interim(robot):
                     interim=INTERIM_POINT, vel_scale=VELOCITY_LOW, acc_scale=DEFAULT_ACC))
 
     askSuccess(_test_circ_interim.__name__,
-                'The robot should have moved to a start position, then 5/12 of a circle, back to the start position'
-                + ' and then 5/8 of a circle.')
+               'The robot should have moved to a start position, then 5/12 of a circle, back to the start position'
+               + ' and then 5/8 of a circle.')
 
 
 def _test_circ_small_vertical(robot):
@@ -124,7 +124,7 @@ def _test_circ_small_vertical(robot):
                     interim=Point(-0.5, 0.3, 0.5), vel_scale=VELOCITY_LOW, acc_scale=DEFAULT_ACC))
 
     askSuccess(_test_circ_small_vertical.__name__,
-                'The robot should have moved to a start position and then 1.99 PI along a small vertical circle.')
+               'The robot should have moved to a start position and then 1.99 PI along a small vertical circle.')
 
 
 if __name__ == "__main__":

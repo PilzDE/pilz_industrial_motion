@@ -52,7 +52,7 @@ def _test_ptp_pos(robot):
     robot.move(Ptp(goal=[0, -0.78, 0.78, 0, 1.56, 0]))
 
     askSuccess(_test_ptp_pos.__name__,
-                'The robot should have moved to [0,0,0,0,0,0] and after that away from [0,0,0,0,0,0].')
+               'The robot should have moved to [0,0,0,0,0,0] and after that away from [0,0,0,0,0,0].')
 
 
 def _test_lin_pos(robot):
@@ -75,7 +75,7 @@ def _test_lin_pos(robot):
     robot.move(Lin(goal=Pose(position=Point(0.0, 0.0, 0.15)), relative=True, vel_scale=PTP_VEL_PICK))
 
     askSuccess(_test_lin_pos.__name__, 'The robot should have moved to the upper pick position. Afterwards the tcp'
-                                        + ' should have moved linear 15cm down and then linear 15cm up.')
+                                       + ' should have moved linear 15cm down and then linear 15cm up.')
 
 
 def _test_seq_pos1(robot):
@@ -133,9 +133,9 @@ def _test_seq_pos1(robot):
     robot.move(seq_l)
 
     askSuccess(_test_seq_pos1.__name__, 'The robot should have moved to [0,0,0,0,0,0] and then to the upper pick'
-                                         + ' position. After that the robot tcp should have moved linear 15cm down and'
-                                         + ' then linear 15cm up. Further on the robot should have moved a quarter'
-                                         + ' circle forwards and backwards and then back to [0,0,0,0,0,0].')
+                                        + ' position. After that the robot tcp should have moved linear 15cm down and'
+                                        + ' then linear 15cm up. Further on the robot should have moved a quarter'
+                                        + ' circle forwards and backwards and then back to [0,0,0,0,0,0].')
 
 
 def _test_seq_pos2(robot):
@@ -187,9 +187,9 @@ def _test_seq_pos2(robot):
     robot.move(seq_l)
 
     askSuccess(_test_seq_pos2.__name__, 'The robot should have moved to a start position and then a quarter'
-                                         + ' circle arriving at the upper pick position. After that the robot tcp'
-                                         + ' should have moved linear 15cm down and then linear 15cm up. In the end the'
-                                         + ' robot should have moved back to [0,0,0,0,0,0].')
+                                        + ' circle arriving at the upper pick position. After that the robot tcp'
+                                        + ' should have moved linear 15cm down and then linear 15cm up. In the end the'
+                                        + ' robot should have moved back to [0,0,0,0,0,0].')
 
 
 def _test_circ_pos(robot):
@@ -219,7 +219,7 @@ def _test_circ_pos(robot):
                     interim=Point(-0.565, -0.105, 0.19)))
 
     askSuccess(_test_circ_pos.__name__, 'The robot should have moved to a start position and then two times half a'
-                                         + ' circle.')
+                                        + ' circle.')
 
 
 def _test_blend_pos(robot):
