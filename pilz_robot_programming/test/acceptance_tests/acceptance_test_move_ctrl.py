@@ -72,8 +72,8 @@ def _test_stop(robot):
     robot.move(Ptp(goal=[0.78, 0.0, 0.0, 0, 0, 0], relative=True, vel_scale=_DEFAULT_VEL_SCALE))
 
     askSuccess(_test_stop.__name__,
-                'The robot should have stopped before reaching the upper pick position and continued moving in '
-                'another direction.')
+               'The robot should have stopped before reaching the upper pick position and continued moving in '
+               'another direction.')
 
 
 def _test_pause_resume(robot):
@@ -112,7 +112,7 @@ def _test_pause_resume(robot):
     move_thread.join()
 
     askSuccess(_test_pause_resume.__name__,
-                'The robot should have paused his movement and continued after approximately 5 seconds.')
+               'The robot should have paused his movement and continued after approximately 5 seconds.')
 
 
 def _test_pause_stop(robot):
@@ -150,8 +150,8 @@ def _test_pause_stop(robot):
     move_thread.join()
 
     askSuccess(_test_pause_stop.__name__,
-                'The robot should have paused his movement before reaching the upper pick position '
-                'and the test should have terminated immediately.')
+               'The robot should have paused his movement before reaching the upper pick position '
+               'and the test should have terminated immediately.')
 
 
 def _test_pause_between_moves(robot):
@@ -197,8 +197,8 @@ def _test_pause_between_moves(robot):
     move_thread.join()
 
     askSuccess(_test_pause_between_moves.__name__,
-                'The robot should have moved to the upper pick position and back to [0, 0, 0, 0, 0, 0] after '
-                'approximately 5 seconds.')
+               'The robot should have moved to the upper pick position and back to [0, 0, 0, 0, 0, 0] after '
+               'approximately 5 seconds.')
 
 
 if __name__ == "__main__":

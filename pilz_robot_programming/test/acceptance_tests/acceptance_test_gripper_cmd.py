@@ -62,7 +62,7 @@ def _test_neg_gripper_pos(robot):
         rospy.logerr('Invalid gripper position does not result in exception.')
 
     askSuccess(_test_neg_gripper_pos.__name__,
-                'There should be an error message stating that the gripper position violates the gripper limits.')
+               'There should be an error message stating that the gripper position violates the gripper limits.')
 
 
 def _test_too_large_gripper_pos(robot):
@@ -87,7 +87,7 @@ def _test_too_large_gripper_pos(robot):
         rospy.logerr('Invalid gripper position does not result in exception.')
 
     askSuccess(_test_too_large_gripper_pos.__name__,
-                'There should be an error message stating that the gripper position violates the gripper limits.')
+               'There should be an error message stating that the gripper position violates the gripper limits.')
 
 
 def _test_correct_gripper_pos(robot):
