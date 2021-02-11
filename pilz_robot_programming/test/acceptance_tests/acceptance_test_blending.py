@@ -19,6 +19,7 @@ import rospy
 from geometry_msgs.msg import Pose, Point
 from pilz_robot_programming.robot import *
 from pilz_robot_programming.commands import *
+from pilz_industrial_motion_testutils.acceptance_test_utils import askPermission, askSuccess
 
 DEFAULT_PTP_VEL = 0.5
 DEFAULT_PTP_ACC = 0.5
@@ -63,7 +64,7 @@ def start_program():
 #       c. Robot performed continuous orientation change (continuous rotational velocity).
 #
 def _testSeqWithJointPoses(robot):
-    if (_askPermission(_testSeqWithJointPoses.__name__) == 0):
+    if (askPermission(_testSeqWithJointPoses.__name__) == 0):
         return
     robot.move(Ptp(goal=[0, 0.007, -1.816, 0, 1.8236, 0], vel_scale=DEFAULT_PTP_VEL))
 
@@ -72,7 +73,7 @@ def _testSeqWithJointPoses(robot):
     seq.append(Lin(goal=[0.52, 0.698, -1.74, 0.349, 1.56, 0.78], vel_scale=0.15), blend_radius=0)
     robot.move(seq)
 
-    _askSuccess(_testSeqWithJointPoses.__name__, 'Did the robot perform a lin-lin blending?.')
+    askSuccess(_testSeqWithJointPoses.__name__, 'Did the robot perform a lin-lin blending?.')
 
 # Tries to blend lin motions. First lin motion contains unreachable position.
 #
@@ -87,7 +88,7 @@ def _testSeqWithJointPoses(robot):
 #       displayed.
 #
 def _testUnreachableFirstPose(robot):
-    if (_askPermission(_testUnreachableFirstPose.__name__) == 0):
+    if (askPermission(_testUnreachableFirstPose.__name__) == 0):
         return
     # Move to initial position
     robot.move(Ptp(goal=[0, 0.007, -1.816, 0, 1.8236, 0], vel_scale=DEFAULT_PTP_VEL))
@@ -98,7 +99,7 @@ def _testUnreachableFirstPose(robot):
     try:
         robot.move(seq1)
     except RobotMoveFailed:
-        _askSuccess(_testUnreachableFirstPose.__name__, 'There should be an error message stating that computation of inverse kinematic failed.')
+        askSuccess(_testUnreachableFirstPose.__name__, 'There should be an error message stating that computation of inverse kinematic failed.')
         return
     print("Test failed!")
 
@@ -115,7 +116,7 @@ def _testUnreachableFirstPose(robot):
 #       displayed.
 #
 def _testLastRadiNonZero(robot):
-    if (_askPermission(_testLastRadiNonZero.__name__) == 0):
+    if (askPermission(_testLastRadiNonZero.__name__) == 0):
         return
 
     # Move to start position (Left corner close to robot base)
@@ -128,7 +129,7 @@ def _testLastRadiNonZero(robot):
     try:
         robot.move(seq)
     except RobotMoveFailed:
-        _askSuccess(_testLastRadiNonZero.__name__, 'Robot should have performed no motion blending (only two PTP\'s).\nHowever, there should be an error stating that the last radi is not zero.')
+        askSuccess(_testLastRadiNonZero.__name__, 'Robot should have performed no motion blending (only two PTP\'s).\nHowever, there should be an error stating that the last radi is not zero.')
         return
     print("Test failed!")
 # Tries to blend lin motions using overlapping blend radii.
@@ -144,7 +145,7 @@ def _testLastRadiNonZero(robot):
 #       displayed.
 #
 def _testOverlappingRadi(robot):
-    if (_askPermission(_testOverlappingRadi.__name__) == 0):
+    if (askPermission(_testOverlappingRadi.__name__) == 0):
         return
 
     # Move to start position (Left corner close to robot base)
@@ -157,7 +158,7 @@ def _testOverlappingRadi(robot):
     try:
         robot.move(seq)
     except RobotMoveFailed:
-        _askSuccess(_testOverlappingRadi.__name__, 'Robot should have performed no motion blending (only two PTP\'s).\nHowever, there should be an error stating that two blending radi are overlapping.')
+        askSuccess(_testOverlappingRadi.__name__, 'Robot should have performed no motion blending (only two PTP\'s).\nHowever, there should be an error stating that two blending radi are overlapping.')
         return
     print("Test failed!")
 
@@ -174,10 +175,10 @@ def _testOverlappingRadi(robot):
 #       The robot moves along the rectangle for serveral rounds.
 #
 def _testSeveralLinBlends(robot):
-    if (_askPermission(_testSeveralLinBlends.__name__) == 0):
+    if (askPermission(_testSeveralLinBlends.__name__) == 0):
         return
     _rectangleLinLoop(robot)
-    _askSuccess(_testSeveralLinBlends.__name__, 'Robot should have moved in a continues motion along a rectangle (several times).')
+    askSuccess(_testSeveralLinBlends.__name__, 'Robot should have moved in a continues motion along a rectangle (several times).')
 
 # Tries to perform blend motions using an empty sequence.
 #
@@ -190,10 +191,10 @@ def _testSeveralLinBlends(robot):
 #       the empty sequence.
 #
 def _testEmptySequence(robot):
-    if (_askPermission(_testEmptySequence.__name__) == 0):
+    if (askPermission(_testEmptySequence.__name__) == 0):
         return
     _emptySequence(robot)
-    _askSuccess(_testEmptySequence.__name__, 'Robot should not move at all.')
+    askSuccess(_testEmptySequence.__name__, 'Robot should not move at all.')
 
 # Tries to blend two lin motions using a negative blend radius.
 #
@@ -208,12 +209,12 @@ def _testEmptySequence(robot):
 #       displayed.
 #
 def _testNegBlendRadius(robot):
-    if (_askPermission(_testNegBlendRadius.__name__) == 0):
+    if (askPermission(_testNegBlendRadius.__name__) == 0):
         return
     try:
         _linLinBlend(robot, 0, r=-0.3)
     except RobotMoveFailed:
-        _askSuccess(_testNegBlendRadius.__name__, 'Robot should only execute ptp but no lin blending.\nThere should be an error stating that a negative blending radius was used.')
+        askSuccess(_testNegBlendRadius.__name__, 'Robot should only execute ptp but no lin blending.\nThere should be an error stating that a negative blending radius was used.')
         return
     print("Test failed!")
 
@@ -230,12 +231,12 @@ def _testNegBlendRadius(robot):
 #       displayed.
 #
 def _testTooLargeBlendRadius(robot):
-    if (_askPermission(_testTooLargeBlendRadius.__name__) == 0):
+    if (askPermission(_testTooLargeBlendRadius.__name__) == 0):
         return
     try:
         _linLinBlend(robot, 0, r=100)
     except RobotMoveFailed:
-        _askSuccess(_testTooLargeBlendRadius.__name__, 'Robot should only execute ptp but no lin blending.\nThere should be an error stating that a too large blending radius was used.')
+        askSuccess(_testTooLargeBlendRadius.__name__, 'Robot should only execute ptp but no lin blending.\nThere should be an error stating that a too large blending radius was used.')
         return
     print("Test failed!")
 # Tests the blending of two lin motions. Both lin goals have the same orientation.
@@ -252,10 +253,10 @@ def _testTooLargeBlendRadius(robot):
 #       b. Robot performed continuous motion (without stop).
 #
 def _testLinLinBlendWithoutOriChange(robot):
-    if (_askPermission(_testLinLinBlendWithoutOriChange.__name__) == 0):
+    if (askPermission(_testLinLinBlendWithoutOriChange.__name__) == 0):
         return
     _linLinBlend(robot, 0)
-    _askSuccess(_testLinLinBlendWithoutOriChange.__name__)
+    askSuccess(_testLinLinBlendWithoutOriChange.__name__)
 
 # Tests the blending of two lin motions.
 # Both lin goals have different orientations (difference in euler angle C).
@@ -273,10 +274,10 @@ def _testLinLinBlendWithoutOriChange(robot):
 #       c. Robot performed continuous orientation change (continuous rotational velocity).
 #
 def _testLinLinBlendWithOriChange(robot):
-    if (_askPermission(_testLinLinBlendWithOriChange.__name__) == 0):
+    if (askPermission(_testLinLinBlendWithOriChange.__name__) == 0):
         return
     _linLinBlend(robot, 1.57)
-    _askSuccess(_testLinLinBlendWithOriChange.__name__)
+    askSuccess(_testLinLinBlendWithOriChange.__name__)
 
 # Tests the blending of three motions where only the second has a radius.
 # 
@@ -294,7 +295,7 @@ def _testLinLinBlendWithOriChange(robot):
 #       d. Robot makes smooth curve between into last trajectory.
 #
 def _testBlendRadiusOnSecondCommand(robot):
-    if (_askPermission(_testBlendRadiusOnSecondCommand.__name__) == 0):
+    if (askPermission(_testBlendRadiusOnSecondCommand.__name__) == 0):
         return
 
     robot.move(Ptp(goal=Pose(position=Point(0.0, 0.0, 0.9), orientation=from_euler(0,0,0)), 
@@ -308,7 +309,7 @@ def _testBlendRadiusOnSecondCommand(robot):
                     vel_scale=DEFAULT_PTP_VEL, acc_scale=DEFAULT_PTP_ACC))
     robot.move(seq1)
 
-    _askSuccess(_testBlendRadiusOnSecondCommand.__name__)
+    askSuccess(_testBlendRadiusOnSecondCommand.__name__)
 
 # Tests the blending of two lin motions.
 # Both lin goals have different orientations (difference in euler angle A, B
@@ -327,7 +328,7 @@ def _testBlendRadiusOnSecondCommand(robot):
 #       c. Robot performed continuous orientation change (continuous rotational velocity).
 #
 def _testOriChangeInABC(robot):
-    if (_askPermission(_testOriChangeInABC.__name__) == 0):
+    if (askPermission(_testOriChangeInABC.__name__) == 0):
         return
     robot.move(Ptp(goal=[0, 0.007, -1.816, 0, 1.8236, 0], vel_scale=DEFAULT_PTP_VEL))
     robot.move(Ptp(goal=Pose(position=Point(0.15, 0.25, 0.75), orientation=from_euler(0,0,0)), vel_scale=DEFAULT_PTP_VEL))
@@ -337,7 +338,7 @@ def _testOriChangeInABC(robot):
     seq.append(Lin(goal=Pose(position=Point(0.5, 0, 0.75), orientation=from_euler(0,0,0)), vel_scale=0.25, acc_scale=0.1), blend_radius=0)
     robot.move(seq)
 
-    _askSuccess(_testOriChangeInABC.__name__, 'Did the robot perform a lin-lin blending motion with orientation change in A,B,C?')
+    askSuccess(_testOriChangeInABC.__name__, 'Did the robot perform a lin-lin blending motion with orientation change in A,B,C?')
 
 # Performs a motion using an empty sequence.
 def _emptySequence(robot):
@@ -381,29 +382,6 @@ def _linLinBlend(robot, z_ori_change, r=0.3):
     seq1.append(Lin(goal=Pose(position=Point(-0.1, 0.5, 0.65), orientation=from_euler(0,0,z_ori_change)),vel_scale=0.1, acc_scale=0.1), blend_radius=0)
 
     robot.move(seq1)
-
-# Asks the user permission to start the test.
-def _askPermission(test_name):
-    s = raw_input('Perform ' + test_name + ' [(y)es, (n)o]?: ')
-    if(s == "n"):
-        print('\n\nSkip ' + test_name + '\n___TEST-END___\n')
-        return 0
-    print('\n\nStart ' + test_name + '\n')
-    return 1
-
-# Asks the user if the test was successful and (if given) displays
-# a hint regarding the assessment of a successful test.
-def _askSuccess(test_name, question=None):
-    if (question != None):
-        print('\nTest ' + test_name + 'successful?')
-        print('Hint: \n' + question)
-
-    s = raw_input('Test ' + test_name + 'successful [(y)es, (n)o]?: ')
-    if(s == "n"):
-        print('\nTest ' + test_name + 'failed!\n___TEST-END___\n')
-        return 0
-    print('Test ' + test_name + 'successful.\n___TEST-END___\n')
-    return 1
 
 if __name__ == "__main__":
     # Init a rosnode

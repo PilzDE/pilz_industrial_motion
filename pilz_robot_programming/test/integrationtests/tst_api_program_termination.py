@@ -18,13 +18,12 @@ import rospy
 import unittest
 import subprocess
 import signal
-from rospkg import RosPack
 from pilz_industrial_motion_testutils.xml_testdata_loader import *
 from pilz_industrial_motion_testutils.robot_motion_observer import RobotMotionObserver
-from pilz_robot_programming.commands import *
-from pilz_robot_programming.robot import *
+from pilz_robot_programming import *
+from pathlib import Path
 
-_TEST_DATA_FILE_NAME = RosPack().get_path("pilz_industrial_motion_testutils") + "/test_data/testdata_deprecated.xml"
+_TEST_DATA_FILE_NAME = Path(__file__).parent.parent.absolute() / Path("test_data/test_data.xml")
 _GROUP_NAME = "manipulator"
 _API_VERSION = "1"
 
@@ -53,7 +52,7 @@ class TestAPIProgramTermination(unittest.TestCase):
         :returns list containing executable with path and appropriate arguments
         """
         ptp_goal = [str(x) for x in self.test_data.get_joints(self._PTP_TEST_NAME, _GROUP_NAME)]
-        movecmd = RosPack().get_path("pilz_robot_programming")+'/test/integrationtests/movecmd.py ptp joint'
+        movecmd = str(Path(__file__).parent.absolute() / Path('movecmd.py')) + ' ptp joint'
 
         return movecmd.split(" ") + ptp_goal
 

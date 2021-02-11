@@ -18,7 +18,7 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 <launch>
 
   <arg name="coverage" default="false"/>
-  <arg name="pythontest_launch_prefix" value="$(eval 'python-coverage run -p' if arg('coverage') else '')"/>
+  <arg name="pythontest_launch_prefix" value="$(eval 'python3-coverage run -p' if arg('coverage') else '')"/>
 
   <node pkg="rosbag" type="record" name="rosbag_log" args="record rosout -o $(find pilz_robot_programming)/api_execution_error_log"/>
 

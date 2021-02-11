@@ -15,13 +15,11 @@
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 import unittest
-from rospkg import RosPack
 from math import radians
 
 from geometry_msgs.msg import Point
 
-from pilz_robot_programming.robot import *
-from pilz_robot_programming.commands import *
+from pilz_robot_programming import *
 
 from pilz_industrial_motion_testutils.integration_test_utils import *
 
@@ -44,7 +42,7 @@ class TestJointPositionLimits(unittest.TestCase):
     def setUp(self):
         self.robot = Robot(API_VERSION)
         self.joint_names = _JOINT_LIMITS_DEGREE.keys()
-        self.joint_names.sort()
+        self.joint_names = sorted(self.joint_names)
 
     def tearDown(self):
         if hasattr(self, 'robot'):

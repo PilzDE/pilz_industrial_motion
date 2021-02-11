@@ -14,9 +14,8 @@
 # You should have received a copy of the GNU Lesser General Public License
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
-from pilz_robot_programming.robot import *
-from pilz_robot_programming.commands import *
-from pilz_industrial_motion_testutils.acceptance_test_utils import _askPermission, _askSuccess
+from pilz_robot_programming import *
+from pilz_industrial_motion_testutils.acceptance_test_utils import askPermission, askSuccess
 from pilz_industrial_motion_testutils.integration_test_utils import *
 from pilz_industrial_motion_testutils.robot_motion_observer import RobotMotionObserver
 
@@ -51,7 +50,7 @@ def _test_stop(robot):
             3. Robot starts motion and moves to the other goal.
     """
 
-    if _askPermission(_test_stop.__name__) == 0:
+    if askPermission(_test_stop.__name__) == 0:
         return
 
     _robot_motion_observer = RobotMotionObserver(_PLANNING_GROUP)
@@ -72,7 +71,7 @@ def _test_stop(robot):
     # 3. Trigger motion with different goal
     robot.move(Ptp(goal=[0.78, 0.0, 0.0, 0, 0, 0], relative=True, vel_scale=_DEFAULT_VEL_SCALE))
 
-    _askSuccess(_test_stop.__name__,
+    askSuccess(_test_stop.__name__,
                 'The robot should have stopped before reaching the upper pick position and continued moving in '
                 'another direction.')
 
@@ -90,7 +89,7 @@ def _test_pause_resume(robot):
             2. Robot stops motion.
             3. Robot starts motion again and moves to goal.
     """
-    if _askPermission(_test_pause_resume.__name__) == 0:
+    if askPermission(_test_pause_resume.__name__) == 0:
         return
 
     _robot_motion_observer = RobotMotionObserver(_PLANNING_GROUP)
@@ -112,7 +111,7 @@ def _test_pause_resume(robot):
     # Wait for thread to finish
     move_thread.join()
 
-    _askSuccess(_test_pause_resume.__name__,
+    askSuccess(_test_pause_resume.__name__,
                 'The robot should have paused his movement and continued after approximately 5 seconds.')
 
 
@@ -129,7 +128,7 @@ def _test_pause_stop(robot):
             2. Robot stops motion.
             3. Move thread terminates.
     """
-    if _askPermission(_test_pause_stop.__name__) == 0:
+    if askPermission(_test_pause_stop.__name__) == 0:
         return
 
     _robot_motion_observer = RobotMotionObserver(_PLANNING_GROUP)
@@ -150,7 +149,7 @@ def _test_pause_stop(robot):
     # Wait for thread to finish
     move_thread.join()
 
-    _askSuccess(_test_pause_stop.__name__,
+    askSuccess(_test_pause_stop.__name__,
                 'The robot should have paused his movement before reaching the upper pick position '
                 'and the test should have terminated immediately.')
 
@@ -170,7 +169,7 @@ def _test_pause_between_moves(robot):
             3. Robot does not move.
             4. Robot moves to goal.
     """
-    if _askPermission(_test_pause_between_moves.__name__) == 0:
+    if askPermission(_test_pause_between_moves.__name__) == 0:
         return
 
     # 1. Create simple ptp command and start thread for movement
@@ -197,7 +196,7 @@ def _test_pause_between_moves(robot):
     # Wait for thread to finish
     move_thread.join()
 
-    _askSuccess(_test_pause_between_moves.__name__,
+    askSuccess(_test_pause_between_moves.__name__,
                 'The robot should have moved to the upper pick position and back to [0, 0, 0, 0, 0, 0] after '
                 'approximately 5 seconds.')
 

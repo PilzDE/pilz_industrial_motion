@@ -15,18 +15,18 @@
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 import unittest
-from rospkg import RosPack
 import numpy as np
 import tf2_ros
 from geometry_msgs.msg import Point, PoseStamped, Transform, TransformStamped
 from tst_api_utils import setOverrideParam
+from pathlib import Path
 
 
 from pilz_robot_programming.robot import *
 from pilz_industrial_motion_testutils.xml_testdata_loader import *
 from pilz_robot_programming.commands import *
 
-_TEST_DATA_FILE_NAME = RosPack().get_path("pilz_industrial_motion_testutils") + "/test_data/testdata_deprecated.xml"
+_TEST_DATA_FILE_NAME = Path(__file__).parent.parent.absolute() / Path("test_data/test_data.xml")
 PLANNING_GROUP_NAME = "manipulator"
 TARGET_LINK_NAME = "prbt_tcp"
 API_VERSION = "1"
@@ -417,7 +417,7 @@ class TestAPICmdConversion(unittest.TestCase):
 
             Test results:
                 1. -
-                2. The scaled velocity scaling factor and the scaled accerleration scaling factor is set.
+                2. The scaled velocity scaling factor and the scaled acceleration scaling factor is set.
         """
         # +++++++++++++++++++++++
         rospy.loginfo("Step 1")
@@ -590,7 +590,7 @@ class TestAPICmdConversion(unittest.TestCase):
 
             Test results:
                 1. -
-                2. The scaled velocity scaling factor and the scaled accerleration scaling factor is set.
+                2. The scaled velocity scaling factor and the scaled acceleration scaling factor is set.
         """
         # +++++++++++++++++++++++
         rospy.loginfo("Step 1")
@@ -735,7 +735,7 @@ class TestAPICmdConversion(unittest.TestCase):
 
             Test results:
                 1. -
-                2. The scaled velocity scaling factor and the scaled accerleration scaling factor is set.
+                2. The scaled velocity scaling factor and the scaled acceleration scaling factor is set.
         """
 
         # +++++++++++++++++++++++
@@ -990,7 +990,7 @@ class TestAPICmdConversion(unittest.TestCase):
             zero_pose.header.stamp = rospy.Time(0)
             zero_pose.header.frame_id = "goal_pose_bf"
             goal_pose_rf_msg = self.tf_buffer_.transform(zero_pose, "ref_move_frame").pose
-        except:
+        except tf.TransformException:
             rospy.logerr("Failed to setup transforms for test!")
 
         # convert the goal in reference frame to planning request(goal in base frame)
@@ -1101,7 +1101,7 @@ class TestAPICmdConversion(unittest.TestCase):
             zero_pose.header.stamp = time_tf
             zero_pose.header.frame_id = "rel_goal_pose_bf"
             goal_pose_rf_msg = self.tf_buffer_.transform(zero_pose, "ref_rel_frame").pose
-        except:
+        except tf.TransformException:
             rospy.logerr("Failed to setup transforms for test!")
 
         # move to initial position and use relative move to reach goal
@@ -1126,7 +1126,7 @@ class TestAPICmdConversion(unittest.TestCase):
 
             1. create and publish tf
             2. get current pose with base and ref
-            3. move roboter to ref
+            3. move robot to ref
             4. get current pose with ref and base
             5. analyse positions
         """
@@ -1161,7 +1161,7 @@ class TestAPICmdConversion(unittest.TestCase):
             tcp_ref_msg = self.tf_buffer_.transform(zero_pose, "ref_frame").pose
             tcp_base_msg = self.tf_buffer_.transform(zero_pose, base_frame).pose
         except Exception as e:
-            print e
+            print(e)
             rospy.logerr("Failed to setup transforms for test!")
 
         # read current pose, move robot and do it again

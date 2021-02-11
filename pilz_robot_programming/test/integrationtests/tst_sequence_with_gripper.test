@@ -20,7 +20,7 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
   <arg name="debug" default="false"/>
   <arg name="gripper" default="pg70"/>
   <arg name="coverage" default="false"/>
-  <arg name="pythontest_launch_prefix" value="$(eval 'python-coverage run -p' if arg('coverage') else '')"/>
+  <arg name="pythontest_launch_prefix" value="$(eval 'python3-coverage run -p' if arg('coverage') else '')"/>
 
   <!-- Start MoveIt Configuration -->
   <node name="joint_state_publisher" pkg="joint_state_publisher" type="joint_state_publisher">
@@ -36,7 +36,7 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
     <arg name="info" value="true"/>
     <arg name="debug" value="$(arg debug)"/>
     <arg name="gripper" value="$(arg gripper)"/>
-    <arg name="pipeline" value="pilz_command_planner" />
+    <arg name="pipeline" value="pilz_industrial_motion_planner" />
   </include>
 
   <node name="fake_speed_override_node" pkg="prbt_hardware_support" type="fake_speed_override_node"/>

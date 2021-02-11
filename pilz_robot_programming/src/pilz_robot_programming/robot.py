@@ -30,7 +30,8 @@ from std_srvs.srv import Trigger
 import tf2_ros
 import tf2_geometry_msgs  # for buffer.transform() to eat a geometry_msgs.Pose directly
 
-from pilz_msgs.msg import MoveGroupSequenceAction, IsBrakeTestRequiredResult
+from moveit_msgs.msg import MoveGroupSequenceAction
+from pilz_msgs.msg import IsBrakeTestRequiredResult
 from pilz_msgs.srv import GetSpeedOverride, IsBrakeTestRequired, BrakeTest
 
 from .move_control_request import _MoveControlState, MoveControlAction, _MoveControlStateMachine
@@ -55,7 +56,7 @@ class Robot(object):
     * :py:class:`.Gripper`
 
     For a more detailed description of the individual commands please see the documentation of
-    the corresponding command. Especially see the documentation of the `pilz_trajectory_generation` package
+    the corresponding command. Especially see the documentation of the `pilz_industrial_motion_planner` package
     to get more information on additional parameters that can be configured in the MoveIt! plugin.
 
     The commands are executed with the help of Moveit.
@@ -187,8 +188,8 @@ class Robot(object):
         try:
             return self._robot_commander.get_group(planning_group).get_current_joint_values()
         except MoveItCommanderException as e:
-            rospy.logerr(e.message)
-            raise RobotCurrentStateError(e.message)
+            rospy.logerr(e)
+            raise RobotCurrentStateError(e)
 
     def get_current_pose_stamped(self, target_link=_DEFAULT_TARGET_LINK, base=_DEFAULT_BASE_LINK):
         """Returns the current stamped pose of target link in the reference frame.
@@ -204,8 +205,8 @@ class Robot(object):
             current_pose = self.tf_buffer_.transform(zero_pose, base, rospy.Duration(5, 0))
             return current_pose
         except tf2_ros.LookupException as e:
-            rospy.logerr(e.message)
-            raise RobotCurrentStateError(e.message)
+            rospy.logerr(e)
+            raise RobotCurrentStateError(e)
 
     def get_current_pose(self, target_link=_DEFAULT_TARGET_LINK, base=_DEFAULT_BASE_LINK):
         """Returns the current pose of target link in the reference frame.
@@ -301,7 +302,8 @@ class Robot(object):
                 self._sequence_client.cancel_goal()
 
     def resume(self):
-        """The function resumes a paused robot motion. If the motion command is not paused or no motion command is active,
+        """The function resumes a paused robot motion.
+        If the motion command is not paused or no motion command is active,
         it has no effects.
 
         :note:
@@ -540,7 +542,7 @@ class Robot(object):
         # Connect to speed override service
         rospy.loginfo("Waiting for connection to service " + self._GET_SPEED_OVERRIDE_SRV + "...")
         rospy.wait_for_service(self._GET_SPEED_OVERRIDE_SRV, self._SERVICE_WAIT_TIMEOUT_S)
-        rospy.loginfo("Connection to service " + self._GET_SPEED_OVERRIDE_SRV + " estabilshed")
+        rospy.loginfo("Connection to service " + self._GET_SPEED_OVERRIDE_SRV + " established")
         self._get_speed_override_srv = rospy.ServiceProxy(self._GET_SPEED_OVERRIDE_SRV, GetSpeedOverride)
 
     def _release(self):
@@ -554,7 +556,11 @@ class Robot(object):
         # do not delete pid parameter if it has not been set or overwritten
         if self._single_instance_flag:
             rospy.logdebug("Delete single instance parameter from parameter server.")
-            rospy.delete_param(self._INSTANCE_PARAM)
+            try:
+                rospy.delete_param(self._INSTANCE_PARAM)
+            except KeyError:
+                rospy.logdebug("Instance parameter was missing.")
+            self._single_instace_flag = False
 
     def __enter__(self):
         return self

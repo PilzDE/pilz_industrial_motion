@@ -1,4 +1,4 @@
-name: CI
+name: CI-noetic
 
 on: [push, pull_request]
 
@@ -14,10 +14,10 @@ jobs:
     strategy:
       matrix:
         env:
-          - {ROS_DISTRO: melodic, ROS_REPO: testing}
-          - {ROS_DISTRO: melodic, ROS_REPO: main}
+          - {ROS_DISTRO: noetic, ROS_REPO: testing}
+          - {ROS_DISTRO: noetic, ROS_REPO: main}
       fail-fast: false
-    runs-on: ubuntu-18.04
+    runs-on: ubuntu-20.04
     steps:
       - uses: actions/checkout@v1
       - uses: 'ros-industrial/industrial_ci@master'
@@ -27,14 +27,14 @@ jobs:
     name: "Coverage check"
     strategy:
       matrix:
-        package: [pilz_extensions, pilz_robot_programming, pilz_trajectory_generation , pilz_store_positions ]
-    runs-on: ubuntu-18.04
+        package: pilz_robot_programming
+    runs-on: ubuntu-20.04
     steps:
       - uses: actions/checkout@v1
       - uses: 'ros-industrial/industrial_ci@master'
         env:
           ROS_REPO: testing
-          ROS_DISTRO: melodic
+          ROS_DISTRO: noetic
           ADDITIONAL_DEBS: git
           CATKIN_LINT: false
           NOT_TEST_BUILD: true

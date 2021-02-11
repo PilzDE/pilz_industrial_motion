@@ -17,21 +17,21 @@
 
 from __future__ import absolute_import
 
+from copy import deepcopy
+from math import pi
+from operator import add
+
 import rospy
 import tf2_geometry_msgs  # for buffer.transform() to eat a geometry_msgs.Pose directly
 from tf_conversions import transformations
-from geometry_msgs.msg import Quaternion, Pose
-from geometry_msgs.msg import PoseStamped
-from pilz_msgs.msg import MoveGroupSequenceGoal, MotionSequenceItem
-from moveit_msgs.msg import (OrientationConstraint, MotionPlanRequest, JointConstraint, Constraints,
-                             PositionConstraint, PlanningOptions)
+from geometry_msgs.msg import Pose, PoseStamped, Quaternion
+from moveit_msgs.msg import (Constraints, JointConstraint, MotionPlanRequest,
+                             MotionSequenceItem, MoveGroupSequenceGoal,
+                             OrientationConstraint, PlanningOptions,
+                             PositionConstraint)
 import shape_msgs.msg as shape_msgs
-from operator import add
-from math import pi
 
 from .move_control_request import _MoveControlState
-from copy import deepcopy
-
 
 __version__ = '0.0.dev1'
 
@@ -97,7 +97,7 @@ class _AbstractCmd(object):
             rospy.logerr("No result received from action server.")
             return robot._FAILURE
 
-        return robot._map_error_code(result_code.error_code)
+        return robot._map_error_code(result_code.response.error_code)
 
     @staticmethod
     def _locked_send_goal(robot, action_client, goal):
@@ -272,7 +272,7 @@ class BaseCmd(_AbstractCmd):
         if isinstance(self._goal, str):
             raise TypeError("String is not convertible into joint values.")
         joint_names = joint_names if len(joint_names) != 0 else self._active_joints
-        joint_values = self._get_joint_pose()
+        joint_values = list(self._get_joint_pose())
         if len(joint_names) != len(joint_values):
             raise IndexError("Given joint goal does not match the active joints " + str(joint_names) + ".")
 
@@ -333,6 +333,10 @@ class BaseCmd(_AbstractCmd):
         goal_joint_state = self._goal if not self._relative else \
             map(add, self._goal, self._start_joint_states)
         return goal_joint_state
+
+    @staticmethod
+    def _calc_acc_scale(vel_scale):  # pragma: no cover  Abstract method
+        raise NotImplementedError("Needs to be defined by child class")
 
     def _to_robot_reference(self, pose_frame, goal_pose_custom_ref):
         """ Transforms a pose from a custom reference frame to one in robot reference frame.
@@ -676,7 +680,7 @@ class Gripper(BaseCmd):
 
         # create goal constraints
         goal_constraints = Constraints()
-        if isinstance(self._goal, (float, int, long)):
+        if isinstance(self._goal, (float, int)):
             joint_names = robot._robot_commander.get_group(self._planning_group).get_active_joints()
 
             if len(joint_names) != 1:

@@ -17,9 +17,8 @@
 
 import unittest
 from geometry_msgs.msg import Point
-from pilz_robot_programming.robot import *
+from pilz_robot_programming import *
 from pilz_industrial_motion_testutils.integration_test_utils import *
-from pilz_robot_programming.commands import *
 
 from visualization_msgs.msg import Marker
 from visualization_msgs.msg import MarkerArray
@@ -74,12 +73,13 @@ class TestSelfCollision(unittest.TestCase):
 
         move_thread_lin = MoveThread(self.robot,
                                      Lin(goal=Pose(position=Point(0.15, 0, 0.12)), relative=True, vel_scale=0.5,
-                                         acc_scale=0.1), RobotMoveFailed)
+                                         acc_scale=0.1),
+                                     RobotMoveFailed)
         move_thread_lin.start()
 
         rospy.loginfo("Waiting for notification...")
         with self.condition:
-            self.condition.wait()
+            self.condition.wait(timeout=5.0)
 
         move_thread_lin.join()
         pos_after_lin = self.robot.get_current_joint_states()
@@ -93,4 +93,4 @@ if __name__ == '__main__':
     import rostest
 
     rospy.init_node('test_self_collision')
-    rostest.rosrun('pilz_trajectory_generation', 'test_self_collision', TestSelfCollision)
+    rostest.rosrun('pilz_industrial_motion_planner', 'test_self_collision', TestSelfCollision)

@@ -16,7 +16,7 @@
 
 from pilz_robot_programming.robot import *
 from pilz_robot_programming.commands import *
-from pilz_industrial_motion_testutils.acceptance_test_utils import _askPermission, _askSuccess
+from pilz_industrial_motion_testutils.acceptance_test_utils import askPermission, askSuccess
 
 DEFAULT_PTP_VEL = 0.5
 
@@ -51,7 +51,7 @@ def _test_neg_gripper_pos(robot):
             1. Robot moves to start position.
             2. Exception is thrown and error message is displayed.
     """
-    if _askPermission(_test_neg_gripper_pos.__name__) == 0:
+    if askPermission(_test_neg_gripper_pos.__name__) == 0:
         return
     robot.move(Ptp(goal=[0, 0.007, -1.816, 0, 1.8236, 0], vel_scale=DEFAULT_PTP_VEL))
     try:
@@ -61,7 +61,7 @@ def _test_neg_gripper_pos(robot):
     else:
         rospy.logerr('Invalid gripper position does not result in exception.')
 
-    _askSuccess(_test_neg_gripper_pos.__name__,
+    askSuccess(_test_neg_gripper_pos.__name__,
                 'There should be an error message stating that the gripper position violates the gripper limits.')
 
 
@@ -76,7 +76,7 @@ def _test_too_large_gripper_pos(robot):
             1. Robot moves to start position.
             2. Exception is thrown and error message is displayed.
     """
-    if _askPermission(_test_too_large_gripper_pos.__name__) == 0:
+    if askPermission(_test_too_large_gripper_pos.__name__) == 0:
         return
     robot.move(Ptp(goal=[0, 0.007, -1.816, 0, 1.8236, 0], vel_scale=DEFAULT_PTP_VEL))
     try:
@@ -86,7 +86,7 @@ def _test_too_large_gripper_pos(robot):
     else:
         rospy.logerr('Invalid gripper position does not result in exception.')
 
-    _askSuccess(_test_too_large_gripper_pos.__name__,
+    askSuccess(_test_too_large_gripper_pos.__name__,
                 'There should be an error message stating that the gripper position violates the gripper limits.')
 
 
@@ -101,12 +101,12 @@ def _test_correct_gripper_pos(robot):
             1. Robot moves to start position.
             2. Gripper moved to given position.
     """
-    if _askPermission(_test_correct_gripper_pos.__name__) == 0:
+    if askPermission(_test_correct_gripper_pos.__name__) == 0:
         return
     robot.move(Ptp(goal=[0, 0.007, -1.816, 0, 1.8236, 0], vel_scale=DEFAULT_PTP_VEL))
     robot.move(Gripper(goal=GRIPPER_MIDDLE))
 
-    _askSuccess(_test_correct_gripper_pos.__name__, 'Gripper should have moved.')
+    askSuccess(_test_correct_gripper_pos.__name__, 'Gripper should have moved.')
 
 
 def _test_closed_gripper_pos(robot):
@@ -120,12 +120,12 @@ def _test_closed_gripper_pos(robot):
             1. Robot moves to start position.
             2. Gripper closed.
     """
-    if _askPermission(_test_closed_gripper_pos.__name__) == 0:
+    if askPermission(_test_closed_gripper_pos.__name__) == 0:
         return
     robot.move(Ptp(goal=[0, 0.007, -1.816, 0, 1.8236, 0], vel_scale=DEFAULT_PTP_VEL))
     robot.move(Gripper(goal=GRIPPER_CLOSED))
 
-    _askSuccess(_test_closed_gripper_pos.__name__, 'Gripper should be closed.')
+    askSuccess(_test_closed_gripper_pos.__name__, 'Gripper should be closed.')
 
 
 def _test_open_gripper_pos(robot):
@@ -139,12 +139,12 @@ def _test_open_gripper_pos(robot):
            1. Robot moves to start position.
            2. Gripper completely open.
     """
-    if _askPermission(_test_open_gripper_pos.__name__) == 0:
+    if askPermission(_test_open_gripper_pos.__name__) == 0:
         return
     robot.move(Ptp(goal=[0, 0.007, -1.816, 0, 1.8236, 0], vel_scale=DEFAULT_PTP_VEL))
     robot.move(Gripper(goal=GRIPPER_OPEN))
 
-    _askSuccess(_test_open_gripper_pos.__name__, 'Gripper should be completely open.')
+    askSuccess(_test_open_gripper_pos.__name__, 'Gripper should be completely open.')
 
 
 def _test_gripper_vel_scale(robot):
@@ -160,14 +160,14 @@ def _test_gripper_vel_scale(robot):
            2. Gripper completely open with maximal speed.
            3. Gripper completely closed with slower speed
     """
-    if _askPermission(_test_gripper_vel_scale.__name__) == 0:
+    if askPermission(_test_gripper_vel_scale.__name__) == 0:
         return
     robot.move(Ptp(goal=[0, 0.007, -1.816, 0, 1.8236, 0], vel_scale=DEFAULT_PTP_VEL))
     robot.move(Gripper(goal=GRIPPER_CLOSED, vel_scale=0.1))
     robot.move(Gripper(goal=GRIPPER_OPEN, vel_scale=1))
     robot.move(Gripper(goal=GRIPPER_CLOSED, vel_scale=0.1))
 
-    _askSuccess(_test_gripper_vel_scale.__name__, 'Gripper should move with different speed.')
+    askSuccess(_test_gripper_vel_scale.__name__, 'Gripper should move with different speed.')
 
 
 def _test_gripper_cmd_stress_test(robot):
@@ -181,7 +181,7 @@ def _test_gripper_cmd_stress_test(robot):
             1. Robot moves to start position.
             2. Gripper moves correctly.
     """
-    if _askPermission(_test_gripper_cmd_stress_test.__name__) == 0:
+    if askPermission(_test_gripper_cmd_stress_test.__name__) == 0:
         return
     robot.move(Ptp(goal=[0, 0.007, -1.816, 0, 1.8236, 0], vel_scale=DEFAULT_PTP_VEL))
 
@@ -191,7 +191,7 @@ def _test_gripper_cmd_stress_test(robot):
     for i in range(1, n):
         robot.move(Gripper(goal=i * step_width))
 
-    _askSuccess(_test_gripper_cmd_stress_test.__name__, 'Gripper should have closed and then opened in %i steps' % n)
+    askSuccess(_test_gripper_cmd_stress_test.__name__, 'Gripper should have closed and then opened in %i steps' % n)
 
 
 def _test_rob_gripper_cmd_combi(robot):
@@ -211,7 +211,7 @@ def _test_rob_gripper_cmd_combi(robot):
                 3. Robot move to stated robot position.
                 4. Gripper moves correctly.
     """
-    if _askPermission(_test_rob_gripper_cmd_combi.__name__) == 0:
+    if askPermission(_test_rob_gripper_cmd_combi.__name__) == 0:
         return
 
     n = 5
@@ -224,7 +224,7 @@ def _test_rob_gripper_cmd_combi(robot):
         robot.move(Ptp(goal=[0.5, 0.007, -1.816, 0, 1.8236, 0], vel_scale=DEFAULT_PTP_VEL))
         robot.move(Gripper(goal=GRIPPER_CLOSED + (i * step_width)))
 
-    _askSuccess(_test_rob_gripper_cmd_combi.__name__, 'Robot and gripper should have moved alternatingly.')
+    askSuccess(_test_rob_gripper_cmd_combi.__name__, 'Robot and gripper should have moved alternatingly.')
 
 
 if __name__ == "__main__":
