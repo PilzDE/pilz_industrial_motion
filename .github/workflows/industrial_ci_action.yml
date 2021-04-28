@@ -39,5 +39,5 @@ jobs:
           CATKIN_LINT: false
           NOT_TEST_BUILD: true
           PARALLEL_TESTS: false
-          AFTER_SCRIPT: 'git clone --depth=1 --branch master https://github.com/PilzDE/industrial_ci_addons.git /industrial_ci_addons && source /industrial_ci_addons/check_coverage.sh && check_coverage ${{ matrix.package }}'
+          AFTER_SCRIPT: 'git clone --depth=1 --branch feature/python3_support https://github.com/PilzDE/industrial_ci_addons.git /industrial_ci_addons && source /industrial_ci_addons/check_coverage.sh && check_coverage ${{ matrix.package }}'
           CMAKE_ARGS: '-DENABLE_COVERAGE_TESTING=ON -DCMAKE_BUILD_TYPE=Debug'
