@@ -11,6 +11,8 @@ Forthcoming
   * Use relative paths for test-data/movecmd.py (colcon support)
   * Misc minor refactorings
 * Fix KeyError on calling release twice
+* Fix blend-radius and misunderstandings in Tests (#341, #330)
+* Fix architecture documentation
 * Use public acceptance-test utility methods
 * Move pilz command planner to moveit
 * Contributors: Pilz GmbH and Co. KG
