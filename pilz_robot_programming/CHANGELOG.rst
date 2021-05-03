@@ -2,8 +2,8 @@
 Changelog for package pilz_robot_programming
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
-Forthcoming
------------
+0.5.0 (2021-05-03)
+------------------
 * Adapt to changes in MoveThread api
 * Port to ROS Noetic (ubuntu 20.04, python3)
   * Remove pilz_store_positions package

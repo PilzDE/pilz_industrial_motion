@@ -2,8 +2,8 @@
 Changelog for package pilz_industrial_motion
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
-Forthcoming
------------
+0.5.0 (2021-05-03)
+------------------
 * Port to ROS Noetic (ubuntu 20.04, python3)
   * Remove pilz_store_positions package
   * Update branching model in README.md
