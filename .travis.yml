@@ -18,16 +18,16 @@ env:
   global:
     - AFTER_SCRIPT='apt list --installed | grep "^ros-"'
     - CCACHE_DIR=$HOME/.ccache
-    - ROS_DISTRO="kinetic" 
+    - ROS_DISTRO="kinetic"
     - CATKIN_LINT=true
     - CATKIN_LINT_ARGS='--strict'
     - ADDITIONAL_DEBS="clang-tidy libclang-dev"
   matrix:
-    - ROS_REPO=ros
-    - ROS_REPO=ros-shadow-fixed
+    - ROS_REPO=main
+    - ROS_REPO=testing
 matrix:
   allow_failures:
-    - env: ROS_REPO=ros
+    - env: ROS_REPO=main
 install:
   - git clone --depth=1 https://github.com/ros-industrial/industrial_ci.git .industrial_ci
 script:
