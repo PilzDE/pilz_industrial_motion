@@ -140,8 +140,9 @@ def _test_repeat_circ_pose(robot):
     except RobotMoveFailed:
       pass
 
-    _askSuccess(_test_repeat_circ_pose.__name__, 'Failed to create path object for circle. '
-                                                 'Circle : Plane for motion is not properly defined.')
+    _askSuccess(_test_repeat_circ_pose.__name__, 'No INVALID_GOAL should appear from controller. The following error '
+                                                 'is o.k.: Failed to create path object for circle. Circle : Plane for '
+                                                 'motion is not properly defined.')
 
 
 def _test_repeat_ptp_in_sequence(robot):
