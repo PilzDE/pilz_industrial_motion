@@ -100,12 +100,20 @@ bool JointLimitsContainer::verifyVelocityLimit(const std::string &joint_name,
 
 
 bool JointLimitsContainer::verifyPositionLimit(const std::string &joint_name,
-                                                     const double &joint_position) const
-{
-  return (!( hasLimit(joint_name)
-             && getLimit(joint_name).has_position_limits
-             && (joint_position < getLimit(joint_name).min_position
-                || joint_position > getLimit(joint_name).max_position) ) );
+                                                   const double &joint_position) const {
+  bool limit_ok = (!(hasLimit(joint_name)
+                      && getLimit(joint_name).has_position_limits
+                      && (joint_position < getLimit(joint_name).min_position
+                        || joint_position > getLimit(joint_name).max_position)));
+
+  if(!limit_ok){
+    std::ostringstream os;
+    os << "Joint " << joint_name << " with position " << joint_position << " not in position limit: "
+       << getLimit(joint_name).min_position << " to " << getLimit(joint_name).max_position;
+    ROS_ERROR_STREAM(os.str());
+  }
+
+  return limit_ok;
 }
 
 
