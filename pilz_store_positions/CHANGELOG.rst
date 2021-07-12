@@ -2,6 +2,9 @@
 Changelog for package pilz_store_positions
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
+Forthcoming
+-----------
+
 0.4.12 (2020-11-24)
 -------------------
 * Use new coverage feature of ros_pytest

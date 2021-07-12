@@ -4,7 +4,11 @@ Changelog for package pilz_robot_programming
 
 Forthcoming
 -----------
-* changing references from pilz_command_planner to pilz_industrial_motion_planner
+* Merge our trajectory_generation as moveit planner
+  * update all references to the planner
+  * move sequence related pilz msgs to moveit
+  * change blend radius in test data to not cause blend radius to large error
+* Prevent misunderstandings in acceptance-tests
 * Contributors: Pilz GmbH and Co. KG
 
 0.4.12 (2020-11-24)
