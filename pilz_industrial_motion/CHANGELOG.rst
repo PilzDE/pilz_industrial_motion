@@ -2,8 +2,8 @@
 Changelog for package pilz_industrial_motion
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
-Forthcoming
------------
+0.4.13 (2021-07-12)
+-------------------
 * Merge our trajectory_generation as moveit planner
   * move sequence related pilz msgs to moveit
   * remove pilz_extensions
