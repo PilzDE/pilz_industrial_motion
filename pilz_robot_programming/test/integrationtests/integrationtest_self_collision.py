@@ -93,4 +93,4 @@ if __name__ == '__main__':
     import rostest
 
     rospy.init_node('test_self_collision')
-    rostest.rosrun('pilz_trajectory_generation', 'test_self_collision', TestSelfCollision)
+    rostest.rosrun('pilz_industrial_motion_planner', 'test_self_collision', TestSelfCollision)

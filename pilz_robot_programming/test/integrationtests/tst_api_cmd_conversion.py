@@ -26,7 +26,7 @@ from pilz_robot_programming.robot import *
 from pilz_industrial_motion_testutils.xml_testdata_loader import *
 from pilz_robot_programming.commands import *
 
-_TEST_DATA_FILE_NAME = RosPack().get_path("pilz_industrial_motion_testutils") + "/test_data/testdata_deprecated.xml"
+_TEST_DATA_FILE_NAME = RosPack().get_path("pilz_robot_programming") + "/test/test_data/test_data.xml"
 PLANNING_GROUP_NAME = "manipulator"
 TARGET_LINK_NAME = "prbt_tcp"
 API_VERSION = "1"

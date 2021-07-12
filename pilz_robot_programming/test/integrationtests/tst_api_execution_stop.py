@@ -22,7 +22,7 @@ from pilz_industrial_motion_testutils.integration_test_utils import *
 from pilz_industrial_motion_testutils.robot_motion_observer import RobotMotionObserver
 from pilz_robot_programming.commands import *
 
-_TEST_DATA_FILE_NAME = RosPack().get_path("pilz_industrial_motion_testutils") + "/test_data/testdata_deprecated.xml"
+_TEST_DATA_FILE_NAME = RosPack().get_path("pilz_robot_programming") + "/test/test_data/test_data.xml"
 PLANNING_GROUP_NAME = "manipulator"
 API_VERSION = "1"
 SEQUENCE_TOPIC = "sequence_move_group"

@@ -39,7 +39,7 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
     <arg name="info" value="true"/>
     <arg name="debug" value="$(arg debug)"/>
     <arg name="gripper" value="$(arg gripper)"/>
-    <arg name="pipeline" value="pilz_command_planner" />
+    <arg name="pipeline" value="pilz_industrial_motion_planner" />
   </include>
 
   <node name="fake_speed_override_node" pkg="prbt_hardware_support" type="fake_speed_override_node"/>

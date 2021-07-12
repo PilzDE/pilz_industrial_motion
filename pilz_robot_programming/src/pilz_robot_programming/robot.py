@@ -30,7 +30,8 @@ from std_srvs.srv import Trigger
 import tf2_ros
 import tf2_geometry_msgs  # for buffer.transform() to eat a geometry_msgs.Pose directly
 
-from pilz_msgs.msg import MoveGroupSequenceAction, IsBrakeTestRequiredResult
+from moveit_msgs.msg import MoveGroupSequenceAction
+from pilz_msgs.msg import IsBrakeTestRequiredResult
 from pilz_msgs.srv import GetSpeedOverride, IsBrakeTestRequired, BrakeTest
 
 from .move_control_request import _MoveControlState, MoveControlAction, _MoveControlStateMachine
@@ -55,7 +56,7 @@ class Robot(object):
     * :py:class:`.Gripper`
 
     For a more detailed description of the individual commands please see the documentation of
-    the corresponding command. Especially see the documentation of the `pilz_trajectory_generation` package
+    the corresponding command. Especially see the documentation of the `pilz_industrial_motion_planner` package
     to get more information on additional parameters that can be configured in the MoveIt! plugin.
 
     The commands are executed with the help of Moveit.
@@ -540,7 +541,7 @@ class Robot(object):
         # Connect to speed override service
         rospy.loginfo("Waiting for connection to service " + self._GET_SPEED_OVERRIDE_SRV + "...")
         rospy.wait_for_service(self._GET_SPEED_OVERRIDE_SRV, self._SERVICE_WAIT_TIMEOUT_S)
-        rospy.loginfo("Connection to service " + self._GET_SPEED_OVERRIDE_SRV + " estabilshed")
+        rospy.loginfo("Connection to service " + self._GET_SPEED_OVERRIDE_SRV + " established")
         self._get_speed_override_srv = rospy.ServiceProxy(self._GET_SPEED_OVERRIDE_SRV, GetSpeedOverride)
 
     def _release(self):

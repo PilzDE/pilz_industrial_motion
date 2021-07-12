@@ -24,7 +24,7 @@ from pilz_industrial_motion_testutils.robot_motion_observer import RobotMotionOb
 from pilz_robot_programming.commands import *
 from pilz_robot_programming.robot import *
 
-_TEST_DATA_FILE_NAME = RosPack().get_path("pilz_industrial_motion_testutils") + "/test_data/testdata_deprecated.xml"
+_TEST_DATA_FILE_NAME = RosPack().get_path("pilz_robot_programming") + "/test/test_data/test_data.xml"
 _GROUP_NAME = "manipulator"
 _API_VERSION = "1"
 

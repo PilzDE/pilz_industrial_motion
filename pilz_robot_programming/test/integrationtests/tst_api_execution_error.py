@@ -22,7 +22,7 @@ from pilz_robot_programming.commands import *
 
 import robot_commander_mock
 
-_TEST_DATA_FILE_NAME = RosPack().get_path("pilz_industrial_motion_testutils") + "/test_data/testdata_deprecated.xml"
+_TEST_DATA_FILE_NAME = RosPack().get_path("pilz_robot_programming") + "/test/test_data/test_data.xml"
 PLANNING_GROUP_NAME = "manipulator"
 API_VERSION = "1"
 
