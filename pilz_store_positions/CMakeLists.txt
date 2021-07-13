@@ -5,7 +5,6 @@ find_package(catkin REQUIRED COMPONENTS
   roslint
   rospy
   std_msgs
-  visualization_msgs
 )
 
 if(CATKIN_ENABLE_TESTING AND ENABLE_COVERAGE_TESTING)
