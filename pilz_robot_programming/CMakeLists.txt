@@ -30,6 +30,7 @@ catkin_install_python(PROGRAMS
 if(CATKIN_ENABLE_TESTING)
 
   find_package(rostest REQUIRED)
+  find_package(visualization_msgs REQUIRED)
 
   include_directories(
     ${catkin_INCLUDE_DIRS}
