@@ -2,6 +2,11 @@
 Changelog for package pilz_extensions
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
+Forthcoming
+-----------
+* Deprecate this package since the planner has been integrated into [moveit](https://moveit.ros.org/documentation/planners/).
+* Contributors: Pilz GmbH and Co. KG
+
 0.4.12 (2020-11-24)
 -------------------
 
