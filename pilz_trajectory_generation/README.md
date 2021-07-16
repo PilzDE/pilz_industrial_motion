@@ -1,3 +1,5 @@
+**This package has been integrated into [moveit](https://moveit.ros.org/documentation/planners/) and is deprecated here.**
+
 # Overview
 This package provides a trajectory generator to plan standard robot motions like PTP, LIN, CIRC
 in the form of a MoveIt! PlannerManager plugin.

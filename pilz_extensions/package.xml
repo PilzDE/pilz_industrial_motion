@@ -26,4 +26,11 @@
 
   <test_depend>rostest</test_depend>
   <test_depend>code_coverage</test_depend>
+
+  <export>
+    <deprecated>
+      This package has been integrated into MoveIt. Please consider using the new package
+      pilz_industrial_motion_planner: https://moveit.ros.org/documentation/planners/
+    </deprecated>
+  </export>
 </package>

@@ -35,8 +35,13 @@ namespace pilz {
 
 static const std::string PARAM_NAMESPACE_LIMTS = "robot_description_planning";
 
-bool CommandPlanner::initialize(const moveit::core::RobotModelConstPtr &model, const std::string &ns)
-{
+bool CommandPlanner::initialize(const moveit::core::RobotModelConstPtr &model,
+                                const std::string &ns) {
+  // Deprecation note
+  ROS_ERROR("DEPRECATION NOTE: This planner has been integrated into MoveIt. "
+            "Please consider using the pilz_industrial_motion_planner: "
+            "https://moveit.ros.org/documentation/planners/");
+
   // Call parent class initialize
   planning_interface::PlannerManager::initialize(model, ns);
 
