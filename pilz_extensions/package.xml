@@ -1,7 +1,11 @@
+<?xml version="1.0"?>
 <package format="2">
-  <name>pilz_industrial_motion</name>
-  <version>0.4.13</version>
-  <description>The pilz_industrial_motion package</description>
+  <name>pilz_extensions</name>
+  <version>0.4.12</version>
+  <description>
+  The pilz_extensions package. Here are classes extending the functionality of other packages.
+  On the long run these extensions should become pull requests on the respective packages.
+  </description>
 
   <maintainer email="a.gutenkunst@pilz.de">Alexander Gutenkunst</maintainer>
   <maintainer email="c.henkel@pilz.de">Christian Henkel</maintainer>
@@ -10,18 +14,16 @@
 
   <license>Apache 2.0</license>
 
-  <url type="website">https://wiki.ros.org/pilz_industrial_motion</url>
+  <url type="website">https://wiki.ros.org/pilz_extensions</url>
   <url type="bugtracker">https://github.com/PilzDE/pilz_industrial_motion/issues</url>
   <url type="repository">https://github.com/PilzDE/pilz_industrial_motion</url>
 
   <buildtool_depend>catkin</buildtool_depend>
 
-  <exec_depend>pilz_extensions</exec_depend>
-  <exec_depend>pilz_trajectory_generation</exec_depend>
-  <exec_depend>pilz_robot_programming</exec_depend>
+  <build_depend>roscpp</build_depend>
 
-  <export>
-    <metapackage/>
-    <architecture_independent/>
-  </export>
+  <depend>joint_limits_interface</depend>
+
+  <test_depend>rostest</test_depend>
+  <test_depend>code_coverage</test_depend>
 </package>

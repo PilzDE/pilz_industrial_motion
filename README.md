@@ -18,7 +18,13 @@ The FTP is implemented by Pilz GmbH & Co. KG.
 Relevant changes are cherry-picked into `melodic-devel` or `kinetic-devel` on a case-by-case basis.
 
 ## Package: pilz_trajectory_generation
-This package used to be found here but is now moved to [moveit](https://moveit.ros.org/documentation/planners/)
+Provides the generators to create LIN, PTP and CIRC trajectories. All of these commands can be combined and
+executed in sequence, with and without blending, using a dedicated MoveIt! capability.
+
+Custom commands can easily be defined and integrated due to the usage of a plugin structure.
+
+## Package: pilz_extensions
+Minor extensions of existing packages needed for the trajectory_generation.
 
 ## Package: pilz\_robot\_programming
 pilz\_robot\_programming provides a python API for an intuitive programming of a MoveIt! enabled robot. For details please refer to the [ Pilz Robot Programming Documentation ](pilz_robot_programming/Readme.rst).

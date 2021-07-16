@@ -27,7 +27,7 @@ jobs:
     name: "Coverage check"
     strategy:
       matrix:
-        package: [pilz_robot_programming, pilz_store_positions ]
+        package: [pilz_extensions, pilz_robot_programming, pilz_trajectory_generation , pilz_store_positions ]
     runs-on: ubuntu-18.04
     steps:
       - uses: actions/checkout@v1
