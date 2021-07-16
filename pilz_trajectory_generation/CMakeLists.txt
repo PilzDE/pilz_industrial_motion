@@ -110,7 +110,7 @@ add_library(pilz_command_planner
 target_link_libraries(pilz_command_planner
                       ${catkin_LIBRARIES})
 
-add_library(planning_context_loader_ptp
+add_library(planning_context_loader_ptp_deprecated
             src/planning_context_loader_ptp.cpp
             src/planning_context_loader.cpp
             src/trajectory_functions.cpp
@@ -120,10 +120,10 @@ add_library(planning_context_loader_ptp
             src/joint_limits_container.cpp
             )
 
-target_link_libraries(planning_context_loader_ptp
+target_link_libraries(planning_context_loader_ptp_deprecated
                       ${catkin_LIBRARIES}) # DO NOT LINK ${PROJECT_NAME} here!
 
-add_library(planning_context_loader_lin
+add_library(planning_context_loader_lin_deprecated
             src/planning_context_loader_lin.cpp
             src/planning_context_loader.cpp
             src/trajectory_functions.cpp
@@ -132,10 +132,10 @@ add_library(planning_context_loader_lin
             src/velocity_profile_atrap.cpp
             )
 
-target_link_libraries(planning_context_loader_lin
+target_link_libraries(planning_context_loader_lin_deprecated
                       ${catkin_LIBRARIES}) # DO NOT LINK ${PROJECT_NAME} here!
 
-add_library(planning_context_loader_circ
+add_library(planning_context_loader_circ_deprecated
             src/planning_context_loader_circ.cpp
             src/planning_context_loader.cpp
             src/trajectory_functions.cpp
@@ -145,18 +145,18 @@ add_library(planning_context_loader_circ
             )
 
 
-target_link_libraries(planning_context_loader_circ
+target_link_libraries(planning_context_loader_circ_deprecated
                       ${catkin_LIBRARIES}) # DO NOT LINK ${PROJECT_NAME} here!
 
-add_library(command_list_manager
+add_library(command_list_manager_deprecated
             src/command_list_manager.cpp
             src/plan_components_builder.cpp)
-target_link_libraries(command_list_manager
+target_link_libraries(command_list_manager_deprecated
             ${catkin_LIBRARIES})
-add_dependencies(command_list_manager
+add_dependencies(command_list_manager_deprecated
             ${catkin_EXPORTED_TARGETS})
 
-add_library(sequence_capability
+add_library(sequence_capability_deprecated
             src/move_group_sequence_action.cpp
             src/move_group_sequence_service.cpp
             src/plan_components_builder.cpp
@@ -168,9 +168,9 @@ add_library(sequence_capability
             src/cartesian_limit.cpp
             src/cartesian_limits_aggregator.cpp
             )
-target_link_libraries(sequence_capability
+target_link_libraries(sequence_capability_deprecated
                       ${catkin_LIBRARIES}) # DO NOT LINK ${PROJECT_NAME} here!
-add_dependencies(sequence_capability
+add_dependencies(sequence_capability_deprecated
            ${catkin_EXPORTED_TARGETS})
 
 #############
@@ -186,11 +186,11 @@ install(FILES
 ## Mark libraries for installation
 install(TARGETS
    pilz_command_planner
-   planning_context_loader_ptp
-   planning_context_loader_lin
-   planning_context_loader_circ
-   command_list_manager
-   sequence_capability
+   planning_context_loader_ptp_deprecated
+   planning_context_loader_lin_deprecated
+   planning_context_loader_circ_deprecated
+   command_list_manager_deprecated
+   sequence_capability_deprecated
 #   ARCHIVE DESTINATION ${CATKIN_PACKAGE_LIB_DESTINATION}
   LIBRARY DESTINATION ${CATKIN_PACKAGE_LIB_DESTINATION}
   RUNTIME DESTINATION ${CATKIN_PACKAGE_BIN_DESTINATION}
@@ -224,11 +224,11 @@ if(CATKIN_ENABLE_TESTING)
   #########################
 
   set(${PROJECT_NAME}_INTEGRATIONTEST_LIBRARIES
-    sequence_capability
+    sequence_capability_deprecated
     pilz_command_planner
-    planning_context_loader_ptp
-    planning_context_loader_lin
-    planning_context_loader_circ
+    planning_context_loader_ptp_deprecated
+    planning_context_loader_lin_deprecated
+    planning_context_loader_circ_deprecated
   )
 
   # Planning Integration tests

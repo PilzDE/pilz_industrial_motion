@@ -1,4 +1,4 @@
-<library path="lib/libsequence_capability">
+<library path="lib/libsequence_capability_deprecated">
   <class name="pilz_trajectory_generation/MoveGroupSequenceAction"
          type="pilz_trajectory_generation::MoveGroupSequenceAction"
          base_class_type="move_group::MoveGroupCapability">
