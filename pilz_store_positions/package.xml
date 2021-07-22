@@ -1,7 +1,7 @@
 <?xml version="1.0"?>
 <package format="2">
   <name>pilz_store_positions</name>
-  <version>0.4.13</version>
+  <version>0.4.14</version>
   <description>Allows to store poses during teach-in.</description>
 
   <maintainer email="j.schleicher@pilz.de">Joachim Schleicher</maintainer>
