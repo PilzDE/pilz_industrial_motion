@@ -2,6 +2,9 @@
 Changelog for package pilz_store_positions
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
+Forthcoming
+-----------
+
 0.4.13 (2021-07-12)
 -------------------
 

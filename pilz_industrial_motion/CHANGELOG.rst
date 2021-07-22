@@ -2,6 +2,11 @@
 Changelog for package pilz_industrial_motion
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
+Forthcoming
+-----------
+* Revert removing pilz_extension and pilz_trajectory_generation, but deprecate it.
+* Contributors: Pilz GmbH and Co. KG
+
 0.4.13 (2021-07-12)
 -------------------
 * Merge our trajectory_generation as moveit planner
