@@ -22,7 +22,6 @@ find_package(catkin REQUIRED COMPONENTS
   eigen_conversions
   moveit_ros_move_group
   moveit_ros_planning_interface
-  pilz_industrial_motion_testutils
   kdl_conversions
 )
 
@@ -209,6 +208,7 @@ install(TARGETS
 if(CATKIN_ENABLE_TESTING)
   find_package(rostest REQUIRED)
   find_package(pilz_testutils REQUIRED)
+  find_package(pilz_industrial_motion_testutils REQUIRED)
 
   include_directories(
     ${pilz_testutils_INCLUDE_DIRS}
