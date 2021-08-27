@@ -212,6 +212,7 @@ if(CATKIN_ENABLE_TESTING)
 
   include_directories(
     ${pilz_testutils_INCLUDE_DIRS}
+    ${pilz_industrial_motion_testutils_INCLUDE_DIRS}
   )
 
   if(ENABLE_COVERAGE_TESTING)
@@ -240,6 +241,7 @@ if(CATKIN_ENABLE_TESTING)
   target_link_libraries(integrationtest_sequence_action_capability
     ${catkin_LIBRARIES}
     ${pilz_testutils_LIBRARIES}
+    ${pilz_industrial_motion_testutils_LIBRARIES}
     ${${PROJECT_NAME}_INTEGRATIONTEST_LIBRARIES}
   )
 
@@ -264,6 +266,7 @@ if(CATKIN_ENABLE_TESTING)
 
   target_link_libraries(integrationtest_sequence_service_capability
     ${catkin_LIBRARIES}
+    ${pilz_industrial_motion_testutils_LIBRARIES}
     ${${PROJECT_NAME}_INTEGRATIONTEST_LIBRARIES}
   )
 
@@ -288,6 +291,7 @@ if(CATKIN_ENABLE_TESTING)
 
   target_link_libraries(integrationtest_command_planning
     ${catkin_LIBRARIES}
+    ${pilz_industrial_motion_testutils_LIBRARIES}
     ${${PROJECT_NAME}_INTEGRATIONTEST_LIBRARIES}
   )
 
@@ -312,6 +316,7 @@ if(CATKIN_ENABLE_TESTING)
 
   target_link_libraries(integrationtest_command_list_manager
     ${catkin_LIBRARIES}
+    ${pilz_industrial_motion_testutils_LIBRARIES}
     ${${PROJECT_NAME}_INTEGRATIONTEST_LIBRARIES}
   )
 
@@ -402,6 +407,7 @@ if(CATKIN_ENABLE_TESTING)
 
   target_link_libraries(unittest_trajectory_blender_transition_window
     ${catkin_LIBRARIES}
+    ${pilz_industrial_motion_testutils_LIBRARIES}
     ${PROJECT_NAME}_testutils
   )
 
@@ -425,6 +431,7 @@ if(CATKIN_ENABLE_TESTING)
 
   target_link_libraries(unittest_trajectory_generator_circ
     ${catkin_LIBRARIES}
+    ${pilz_industrial_motion_testutils_LIBRARIES}
     ${PROJECT_NAME}_testutils
   )
 
@@ -436,6 +443,7 @@ if(CATKIN_ENABLE_TESTING)
 
   target_link_libraries(unittest_trajectory_generator_lin
     ${catkin_LIBRARIES}
+    ${pilz_industrial_motion_testutils_LIBRARIES}
     ${PROJECT_NAME}_testutils
   )
 
