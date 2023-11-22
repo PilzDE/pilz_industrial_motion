@@ -4,9 +4,6 @@
   <version>0.3.10</version>
   <description>The pilz_trajectory_generation package containing the MoveIt! plugin pilz_command_planner.</description>
 
-  <maintainer email="a.gutenkunst@pilz.de">Alexander Gutenkunst</maintainer>
-  <maintainer email="c.henkel@pilz.de">Christian Henkel</maintainer>
-  <maintainer email="h.slusarek@pilz.de">Hagen Slusarek</maintainer>
   <maintainer email="i.martini@pilz.de">Immanuel Martini</maintainer>
 
   <license>LGPLv3</license>
