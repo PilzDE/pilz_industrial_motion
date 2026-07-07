@@ -1,3 +1,14 @@
+# ⚠️ End of Life (EOL) Notice
+
+> **ROS 1 has reached End of Life (EOL). This repository is no longer maintained.**
+
+### What this means
+- ❌ No new features will be developed.
+- ❌ No bug fixes will be provided.
+- ❌ No security updates will be released.
+- ⚠️ Use at your own risk.
+- 
+
 # Package: pilz_industrial_motion
 Meta package containing the current results of the
 [ROSIN FTP: Industrial trajectory generation for MoveIt!](http://rosin-project.eu/ftp/industrial-trajectory-generation).
